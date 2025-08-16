@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa Convex Sets</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .control-row label {
+            min-width: 120px;
+            margin-right: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .convexity-test {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .set-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .set-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .set-card.convex {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+        .set-card.non-convex {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔷 Minh họa Convex Sets</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>🎯 Loại tập hợp</h3>
+                <div class="control-row">
+                    <button onclick="setType('circle')">⭕ Hình tròn</button>
+                    <button onclick="setType('rectangle')">⬜ Hình chữ nhật</button>
+                </div>
+                <div class="control-row">
+                    <button onclick="setType('polygon')">🔷 Đa giác</button>
+                    <button onclick="setType('halfspace')">📐 Nửa mặt phẳng</button>
+                </div>
+                <div class="formula">
+                    <strong>Định nghĩa: </strong> Tập C là lồi nếu ∀x,y ∈ C và θ ∈ [0,1], ta có θx + (1-θ)y ∈ C
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>📏 Tham số hình dạng</h3>
+                <div class="control-row">
+                    <label>Bán kính:</label>
+                    <input type="range" id="radius" min="20" max="150" value="80" step="5">
+                    <input type="number" id="radiusValue" value="80" min="20" max="150">
+                </div>
+                <div class="control-row">
+                    <label>Chiều rộng:</label>
+                    <input type="range" id="width" min="50" max="200" value="120" step="10">
+                    <input type="number" id="widthValue" value="120" min="50" max="200">
+                </div>
+                <div class="control-row">
+                    <label>Chiều cao:</label>
+                    <input type="range" id="height" min="50" max="200" value="100" step="10">
+                    <input type="number" id="heightValue" value="100" min="50" max="200">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎲 Điểm thử nghiệm</h3>
+                <div class="control-row">
+                    <label>Điểm A (x):</label>
+                    <input type="range" id="pointAx" min="-200" max="200" value="-50" step="5">
+                    <input type="number" id="pointAxValue" value="-50" min="-200" max="200">
+                </div>
+                <div class="control-row">
+                    <label>Điểm A (y):</label>
+                    <input type="range" id="pointAy" min="-200" max="200" value="-30" step="5">
+                    <input type="number" id="pointAyValue" value="-30" min="-200" max="200">
+                </div>
+                <div class="control-row">
+                    <label>Điểm B (x):</label>
+                    <input type="range" id="pointBx" min="-200" max="200" value="50" step="5">
+                    <input type="number" id="pointBxValue" value="50" min="-200" max="200">
+                </div>
+                <div class="control-row">
+                    <label>Điểm B (y):</label>
+                    <input type="range" id="pointBy" min="-200" max="200" value="40" step="5">
+                    <input type="number" id="pointByValue" value="40" min="-200" max="200">
+                </div>
+                <div class="control-row">
+                    <label>θ (0-1):</label>
+                    <input type="range" id="theta" min="0" max="1" value="0.5" step="0.05">
+                    <input type="number" id="thetaValue" value="0.5" min="0" max="1" step="0.05">
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="convexCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📊 Kết quả phân tích</h3>
+            <div id="convexityResult" class="convexity-test">
+                <strong>Kết quả kiểm tra tính lồi:</strong> <span id="convexityStatus">Đang tính...</span>
+            </div>
+            
+            <h4>🔍 Thông tin điểm:</h4>
+            <div class="set-info" id="pointInfo">
+                <!-- Point information will be displayed here -->
+            </div>
+            
+            <h4>📐 Công thức tính:</h4>
+            <div id="formulaInfo">
+                <p><strong>Điểm A:</strong> <span id="pointAFormula">(-50, -30)</span></p>
+                <p><strong>Điểm B:</strong> <span id="pointBFormula">(50, 40)</span></p>
+                <p><strong>Điểm trung gian:</strong> <span id="intermediateFormula">θA + (1-θ)B</span></p>
+                <p><strong>Kết quả:</strong> <span id="resultFormula">Đang tính...</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('convexCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set parameters
+        let currentSetType = 'circle';
+        let radius = 80;
+        let width = 120;
+        let height = 100;
+        let pointA = {x: -50, y: -30};
+        let pointB = {x: 50, y: 40};
+        let theta = 0.5;
+        
+        // Update parameters
+        function updateParameters() {
+            radius = parseFloat(document.getElementById('radiusValue').value);
+            width = parseFloat(document.getElementById('widthValue').value);
+            height = parseFloat(document.getElementById('heightValue').value);
+            pointA.x = parseFloat(document.getElementById('pointAxValue').value);
+            pointA.y = parseFloat(document.getElementById('pointAyValue').value);
+            pointB.x = parseFloat(document.getElementById('pointBxValue').value);
+            pointB.y = parseFloat(document.getElementById('pointByValue').value);
+            theta = parseFloat(document.getElementById('thetaValue').value);
+            
+            drawConvexSet();
+            updatePointInfo();
+        }
+        
+        // Set set type
+        function setType(type) {
+            currentSetType = type;
+            drawConvexSet();
+            updatePointInfo();
+        }
+        
+        // Check if point is inside set
+        function isPointInSet(x, y) {
+            const centerX = 0;
+            const centerY = 0;
+            
+            switch(currentSetType) {
+                case 'circle':
+                    const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                    return distance <= radius;
+                case 'rectangle':
+                    return Math.abs(x) <= width/2 && Math.abs(y) <= height/2;
+                case 'polygon':
+                    // Simple hexagon
+                    const angle = Math.atan2(y, x);
+                    const distanceFromCenter = Math.sqrt(x**2 + y**2);
+                    const maxRadius = radius * (1 + 0.3 * Math.cos(6 * angle));
+                    return distanceFromCenter <= maxRadius;
+                case 'halfspace':
+                    return x + y <= radius;
+                default:
+                    return false;
+            }
+        }
+        
+        // Calculate intermediate point
+        function calculateIntermediatePoint() {
+            return {
+                x: theta * pointA.x + (1 - theta) * pointB.x,
+                y: theta * pointA.y + (1 - theta) * pointB.y
+            };
+        }
+        
+        // Check convexity
+        function checkConvexity() {
+            const intermediate = calculateIntermediatePoint();
+            const pointAInSet = isPointInSet(pointA.x, pointA.y);
+            const pointBInSet = isPointInSet(pointB.x, pointB.y);
+            const intermediateInSet = isPointInSet(intermediate.x, intermediate.y);
+            
+            return {
+                pointAInSet,
+                pointBInSet,
+                intermediateInSet,
+                isConvex: pointAInSet && pointBInSet && intermediateInSet
+            };
+        }
+        
+        // Draw the convex set
+        function drawConvexSet() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 2;
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: centerX + x * scale,
+                    y: centerY - y * scale
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = -200; i <= 200; i += 20) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, 0);
+                ctx.lineTo(pos.x, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = -200; i <= 200; i += 20) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(0, pos.y);
+                ctx.lineTo(canvas.width, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, 0);
+            ctx.lineTo(origin.x, canvas.height);
+            ctx.moveTo(0, origin.y);
+            ctx.lineTo(canvas.width, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('y', 0, 0);
+            ctx.restore();
+            
+            // Draw the set
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.3)';
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 3;
+            
+            switch(currentSetType) {
+                case 'circle':
+                    const circlePos = transform(0, 0);
+                    ctx.beginPath();
+                    ctx.arc(circlePos.x, circlePos.y, radius * scale, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'rectangle':
+                    const rectPos = transform(-width/2, height/2);
+                    ctx.fillRect(rectPos.x, rectPos.y, width * scale, height * scale);
+                    ctx.strokeRect(rectPos.x, rectPos.y, width * scale, height * scale);
+                    break;
+                    
+                case 'polygon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * Math.PI) / 3;
+                        const x = radius * Math.cos(angle);
+                        const y = radius * Math.sin(angle);
+                        const pos = transform(x, y);
+                        if (i === 0) {
+                            ctx.moveTo(pos.x, pos.y);
+                        } else {
+                            ctx.lineTo(pos.x, pos.y);
+                        }
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'halfspace':
+                    const halfspacePoints = [
+                        transform(-200, radius + 200),
+                        transform(200, radius + 200),
+                        transform(200, -200),
+                        transform(-200, -200)
+                    ];
+                    ctx.beginPath();
+                    ctx.moveTo(halfspacePoints[0].x, halfspacePoints[0].y);
+                    for (let i = 1; i < halfspacePoints.length; i++) {
+                        ctx.lineTo(halfspacePoints[i].x, halfspacePoints[i].y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+            
+            // Draw test points
+            const pointAPos = transform(pointA.x, pointA.y);
+            const pointBPos = transform(pointB.x, pointB.y);
+            const intermediate = calculateIntermediatePoint();
+            const intermediatePos = transform(intermediate.x, intermediate.y);
+            
+            // Draw line segment between A and B
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(pointAPos.x, pointAPos.y);
+            ctx.lineTo(pointBPos.x, pointBPos.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw points
+            const convexity = checkConvexity();
+            
+            // Point A
+            ctx.fillStyle = convexity.pointAInSet ? '#4CAF50' : '#f44336';
+            ctx.beginPath();
+            ctx.arc(pointAPos.x, pointAPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('A', pointAPos.x + 10, pointAPos.y - 10);
+            
+            // Point B
+            ctx.fillStyle = convexity.pointBInSet ? '#4CAF50' : '#f44336';
+            ctx.beginPath();
+            ctx.arc(pointBPos.x, pointBPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('B', pointBPos.x + 10, pointBPos.y - 10);
+            
+            // Intermediate point
+            ctx.fillStyle = convexity.intermediateInSet ? '#4CAF50' : '#f44336';
+            ctx.beginPath();
+            ctx.arc(intermediatePos.x, intermediatePos.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`θ=${theta.toFixed(2)}`, intermediatePos.x + 10, intermediatePos.y - 10);
+            
+            // Update convexity result
+            const status = convexity.isConvex ? '✅ TẬP LỒI' : '❌ KHÔNG LỒI';
+            document.getElementById('convexityStatus').textContent = status;
+            document.getElementById('convexityResult').className = 
+                convexity.isConvex ? 'convexity-test' : 'convexity-test non-convex';
+        }
+        
+        // Update point information
+        function updatePointInfo() {
+            const intermediate = calculateIntermediatePoint();
+            const convexity = checkConvexity();
+            
+            document.getElementById('pointAFormula').textContent = `(${pointA.x}, ${pointA.y})`;
+            document.getElementById('pointBFormula').textContent = `(${pointB.x}, ${pointB.y})`;
+            document.getElementById('intermediateFormula').textContent = 
+                `θA + (1-θ)B = ${theta.toFixed(2)}×(${pointA.x}, ${pointA.y}) + ${(1-theta).toFixed(2)}×(${pointB.x}, ${pointB.y})`;
+            document.getElementById('resultFormula').textContent = 
+                `= (${intermediate.x.toFixed(1)}, ${intermediate.y.toFixed(1)})`;
+            
+            const container = document.getElementById('pointInfo');
+            container.innerHTML = `
+                <div class="set-card ${convexity.pointAInSet ? 'convex' : 'non-convex'}">
+                    <strong>Điểm A</strong><br>
+                    (${pointA.x}, ${pointA.y})<br>
+                    ${convexity.pointAInSet ? '✅ Trong tập' : '❌ Ngoài tập'}
+                </div>
+                <div class="set-card ${convexity.pointBInSet ? 'convex' : 'non-convex'}">
+                    <strong>Điểm B</strong><br>
+                    (${pointB.x}, ${pointB.y})<br>
+                    ${convexity.pointBInSet ? '✅ Trong tập' : '❌ Ngoài tập'}
+                </div>
+                <div class="set-card ${convexity.intermediateInSet ? 'convex' : 'non-convex'}">
+                    <strong>Điểm trung gian</strong><br>
+                    (${intermediate.x.toFixed(1)}, ${intermediate.y.toFixed(1)})<br>
+                    ${convexity.intermediateInSet ? '✅ Trong tập' : '❌ Ngoài tập'}
+                </div>
+                <div class="set-card ${convexity.isConvex ? 'convex' : 'non-convex'}">
+                    <strong>Kết luận</strong><br>
+                    ${convexity.isConvex ? '✅ TẬP LỒI' : '❌ KHÔNG LỒI'}<br>
+                    θ = ${theta.toFixed(2)}
+                </div>
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('radius').addEventListener('input', function() {
+            document.getElementById('radiusValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('radiusValue').addEventListener('input', function() {
+            document.getElementById('radius').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('width').addEventListener('input', function() {
+            document.getElementById('widthValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('widthValue').addEventListener('input', function() {
+            document.getElementById('width').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('height').addEventListener('input', function() {
+            document.getElementById('heightValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('heightValue').addEventListener('input', function() {
+            document.getElementById('height').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointAx').addEventListener('input', function() {
+            document.getElementById('pointAxValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointAxValue').addEventListener('input', function() {
+            document.getElementById('pointAx').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointAy').addEventListener('input', function() {
+            document.getElementById('pointAyValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointAyValue').addEventListener('input', function() {
+            document.getElementById('pointAy').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointBx').addEventListener('input', function() {
+            document.getElementById('pointBxValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointBxValue').addEventListener('input', function() {
+            document.getElementById('pointBx').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointBy').addEventListener('input', function() {
+            document.getElementById('pointByValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('pointByValue').addEventListener('input', function() {
+            document.getElementById('pointBy').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('theta').addEventListener('input', function() {
+            document.getElementById('thetaValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('thetaValue').addEventListener('input', function() {
+            document.getElementById('theta').value = this.value;
+            updateParameters();
+        });
+        
+        // Initialize
+        updateParameters();
+    </script>
+</body>
+</html> 

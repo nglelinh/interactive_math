@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Numerical Methods Demo</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    #output { margin-top: 1em; font-size: 1.2em; }
+    label, input { margin: 0.5em 0; }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <h1>Numerical Optimization: Nelder-Mead Demo</h1>
+  <p>Try different starting points for the optimizer:</p>
+  <form id="form">
+    <label>Start x: <input type="number" id="startX" value="-3.5" step="0.1"></label><br>
+    <label>Start y: <input type="number" id="startY" value="3.5" step="0.1"></label><br>
+    <button type="submit">Optimize</button>
+  </form>
+  <div id="output"></div>
+  <div id="d3vis" style="margin-top:2em;"></div>
+  <script src="https://cdn.jsdelivr.net/npm/fmin@0.0.4/build/fmin.min.js?v1"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="index.js"></script>
+  <script>
+    document.getElementById('form').onsubmit = function(e) {
+      e.preventDefault();
+      var startX = parseFloat(document.getElementById('startX').value);
+      var startY = parseFloat(document.getElementById('startY').value);
+      window.runNelderMeadDemo(startX, startY);
+    };
+    // Initial draw
+    document.getElementById('form').onsubmit(new Event('submit'));
+  </script>
+</body>
+</html>

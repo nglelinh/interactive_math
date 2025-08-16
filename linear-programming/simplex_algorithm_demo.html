@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Thuật Toán Simplex - Bảng Tableau</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .main-content {
+            display: flex;
+            gap: 30px;
+        }
+        .input-section {
+            flex: 1;
+            max-width: 400px;
+        }
+        .tableau-section {
+            flex: 2;
+        }
+        .section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .input-row input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .input-row select {
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.danger {
+            background-color: #e74c3c;
+        }
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+        button.success {
+            background-color: #27ae60;
+        }
+        button.success:hover {
+            background-color: #229954;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .tableau-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        .tableau {
+            border-collapse: collapse;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tableau th, .tableau td {
+            border: 1px solid #bdc3c7;
+            padding: 8px 12px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        .tableau th {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        .tableau .basic-var {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        .tableau .pivot-cell {
+            background-color: #e74c3c !important;
+            color: white;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        .tableau .pivot-row {
+            background-color: #f8d7da;
+        }
+        .tableau .pivot-col {
+            background-color: #d1ecf1;
+        }
+        .tableau .entering-var {
+            background-color: #d4edda;
+        }
+        .tableau .leaving-var {
+            background-color: #fff3cd;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .iteration-info {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .step-info {
+            background-color: #f39c12;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .solution-info {
+            background-color: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .error-info {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .problem-display {
+            background-color: #9b59b6;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        .constraint-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            padding: 10px;
+            background-color: white;
+        }
+        .constraint-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        .constraint-item:last-child {
+            border-bottom: none;
+        }
+        .constraint-text {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .ratio-test {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            border-left: 4px solid #27ae60;
+        }
+        .ratio-test h4 {
+            margin: 0 0 10px 0;
+            color: #27ae60;
+        }
+        .instructions {
+            background-color: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>Demo Thuật Toán Simplex</h1>
+        <p class="subtitle">Giải bài toán Linear Programming bằng phương pháp Simplex với bảng tableau</p>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <div class="section">
+                    <h3>Thiết Lập Bài Toán</h3>
+                    <div class="instructions">
+                        <strong>Hướng dẫn:</strong><br>
+                        1. Nhập hàm mục tiêu<br>
+                        2. Thêm các ràng buộc (≤)<br>
+                        3. Nhấn "Khởi tạo Simplex"<br>
+                        4. Sử dụng "Bước tiếp theo" để xem từng iteration
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Hàm Mục Tiêu (Maximize):</label>
+                        <div class="input-row">
+                            <span>z =</span>
+                            <input type="number" id="objCoefX1" value="3" step="0.1">
+                            <span>x₁ +</span>
+                            <input type="number" id="objCoefX2" value="2" step="0.1">
+                            <span>x₂</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Thêm Ràng Buộc (≤):</label>
+                        <div class="input-row">
+                            <input type="number" id="coefX1" value="1" step="0.1">
+                            <span>x₁ +</span>
+                            <input type="number" id="coefX2" value="1" step="0.1">
+                            <span>x₂ ≤</span>
+                            <input type="number" id="rhs" value="6" step="0.1">
+                            <button onclick="addConstraint()">Thêm</button>
+                        </div>
+                    </div>
+                    
+                    <div class="constraint-list" id="constraintList">
+                        <!-- Constraints will be listed here -->
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <button class="success" onclick="initializeSimplex()">Khởi tạo Simplex</button>
+                        <button class="danger" onclick="clearConstraints()">Xóa Ràng Buộc</button>
+                        <button onclick="loadExample()">Ví Dụ Mẫu</button>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Bài Toán Hiện Tại</h3>
+                    <div class="problem-display" id="problemDisplay">
+                        Chưa có bài toán nào được thiết lập
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tableau-section">
+                <div class="iteration-info" id="iterationInfo" style="display: none;">
+                    Bảng Simplex ban đầu
+                </div>
+                
+                <div class="step-info" id="stepInfo" style="display: none;">
+                    Bước: Khởi tạo bảng Simplex
+                </div>
+                
+                <div class="controls" id="controls" style="display: none;">
+                    <button class="success" onclick="nextStep()" id="nextBtn">Bước Tiếp Theo</button>
+                    <button onclick="autoSolve()" id="autoBtn">Giải Tự Động</button>
+                    <button class="danger" onclick="reset()">Reset</button>
+                </div>
+                
+                <div class="tableau-container">
+                    <table class="tableau" id="tableau" style="display: none;">
+                        <!-- Tableau will be generated here -->
+                    </table>
+                </div>
+                
+                <div class="ratio-test" id="ratioTest" style="display: none;">
+                    <h4>Ratio Test (Kiểm tra tỷ lệ)</h4>
+                    <div id="ratioContent"></div>
+                </div>
+                
+                <div class="solution-info" id="solutionInfo" style="display: none;">
+                    <h3 style="margin-top: 0;">Nghiệm Tối Ưu Tìm Được!</h3>
+                    <div id="solutionContent"></div>
+                </div>
+                
+                <div class="error-info" id="errorInfo" style="display: none;">
+                    <div id="errorContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let constraints = [];
+        let tableau = [];
+        let basicVariables = [];
+        let iteration = 0;
+        let isOptimal = false;
+        let isUnbounded = false;
+        let currentStep = 'init';
+        let pivotRow = -1, pivotCol = -1;
+        let objectiveCoefX1 = 3, objectiveCoefX2 = 2;
+        
+        // Thêm ràng buộc
+        function addConstraint() {
+            const x1 = parseFloat(document.getElementById('coefX1').value) || 0;
+            const x2 = parseFloat(document.getElementById('coefX2').value) || 0;
+            const rhs = parseFloat(document.getElementById('rhs').value) || 0;
+            
+            if (rhs < 0) {
+                alert('RHS phải không âm!');
+                return;
+            }
+            
+            constraints.push({ x1, x2, rhs });
+            updateConstraintList();
+            updateProblemDisplay();
+            
+            // Reset form
+            document.getElementById('coefX1').value = '';
+            document.getElementById('coefX2').value = '';
+            document.getElementById('rhs').value = '';
+        }
+        
+        // Cập nhật danh sách ràng buộc
+        function updateConstraintList() {
+            const list = document.getElementById('constraintList');
+            list.innerHTML = '';
+            
+            constraints.forEach((constraint, index) => {
+                const item = document.createElement('div');
+                item.className = 'constraint-item';
+                item.innerHTML = `
+                    <span class="constraint-text">${constraint.x1}x₁ + ${constraint.x2}x₂ ≤ ${constraint.rhs}</span>
+                    <button onclick="removeConstraint(${index})" style="padding: 2px 6px; font-size: 12px;">Xóa</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        // Xóa ràng buộc
+        function removeConstraint(index) {
+            constraints.splice(index, 1);
+            updateConstraintList();
+            updateProblemDisplay();
+        }
+        
+        // Xóa tất cả ràng buộc
+        function clearConstraints() {
+            constraints = [];
+            updateConstraintList();
+            updateProblemDisplay();
+            reset();
+        }
+        
+        // Cập nhật hiển thị bài toán
+        function updateProblemDisplay() {
+            const display = document.getElementById('problemDisplay');
+            
+            if (constraints.length === 0) {
+                display.textContent = 'Chưa có bài toán nào được thiết lập';
+                return;
+            }
+            
+            objectiveCoefX1 = parseFloat(document.getElementById('objCoefX1').value) || 0;
+            objectiveCoefX2 = parseFloat(document.getElementById('objCoefX2').value) || 0;
+            
+            let text = `Maximize z = ${objectiveCoefX1}x₁ + ${objectiveCoefX2}x₂\n\nSubject to:\n`;
+            constraints.forEach((constraint, index) => {
+                text += `  ${constraint.x1}x₁ + ${constraint.x2}x₂ ≤ ${constraint.rhs}\n`;
+            });
+            text += `  x₁, x₂ ≥ 0`;
+            
+            display.textContent = text;
+        }
+        
+        // Khởi tạo Simplex
+        function initializeSimplex() {
+            if (constraints.length === 0) {
+                alert('Vui lòng thêm ít nhất một ràng buộc!');
+                return;
+            }
+            
+            objectiveCoefX1 = parseFloat(document.getElementById('objCoefX1').value) || 0;
+            objectiveCoefX2 = parseFloat(document.getElementById('objCoefX2').value) || 0;
+            
+            // Tạo bảng Simplex ban đầu
+            const numConstraints = constraints.length;
+            const numVars = 2; // x1, x2
+            const numSlackVars = numConstraints;
+            const totalVars = numVars + numSlackVars;
+            
+            // Khởi tạo tableau
+            tableau = [];
+            basicVariables = [];
+            
+            // Hàng mục tiêu (dòng cuối)
+            const objectiveRow = new Array(totalVars + 1).fill(0);
+            objectiveRow[0] = -objectiveCoefX1; // -c1
+            objectiveRow[1] = -objectiveCoefX2; // -c2
+            // Slack variables có hệ số 0 trong hàm mục tiêu
+            objectiveRow[totalVars] = 0; // RHS của hàm mục tiêu
+            
+            // Các hàng ràng buộc
+            for (let i = 0; i < numConstraints; i++) {
+                const row = new Array(totalVars + 1).fill(0);
+                row[0] = constraints[i].x1;
+                row[1] = constraints[i].x2;
+                row[numVars + i] = 1; // Slack variable
+                row[totalVars] = constraints[i].rhs;
+                tableau.push(row);
+                basicVariables.push(`s${i + 1}`); // Slack variables are basic
+            }
+            
+            tableau.push(objectiveRow);
+            
+            iteration = 0;
+            isOptimal = false;
+            isUnbounded = false;
+            currentStep = 'checkOptimality';
+            
+            displayTableau();
+            document.getElementById('controls').style.display = 'block';
+            document.getElementById('iterationInfo').style.display = 'block';
+            document.getElementById('iterationInfo').textContent = 'Bảng Simplex ban đầu';
+            document.getElementById('stepInfo').style.display = 'block';
+            document.getElementById('stepInfo').textContent = 'Bước: Kiểm tra tính tối ưu';
+        }
+        
+        // Hiển thị bảng tableau
+        function displayTableau() {
+            const table = document.getElementById('tableau');
+            table.style.display = 'table';
+            table.innerHTML = '';
+            
+            const numConstraints = constraints.length;
+            const numVars = 2 + numConstraints; // x1, x2, s1, s2, ...
+            
+            // Header
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th>Biến cơ sở</th>';
+            for (let i = 0; i < 2; i++) {
+                headerRow.innerHTML += `<th>x${i + 1}</th>`;
+            }
+            for (let i = 0; i < numConstraints; i++) {
+                headerRow.innerHTML += `<th>s${i + 1}</th>`;
+            }
+            headerRow.innerHTML += '<th>RHS</th>';
+            table.appendChild(headerRow);
+            
+            // Constraint rows
+            for (let i = 0; i < numConstraints; i++) {
+                const row = document.createElement('tr');
+                const basicVarCell = document.createElement('td');
+                basicVarCell.className = 'basic-var';
+                basicVarCell.textContent = basicVariables[i];
+                row.appendChild(basicVarCell);
+                
+                for (let j = 0; j <= numVars; j++) {
+                    const cell = document.createElement('td');
+                    cell.textContent = tableau[i][j].toFixed(3);
+                    
+                    // Highlight pivot cell, row, column
+                    if (i === pivotRow && j === pivotCol && pivotRow !== -1 && pivotCol !== -1) {
+                        cell.className = 'pivot-cell';
+                    } else if (i === pivotRow && pivotRow !== -1) {
+                        cell.className = 'pivot-row';
+                    } else if (j === pivotCol && pivotCol !== -1) {
+                        cell.className = 'pivot-col';
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+            
+            // Objective row
+            const objRow = document.createElement('tr');
+            const objCell = document.createElement('td');
+            objCell.className = 'basic-var';
+            objCell.textContent = 'z';
+            objRow.appendChild(objCell);
+            
+            const objectiveRowIndex = tableau.length - 1;
+            for (let j = 0; j <= numVars; j++) {
+                const cell = document.createElement('td');
+                cell.textContent = tableau[objectiveRowIndex][j].toFixed(3);
+                
+                if (j === pivotCol && pivotCol !== -1) {
+                    cell.className = 'pivot-col';
+                }
+                
+                objRow.appendChild(cell);
+            }
+            table.appendChild(objRow);
+        }
+        
+        // Bước tiếp theo
+        function nextStep() {
+            switch (currentStep) {
+                case 'checkOptimality':
+                    checkOptimality();
+                    break;
+                case 'findEnteringVariable':
+                    findEnteringVariable();
+                    break;
+                case 'findLeavingVariable':
+                    findLeavingVariable();
+                    break;
+                case 'pivot':
+                    performPivot();
+                    break;
+            }
+        }
+        
+        // Kiểm tra tính tối ưu
+        function checkOptimality() {
+            const objectiveRowIndex = tableau.length - 1;
+            const objectiveRow = tableau[objectiveRowIndex];
+            
+            // Tìm hệ số âm trong hàng mục tiêu (excluding RHS)
+            let hasNegative = false;
+            for (let j = 0; j < objectiveRow.length - 1; j++) {
+                if (objectiveRow[j] < -1e-10) {
+                    hasNegative = true;
+                    break;
+                }
+            }
+            
+            if (!hasNegative) {
+                isOptimal = true;
+                showSolution();
+                return;
+            }
+            
+            currentStep = 'findEnteringVariable';
+            document.getElementById('stepInfo').textContent = 'Bước: Tìm biến entering (biến vào cơ sở)';
+            document.getElementById('nextBtn').textContent = 'Tìm Biến Vào';
+        }
+        
+        // Tìm biến entering
+        function findEnteringVariable() {
+            const objectiveRowIndex = tableau.length - 1;
+            const objectiveRow = tableau[objectiveRowIndex];
+            
+            // Tìm hệ số âm nhỏ nhất (most negative)
+            let minValue = 0;
+            pivotCol = -1;
+            
+            for (let j = 0; j < objectiveRow.length - 1; j++) {
+                if (objectiveRow[j] < minValue) {
+                    minValue = objectiveRow[j];
+                    pivotCol = j;
+                }
+            }
+            
+            if (pivotCol === -1) {
+                isOptimal = true;
+                showSolution();
+                return;
+            }
+            
+            currentStep = 'findLeavingVariable';
+            document.getElementById('stepInfo').textContent = `Bước: Biến vào x${pivotCol < 2 ? pivotCol + 1 : 's' + (pivotCol - 1)}. Tìm biến leaving (biến ra khỏi cơ sở)`;
+            document.getElementById('nextBtn').textContent = 'Tìm Biến Ra';
+            displayTableau();
+        }
+        
+        // Tìm biến leaving
+        function findLeavingVariable() {
+            let minRatio = Infinity;
+            pivotRow = -1;
+            let ratioInfo = [];
+            
+            // Ratio test
+            for (let i = 0; i < constraints.length; i++) {
+                const pivot = tableau[i][pivotCol];
+                const rhs = tableau[i][tableau[i].length - 1];
+                
+                if (pivot > 1e-10) { // Chỉ xét pivot > 0
+                    const ratio = rhs / pivot;
+                    ratioInfo.push({
+                        row: i,
+                        variable: basicVariables[i],
+                        rhs: rhs,
+                        pivot: pivot,
+                        ratio: ratio
+                    });
+                    
+                    if (ratio < minRatio) {
+                        minRatio = ratio;
+                        pivotRow = i;
+                    }
+                }
+            }
+            
+            if (pivotRow === -1) {
+                isUnbounded = true;
+                showError('Bài toán không bị chặn (unbounded)!');
+                return;
+            }
+            
+            // Hiển thị ratio test
+            displayRatioTest(ratioInfo);
+            
+            currentStep = 'pivot';
+            document.getElementById('stepInfo').textContent = `Bước: Biến ra ${basicVariables[pivotRow]}. Thực hiện pivot operation`;
+            document.getElementById('nextBtn').textContent = 'Thực Hiện Pivot';
+            displayTableau();
+        }
+        
+        // Hiển thị ratio test
+        function displayRatioTest(ratioInfo) {
+            const ratioTest = document.getElementById('ratioTest');
+            const ratioContent = document.getElementById('ratioContent');
+            
+            let content = '';
+            ratioInfo.forEach(info => {
+                const isSelected = info.row === pivotRow;
+                content += `<div style="margin: 5px 0; ${isSelected ? 'font-weight: bold; color: #e74c3c;' : ''}">
+                    ${info.variable}: ${info.rhs.toFixed(3)} / ${info.pivot.toFixed(3)} = ${info.ratio.toFixed(3)} ${isSelected ? '← Minimum' : ''}
+                </div>`;
+            });
+            
+            ratioContent.innerHTML = content;
+            ratioTest.style.display = 'block';
+        }
+        
+        // Thực hiện pivot operation
+        function performPivot() {
+            iteration++;
+            
+            const pivotElement = tableau[pivotRow][pivotCol];
+            
+            // Normalize pivot row
+            for (let j = 0; j < tableau[pivotRow].length; j++) {
+                tableau[pivotRow][j] /= pivotElement;
+            }
+            
+            // Eliminate other rows
+            for (let i = 0; i < tableau.length; i++) {
+                if (i !== pivotRow) {
+                    const factor = tableau[i][pivotCol];
+                    for (let j = 0; j < tableau[i].length; j++) {
+                        tableau[i][j] -= factor * tableau[pivotRow][j];
+                    }
+                }
+            }
+            
+            // Update basic variable
+            const varNames = ['x₁', 'x₂'];
+            for (let i = 2; i < 2 + constraints.length; i++) {
+                varNames.push(`s${i - 1}`);
+            }
+            basicVariables[pivotRow] = varNames[pivotCol];
+            
+            pivotRow = -1;
+            pivotCol = -1;
+            currentStep = 'checkOptimality';
+            
+            document.getElementById('iterationInfo').textContent = `Iteration ${iteration}`;
+            document.getElementById('stepInfo').textContent = 'Bước: Kiểm tra tính tối ưu';
+            document.getElementById('nextBtn').textContent = 'Kiểm Tra Tối Ưu';
+            document.getElementById('ratioTest').style.display = 'none';
+            
+            displayTableau();
+        }
+        
+        // Hiển thị nghiệm
+        function showSolution() {
+            const objectiveRowIndex = tableau.length - 1;
+            const objectiveValue = tableau[objectiveRowIndex][tableau[objectiveRowIndex].length - 1];
+            
+            let solutionText = `<div><strong>Số iterations: ${iteration}</strong></div>`;
+            solutionText += `<div><strong>Giá trị tối ưu: z* = ${objectiveValue.toFixed(4)}</strong></div><br>`;
+            
+            // Tìm giá trị các biến
+            const variableValues = { x1: 0, x2: 0 };
+            
+            for (let i = 0; i < basicVariables.length; i++) {
+                const varName = basicVariables[i];
+                const value = tableau[i][tableau[i].length - 1];
+                
+                if (varName === 'x₁') variableValues.x1 = value;
+                else if (varName === 'x₂') variableValues.x2 = value;
+                
+                solutionText += `<div>${varName} = ${value.toFixed(4)}</div>`;
+            }
+            
+            solutionText += `<br><div><strong>Nghiệm tối ưu: (${variableValues.x1.toFixed(4)}, ${variableValues.x2.toFixed(4)})</strong></div>`;
+            
+            document.getElementById('solutionContent').innerHTML = solutionText;
+            document.getElementById('solutionInfo').style.display = 'block';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+        }
+        
+        // Hiển thị lỗi
+        function showError(message) {
+            document.getElementById('errorContent').textContent = message;
+            document.getElementById('errorInfo').style.display = 'block';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+        }
+        
+        // Giải tự động
+        function autoSolve() {
+            const maxIterations = 20;
+            let count = 0;
+            
+            const solve = () => {
+                if (count >= maxIterations) {
+                    showError('Quá nhiều iterations! Có thể bài toán có vấn đề.');
+                    return;
+                }
+                
+                if (!isOptimal && !isUnbounded) {
+                    nextStep();
+                    count++;
+                    setTimeout(solve, 500); // Delay 500ms giữa các bước
+                }
+            };
+            
+            solve();
+        }
+        
+        // Reset
+        function reset() {
+            tableau = [];
+            basicVariables = [];
+            iteration = 0;
+            isOptimal = false;
+            isUnbounded = false;
+            currentStep = 'init';
+            pivotRow = -1;
+            pivotCol = -1;
+            
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('tableau').style.display = 'none';
+            document.getElementById('iterationInfo').style.display = 'none';
+            document.getElementById('stepInfo').style.display = 'none';
+            document.getElementById('solutionInfo').style.display = 'none';
+            document.getElementById('errorInfo').style.display = 'none';
+            document.getElementById('ratioTest').style.display = 'none';
+            
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('nextBtn').textContent = 'Bước Tiếp Theo';
+        }
+        
+        // Tải ví dụ mẫu
+        function loadExample() {
+            clearConstraints();
+            
+            // Ví dụ: Maximize 3x1 + 2x2
+            // Subject to: x1 + x2 <= 6, 2x1 + x2 <= 8
+            constraints = [
+                { x1: 1, x2: 1, rhs: 6 },
+                { x1: 2, x2: 1, rhs: 8 }
+            ];
+            
+            document.getElementById('objCoefX1').value = 3;
+            document.getElementById('objCoefX2').value = 2;
+            
+            updateConstraintList();
+            updateProblemDisplay();
+        }
+        
+        // Event listeners
+        document.getElementById('objCoefX1').addEventListener('change', updateProblemDisplay);
+        document.getElementById('objCoefX2').addEventListener('change', updateProblemDisplay);
+        
+        // Khởi tạo
+        updateProblemDisplay();
+        loadExample();
+    </script>
+</body>
+</html> 

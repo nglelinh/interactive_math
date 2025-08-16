@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Transformations - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .transformation-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .transformation-buttons button {
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .transformation-buttons button:hover {
+            background: #555;
+        }
+        
+        .transformation-buttons button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+        }
+        
+        .matrix-display {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .matrix-display .matrix {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .vector-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .vector-inputs input {
+            padding: 5px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 3px;
+            width: 100%;
+        }
+        
+        .reset-button {
+            width: 100%;
+            padding: 12px;
+            background: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .reset-button:hover {
+            background: #e67e22;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>🔄 Matrix Transformations</strong><br/>
+                Select a transformation type and adjust parameters to see how matrices affect geometric shapes.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Original Shape</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Transformed Shape</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Transformation Vector</div>
+                    <div class="legend-item" style="color: #555;">📐 Grid Lines</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Transformation Type</h3>
+                <div class="transformation-buttons">
+                    <button id="identity" class="active">Identity</button>
+                    <button id="scale">Scale</button>
+                    <button id="rotation">Rotation</button>
+                    <button id="shear">Shear</button>
+                    <button id="reflection">Reflection</button>
+                    <button id="custom">Custom</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Parameters</h3>
+                <div id="scaleControls" class="parameter-controls">
+                    <div class="slider-group">
+                        <label>Scale X:</label>
+                        <input type="range" id="scaleX" min="0.1" max="3" step="0.1" value="1">
+                        <div class="slider-value" id="scaleXValue">1.0</div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Scale Y:</label>
+                        <input type="range" id="scaleY" min="0.1" max="3" step="0.1" value="1">
+                        <div class="slider-value" id="scaleYValue">1.0</div>
+                    </div>
+                </div>
+                
+                <div id="rotationControls" class="parameter-controls" style="display: none;">
+                    <div class="slider-group">
+                        <label>Angle (degrees):</label>
+                        <input type="range" id="rotationAngle" min="0" max="360" step="5" value="0">
+                        <div class="slider-value" id="rotationAngleValue">0°</div>
+                    </div>
+                </div>
+                
+                <div id="shearControls" class="parameter-controls" style="display: none;">
+                    <div class="slider-group">
+                        <label>Shear X:</label>
+                        <input type="range" id="shearX" min="-2" max="2" step="0.1" value="0">
+                        <div class="slider-value" id="shearXValue">0.0</div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Shear Y:</label>
+                        <input type="range" id="shearY" min="-2" max="2" step="0.1" value="0">
+                        <div class="slider-value" id="shearYValue">0.0</div>
+                    </div>
+                </div>
+                
+                <div id="reflectionControls" class="parameter-controls" style="display: none;">
+                    <div class="slider-group">
+                        <label>Reflection Axis:</label>
+                        <select id="reflectionAxis" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #555;">
+                            <option value="x">X-axis</option>
+                            <option value="y">Y-axis</option>
+                            <option value="origin">Through Origin</option>
+                            <option value="line">Custom Line y=mx</option>
+                        </select>
+                    </div>
+                    <div class="slider-group" id="reflectionSlope" style="display: none;">
+                        <label>Line Slope (m):</label>
+                        <input type="range" id="reflectionM" min="-3" max="3" step="0.1" value="1">
+                        <div class="slider-value" id="reflectionMValue">1.0</div>
+                    </div>
+                </div>
+                
+                <div id="customControls" class="parameter-controls" style="display: none;">
+                    <div class="slider-group">
+                        <label>Matrix Elements:</label>
+                        <div class="vector-inputs">
+                            <input type="number" id="m11" step="0.1" value="1" placeholder="a">
+                            <input type="number" id="m12" step="0.1" value="0" placeholder="b">
+                            <input type="number" id="m21" step="0.1" value="0" placeholder="c">
+                            <input type="number" id="m22" step="0.1" value="1" placeholder="d">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Transformation Matrix</h3>
+                <div class="matrix-display">
+                    <div class="matrix">
+                        [<span id="matrix11">1.0</span>  <span id="matrix12">0.0</span>]<br>
+                        [<span id="matrix21">0.0</span>  <span id="matrix22">1.0</span>]
+                    </div>
+                    <div style="margin-top: 10px; font-size: 12px;">
+                        det = <span id="determinant">1.0</span><br>
+                        <span id="matrixProperties">Identity Matrix</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Test Vector</h3>
+                <div class="vector-inputs">
+                    <input type="number" id="vectorX" step="0.5" value="2" placeholder="x">
+                    <input type="number" id="vectorY" step="0.5" value="1" placeholder="y">
+                </div>
+                <div style="margin-top: 10px; font-size: 12px;">
+                    Original: (<span id="origVector">2, 1</span>)<br>
+                    Transformed: (<span id="transVector">2, 1</span>)
+                </div>
+                <button class="reset-button" onclick="resetTransformation()">Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Canvas setup
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 50; // pixels per unit
+        
+        // Current transformation matrix
+        let transformMatrix = {
+            a: 1, b: 0,
+            c: 0, d: 1
+        };
+        
+        let currentTransformation = 'identity';
+        
+        // Original shape (unit square and some other shapes)
+        const originalShapes = {
+            square: [
+                {x: -1, y: -1}, {x: 1, y: -1}, {x: 1, y: 1}, {x: -1, y: 1}
+            ],
+            triangle: [
+                {x: 0, y: 1}, {x: -0.866, y: -0.5}, {x: 0.866, y: -0.5}
+            ],
+            house: [
+                {x: -1, y: -1}, {x: 1, y: -1}, {x: 1, y: 0}, 
+                {x: 0, y: 1}, {x: -1, y: 0}
+            ]
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return (canvasX - centerX) / scale;
+        }
+        
+        function fromCanvasY(canvasY) {
+            return (centerY - canvasY) / scale;
+        }
+        
+        function applyTransformation(point) {
+            return {
+                x: transformMatrix.a * point.x + transformMatrix.b * point.y,
+                y: transformMatrix.c * point.x + transformMatrix.d * point.y
+            };
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = -10; x <= 10; x++) {
+                const canvasX = toCanvasX(x);
+                ctx.beginPath();
+                ctx.moveTo(canvasX, 0);
+                ctx.lineTo(canvasX, height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = -10; y <= 10; y++) {
+                const canvasY = toCanvasY(y);
+                ctx.beginPath();
+                ctx.moveTo(0, canvasY);
+                ctx.lineTo(width, canvasY);
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawShape(points, color, lineWidth = 2) {
+            if (points.length === 0) return;
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            
+            const firstPoint = points[0];
+            ctx.moveTo(toCanvasX(firstPoint.x), toCanvasY(firstPoint.y));
+            
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(toCanvasX(points[i].x), toCanvasY(points[i].y));
+            }
+            
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
+        function drawVector(from, to, color) {
+            const canvasFromX = toCanvasX(from.x);
+            const canvasFromY = toCanvasY(from.y);
+            const canvasToX = toCanvasX(to.x);
+            const canvasToY = toCanvasY(to.y);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(canvasFromX, canvasFromY);
+            ctx.lineTo(canvasToX, canvasToY);
+            ctx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(canvasToY - canvasFromY, canvasToX - canvasFromX);
+            const arrowLength = 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(canvasToX, canvasToY);
+            ctx.lineTo(
+                canvasToX - arrowLength * Math.cos(angle - Math.PI / 6),
+                canvasToY - arrowLength * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(canvasToX, canvasToY);
+            ctx.lineTo(
+                canvasToX - arrowLength * Math.cos(angle + Math.PI / 6),
+                canvasToY - arrowLength * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            
+            // Draw original shapes
+            drawShape(originalShapes.square, '#0ff', 2);
+            drawShape(originalShapes.triangle, '#0ff', 1);
+            
+            // Draw transformed shapes
+            const transformedSquare = originalShapes.square.map(applyTransformation);
+            const transformedTriangle = originalShapes.triangle.map(applyTransformation);
+            
+            drawShape(transformedSquare, '#f39c12', 2);
+            drawShape(transformedTriangle, '#f39c12', 1);
+            
+            // Draw test vector and its transformation
+            const vectorX = parseFloat(document.getElementById('vectorX').value) || 0;
+            const vectorY = parseFloat(document.getElementById('vectorY').value) || 0;
+            const originalVector = {x: vectorX, y: vectorY};
+            const transformedVector = applyTransformation(originalVector);
+            
+            drawVector({x: 0, y: 0}, originalVector, '#0ff');
+            drawVector({x: 0, y: 0}, transformedVector, '#e74c3c');
+            
+            // Update vector display
+            document.getElementById('origVector').textContent = 
+                `${originalVector.x.toFixed(1)}, ${originalVector.y.toFixed(1)}`;
+            document.getElementById('transVector').textContent = 
+                `${transformedVector.x.toFixed(1)}, ${transformedVector.y.toFixed(1)}`;
+        }
+        
+        function updateMatrix() {
+            // Update matrix display
+            document.getElementById('matrix11').textContent = transformMatrix.a.toFixed(2);
+            document.getElementById('matrix12').textContent = transformMatrix.b.toFixed(2);
+            document.getElementById('matrix21').textContent = transformMatrix.c.toFixed(2);
+            document.getElementById('matrix22').textContent = transformMatrix.d.toFixed(2);
+            
+            // Calculate determinant
+            const det = transformMatrix.a * transformMatrix.d - transformMatrix.b * transformMatrix.c;
+            document.getElementById('determinant').textContent = det.toFixed(2);
+            
+            // Determine matrix properties
+            let properties = [];
+            if (Math.abs(det) < 0.001) {
+                properties.push('Singular (non-invertible)');
+            }
+            if (Math.abs(det - 1) < 0.001) {
+                properties.push('Area-preserving');
+            }
+            if (det < 0) {
+                properties.push('Orientation-reversing');
+            }
+            if (transformMatrix.a === 1 && transformMatrix.b === 0 && 
+                transformMatrix.c === 0 && transformMatrix.d === 1) {
+                properties.push('Identity Matrix');
+            }
+            
+            document.getElementById('matrixProperties').textContent = 
+                properties.length > 0 ? properties.join(', ') : 'General transformation';
+            
+            draw();
+        }
+        
+        function setTransformation(type) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.transformation-buttons button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            document.getElementById(type).classList.add('active');
+            
+            // Hide all parameter controls
+            document.querySelectorAll('.parameter-controls').forEach(control => {
+                control.style.display = 'none';
+            });
+            
+            currentTransformation = type;
+            
+            switch(type) {
+                case 'identity':
+                    transformMatrix = {a: 1, b: 0, c: 0, d: 1};
+                    break;
+                case 'scale':
+                    document.getElementById('scaleControls').style.display = 'block';
+                    updateScaleTransformation();
+                    break;
+                case 'rotation':
+                    document.getElementById('rotationControls').style.display = 'block';
+                    updateRotationTransformation();
+                    break;
+                case 'shear':
+                    document.getElementById('shearControls').style.display = 'block';
+                    updateShearTransformation();
+                    break;
+                case 'reflection':
+                    document.getElementById('reflectionControls').style.display = 'block';
+                    updateReflectionTransformation();
+                    break;
+                case 'custom':
+                    document.getElementById('customControls').style.display = 'block';
+                    updateCustomTransformation();
+                    break;
+            }
+            
+            updateMatrix();
+        }
+        
+        function updateScaleTransformation() {
+            const scaleX = parseFloat(document.getElementById('scaleX').value);
+            const scaleY = parseFloat(document.getElementById('scaleY').value);
+            
+            transformMatrix = {
+                a: scaleX, b: 0,
+                c: 0, d: scaleY
+            };
+            
+            document.getElementById('scaleXValue').textContent = scaleX.toFixed(1);
+            document.getElementById('scaleYValue').textContent = scaleY.toFixed(1);
+            
+            updateMatrix();
+        }
+        
+        function updateRotationTransformation() {
+            const angleDeg = parseFloat(document.getElementById('rotationAngle').value);
+            const angleRad = angleDeg * Math.PI / 180;
+            
+            const cos = Math.cos(angleRad);
+            const sin = Math.sin(angleRad);
+            
+            transformMatrix = {
+                a: cos, b: -sin,
+                c: sin, d: cos
+            };
+            
+            document.getElementById('rotationAngleValue').textContent = angleDeg.toFixed(0) + '°';
+            
+            updateMatrix();
+        }
+        
+        function updateShearTransformation() {
+            const shearX = parseFloat(document.getElementById('shearX').value);
+            const shearY = parseFloat(document.getElementById('shearY').value);
+            
+            transformMatrix = {
+                a: 1, b: shearX,
+                c: shearY, d: 1
+            };
+            
+            document.getElementById('shearXValue').textContent = shearX.toFixed(1);
+            document.getElementById('shearYValue').textContent = shearY.toFixed(1);
+            
+            updateMatrix();
+        }
+        
+        function updateReflectionTransformation() {
+            const axis = document.getElementById('reflectionAxis').value;
+            
+            switch(axis) {
+                case 'x':
+                    transformMatrix = {a: 1, b: 0, c: 0, d: -1};
+                    document.getElementById('reflectionSlope').style.display = 'none';
+                    break;
+                case 'y':
+                    transformMatrix = {a: -1, b: 0, c: 0, d: 1};
+                    document.getElementById('reflectionSlope').style.display = 'none';
+                    break;
+                case 'origin':
+                    transformMatrix = {a: -1, b: 0, c: 0, d: -1};
+                    document.getElementById('reflectionSlope').style.display = 'none';
+                    break;
+                case 'line':
+                    document.getElementById('reflectionSlope').style.display = 'block';
+                    const m = parseFloat(document.getElementById('reflectionM').value);
+                    const denom = 1 + m * m;
+                    transformMatrix = {
+                        a: (1 - m*m) / denom, 
+                        b: 2*m / denom,
+                        c: 2*m / denom, 
+                        d: (m*m - 1) / denom
+                    };
+                    document.getElementById('reflectionMValue').textContent = m.toFixed(1);
+                    break;
+            }
+            
+            updateMatrix();
+        }
+        
+        function updateCustomTransformation() {
+            transformMatrix = {
+                a: parseFloat(document.getElementById('m11').value) || 0,
+                b: parseFloat(document.getElementById('m12').value) || 0,
+                c: parseFloat(document.getElementById('m21').value) || 0,
+                d: parseFloat(document.getElementById('m22').value) || 0
+            };
+            
+            updateMatrix();
+        }
+        
+        function resetTransformation() {
+            // Reset all sliders and inputs
+            document.getElementById('scaleX').value = 1;
+            document.getElementById('scaleY').value = 1;
+            document.getElementById('rotationAngle').value = 0;
+            document.getElementById('shearX').value = 0;
+            document.getElementById('shearY').value = 0;
+            document.getElementById('reflectionAxis').value = 'x';
+            document.getElementById('reflectionM').value = 1;
+            document.getElementById('m11').value = 1;
+            document.getElementById('m12').value = 0;
+            document.getElementById('m21').value = 0;
+            document.getElementById('m22').value = 1;
+            document.getElementById('vectorX').value = 2;
+            document.getElementById('vectorY').value = 1;
+            
+            setTransformation('identity');
+        }
+        
+        // Event listeners
+        document.getElementById('identity').addEventListener('click', () => setTransformation('identity'));
+        document.getElementById('scale').addEventListener('click', () => setTransformation('scale'));
+        document.getElementById('rotation').addEventListener('click', () => setTransformation('rotation'));
+        document.getElementById('shear').addEventListener('click', () => setTransformation('shear'));
+        document.getElementById('reflection').addEventListener('click', () => setTransformation('reflection'));
+        document.getElementById('custom').addEventListener('click', () => setTransformation('custom'));
+        
+        document.getElementById('scaleX').addEventListener('input', updateScaleTransformation);
+        document.getElementById('scaleY').addEventListener('input', updateScaleTransformation);
+        document.getElementById('rotationAngle').addEventListener('input', updateRotationTransformation);
+        document.getElementById('shearX').addEventListener('input', updateShearTransformation);
+        document.getElementById('shearY').addEventListener('input', updateShearTransformation);
+        document.getElementById('reflectionAxis').addEventListener('change', updateReflectionTransformation);
+        document.getElementById('reflectionM').addEventListener('input', updateReflectionTransformation);
+        
+        document.getElementById('m11').addEventListener('input', updateCustomTransformation);
+        document.getElementById('m12').addEventListener('input', updateCustomTransformation);
+        document.getElementById('m21').addEventListener('input', updateCustomTransformation);
+        document.getElementById('m22').addEventListener('input', updateCustomTransformation);
+        
+        document.getElementById('vectorX').addEventListener('input', draw);
+        document.getElementById('vectorY').addEventListener('input', draw);
+        
+        // Initialize
+        setTransformation('identity');
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            draw();
+        });
+    </script>
+</body>
+</html>

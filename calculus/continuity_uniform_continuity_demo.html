@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Continuity and Uniform Continuity Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; font-family: Arial, sans-serif; }
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      background: #333;
+    }
+    #info {
+      width: 450px;
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .definition-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    .continuity {
+      border-left: 4px solid #2196F3;
+    }
+    .uniform-continuity {
+      border-left: 4px solid #FF9800;
+    }
+    .example-section {
+      border-left: 4px solid #9C27B0;
+    }
+    .theorem-section {
+      border-left: 4px solid #4CAF50;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+      background: #444;
+      color: white;
+      border: 1px solid #666;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .epsilon-delta {
+      color: #FFC107;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .math-notation {
+      font-family: "Times New Roman", serif;
+      font-style: italic;
+    }
+    .point-info {
+      background: rgba(33, 150, 243, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .status {
+      font-weight: bold;
+    }
+    .continuous { color: #4CAF50; }
+    .discontinuous { color: #f44336; }
+    .uniformly-continuous { color: #FF9800; }
+    .not-uniformly-continuous { color: #E91E63; }
+    
+    .function-curve { 
+      stroke: #2196F3; 
+      stroke-width: 2; 
+      fill: none; 
+    }
+    .epsilon-band { 
+      fill: rgba(76, 175, 80, 0.2); 
+      stroke: #4CAF50; 
+      stroke-width: 1; 
+      stroke-dasharray: 5,5; 
+    }
+    .delta-interval { 
+      fill: rgba(255, 193, 7, 0.3); 
+      stroke: #FFC107; 
+      stroke-width: 2; 
+    }
+    .test-point { 
+      fill: #f44336; 
+      stroke: white; 
+      stroke-width: 2; 
+    }
+    .axis { 
+      stroke: #666; 
+      stroke-width: 1; 
+    }
+    .grid-line { 
+      stroke: #444; 
+      stroke-width: 0.5; 
+    }
+    .function-label {
+      fill: white;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    
+    <div id="info">
+      <h3>Continuity vs Uniform Continuity</h3>
+      
+      <div class="definition-section continuity">
+        <h4>Continuity at a Point</h4>
+        <div>A function <span class="math-notation">f</span> is <strong>continuous</strong> at <span class="math-notation">x₀</span> if:</div>
+        <div class="epsilon-delta">∀ε > 0, ∃δ > 0 such that<br>|x - x₀| < δ ⟹ |f(x) - f(x₀)| < ε</div>
+        <div><em>δ can depend on both ε and x₀</em></div>
+      </div>
+
+      <div class="definition-section uniform-continuity">
+        <h4>Uniform Continuity</h4>
+        <div>A function <span class="math-notation">f</span> is <strong>uniformly continuous</strong> if:</div>
+        <div class="epsilon-delta">∀ε > 0, ∃δ > 0 such that ∀x,y:<br>|x - y| < δ ⟹ |f(x) - f(y)| < ε</div>
+        <div><em>δ depends only on ε, not on the point</em></div>
+      </div>
+
+      <div class="control-group">
+        <label>Function:</label>
+        <select id="functionSelect">
+          <option value="linear">Linear: f(x) = x</option>
+          <option value="quadratic">Quadratic: f(x) = x²</option>
+          <option value="cubic">Cubic: f(x) = x³</option>
+          <option value="sqrt">Square Root: f(x) = √x</option>
+          <option value="reciprocal">Reciprocal: f(x) = 1/x</option>
+          <option value="exp">Exponential: f(x) = eˣ</option>
+          <option value="sin">Sine: f(x) = sin(x)</option>
+          <option value="tan">Tangent: f(x) = tan(x)</option>
+          <option value="abs">Absolute: f(x) = |x|</option>
+          <option value="step">Step Function</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Test Point (x₀):</label>
+        <input type="range" id="testPoint" min="-3" max="3" step="0.1" value="1">
+        <span id="testPointValue">1.0</span>
+      </div>
+
+      <div class="control-group">
+        <label>Epsilon (ε):</label>
+        <input type="range" id="epsilon" min="0.1" max="2" step="0.1" value="0.5">
+        <span id="epsilonValue">0.5</span>
+      </div>
+
+      <div class="control-group">
+        <label>Delta (δ):</label>
+        <input type="range" id="delta" min="0.1" max="2" step="0.1" value="0.5">
+        <span id="deltaValue">0.5</span>
+      </div>
+
+      <div class="control-group">
+        <button id="findDeltaBtn">Find Required δ</button>
+        <button id="testUniformBtn">Test Uniform Continuity</button>
+      </div>
+
+      <div class="point-info">
+        <strong>At Current Point:</strong><br>
+        <div>x₀ = <span id="currentX0" class="value-display">1.0</span></div>
+        <div>f(x₀) = <span id="currentF0" class="value-display">1.0</span></div>
+        <div>Continuity: <span id="continuityStat" class="continuous">Continuous</span></div>
+        <div>Required δ: <span id="requiredDelta" class="value-display">N/A</span></div>
+      </div>
+
+      <div class="definition-section example-section">
+        <h4>Current Analysis</h4>
+        <div>Function: <span id="functionName" class="value-display">f(x) = x</span></div>
+        <div>Domain: <span id="domainInfo" class="value-display">ℝ</span></div>
+        <div>Uniform Continuity: <span id="uniformStatus" class="uniformly-continuous">Yes</span></div>
+        <div id="uniformReason" style="font-size: 12px; margin-top: 5px;"></div>
+      </div>
+
+      <div class="control-group">
+        <input type="checkbox" id="showEpsilonBand" checked> Show ε-neighborhood
+        <input type="checkbox" id="showDeltaInterval" checked> Show δ-interval
+        <input type="checkbox" id="showGrid" checked> Show Grid
+      </div>
+
+      <div class="theorem-section">
+        <h4>Key Theorems</h4>
+        <div><strong>1.</strong> Uniform continuity ⟹ Continuity</div>
+        <div><strong>2.</strong> Continuous on compact set ⟹ Uniformly continuous</div>
+        <div><strong>3.</strong> Lipschitz continuous ⟹ Uniformly continuous</div>
+        <div><strong>4.</strong> f'(x) bounded ⟹ Uniformly continuous</div>
+      </div>
+
+      <div class="definition-section">
+        <h4>Examples</h4>
+        <div><span class="continuous">Continuous everywhere:</span></div>
+        <div>• Polynomials, sin(x), cos(x), eˣ</div>
+        <br>
+        <div><span class="uniformly-continuous">Uniformly continuous:</span></div>
+        <div>• Linear functions, sin(x), cos(x)</div>
+        <div>• √x on [0,∞), x² on bounded intervals</div>
+        <br>
+        <div><span class="not-uniformly-continuous">Not uniformly continuous:</span></div>
+        <div>• x² on ℝ, 1/x on (0,1], eˣ on ℝ</div>
+      </div>
+
+      <div class="definition-section">
+        <h4>Interactive Instructions</h4>
+        <div>• Adjust ε to see the neighborhood around f(x₀)</div>
+        <div>• Adjust δ to see if the condition is satisfied</div>
+        <div>• Move the test point to explore different locations</div>
+        <div>• Green band: ε-neighborhood of f(x₀)</div>
+        <div>• Yellow interval: δ-neighborhood of x₀</div>
+        <div>• Red dot: Current test point</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const container = document.getElementById('canvas-container');
+    
+    // Function parameters
+    let currentFunction = 'linear';
+    let testPoint = 1.0;
+    let epsilon = 0.5;
+    let delta = 0.5;
+    
+    // Function definitions
+    const functions = {
+      linear: {
+        f: x => x,
+        name: 'f(x) = x',
+        domain: 'ℝ',
+        uniformlyContinuous: true,
+        reason: 'Linear functions are Lipschitz continuous with L = 1'
+      },
+      quadratic: {
+        f: x => x * x,
+        name: 'f(x) = x²',
+        domain: 'ℝ',
+        uniformlyContinuous: false,
+        reason: 'f\'(x) = 2x is unbounded on ℝ'
+      },
+      cubic: {
+        f: x => x * x * x,
+        name: 'f(x) = x³',
+        domain: 'ℝ',
+        uniformlyContinuous: false,
+        reason: 'f\'(x) = 3x² is unbounded on ℝ'
+      },
+      sqrt: {
+        f: x => x >= 0 ? Math.sqrt(x) : NaN,
+        name: 'f(x) = √x',
+        domain: '[0,∞)',
+        uniformlyContinuous: true,
+        reason: 'f\'(x) = 1/(2√x) → 0 as x → ∞, bounded on [δ,∞) for any δ > 0'
+      },
+      reciprocal: {
+        f: x => x !== 0 ? 1/x : NaN,
+        name: 'f(x) = 1/x',
+        domain: 'ℝ \\ {0}',
+        uniformlyContinuous: false,
+        reason: 'Not uniformly continuous on (0,1]: as x → 0⁺, |f\'(x)| → ∞'
+      },
+      exp: {
+        f: x => Math.exp(x),
+        name: 'f(x) = eˣ',
+        domain: 'ℝ',
+        uniformlyContinuous: false,
+        reason: 'f\'(x) = eˣ is unbounded on ℝ'
+      },
+      sin: {
+        f: x => Math.sin(x),
+        name: 'f(x) = sin(x)',
+        domain: 'ℝ',
+        uniformlyContinuous: true,
+        reason: '|f\'(x)| = |cos(x)| ≤ 1, so f is Lipschitz continuous'
+      },
+      tan: {
+        f: x => Math.tan(x),
+        name: 'f(x) = tan(x)',
+        domain: 'ℝ \\ {π/2 + nπ}',
+        uniformlyContinuous: false,
+        reason: 'f\'(x) = sec²(x) is unbounded near x = π/2 + nπ'
+      },
+      abs: {
+        f: x => Math.abs(x),
+        name: 'f(x) = |x|',
+        domain: 'ℝ',
+        uniformlyContinuous: true,
+        reason: '|f(x) - f(y)| = ||x| - |y|| ≤ |x - y|, so f is Lipschitz continuous'
+      },
+      step: {
+        f: x => x >= 0 ? 1 : 0,
+        name: 'f(x) = step function',
+        domain: 'ℝ',
+        uniformlyContinuous: false,
+        reason: 'Discontinuous at x = 0'
+      }
+    };
+
+    // Setup SVG
+    function setupSVG() {
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+
+    // Coordinate transformation
+    function toSVG(x, y) {
+      const rect = container.getBoundingClientRect();
+      const margin = 50;
+      const xRange = 6; // -3 to 3
+      const yRange = 6; // -3 to 3
+      
+      const scaleX = (rect.width - 2 * margin) / xRange;
+      const scaleY = (rect.height - 2 * margin) / yRange;
+      
+      return {
+        x: margin + (x + 3) * scaleX,
+        y: rect.height - margin - (y + 3) * scaleY
+      };
+    }
+
+    function fromSVG(svgX, svgY) {
+      const rect = container.getBoundingClientRect();
+      const margin = 50;
+      const xRange = 6;
+      const yRange = 6;
+      
+      const scaleX = (rect.width - 2 * margin) / xRange;
+      const scaleY = (rect.height - 2 * margin) / yRange;
+      
+      return {
+        x: (svgX - margin) / scaleX - 3,
+        y: -((svgY - (rect.height - margin)) / scaleY - 3)
+      };
+    }
+
+    // Draw grid
+    function drawGrid() {
+      if (!document.getElementById('showGrid').checked) return;
+      
+      const rect = container.getBoundingClientRect();
+      
+      // Vertical grid lines
+      for (let x = -3; x <= 3; x += 0.5) {
+        const start = toSVG(x, -3);
+        const end = toSVG(x, 3);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', x === 0 ? 'axis' : 'grid-line');
+        svg.appendChild(line);
+      }
+      
+      // Horizontal grid lines
+      for (let y = -3; y <= 3; y += 0.5) {
+        const start = toSVG(-3, y);
+        const end = toSVG(3, y);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', y === 0 ? 'axis' : 'grid-line');
+        svg.appendChild(line);
+      }
+    }
+
+    // Draw function
+    function drawFunction() {
+      const func = functions[currentFunction];
+      const points = [];
+      
+      for (let x = -3; x <= 3; x += 0.01) {
+        const y = func.f(x);
+        if (!isNaN(y) && Math.abs(y) <= 10) {
+          const svgPoint = toSVG(x, Math.max(-3, Math.min(3, y)));
+          points.push(`${svgPoint.x},${svgPoint.y}`);
+        }
+      }
+      
+      if (points.length > 0) {
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', points.join(' '));
+        polyline.setAttribute('class', 'function-curve');
+        svg.appendChild(polyline);
+      }
+    }
+
+    // Draw epsilon band
+    function drawEpsilonBand() {
+      if (!document.getElementById('showEpsilonBand').checked) return;
+      
+      const func = functions[currentFunction];
+      const f0 = func.f(testPoint);
+      
+      if (isNaN(f0)) return;
+      
+      const upperY = f0 + epsilon;
+      const lowerY = f0 - epsilon;
+      
+      const startPoint = toSVG(-3, Math.max(-3, Math.min(3, upperY)));
+      const width = toSVG(3, 0).x - toSVG(-3, 0).x;
+      const height = Math.abs(toSVG(0, upperY).y - toSVG(0, lowerY).y);
+      
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', startPoint.x);
+      rect.setAttribute('y', Math.min(toSVG(0, upperY).y, toSVG(0, lowerY).y));
+      rect.setAttribute('width', width);
+      rect.setAttribute('height', height);
+      rect.setAttribute('class', 'epsilon-band');
+      svg.appendChild(rect);
+      
+      // Add epsilon labels
+      const upperLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      upperLabel.setAttribute('x', toSVG(2.5, 0).x);
+      upperLabel.setAttribute('y', toSVG(0, upperY).y);
+      upperLabel.setAttribute('class', 'function-label');
+      upperLabel.textContent = `f(x₀) + ε`;
+      svg.appendChild(upperLabel);
+      
+      const lowerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lowerLabel.setAttribute('x', toSVG(2.5, 0).x);
+      lowerLabel.setAttribute('y', toSVG(0, lowerY).y);
+      lowerLabel.setAttribute('class', 'function-label');
+      lowerLabel.textContent = `f(x₀) - ε`;
+      svg.appendChild(lowerLabel);
+    }
+
+    // Draw delta interval
+    function drawDeltaInterval() {
+      if (!document.getElementById('showDeltaInterval').checked) return;
+      
+      const leftX = testPoint - delta;
+      const rightX = testPoint + delta;
+      
+      const leftPoint = toSVG(leftX, -3);
+      const rightPoint = toSVG(rightX, -3);
+      const width = rightPoint.x - leftPoint.x;
+      const height = toSVG(0, 3).y - toSVG(0, -3).y;
+      
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', leftPoint.x);
+      rect.setAttribute('y', toSVG(0, 3).y);
+      rect.setAttribute('width', width);
+      rect.setAttribute('height', height);
+      rect.setAttribute('class', 'delta-interval');
+      svg.appendChild(rect);
+      
+      // Add delta labels
+      const leftLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      leftLabel.setAttribute('x', leftPoint.x);
+      leftLabel.setAttribute('y', toSVG(0, -2.7).y);
+      leftLabel.setAttribute('class', 'function-label');
+      leftLabel.textContent = `x₀ - δ`;
+      svg.appendChild(leftLabel);
+      
+      const rightLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      rightLabel.setAttribute('x', rightPoint.x - 40);
+      rightLabel.setAttribute('y', toSVG(0, -2.7).y);
+      rightLabel.setAttribute('class', 'function-label');
+      rightLabel.textContent = `x₀ + δ`;
+      svg.appendChild(rightLabel);
+    }
+
+    // Draw test point
+    function drawTestPoint() {
+      const func = functions[currentFunction];
+      const f0 = func.f(testPoint);
+      
+      if (isNaN(f0)) return;
+      
+      const point = toSVG(testPoint, f0);
+      
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', 5);
+      circle.setAttribute('class', 'test-point');
+      svg.appendChild(circle);
+      
+      // Add coordinate label
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', point.x + 10);
+      label.setAttribute('y', point.y - 10);
+      label.setAttribute('class', 'function-label');
+      label.textContent = `(${testPoint.toFixed(1)}, ${f0.toFixed(2)})`;
+      svg.appendChild(label);
+    }
+
+    // Update display
+    function updateDisplay() {
+      // Clear SVG
+      svg.innerHTML = '';
+      
+      // Draw everything
+      drawGrid();
+      drawEpsilonBand();
+      drawDeltaInterval();
+      drawFunction();
+      drawTestPoint();
+      
+      // Update text displays
+      const func = functions[currentFunction];
+      const f0 = func.f(testPoint);
+      
+      document.getElementById('functionName').textContent = func.name;
+      document.getElementById('domainInfo').textContent = func.domain;
+      document.getElementById('uniformStatus').textContent = func.uniformlyContinuous ? 'Yes' : 'No';
+      document.getElementById('uniformStatus').className = func.uniformlyContinuous ? 'uniformly-continuous' : 'not-uniformly-continuous';
+      document.getElementById('uniformReason').textContent = func.reason;
+      
+      document.getElementById('currentX0').textContent = testPoint.toFixed(2);
+      document.getElementById('currentF0').textContent = isNaN(f0) ? 'Undefined' : f0.toFixed(3);
+      
+      // Check continuity at current point
+      const isContinuous = !isNaN(f0) && currentFunction !== 'step' || (currentFunction === 'step' && testPoint !== 0);
+      document.getElementById('continuityStat').textContent = isContinuous ? 'Continuous' : 'Discontinuous';
+      document.getElementById('continuityStat').className = isContinuous ? 'continuous' : 'discontinuous';
+      
+      // Calculate required delta
+      calculateRequiredDelta();
+    }
+
+    // Calculate required delta for given epsilon
+    function calculateRequiredDelta() {
+      const func = functions[currentFunction];
+      const f0 = func.f(testPoint);
+      
+      if (isNaN(f0) || currentFunction === 'step') {
+        document.getElementById('requiredDelta').textContent = 'N/A';
+        return;
+      }
+      
+      let requiredDelta = 0.1;
+      
+      // For different functions, calculate theoretical delta
+      switch (currentFunction) {
+        case 'linear':
+          requiredDelta = epsilon; // Lipschitz with L=1
+          break;
+        case 'quadratic':
+          requiredDelta = epsilon / (2 * Math.abs(testPoint) + epsilon);
+          break;
+        case 'sqrt':
+          if (testPoint > 0) {
+            requiredDelta = epsilon * Math.sqrt(testPoint);
+          }
+          break;
+        case 'reciprocal':
+          if (testPoint !== 0) {
+            requiredDelta = epsilon * testPoint * testPoint;
+          }
+          break;
+        case 'sin':
+          requiredDelta = epsilon; // Lipschitz with L=1
+          break;
+        case 'abs':
+          requiredDelta = epsilon; // Lipschitz with L=1
+          break;
+        default:
+          // Numerical approximation
+          for (let d = 0.01; d <= 2; d += 0.01) {
+            let maxDiff = 0;
+            for (let x = testPoint - d; x <= testPoint + d; x += 0.01) {
+              const fx = func.f(x);
+              if (!isNaN(fx)) {
+                maxDiff = Math.max(maxDiff, Math.abs(fx - f0));
+              }
+            }
+            if (maxDiff <= epsilon) {
+              requiredDelta = d;
+              break;
+            }
+          }
+      }
+      
+      document.getElementById('requiredDelta').textContent = requiredDelta.toFixed(3);
+    }
+
+    // Find optimal delta
+    function findDelta() {
+      calculateRequiredDelta();
+      const requiredDelta = parseFloat(document.getElementById('requiredDelta').textContent);
+      if (!isNaN(requiredDelta)) {
+        delta = Math.min(requiredDelta, 2);
+        document.getElementById('delta').value = delta;
+        document.getElementById('deltaValue').textContent = delta.toFixed(1);
+        updateDisplay();
+      }
+    }
+
+    // Test uniform continuity
+    function testUniformContinuity() {
+      const func = functions[currentFunction];
+      let isUniform = true;
+      let problemPoint = null;
+      
+      // Test multiple points
+      for (let x1 = -2.5; x1 <= 2.5 && isUniform; x1 += 0.5) {
+        for (let x2 = x1 + 0.1; x2 <= x1 + delta && x2 <= 3; x2 += 0.1) {
+          const f1 = func.f(x1);
+          const f2 = func.f(x2);
+          
+          if (!isNaN(f1) && !isNaN(f2)) {
+            if (Math.abs(f2 - f1) > epsilon) {
+              isUniform = false;
+              problemPoint = {x1, x2, f1, f2};
+              break;
+            }
+          }
+        }
+      }
+      
+      const statusText = isUniform ? 'PASSED: δ works for all points' : 
+                        `FAILED: Found points x₁=${problemPoint.x1.toFixed(2)}, x₂=${problemPoint.x2.toFixed(2)} where |f(x₁)-f(x₂)|=${Math.abs(problemPoint.f2-problemPoint.f1).toFixed(3)} > ε`;
+      
+      alert(statusText);
+    }
+
+    // Event listeners
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      updateDisplay();
+    });
+
+    document.getElementById('testPoint').addEventListener('input', (e) => {
+      testPoint = parseFloat(e.target.value);
+      document.getElementById('testPointValue').textContent = testPoint.toFixed(1);
+      updateDisplay();
+    });
+
+    document.getElementById('epsilon').addEventListener('input', (e) => {
+      epsilon = parseFloat(e.target.value);
+      document.getElementById('epsilonValue').textContent = epsilon.toFixed(1);
+      updateDisplay();
+    });
+
+    document.getElementById('delta').addEventListener('input', (e) => {
+      delta = parseFloat(e.target.value);
+      document.getElementById('deltaValue').textContent = delta.toFixed(1);
+      updateDisplay();
+    });
+
+    document.getElementById('findDeltaBtn').addEventListener('click', findDelta);
+    document.getElementById('testUniformBtn').addEventListener('click', testUniformContinuity);
+
+    document.getElementById('showEpsilonBand').addEventListener('change', updateDisplay);
+    document.getElementById('showDeltaInterval').addEventListener('change', updateDisplay);
+    document.getElementById('showGrid').addEventListener('change', updateDisplay);
+
+    // Mouse interaction for setting test point
+    svg.addEventListener('click', (event) => {
+      const rect = svg.getBoundingClientRect();
+      const svgX = event.clientX - rect.left;
+      const svgY = event.clientY - rect.top;
+      const coords = fromSVG(svgX, svgY);
+      
+      if (coords.x >= -3 && coords.x <= 3) {
+        testPoint = coords.x;
+        document.getElementById('testPoint').value = testPoint;
+        document.getElementById('testPointValue').textContent = testPoint.toFixed(1);
+        updateDisplay();
+      }
+    });
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      setupSVG();
+      updateDisplay();
+    });
+
+    // Initialize
+    setupSVG();
+    updateDisplay();
+  </script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa General Duality</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 2.5em;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        
+        label {
+            min-width: 120px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .canvas-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .info-panel {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .info-panel h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .formula {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .lagrangian-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .duality-info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .problem-selector {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .problem-selector button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .problem-selector button.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-card h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Minh họa General Duality</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Primal Problem</h3>
+                <div class="problem-selector">
+                    <button onclick="setProblem('quadratic')" class="active">Quadratic</button>
+                    <button onclick="setProblem('simple')">Simple</button>
+                </div>
+                <div class="control-row">
+                    <label>Parameter λ:</label>
+                    <input type="range" id="lambda" min="0" max="4" value="1" step="0.1">
+                    <input type="number" id="lambdaValue" value="1" min="0" max="4" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Parameter ν:</label>
+                    <input type="range" id="nu" min="-2" max="2" value="0" step="0.1">
+                    <input type="number" id="nuValue" value="0" min="-2" max="2" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Point x:</label>
+                    <input type="range" id="pointX" min="-2" max="3" value="1" step="0.1">
+                    <input type="number" id="pointXValue" value="1" min="-2" max="3" step="0.1">
+                </div>
+                <div class="lagrangian-info">
+                    <strong>Lagrangian Function:</strong><br>
+                    <span id="lagrangianResult">Đang tính...</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎯 Dual Function</h3>
+                <div class="control-row">
+                    <button onclick="solveDual()">🔍 Giải Dual</button>
+                    <button onclick="checkDuality()">✅ Kiểm tra Duality</button>
+                </div>
+                <div class="duality-info">
+                    <strong>Dual Function:</strong><br>
+                    <span id="dualResult">Đang tính...</span>
+                </div>
+                <div class="duality-info">
+                    <strong>Duality Results:</strong><br>
+                    <span id="dualityResult">Chưa tính</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="dualityCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📚 Thông tin Chi tiết</h3>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>📊 Primal Problem</h4>
+                    <div class="formula">
+                        <strong>Minimize:</strong> f₀(x)<br>
+                        <strong>Subject to:</strong><br>
+                        • fᵢ(x) ≤ 0<br>
+                        • hⱼ(x) = 0
+                    </div>
+                    <ul>
+                        <li>Objective function: f₀(x)</li>
+                        <li>Inequality constraints: fᵢ(x) ≤ 0</li>
+                        <li>Equality constraints: hⱼ(x) = 0</li>
+                        <li>Feasible region: intersection of constraints</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-card">
+                    <h4>🎯 Dual Problem</h4>
+                    <div class="formula">
+                        <strong>Maximize:</strong> g(λ, ν)<br>
+                        <strong>Subject to:</strong><br>
+                        • λ ≥ 0
+                    </div>
+                    <ul>
+                        <li>Dual function: g(λ, ν) = inf_x L(x, λ, ν)</li>
+                        <li>Lagrangian: L(x, λ, ν) = f₀(x) + Σλᵢfᵢ(x) + Σνⱼhⱼ(x)</li>
+                        <li>Always convex</li>
+                        <li>Provides lower bounds</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="formula">
+                <strong>Weak Duality:</strong> g(λ, ν) ≤ f₀(x) for any feasible x, λ ≥ 0<br>
+                <strong>Strong Duality:</strong> max g(λ, ν) = min f₀(x) (under Slater's condition)<br>
+                <strong>Complementary Slackness:</strong> λᵢ*fᵢ(x*) = 0 for all i
+            </div>
+            
+            <div class="formula">
+                <strong>Slater's Condition:</strong><br>
+                There exists x such that fᵢ(x) < 0 for all i and hⱼ(x) = 0 for all j<br>
+                <strong>KKT Conditions:</strong><br>
+                ∇f₀(x*) + Σλᵢ*∇fᵢ(x*) + Σνⱼ*∇hⱼ(x*) = 0, λᵢ* ≥ 0, λᵢ*fᵢ(x*) = 0
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('dualityCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // State
+        let currentProblem = 'quadratic';
+        let lambda = 1;
+        let nu = 0;
+        let pointX = 1;
+        let primalSolution = { x: 0, value: 0 };
+        let dualSolution = { lambda: 0, nu: 0, value: 0 };
+        
+        // Problem definitions
+        const problems = {
+            quadratic: {
+                name: 'Quadratic Programming',
+                f0: (x) => 0.5 * x * x + x,
+                f1: (x) => x - 1, // x ≤ 1
+                h1: (x) => x - 0.5, // x = 0.5 (equality)
+                df0: (x) => x + 1,
+                df1: (x) => 1,
+                dh1: (x) => 1,
+                optimalX: 0.5,
+                optimalValue: 0.5 * 0.5 * 0.5 + 0.5
+            },
+            simple: {
+                name: 'Simple Example',
+                f0: (x) => x * x,
+                f1: (x) => 1 - x, // x ≥ 1
+                h1: (x) => 0, // no equality constraint
+                df0: (x) => 2 * x,
+                df1: (x) => -1,
+                dh1: (x) => 0,
+                optimalX: 1,
+                optimalValue: 1
+            }
+        };
+        
+        // Update parameters
+        function updateParameters() {
+            lambda = parseFloat(document.getElementById('lambdaValue').value);
+            nu = parseFloat(document.getElementById('nuValue').value);
+            pointX = parseFloat(document.getElementById('pointXValue').value);
+        }
+        
+        // Set problem
+        function setProblem(problemName) {
+            currentProblem = problemName;
+            document.querySelectorAll('.problem-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateProblemInfo();
+            drawVisualization();
+        }
+        
+        // Lagrangian function
+        function lagrangian(x, lambda, nu) {
+            const problem = problems[currentProblem];
+            return problem.f0(x) + lambda * problem.f1(x) + nu * problem.h1(x);
+        }
+        
+        // Dual function (infimum of Lagrangian over x)
+        function dualFunction(lambda, nu) {
+            const problem = problems[currentProblem];
+            
+            // For quadratic problem: L(x, λ, ν) = 0.5x² + x + λ(x-1) + ν(x-0.5)
+            // dL/dx = x + 1 + λ + ν = 0 => x = -(1 + λ + ν)
+            if (currentProblem === 'quadratic') {
+                const x = -(1 + lambda + nu);
+                return lagrangian(x, lambda, nu);
+            }
+            
+            // For simple problem: L(x, λ, ν) = x² + λ(1-x)
+            // dL/dx = 2x - λ = 0 => x = λ/2
+            if (currentProblem === 'simple') {
+                const x = lambda / 2;
+                return lagrangian(x, lambda, nu);
+            }
+            
+            return 0;
+        }
+        
+        // Update problem info
+        function updateProblemInfo() {
+            const problem = problems[currentProblem];
+            const lagrangianValue = lagrangian(pointX, lambda, nu);
+            const dualValue = dualFunction(lambda, nu);
+            
+            document.getElementById('lagrangianResult').innerHTML = `
+                <strong>L(x, λ, ν) = f₀(x) + λf₁(x) + νh₁(x)</strong><br>
+                f₀(${pointX.toFixed(2)}) = ${problem.f0(pointX).toFixed(3)}<br>
+                λf₁(${pointX.toFixed(2)}) = ${lambda.toFixed(2)} × ${problem.f1(pointX).toFixed(3)} = ${(lambda * problem.f1(pointX)).toFixed(3)}<br>
+                νh₁(${pointX.toFixed(2)}) = ${nu.toFixed(2)} × ${problem.h1(pointX).toFixed(3)} = ${(nu * problem.h1(pointX)).toFixed(3)}<br>
+                <strong>L = ${lagrangianValue.toFixed(3)}</strong>
+            `;
+            
+            document.getElementById('dualResult').innerHTML = `
+                <strong>g(λ, ν) = inf_x L(x, λ, ν)</strong><br>
+                λ = ${lambda.toFixed(2)}, ν = ${nu.toFixed(2)}<br>
+                <strong>g(λ, ν) = ${dualValue.toFixed(3)}</strong><br>
+                <em>This is a lower bound on the optimal primal value</em>
+            `;
+        }
+        
+        // Solve dual problem
+        function solveDual() {
+            updateParameters();
+            
+            // Find optimal dual variables
+            if (currentProblem === 'quadratic') {
+                // For quadratic problem, we can solve analytically
+                // The dual function is concave in λ and ν
+                dualSolution.lambda = Math.max(0, 0.5 - nu);
+                dualSolution.nu = 0.5 - lambda;
+                dualSolution.value = dualFunction(dualSolution.lambda, dualSolution.nu);
+            } else {
+                // For simple problem
+                dualSolution.lambda = 2; // Optimal λ for simple problem
+                dualSolution.nu = 0;
+                dualSolution.value = dualFunction(dualSolution.lambda, dualSolution.nu);
+            }
+            
+            updateDualityResult();
+            drawVisualization();
+        }
+        
+        // Check duality conditions
+        function checkDuality() {
+            updateParameters();
+            
+            const problem = problems[currentProblem];
+            const primalObj = problem.f0(pointX);
+            const dualObj = dualFunction(lambda, nu);
+            
+            // Check weak duality
+            const weakDuality = dualObj <= primalObj;
+            
+            // Check complementary slackness
+            const constraintValue = problem.f1(pointX);
+            const compSlackness = lambda * constraintValue;
+            
+            document.getElementById('dualityResult').innerHTML = `
+                <strong>Weak Duality:</strong> ${weakDuality ? '✅' : '❌'} (${dualObj.toFixed(3)} ≤ ${primalObj.toFixed(3)})<br>
+                <strong>Complementary Slackness:</strong> λf₁(x) = ${compSlackness.toFixed(3)}<br>
+                <strong>Primal Objective:</strong> ${primalObj.toFixed(3)}<br>
+                <strong>Dual Objective:</strong> ${dualObj.toFixed(3)}<br>
+                <strong>Optimal Primal Value:</strong> ${problem.optimalValue.toFixed(3)}
+            `;
+        }
+        
+        // Update duality result
+        function updateDualityResult() {
+            const problem = problems[currentProblem];
+            
+            document.getElementById('dualityResult').innerHTML = `
+                <strong>Optimal Dual Solution:</strong><br>
+                λ* = ${dualSolution.lambda.toFixed(3)}, ν* = ${dualSolution.nu.toFixed(3)}<br>
+                <strong>Dual Value:</strong> ${dualSolution.value.toFixed(3)}<br>
+                <strong>Primal Optimal:</strong> ${problem.optimalValue.toFixed(3)}<br>
+                <strong>Strong Duality:</strong> ${Math.abs(dualSolution.value - problem.optimalValue) < 0.01 ? '✅' : '❌'}
+            `;
+        }
+        
+        // Draw visualization
+        function drawVisualization() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const margin = 50;
+            const width = canvas.width - 2 * margin;
+            const height = canvas.height - 2 * margin;
+            const xMin = -2;
+            const xMax = 3;
+            const yMin = -1;
+            const yMax = 8;
+            const scaleX = width / (xMax - xMin);
+            const scaleY = height / (yMax - yMin);
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: margin + (x - xMin) * scaleX,
+                    y: canvas.height - margin - (y - yMin) * scaleY
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = xMin; i <= xMax; i++) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, margin);
+                ctx.lineTo(pos.x, canvas.height - margin);
+                ctx.stroke();
+            }
+            for (let i = yMin; i <= yMax; i++) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(margin, pos.y);
+                ctx.lineTo(canvas.width - margin, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, margin);
+            ctx.lineTo(origin.x, canvas.height - margin);
+            ctx.moveTo(margin, origin.y);
+            ctx.lineTo(canvas.width - margin, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('f(x)', 0, 0);
+            ctx.restore();
+            
+            const problem = problems[currentProblem];
+            
+            // Draw objective function
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = problem.f0(x);
+                const pos = transform(x, y);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw constraint
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = problem.f1(x);
+                const pos = transform(x, y);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw equality constraint (if any)
+            if (currentProblem === 'quadratic') {
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 5]);
+                const equalityX = 0.5;
+                const equalityY = problem.h1(equalityX);
+                const pos1 = transform(equalityX, yMin);
+                const pos2 = transform(equalityX, yMax);
+                ctx.beginPath();
+                ctx.moveTo(pos1.x, pos1.y);
+                ctx.lineTo(pos2.x, pos2.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Draw Lagrangian for current λ, ν
+            ctx.strokeStyle = '#ffc107';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = lagrangian(x, lambda, nu);
+                const pos = transform(x, y);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw current point
+            const currentValue = problem.f0(pointX);
+            const currentPos = transform(pointX, currentValue);
+            
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(currentPos.x, currentPos.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw optimal point
+            const optimalPos = transform(problem.optimalX, problem.optimalValue);
+            
+            ctx.fillStyle = '#28a745';
+            ctx.beginPath();
+            ctx.arc(optimalPos.x, optimalPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw dual function (if dual space is selected)
+            if (lambda > 0) {
+                const dualMargin = 50;
+                const dualWidth = 200;
+                const dualHeight = 150;
+                const dualX = canvas.width - dualWidth - dualMargin;
+                const dualY = dualMargin;
+                
+                // Draw dual function g(λ)
+                ctx.strokeStyle = '#ffc107';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                for (let i = 0; i <= dualWidth; i++) {
+                    const lambdaVal = (i / dualWidth) * 4; // λ from 0 to 4
+                    const dualVal = dualFunction(lambdaVal, nu);
+                    const pos = {
+                        x: dualX + i,
+                        y: dualY + dualHeight - (dualVal + 1) * (dualHeight / 4)
+                    };
+                    if (i === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                }
+                ctx.stroke();
+                
+                // Mark current dual point
+                const currentDualValue = dualFunction(lambda, nu);
+                const currentDualPos = {
+                    x: dualX + (lambda / 4) * dualWidth,
+                    y: dualY + dualHeight - (currentDualValue + 1) * (dualHeight / 4)
+                };
+                
+                ctx.fillStyle = '#ffc107';
+                ctx.beginPath();
+                ctx.arc(currentDualPos.x, currentDualPos.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Dual space labels
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Dual Function g(λ)', dualX + dualWidth / 2, dualY - 10);
+                ctx.fillText('λ', dualX + dualWidth / 2, dualY + dualHeight + 15);
+                ctx.save();
+                ctx.translate(dualX - 10, dualY + dualHeight / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('g(λ)', 0, 0);
+                ctx.restore();
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`f₀(x) = ${currentProblem === 'quadratic' ? '0.5x² + x' : 'x²'}`, margin + 10, margin + 20);
+            ctx.fillText(`f₁(x) = ${currentProblem === 'quadratic' ? 'x - 1' : '1 - x'}`, margin + 10, margin + 40);
+            if (currentProblem === 'quadratic') {
+                ctx.fillText(`h₁(x) = x - 0.5`, margin + 10, margin + 60);
+            }
+            ctx.fillText(`L(x, λ, ν) = f₀(x) + λf₁(x) + νh₁(x)`, margin + 10, margin + 80);
+        }
+        
+        // Event listeners
+        document.getElementById('lambda').addEventListener('input', function() {
+            document.getElementById('lambdaValue').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('lambdaValue').addEventListener('input', function() {
+            document.getElementById('lambda').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('nu').addEventListener('input', function() {
+            document.getElementById('nuValue').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('nuValue').addEventListener('input', function() {
+            document.getElementById('nu').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('pointX').addEventListener('input', function() {
+            document.getElementById('pointXValue').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('pointXValue').addEventListener('input', function() {
+            document.getElementById('pointX').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        // Initialize
+        updateParameters();
+        updateProblemInfo();
+        drawVisualization();
+    </script>
+</body>
+</html> 

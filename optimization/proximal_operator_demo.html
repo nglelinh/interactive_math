@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Proximal Operator Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      background: #222;
+    }
+    #info {
+      width: 450px;
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    .definition-section {
+      border-left: 4px solid #2196F3;
+    }
+    .examples-section {
+      border-left: 4px solid #FF9800;
+    }
+    .computation-section {
+      border-left: 4px solid #9C27B0;
+    }
+    .interpretation-section {
+      border-left: 4px solid #4CAF50;
+    }
+    .control-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 3px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 3px;
+      font-size: 11px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .compute-btn {
+      background: #2196F3;
+    }
+    .compute-btn:hover {
+      background: #1976D2;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 8px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      font-size: 11px;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .math-formula {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    .result-info {
+      background: rgba(33, 150, 243, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    .proximity-interpretation {
+      background: rgba(76, 175, 80, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    /* SVG styles */
+    .function-curve {
+      stroke: #2196F3;
+      stroke-width: 2;
+      fill: none;
+    }
+    .proximal-function {
+      stroke: #FF9800;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 5,5;
+    }
+    .quadratic-term {
+      stroke: #9C27B0;
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.7;
+    }
+    .input-point {
+      fill: #f44336;
+      stroke: white;
+      stroke-width: 2;
+    }
+    .proximal-point {
+      fill: #4CAF50;
+      stroke: white;
+      stroke-width: 3;
+    }
+    .connection-line {
+      stroke: #FFEB3B;
+      stroke-width: 2;
+      stroke-dasharray: 3,3;
+    }
+    .axis {
+      stroke: #666;
+      stroke-width: 1;
+    }
+    .grid-line {
+      stroke: #333;
+      stroke-width: 0.5;
+    }
+    .label {
+      fill: white;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .gradient-arrow {
+      stroke: #E91E63;
+      stroke-width: 2;
+      fill: #E91E63;
+    }
+    .level-curve {
+      stroke: #00BCD4;
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.6;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    
+    <div id="info">
+      <h3>Proximal Operator Demo</h3>
+      
+      <div class="section definition-section">
+        <h4>Definition</h4>
+        <div>For a function <em>g</em> and parameter <em>λ > 0</em>, the <strong>proximal operator</strong> is:</div>
+        <div class="math-formula">
+          prox<sub>λg</sub>(v) = argmin<sub>x</sub> { g(x) + (1/2λ)||x - v||² }
+        </div>
+        <div>It finds the point that best balances:</div>
+        <div>• Minimizing <em>g(x)</em> (staying in low-cost regions)</div>
+        <div>• Staying close to input point <em>v</em> (proximity penalty)</div>
+      </div>
+
+      <div class="section examples-section">
+        <h4>Function Selection</h4>
+        <div class="control-group">
+          <label>Function g(x):</label>
+          <select id="functionSelect">
+            <option value="l1">L1 Norm: |x|</option>
+            <option value="l2">L2 Norm: ½x²</option>
+            <option value="huber">Huber Loss</option>
+            <option value="hinge">Hinge Loss: max(0, 1-x)</option>
+            <option value="indicator">Indicator: I[−1,1](x)</option>
+            <option value="elastic">Elastic Net: |x| + ½x²</option>
+            <option value="logistic">Logistic: log(1+exp(x))</option>
+            <option value="quadratic">Quadratic: x² + x + 1</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label>Input Point (v):</label>
+          <input type="range" id="inputPoint" min="-3" max="3" step="0.1" value="1.5">
+          <span id="inputPointValue">1.5</span>
+        </div>
+        
+        <div class="control-group">
+          <label>Lambda (λ):</label>
+          <input type="range" id="lambda" min="0.1" max="2" step="0.1" value="0.5">
+          <span id="lambdaValue">0.5</span>
+        </div>
+        
+        <div class="control-group">
+          <button id="computeBtn" class="compute-btn">Compute Proximal Operator</button>
+          <button id="animateBtn">Animate λ</button>
+          <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+      </div>
+
+      <div class="section computation-section">
+        <h4>Current Computation</h4>
+        <div id="functionInfo">
+          <div><strong>Function:</strong> <span id="functionName">|x|</span></div>
+          <div><strong>Input (v):</strong> <span id="currentInput" class="value-display">1.5</span></div>
+          <div><strong>Lambda (λ):</strong> <span id="currentLambda" class="value-display">0.5</span></div>
+        </div>
+        
+        <div class="result-info">
+          <div><strong>Proximal Point:</strong> <span id="proximalResult" class="value-display">-</span></div>
+          <div><strong>Objective Value:</strong> <span id="objectiveValue" class="value-display">-</span></div>
+          <div><strong>Distance to Input:</strong> <span id="distanceValue" class="value-display">-</span></div>
+        </div>
+        
+        <div class="math-formula" id="closedFormula">
+          <div><strong>Closed Form:</strong></div>
+          <div id="formulaText">Select a function to see formula</div>
+        </div>
+      </div>
+
+      <div class="section interpretation-section">
+        <h4>Geometric Interpretation</h4>
+        <div class="proximity-interpretation">
+          <div><strong>What the proximal operator does:</strong></div>
+          <div>• <span style="color: #f44336;">Red point</span>: Input v</div>
+          <div>• <span style="color: #4CAF50;">Green point</span>: Proximal operator result</div>
+          <div>• <span style="color: #2196F3;">Blue curve</span>: Original function g(x)</div>
+          <div>• <span style="color: #FF9800;">Orange curve</span>: Moreau envelope (smoothed g)</div>
+          <div>• <span style="color: #9C27B0;">Purple curve</span>: Quadratic penalty term</div>
+          <div>• <span style="color: #FFEB3B;">Yellow line</span>: Connection showing "shrinkage"</div>
+        </div>
+        
+        <div id="interpretationText">
+          The proximal operator "shrinks" or "projects" the input point toward regions where g(x) is small, balanced by staying close to the original point.
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Key Properties</h4>
+        <div style="font-size: 11px;">
+          <div><strong>1. Firmly Non-expansive:</strong> ||prox(u) - prox(v)|| ≤ ||u - v||</div>
+          <div><strong>2. Moreau Decomposition:</strong> v = prox<sub>λg</sub>(v) + λ·prox<sub>g*/λ</sub>(v/λ)</div>
+          <div><strong>3. Fixed Points:</strong> x* = prox<sub>λg</sub>(x*) ⟺ 0 ∈ ∂g(x*)</div>
+          <div><strong>4. Resolvent:</strong> prox<sub>λg</sub> = (I + λ∂g)⁻¹</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Applications</h4>
+        <div style="font-size: 11px;">
+          <div><strong>• FISTA:</strong> Fast proximal gradient method</div>
+          <div><strong>• ADMM:</strong> Alternating direction method of multipliers</div>
+          <div><strong>• Denoising:</strong> prox of L1 norm (soft thresholding)</div>
+          <div><strong>• Projection:</strong> prox of indicator function</div>
+          <div><strong>• Regularization:</strong> Sparse optimization with L1/L2 penalties</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Visualization Controls</h4>
+        <div class="control-group">
+          <input type="checkbox" id="showOriginal" checked> Show Original Function g(x)
+          <input type="checkbox" id="showQuadratic" checked> Show Quadratic Term
+          <input type="checkbox" id="showMoreau" checked> Show Moreau Envelope
+          <input type="checkbox" id="showGradient"> Show Gradient at Proximal Point
+          <input type="checkbox" id="showLevelCurves"> Show Level Curves
+          <input type="checkbox" id="showGrid"> Show Grid
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const container = document.getElementById('canvas-container');
+    
+    // Parameters
+    let currentFunction = 'l1';
+    let inputPoint = 1.5;
+    let lambda = 0.5;
+    let proximalPoint = null;
+    let isAnimating = false;
+
+    // Function definitions
+    const functions = {
+      l1: {
+        name: '|x|',
+        f: x => Math.abs(x),
+        prox: (v, lam) => Math.sign(v) * Math.max(0, Math.abs(v) - lam),
+        formula: 'prox_λ|·|(v) = sign(v) · max(0, |v| - λ)',
+        description: 'Soft thresholding operator - shrinks toward zero',
+        subdifferential: x => x > 0 ? 1 : (x < 0 ? -1 : [-1, 1])
+      },
+      l2: {
+        name: '½x²',
+        f: x => 0.5 * x * x,
+        prox: (v, lam) => v / (1 + lam),
+        formula: 'prox_λ(½|·|²)(v) = v / (1 + λ)',
+        description: 'Shrinkage toward zero with scaling factor',
+        subdifferential: x => x
+      },
+      huber: {
+        name: 'Huber(x)',
+        f: x => Math.abs(x) <= 1 ? 0.5 * x * x : Math.abs(x) - 0.5,
+        prox: (v, lam) => {
+          if (Math.abs(v) <= lam + 1) {
+            return v / (1 + lam);
+          } else {
+            return Math.sign(v) * (Math.abs(v) - lam);
+          }
+        },
+        formula: 'Combination of L2 (smooth) and L1 (robust)',
+        description: 'Smooth for small values, linear for large values',
+        subdifferential: x => Math.abs(x) < 1 ? x : (x > 0 ? 1 : -1)
+      },
+      hinge: {
+        name: 'max(0, 1-x)',
+        f: x => Math.max(0, 1 - x),
+        prox: (v, lam) => {
+          if (v >= 1 + lam) return v - lam;
+          if (v <= 1) return v;
+          return 1;
+        },
+        formula: 'Projection-like behavior around x = 1',
+        description: 'Used in SVM, creates margin around x = 1',
+        subdifferential: x => x < 1 ? -1 : (x > 1 ? 0 : [-1, 0])
+      },
+      indicator: {
+        name: 'I[-1,1](x)',
+        f: x => Math.abs(x) <= 1 ? 0 : Infinity,
+        prox: (v, lam) => Math.max(-1, Math.min(1, v)),
+        formula: 'prox_λI_C(v) = Proj_C(v) = max(-1, min(1, v))',
+        description: 'Projection onto interval [-1, 1]',
+        subdifferential: x => Math.abs(x) < 1 ? 0 : (x > 1 ? [0, Infinity] : [-Infinity, 0])
+      },
+      elastic: {
+        name: '|x| + ½x²',
+        f: x => Math.abs(x) + 0.5 * x * x,
+        prox: (v, lam) => {
+          const denom = 1 + lam;
+          return Math.sign(v) * Math.max(0, Math.abs(v) - lam) / denom;
+        },
+        formula: 'Elastic net regularization',
+        description: 'Combines L1 sparsity with L2 stability',
+        subdifferential: x => (x > 0 ? 1 : (x < 0 ? -1 : [-1, 1])) + x
+      },
+      logistic: {
+        name: 'log(1+exp(x))',
+        f: x => Math.log(1 + Math.exp(Math.min(x, 700))), // Prevent overflow
+        prox: (v, lam) => {
+          // Numerical solution needed - approximate with Newton's method
+          let x = v;
+          for (let i = 0; i < 10; i++) {
+            const expx = Math.exp(Math.min(x, 700));
+            const grad = expx / (1 + expx) + (x - v) / lam;
+            const hess = expx / ((1 + expx) * (1 + expx)) + 1 / lam;
+            const step = grad / hess;
+            x -= step;
+            if (Math.abs(step) < 1e-8) break;
+          }
+          return x;
+        },
+        formula: 'Numerical solution via Newton method',
+        description: 'Smooth approximation to hinge loss',
+        subdifferential: x => Math.exp(x) / (1 + Math.exp(x))
+      },
+      quadratic: {
+        name: 'x² + x + 1',
+        f: x => x * x + x + 1,
+        prox: (v, lam) => (v - lam * 1) / (1 + 2 * lam),
+        formula: 'prox_λ(x²+x+c)(v) = (v - λ) / (1 + 2λ)',
+        description: 'General quadratic with linear term',
+        subdifferential: x => 2 * x + 1
+      }
+    };
+
+    // Setup SVG
+    function setupSVG() {
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+
+    // Coordinate transformation
+    function toSVG(x, y) {
+      const rect = container.getBoundingClientRect();
+      const margin = 40;
+      const xRange = 6; // -3 to 3
+      const yRange = 8; // -2 to 6
+      
+      const scaleX = (rect.width - 2 * margin) / xRange;
+      const scaleY = (rect.height - 2 * margin) / yRange;
+      
+      return {
+        x: margin + (x + 3) * scaleX,
+        y: rect.height - margin - (y + 2) * scaleY
+      };
+    }
+
+    // Compute proximal operator
+    function computeProximal() {
+      const func = functions[currentFunction];
+      proximalPoint = func.prox(inputPoint, lambda);
+      
+      // Calculate objective value at proximal point
+      const gValue = func.f(proximalPoint);
+      const quadraticTerm = 0.5 * (proximalPoint - inputPoint) * (proximalPoint - inputPoint) / lambda;
+      const objectiveValue = gValue + quadraticTerm;
+      
+      // Update display
+      document.getElementById('proximalResult').textContent = proximalPoint.toFixed(4);
+      document.getElementById('objectiveValue').textContent = objectiveValue.toFixed(4);
+      document.getElementById('distanceValue').textContent = Math.abs(proximalPoint - inputPoint).toFixed(4);
+      
+      // Update formula
+      document.getElementById('formulaText').textContent = func.formula;
+      
+      // Update interpretation
+      updateInterpretation();
+      
+      // Redraw
+      drawVisualization();
+    }
+
+    // Update interpretation text
+    function updateInterpretation() {
+      const func = functions[currentFunction];
+      let interpretation = func.description;
+      
+      if (proximalPoint !== null) {
+        const shrinkage = Math.abs(inputPoint - proximalPoint);
+        const direction = proximalPoint < inputPoint ? 'toward zero' : 'away from zero';
+        
+        interpretation += `<br><br><strong>Current result:</strong> Input ${inputPoint.toFixed(2)} → Proximal ${proximalPoint.toFixed(2)}`;
+        interpretation += `<br>Shrinkage: ${shrinkage.toFixed(3)} units ${direction}`;
+        
+        if (currentFunction === 'l1') {
+          interpretation += `<br>Soft thresholding with threshold λ = ${lambda}`;
+        } else if (currentFunction === 'indicator') {
+          interpretation += `<br>Projected to feasible interval [-1, 1]`;
+        }
+      }
+      
+      document.getElementById('interpretationText').innerHTML = interpretation;
+    }
+
+    // Draw visualization
+    function drawVisualization() {
+      svg.innerHTML = '';
+      
+      // Draw grid
+      if (document.getElementById('showGrid').checked) {
+        drawGrid();
+      }
+      
+      // Draw axes
+      drawAxes();
+      
+      // Draw original function
+      if (document.getElementById('showOriginal').checked) {
+        drawFunction();
+      }
+      
+      // Draw quadratic term
+      if (document.getElementById('showQuadratic').checked) {
+        drawQuadraticTerm();
+      }
+      
+      // Draw Moreau envelope
+      if (document.getElementById('showMoreau').checked) {
+        drawMoreauEnvelope();
+      }
+      
+      // Draw level curves
+      if (document.getElementById('showLevelCurves').checked) {
+        drawLevelCurves();
+      }
+      
+      // Draw points and connections
+      drawPoints();
+      
+      // Draw gradient
+      if (document.getElementById('showGradient').checked && proximalPoint !== null) {
+        drawGradient();
+      }
+    }
+
+    // Draw grid
+    function drawGrid() {
+      for (let x = -3; x <= 3; x += 0.5) {
+        const start = toSVG(x, -2);
+        const end = toSVG(x, 6);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', x === 0 ? 'axis' : 'grid-line');
+        svg.appendChild(line);
+      }
+      
+      for (let y = -2; y <= 6; y += 0.5) {
+        const start = toSVG(-3, y);
+        const end = toSVG(3, y);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', y === 0 ? 'axis' : 'grid-line');
+        svg.appendChild(line);
+      }
+    }
+
+    // Draw axes
+    function drawAxes() {
+      // X-axis
+      const xStart = toSVG(-3, 0);
+      const xEnd = toSVG(3, 0);
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', xStart.x);
+      xAxis.setAttribute('y1', xStart.y);
+      xAxis.setAttribute('x2', xEnd.x);
+      xAxis.setAttribute('y2', xEnd.y);
+      xAxis.setAttribute('class', 'axis');
+      svg.appendChild(xAxis);
+      
+      // Y-axis
+      const yStart = toSVG(0, -2);
+      const yEnd = toSVG(0, 6);
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', yStart.x);
+      yAxis.setAttribute('y1', yStart.y);
+      yAxis.setAttribute('x2', yEnd.x);
+      yAxis.setAttribute('y2', yEnd.y);
+      yAxis.setAttribute('class', 'axis');
+      svg.appendChild(yAxis);
+      
+      // Labels
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      xLabel.setAttribute('x', toSVG(3, 0).x + 10);
+      xLabel.setAttribute('y', toSVG(3, 0).y + 5);
+      xLabel.setAttribute('class', 'label');
+      xLabel.textContent = 'x';
+      svg.appendChild(xLabel);
+      
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.setAttribute('x', toSVG(0, 6).x - 15);
+      yLabel.setAttribute('y', toSVG(0, 6).y);
+      yLabel.setAttribute('class', 'label');
+      yLabel.textContent = 'g(x)';
+      svg.appendChild(yLabel);
+    }
+
+    // Draw original function
+    function drawFunction() {
+      const func = functions[currentFunction];
+      const points = [];
+      
+      for (let x = -3; x <= 3; x += 0.02) {
+        const y = func.f(x);
+        if (isFinite(y) && y <= 6) {
+          const svgPoint = toSVG(x, Math.min(y, 6));
+          points.push(`${svgPoint.x},${svgPoint.y}`);
+        } else if (y === Infinity) {
+          // Handle indicator function discontinuity
+          if (points.length > 0) {
+            const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+            polyline.setAttribute('points', points.join(' '));
+            polyline.setAttribute('class', 'function-curve');
+            svg.appendChild(polyline);
+            points.length = 0;
+          }
+        }
+      }
+      
+      if (points.length > 0) {
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', points.join(' '));
+        polyline.setAttribute('class', 'function-curve');
+        svg.appendChild(polyline);
+      }
+      
+      // Add function label
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', toSVG(2, 5).x);
+      label.setAttribute('y', toSVG(2, 5).y);
+      label.setAttribute('class', 'label');
+      label.setAttribute('fill', '#2196F3');
+      label.textContent = `g(x) = ${func.name}`;
+      svg.appendChild(label);
+    }
+
+    // Draw quadratic penalty term
+    function drawQuadraticTerm() {
+      const points = [];
+      
+      for (let x = -3; x <= 3; x += 0.02) {
+        const y = 0.5 * (x - inputPoint) * (x - inputPoint) / lambda;
+        if (y <= 6) {
+          const svgPoint = toSVG(x, y);
+          points.push(`${svgPoint.x},${svgPoint.y}`);
+        }
+      }
+      
+      const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      polyline.setAttribute('points', points.join(' '));
+      polyline.setAttribute('class', 'quadratic-term');
+      svg.appendChild(polyline);
+      
+      // Add label
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', toSVG(-2, 4).x);
+      label.setAttribute('y', toSVG(-2, 4).y);
+      label.setAttribute('class', 'label');
+      label.setAttribute('fill', '#9C27B0');
+      label.textContent = `½||x - v||²/λ`;
+      svg.appendChild(label);
+    }
+
+    // Draw Moreau envelope
+    function drawMoreauEnvelope() {
+      const func = functions[currentFunction];
+      const points = [];
+      
+      for (let x = -3; x <= 3; x += 0.02) {
+        const prox = func.prox(x, lambda);
+        const envelope = func.f(prox) + 0.5 * (prox - x) * (prox - x) / lambda;
+        
+        if (isFinite(envelope) && envelope <= 6) {
+          const svgPoint = toSVG(x, envelope);
+          points.push(`${svgPoint.x},${svgPoint.y}`);
+        }
+      }
+      
+      if (points.length > 0) {
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('points', points.join(' '));
+        polyline.setAttribute('class', 'proximal-function');
+        svg.appendChild(polyline);
+        
+        // Add label
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', toSVG(-2, 2).x);
+        label.setAttribute('y', toSVG(-2, 2).y);
+        label.setAttribute('class', 'label');
+        label.setAttribute('fill', '#FF9800');
+        label.textContent = `Moreau envelope`;
+        svg.appendChild(label);
+      }
+    }
+
+    // Draw level curves of the proximal objective
+    function drawLevelCurves() {
+      const func = functions[currentFunction];
+      const levels = [0.5, 1, 2, 3];
+      
+      levels.forEach((level, i) => {
+        const points = [];
+        
+        for (let x = -3; x <= 3; x += 0.05) {
+          const gx = func.f(x);
+          const quadTerm = 0.5 * (x - inputPoint) * (x - inputPoint) / lambda;
+          const totalValue = gx + quadTerm;
+          
+          if (isFinite(totalValue) && Math.abs(totalValue - level) < 0.1) {
+            const svgPoint = toSVG(x, 0.1 * i - 1.5);
+            points.push(`${svgPoint.x},${svgPoint.y}`);
+          }
+        }
+        
+        if (points.length > 1) {
+          const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+          polyline.setAttribute('points', points.join(' '));
+          polyline.setAttribute('class', 'level-curve');
+          svg.appendChild(polyline);
+        }
+      });
+    }
+
+    // Draw points and connections
+    function drawPoints() {
+      // Input point
+      const inputSVG = toSVG(inputPoint, 0);
+      const inputCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      inputCircle.setAttribute('cx', inputSVG.x);
+      inputCircle.setAttribute('cy', inputSVG.y);
+      inputCircle.setAttribute('r', 6);
+      inputCircle.setAttribute('class', 'input-point');
+      svg.appendChild(inputCircle);
+      
+      // Input label
+      const inputLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      inputLabel.setAttribute('x', inputSVG.x + 10);
+      inputLabel.setAttribute('y', inputSVG.y - 10);
+      inputLabel.setAttribute('class', 'label');
+      inputLabel.textContent = `v = ${inputPoint.toFixed(2)}`;
+      svg.appendChild(inputLabel);
+      
+      // Proximal point
+      if (proximalPoint !== null) {
+        const proxSVG = toSVG(proximalPoint, 0);
+        const proxCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        proxCircle.setAttribute('cx', proxSVG.x);
+        proxCircle.setAttribute('cy', proxSVG.y);
+        proxCircle.setAttribute('r', 8);
+        proxCircle.setAttribute('class', 'proximal-point');
+        svg.appendChild(proxCircle);
+        
+        // Proximal label
+        const proxLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        proxLabel.setAttribute('x', proxSVG.x + 10);
+        proxLabel.setAttribute('y', proxSVG.y + 20);
+        proxLabel.setAttribute('class', 'label');
+        proxLabel.textContent = `prox = ${proximalPoint.toFixed(2)}`;
+        svg.appendChild(proxLabel);
+        
+        // Connection line
+        const connection = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        connection.setAttribute('x1', inputSVG.x);
+        connection.setAttribute('y1', inputSVG.y);
+        connection.setAttribute('x2', proxSVG.x);
+        connection.setAttribute('y2', proxSVG.y);
+        connection.setAttribute('class', 'connection-line');
+        svg.appendChild(connection);
+        
+        // Show point on function
+        const func = functions[currentFunction];
+        const funcValue = func.f(proximalPoint);
+        if (isFinite(funcValue) && funcValue <= 6) {
+          const funcPoint = toSVG(proximalPoint, funcValue);
+          const funcCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          funcCircle.setAttribute('cx', funcPoint.x);
+          funcCircle.setAttribute('cy', funcPoint.y);
+          funcCircle.setAttribute('r', 4);
+          funcCircle.setAttribute('fill', '#4CAF50');
+          funcCircle.setAttribute('stroke', 'white');
+          funcCircle.setAttribute('stroke-width', '1');
+          svg.appendChild(funcCircle);
+        }
+      }
+    }
+
+    // Draw gradient
+    function drawGradient() {
+      if (proximalPoint === null) return;
+      
+      const func = functions[currentFunction];
+      const subdiff = func.subdifferential(proximalPoint);
+      
+      // For simplicity, just show direction of gradient/subgradient
+      const grad = Array.isArray(subdiff) ? subdiff[0] : subdiff;
+      
+      const startPoint = toSVG(proximalPoint, 0);
+      const endPoint = toSVG(proximalPoint + 0.3 * Math.sign(grad), 0.3 * Math.abs(grad));
+      
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      arrow.setAttribute('x1', startPoint.x);
+      arrow.setAttribute('y1', startPoint.y);
+      arrow.setAttribute('x2', endPoint.x);
+      arrow.setAttribute('y2', endPoint.y);
+      arrow.setAttribute('class', 'gradient-arrow');
+      svg.appendChild(arrow);
+      
+      // Arrow head
+      const angle = Math.atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x);
+      const arrowLength = 8;
+      const arrowAngle = Math.PI / 6;
+      
+      const arrow1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      arrow1.setAttribute('x1', endPoint.x);
+      arrow1.setAttribute('y1', endPoint.y);
+      arrow1.setAttribute('x2', endPoint.x - arrowLength * Math.cos(angle - arrowAngle));
+      arrow1.setAttribute('y2', endPoint.y - arrowLength * Math.sin(angle - arrowAngle));
+      arrow1.setAttribute('class', 'gradient-arrow');
+      svg.appendChild(arrow1);
+      
+      const arrow2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      arrow2.setAttribute('x1', endPoint.x);
+      arrow2.setAttribute('y1', endPoint.y);
+      arrow2.setAttribute('x2', endPoint.x - arrowLength * Math.cos(angle + arrowAngle));
+      arrow2.setAttribute('y2', endPoint.y - arrowLength * Math.sin(angle + arrowAngle));
+      arrow2.setAttribute('class', 'gradient-arrow');
+      svg.appendChild(arrow2);
+    }
+
+    // Animate lambda
+    async function animateLambda() {
+      if (isAnimating) return;
+      
+      isAnimating = true;
+      document.getElementById('animateBtn').disabled = true;
+      
+      const originalLambda = lambda;
+      
+      // Animate from 0.1 to 2 and back
+      for (let l = 0.1; l <= 2; l += 0.05) {
+        lambda = l;
+        document.getElementById('lambda').value = lambda;
+        document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+        document.getElementById('currentLambda').textContent = lambda.toFixed(2);
+        computeProximal();
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (!isAnimating) break;
+      }
+      
+      for (let l = 2; l >= 0.1; l -= 0.05) {
+        lambda = l;
+        document.getElementById('lambda').value = lambda;
+        document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+        document.getElementById('currentLambda').textContent = lambda.toFixed(2);
+        computeProximal();
+        await new Promise(resolve => setTimeout(resolve, 50));
+        if (!isAnimating) break;
+      }
+      
+      // Restore original lambda
+      lambda = originalLambda;
+      document.getElementById('lambda').value = lambda;
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+      document.getElementById('currentLambda').textContent = lambda.toFixed(2);
+      computeProximal();
+      
+      isAnimating = false;
+      document.getElementById('animateBtn').disabled = false;
+    }
+
+    // Event listeners
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      document.getElementById('functionName').textContent = functions[currentFunction].name;
+      if (proximalPoint !== null) {
+        computeProximal();
+      } else {
+        drawVisualization();
+      }
+    });
+
+    document.getElementById('inputPoint').addEventListener('input', (e) => {
+      inputPoint = parseFloat(e.target.value);
+      document.getElementById('inputPointValue').textContent = inputPoint.toFixed(1);
+      document.getElementById('currentInput').textContent = inputPoint.toFixed(2);
+      if (proximalPoint !== null) {
+        computeProximal();
+      } else {
+        drawVisualization();
+      }
+    });
+
+    document.getElementById('lambda').addEventListener('input', (e) => {
+      lambda = parseFloat(e.target.value);
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(1);
+      document.getElementById('currentLambda').textContent = lambda.toFixed(2);
+      if (proximalPoint !== null) {
+        computeProximal();
+      }
+    });
+
+    document.getElementById('computeBtn').addEventListener('click', computeProximal);
+    document.getElementById('animateBtn').addEventListener('click', animateLambda);
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      isAnimating = false;
+      proximalPoint = null;
+      document.getElementById('proximalResult').textContent = '-';
+      document.getElementById('objectiveValue').textContent = '-';
+      document.getElementById('distanceValue').textContent = '-';
+      document.getElementById('formulaText').textContent = 'Select a function to see formula';
+      document.getElementById('interpretationText').textContent = 'The proximal operator "shrinks" or "projects" the input point toward regions where g(x) is small, balanced by staying close to the original point.';
+      drawVisualization();
+    });
+
+    // Checkbox event listeners
+    ['showOriginal', 'showQuadratic', 'showMoreau', 'showGradient', 'showLevelCurves', 'showGrid'].forEach(id => {
+      document.getElementById(id).addEventListener('change', drawVisualization);
+    });
+
+    // Mouse interaction
+    svg.addEventListener('click', (event) => {
+      const rect = svg.getBoundingClientRect();
+      const svgX = event.clientX - rect.left;
+      const mouseX = (svgX - 40) * 6 / (rect.width - 80) - 3;
+      
+      if (mouseX >= -3 && mouseX <= 3) {
+        inputPoint = mouseX;
+        document.getElementById('inputPoint').value = inputPoint;
+        document.getElementById('inputPointValue').textContent = inputPoint.toFixed(1);
+        document.getElementById('currentInput').textContent = inputPoint.toFixed(2);
+        
+        if (proximalPoint !== null) {
+          computeProximal();
+        } else {
+          drawVisualization();
+        }
+      }
+    });
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      setupSVG();
+      drawVisualization();
+    });
+
+    // Initialize
+    setupSVG();
+    document.getElementById('functionName').textContent = functions[currentFunction].name;
+    document.getElementById('currentInput').textContent = inputPoint.toFixed(2);
+    document.getElementById('currentLambda').textContent = lambda.toFixed(2);
+    drawVisualization();
+  </script>
+</body>
+</html>

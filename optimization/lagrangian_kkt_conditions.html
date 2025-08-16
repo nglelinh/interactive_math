@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagrangian & KKT Conditions - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 450px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .problem-setup {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .kkt-conditions {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.3;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffff00;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .lagrangian-display {
+            background: rgba(255, 0, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.3;
+            margin-bottom: 15px;
+            border-left: 3px solid #ff00ff;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 380px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .problem-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .problem-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .problem-button:hover {
+            background: #555;
+        }
+        
+        .problem-button.active {
+            background: #f39c12;
+            color: #000;
+        }
+        
+        .multiplier-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .multiplier-input {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .multiplier-input label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .multiplier-input input {
+            width: 80px;
+            padding: 4px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .point-analysis {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00ff00;
+        }
+        
+        .condition-status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        
+        .condition-satisfied {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .condition-violated {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>⚖️ Lagrangian & KKT Conditions</strong><br/>
+                Interactive exploration of constrained optimization, Lagrange multipliers, and KKT conditions.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Objective Function Contours</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Equality Constraints g(x,y) = 0</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Inequality Constraints h(x,y) ≤ 0</div>
+                    <div class="legend-item" style="color: #2ecc71;">🟢 Feasible Region</div>
+                    <div class="legend-item" style="color: #9b59b6;">🟣 Optimal Point x*</div>
+                    <div class="legend-item" style="color: #e67e22;">🟤 Gradient Vectors</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Problem Selection</h3>
+                <div class="problem-selector">
+                    <button class="problem-button active" onclick="selectProblem('equality')">Equality Constrained</button>
+                    <button class="problem-button" onclick="selectProblem('inequality')">Inequality Constrained</button>
+                    <button class="problem-button" onclick="selectProblem('mixed')">Mixed Constraints</button>
+                    <button class="problem-button" onclick="selectProblem('quadratic')">Quadratic Program</button>
+                    <button class="problem-button" onclick="selectProblem('nonconvex')">Non-convex</button>
+                    <button class="problem-button" onclick="selectProblem('infeasible')">Infeasible</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Problem</h3>
+                <div id="problem-setup" class="problem-setup">
+                    <!-- Problem formulation will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Lagrangian Function</h3>
+                <div id="lagrangian-display" class="lagrangian-display">
+                    <!-- Lagrangian will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Lagrange Multipliers</h3>
+                <div class="multiplier-controls" id="multiplier-controls">
+                    <!-- Multiplier controls will be generated here -->
+                </div>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="findOptimalMultipliers()">
+                        🎯 Find Optimal λ
+                    </div>
+                    <div class="toggle-button" onclick="resetMultipliers()">
+                        🔄 Reset λ
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>KKT Conditions</h3>
+                <div id="kkt-conditions" class="kkt-conditions">
+                    <!-- KKT conditions will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Point Analysis</h3>
+                <div id="point-analysis" class="point-analysis">
+                    Click on the canvas to analyze KKT conditions at different points.
+                </div>
+                <div class="slider-group">
+                    <label>Analysis Point X:</label>
+                    <input type="range" id="analysisX" min="-3" max="3" step="0.1" value="0">
+                    <div class="slider-value" id="analysisXValue">0.0</div>
+                </div>
+                <div class="slider-group">
+                    <label>Analysis Point Y:</label>
+                    <input type="range" id="analysisY" min="-3" max="3" step="0.1" value="0">
+                    <div class="slider-value" id="analysisYValue">0.0</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-objective" onclick="toggleVisualization('objective')">
+                        Objective Contours
+                    </div>
+                    <div class="toggle-button active" id="toggle-constraints" onclick="toggleVisualization('constraints')">
+                        Constraint Curves
+                    </div>
+                    <div class="toggle-button active" id="toggle-feasible" onclick="toggleVisualization('feasible')">
+                        Feasible Region
+                    </div>
+                    <div class="toggle-button active" id="toggle-gradients" onclick="toggleVisualization('gradients')">
+                        Gradient Vectors
+                    </div>
+                    <div class="toggle-button active" id="toggle-optimal" onclick="toggleVisualization('optimal')">
+                        Optimal Point
+                    </div>
+                    <div class="toggle-button" id="toggle-lagrangian" onclick="toggleVisualization('lagrangian')">
+                        Lagrangian Contours
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 80;
+        
+        // Current problem
+        let currentProblem = 'equality';
+        let analysisPoint = { x: 0, y: 0 };
+        let multipliers = {};
+        
+        // Visualization options
+        let showOptions = {
+            objective: true,
+            constraints: true,
+            feasible: true,
+            gradients: true,
+            optimal: true,
+            lagrangian: false
+        };
+        
+        // Problem definitions
+        const problems = {
+            equality: {
+                name: 'Equality Constrained Optimization',
+                objective: {
+                    func: (x, y) => x*x + y*y,
+                    grad: (x, y) => [2*x, 2*y],
+                    formula: 'f(x,y) = x² + y²'
+                },
+                equalityConstraints: [
+                    {
+                        func: (x, y) => x + y - 2,
+                        grad: (x, y) => [1, 1],
+                        formula: 'g₁(x,y) = x + y - 2 = 0'
+                    }
+                ],
+                inequalityConstraints: [],
+                optimalPoint: { x: 1, y: 1 },
+                optimalMultipliers: { lambda1: -2 }
+            },
+            inequality: {
+                name: 'Inequality Constrained Optimization',
+                objective: {
+                    func: (x, y) => -(x*x + y*y),
+                    grad: (x, y) => [-2*x, -2*y],
+                    formula: 'f(x,y) = -(x² + y²)'
+                },
+                equalityConstraints: [],
+                inequalityConstraints: [
+                    {
+                        func: (x, y) => x*x + y*y - 4,
+                        grad: (x, y) => [2*x, 2*y],
+                        formula: 'h₁(x,y) = x² + y² - 4 ≤ 0'
+                    }
+                ],
+                optimalPoint: { x: 0, y: 0 },
+                optimalMultipliers: { mu1: 0 }
+            },
+            mixed: {
+                name: 'Mixed Constraints Problem',
+                objective: {
+                    func: (x, y) => x*x + (y - 1)*(y - 1),
+                    grad: (x, y) => [2*x, 2*(y - 1)],
+                    formula: 'f(x,y) = x² + (y-1)²'
+                },
+                equalityConstraints: [
+                    {
+                        func: (x, y) => x - 1,
+                        grad: (x, y) => [1, 0],
+                        formula: 'g₁(x,y) = x - 1 = 0'
+                    }
+                ],
+                inequalityConstraints: [
+                    {
+                        func: (x, y) => y,
+                        grad: (x, y) => [0, 1],
+                        formula: 'h₁(x,y) = y ≤ 0'
+                    }
+                ],
+                optimalPoint: { x: 1, y: 0 },
+                optimalMultipliers: { lambda1: 2, mu1: 2 }
+            },
+            quadratic: {
+                name: 'Quadratic Programming',
+                objective: {
+                    func: (x, y) => 0.5*(x*x + y*y) - x - 2*y,
+                    grad: (x, y) => [x - 1, y - 2],
+                    formula: 'f(x,y) = ½(x² + y²) - x - 2y'
+                },
+                equalityConstraints: [],
+                inequalityConstraints: [
+                    {
+                        func: (x, y) => -x,
+                        grad: (x, y) => [-1, 0],
+                        formula: 'h₁(x,y) = -x ≤ 0'
+                    },
+                    {
+                        func: (x, y) => -y,
+                        grad: (x, y) => [0, -1],
+                        formula: 'h₂(x,y) = -y ≤ 0'
+                    }
+                ],
+                optimalPoint: { x: 1, y: 2 },
+                optimalMultipliers: { mu1: 0, mu2: 0 }
+            },
+            nonconvex: {
+                name: 'Non-convex Problem',
+                objective: {
+                    func: (x, y) => x*x*x - 3*x + y*y,
+                    grad: (x, y) => [3*x*x - 3, 2*y],
+                    formula: 'f(x,y) = x³ - 3x + y²'
+                },
+                equalityConstraints: [
+                    {
+                        func: (x, y) => x*x + y*y - 1,
+                        grad: (x, y) => [2*x, 2*y],
+                        formula: 'g₁(x,y) = x² + y² - 1 = 0'
+                    }
+                ],
+                inequalityConstraints: [],
+                optimalPoint: { x: -1, y: 0 },
+                optimalMultipliers: { lambda1: 3 }
+            },
+            infeasible: {
+                name: 'Infeasible Problem',
+                objective: {
+                    func: (x, y) => x + y,
+                    grad: (x, y) => [1, 1],
+                    formula: 'f(x,y) = x + y'
+                },
+                equalityConstraints: [
+                    {
+                        func: (x, y) => x + y - 1,
+                        grad: (x, y) => [1, 1],
+                        formula: 'g₁(x,y) = x + y - 1 = 0'
+                    },
+                    {
+                        func: (x, y) => x + y - 2,
+                        grad: (x, y) => [1, 1],
+                        formula: 'g₂(x,y) = x + y - 2 = 0'
+                    }
+                ],
+                inequalityConstraints: [],
+                optimalPoint: null,
+                optimalMultipliers: {}
+            }
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return (canvasX - centerX) / scale;
+        }
+        
+        function fromCanvasY(canvasY) {
+            return (centerY - canvasY) / scale;
+        }
+        
+        function selectProblem(problemName) {
+            currentProblem = problemName;
+            
+            // Update active button
+            document.querySelectorAll('.problem-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Reset multipliers
+            multipliers = {};
+            const problem = problems[currentProblem];
+            
+            // Initialize multipliers to zero
+            problem.equalityConstraints.forEach((_, i) => {
+                multipliers[`lambda${i+1}`] = 0;
+            });
+            problem.inequalityConstraints.forEach((_, i) => {
+                multipliers[`mu${i+1}`] = 0;
+            });
+            
+            updateProblemDisplay();
+            updateMultiplierControls();
+            updateLagrangianDisplay();
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        }
+        
+        function updateProblemDisplay() {
+            const problem = problems[currentProblem];
+            let html = `<strong>${problem.name}</strong><br/><br/>`;
+            html += `Minimize: ${problem.objective.formula}<br/><br/>`;
+            
+            if (problem.equalityConstraints.length > 0) {
+                html += 'Subject to:<br/>';
+                problem.equalityConstraints.forEach(constraint => {
+                    html += `${constraint.formula}<br/>`;
+                });
+            }
+            
+            if (problem.inequalityConstraints.length > 0) {
+                if (problem.equalityConstraints.length === 0) html += 'Subject to:<br/>';
+                problem.inequalityConstraints.forEach(constraint => {
+                    html += `${constraint.formula}<br/>`;
+                });
+            }
+            
+            document.getElementById('problem-setup').innerHTML = html;
+        }
+        
+        function updateMultiplierControls() {
+            const problem = problems[currentProblem];
+            const container = document.getElementById('multiplier-controls');
+            container.innerHTML = '';
+            
+            // Add equality multipliers
+            problem.equalityConstraints.forEach((_, i) => {
+                const div = document.createElement('div');
+                div.className = 'multiplier-input';
+                div.innerHTML = `
+                    <label>λ${i+1}</label>
+                    <input type="number" step="0.1" value="0" onchange="updateMultiplier('lambda${i+1}', this.value)">
+                `;
+                container.appendChild(div);
+            });
+            
+            // Add inequality multipliers
+            problem.inequalityConstraints.forEach((_, i) => {
+                const div = document.createElement('div');
+                div.className = 'multiplier-input';
+                div.innerHTML = `
+                    <label>μ${i+1}</label>
+                    <input type="number" step="0.1" value="0" min="0" onchange="updateMultiplier('mu${i+1}', this.value)">
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function updateMultiplier(name, value) {
+            multipliers[name] = parseFloat(value) || 0;
+            updateLagrangianDisplay();
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        }
+        
+        function updateLagrangianDisplay() {
+            const problem = problems[currentProblem];
+            let lagrangian = problem.objective.formula;
+            
+            problem.equalityConstraints.forEach((constraint, i) => {
+                const lambda = multipliers[`lambda${i+1}`] || 0;
+                lagrangian += ` + λ${i+1}(${constraint.formula.split(' = ')[0]})`;
+            });
+            
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                const mu = multipliers[`mu${i+1}`] || 0;
+                lagrangian += ` + μ${i+1}(${constraint.formula.split(' ≤ ')[0]})`;
+            });
+            
+            document.getElementById('lagrangian-display').innerHTML = `
+                <strong>Lagrangian Function:</strong><br/>
+                L(x,y,λ,μ) = ${lagrangian}
+            `;
+        }
+        
+        function updateKKTConditions() {
+            const problem = problems[currentProblem];
+            const point = analysisPoint;
+            let html = '<strong>KKT Conditions at current point:</strong><br/><br/>';
+            
+            // Stationarity condition
+            const objGrad = problem.objective.grad(point.x, point.y);
+            let gradLagrangian = [objGrad[0], objGrad[1]];
+            
+            problem.equalityConstraints.forEach((constraint, i) => {
+                const lambda = multipliers[`lambda${i+1}`] || 0;
+                const constraintGrad = constraint.grad(point.x, point.y);
+                gradLagrangian[0] += lambda * constraintGrad[0];
+                gradLagrangian[1] += lambda * constraintGrad[1];
+            });
+            
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                const mu = multipliers[`mu${i+1}`] || 0;
+                const constraintGrad = constraint.grad(point.x, point.y);
+                gradLagrangian[0] += mu * constraintGrad[0];
+                gradLagrangian[1] += mu * constraintGrad[1];
+            });
+            
+            const stationarityViolation = Math.sqrt(gradLagrangian[0]**2 + gradLagrangian[1]**2);
+            html += `<div class="condition-status ${stationarityViolation < 0.1 ? 'condition-satisfied' : 'condition-violated'}">`;
+            html += `1. Stationarity: ∇L = (${gradLagrangian[0].toFixed(3)}, ${gradLagrangian[1].toFixed(3)}) ≈ 0`;
+            html += `</div>`;
+            
+            // Primal feasibility
+            problem.equalityConstraints.forEach((constraint, i) => {
+                const value = constraint.func(point.x, point.y);
+                html += `<div class="condition-status ${Math.abs(value) < 0.1 ? 'condition-satisfied' : 'condition-violated'}">`;
+                html += `2.${i+1} Primal feasibility: g${i+1}(x) = ${value.toFixed(3)} = 0`;
+                html += `</div>`;
+            });
+            
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                const value = constraint.func(point.x, point.y);
+                html += `<div class="condition-status ${value <= 0.1 ? 'condition-satisfied' : 'condition-violated'}">`;
+                html += `3.${i+1} Primal feasibility: h${i+1}(x) = ${value.toFixed(3)} ≤ 0`;
+                html += `</div>`;
+            });
+            
+            // Dual feasibility
+            problem.inequalityConstraints.forEach((_, i) => {
+                const mu = multipliers[`mu${i+1}`] || 0;
+                html += `<div class="condition-status ${mu >= -0.01 ? 'condition-satisfied' : 'condition-violated'}">`;
+                html += `4.${i+1} Dual feasibility: μ${i+1} = ${mu.toFixed(3)} ≥ 0`;
+                html += `</div>`;
+            });
+            
+            // Complementary slackness
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                const mu = multipliers[`mu${i+1}`] || 0;
+                const h = constraint.func(point.x, point.y);
+                const complementarySlackness = Math.abs(mu * h);
+                html += `<div class="condition-status ${complementarySlackness < 0.1 ? 'condition-satisfied' : 'condition-violated'}">`;
+                html += `5.${i+1} Comp. slackness: μ${i+1}·h${i+1} = ${complementarySlackness.toFixed(3)} = 0`;
+                html += `</div>`;
+            });
+            
+            document.getElementById('kkt-conditions').innerHTML = html;
+        }
+        
+        function updatePointAnalysis() {
+            const problem = problems[currentProblem];
+            const point = analysisPoint;
+            
+            let html = `<strong>Point Analysis: (${point.x.toFixed(2)}, ${point.y.toFixed(2)})</strong><br/><br/>`;
+            html += `Objective value: f(x,y) = ${problem.objective.func(point.x, point.y).toFixed(3)}<br/>`;
+            html += `Gradient: ∇f = (${problem.objective.grad(point.x, point.y).map(g => g.toFixed(3)).join(', ')})<br/><br/>`;
+            
+            if (problem.equalityConstraints.length > 0) {
+                html += 'Equality constraints:<br/>';
+                problem.equalityConstraints.forEach((constraint, i) => {
+                    html += `g${i+1}(x,y) = ${constraint.func(point.x, point.y).toFixed(3)}<br/>`;
+                });
+                html += '<br/>';
+            }
+            
+            if (problem.inequalityConstraints.length > 0) {
+                html += 'Inequality constraints:<br/>';
+                problem.inequalityConstraints.forEach((constraint, i) => {
+                    const value = constraint.func(point.x, point.y);
+                    html += `h${i+1}(x,y) = ${value.toFixed(3)} ${value <= 0 ? '(feasible)' : '(violated)'}<br/>`;
+                });
+            }
+            
+            document.getElementById('point-analysis').innerHTML = html;
+        }
+        
+        function findOptimalMultipliers() {
+            const problem = problems[currentProblem];
+            const optimalMults = problem.optimalMultipliers;
+            
+            // Set optimal multipliers
+            Object.keys(optimalMults).forEach(key => {
+                multipliers[key] = optimalMults[key];
+            });
+            
+            // Update input fields
+            Object.keys(optimalMults).forEach(key => {
+                const input = document.querySelector(`input[onchange*="${key}"]`);
+                if (input) input.value = optimalMults[key];
+            });
+            
+            // Set analysis point to optimal point
+            if (problem.optimalPoint) {
+                analysisPoint = { ...problem.optimalPoint };
+                document.getElementById('analysisX').value = analysisPoint.x;
+                document.getElementById('analysisY').value = analysisPoint.y;
+                document.getElementById('analysisXValue').textContent = analysisPoint.x.toFixed(1);
+                document.getElementById('analysisYValue').textContent = analysisPoint.y.toFixed(1);
+            }
+            
+            updateLagrangianDisplay();
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        }
+        
+        function resetMultipliers() {
+            Object.keys(multipliers).forEach(key => {
+                multipliers[key] = 0;
+            });
+            
+            // Reset input fields
+            document.querySelectorAll('#multiplier-controls input').forEach(input => {
+                input.value = 0;
+            });
+            
+            updateLagrangianDisplay();
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -10; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawObjectiveContours() {
+            if (!showOptions.objective) return;
+            
+            const problem = problems[currentProblem];
+            const step = 0.1;
+            
+            // Draw contour lines
+            for (let level = -10; level <= 10; level += 1) {
+                if (level === 0) continue;
+                
+                ctx.strokeStyle = `rgba(0, 255, 255, ${Math.abs(level) < 5 ? 0.6 : 0.3})`;
+                ctx.lineWidth = 1;
+                
+                ctx.beginPath();
+                let hasPoints = false;
+                
+                for (let x = -4; x <= 4; x += step) {
+                    for (let y = -3; y <= 3; y += step) {
+                        const value = problem.objective.func(x, y);
+                        if (Math.abs(value - level) < 0.1) {
+                            ctx.fillRect(toCanvasX(x) - 1, toCanvasY(y) - 1, 2, 2);
+                            hasPoints = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function drawConstraints() {
+            if (!showOptions.constraints) return;
+            
+            const problem = problems[currentProblem];
+            
+            // Draw equality constraints
+            problem.equalityConstraints.forEach((constraint, i) => {
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                
+                drawConstraintCurve(constraint.func, 0);
+            });
+            
+            // Draw inequality constraints
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 2;
+                
+                drawConstraintCurve(constraint.func, 0);
+                
+                // Shade infeasible region
+                if (showOptions.feasible) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+                    const step = 0.2;
+                    for (let x = -4; x <= 4; x += step) {
+                        for (let y = -3; y <= 3; y += step) {
+                            if (constraint.func(x, y) > 0) {
+                                ctx.fillRect(toCanvasX(x) - 1, toCanvasY(y) - 1, 3, 3);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function drawConstraintCurve(constraintFunc, level) {
+            const step = 0.05;
+            
+            for (let x = -4; x <= 4; x += step) {
+                for (let y = -3; y <= 3; y += step) {
+                    const value = constraintFunc(x, y);
+                    if (Math.abs(value - level) < 0.05) {
+                        ctx.fillRect(toCanvasX(x) - 1, toCanvasY(y) - 1, 2, 2);
+                    }
+                }
+            }
+        }
+        
+        function drawFeasibleRegion() {
+            if (!showOptions.feasible) return;
+            
+            const problem = problems[currentProblem];
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.2)';
+            
+            const step = 0.1;
+            for (let x = -4; x <= 4; x += step) {
+                for (let y = -3; y <= 3; y += step) {
+                    let feasible = true;
+                    
+                    // Check equality constraints
+                    problem.equalityConstraints.forEach(constraint => {
+                        if (Math.abs(constraint.func(x, y)) > 0.1) {
+                            feasible = false;
+                        }
+                    });
+                    
+                    // Check inequality constraints
+                    problem.inequalityConstraints.forEach(constraint => {
+                        if (constraint.func(x, y) > 0.01) {
+                            feasible = false;
+                        }
+                    });
+                    
+                    if (feasible) {
+                        ctx.fillRect(toCanvasX(x) - 1, toCanvasY(y) - 1, 2, 2);
+                    }
+                }
+            }
+        }
+        
+        function drawGradients() {
+            if (!showOptions.gradients) return;
+            
+            const problem = problems[currentProblem];
+            const point = analysisPoint;
+            
+            // Draw objective gradient
+            const objGrad = problem.objective.grad(point.x, point.y);
+            drawGradientVector(point, objGrad, '#0ff', '∇f');
+            
+            // Draw constraint gradients
+            problem.equalityConstraints.forEach((constraint, i) => {
+                const grad = constraint.grad(point.x, point.y);
+                drawGradientVector(point, grad, '#e74c3c', `∇g${i+1}`);
+            });
+            
+            problem.inequalityConstraints.forEach((constraint, i) => {
+                const grad = constraint.grad(point.x, point.y);
+                drawGradientVector(point, grad, '#f39c12', `∇h${i+1}`);
+            });
+        }
+        
+        function drawGradientVector(point, grad, color, label) {
+            const magnitude = Math.sqrt(grad[0]**2 + grad[1]**2);
+            if (magnitude < 1e-6) return;
+            
+            const scale_factor = 0.5;
+            const endX = point.x + grad[0] * scale_factor;
+            const endY = point.y + grad[1] * scale_factor;
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2;
+            
+            // Arrow body
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(point.x), toCanvasY(point.y));
+            ctx.lineTo(toCanvasX(endX), toCanvasY(endY));
+            ctx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(endY - point.y, endX - point.x);
+            const headLength = 0.2;
+            
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(endX), toCanvasY(endY));
+            ctx.lineTo(
+                toCanvasX(endX - headLength * Math.cos(angle - Math.PI / 6)),
+                toCanvasY(endY - headLength * Math.sin(angle - Math.PI / 6))
+            );
+            ctx.moveTo(toCanvasX(endX), toCanvasY(endY));
+            ctx.lineTo(
+                toCanvasX(endX - headLength * Math.cos(angle + Math.PI / 6)),
+                toCanvasY(endY - headLength * Math.sin(angle + Math.PI / 6))
+            );
+            ctx.stroke();
+            
+            // Label
+            ctx.font = '12px Arial';
+            ctx.fillText(label, toCanvasX(endX) + 5, toCanvasY(endY) - 5);
+        }
+        
+        function drawOptimalPoint() {
+            if (!showOptions.optimal) return;
+            
+            const problem = problems[currentProblem];
+            if (!problem.optimalPoint) return;
+            
+            const optimal = problem.optimalPoint;
+            
+            ctx.fillStyle = '#9b59b6';
+            ctx.strokeStyle = '#9b59b6';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(optimal.x), toCanvasY(optimal.y), 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(optimal.x), toCanvasY(optimal.y), 12, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Label
+            ctx.fillStyle = '#9b59b6';
+            ctx.font = '14px Arial';
+            ctx.fillText('x*', toCanvasX(optimal.x) + 15, toCanvasY(optimal.y) - 10);
+        }
+        
+        function drawAnalysisPoint() {
+            const point = analysisPoint;
+            
+            ctx.fillStyle = '#00ff00';
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(point.x), toCanvasY(point.y), 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(point.x), toCanvasY(point.y), 10, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            drawFeasibleRegion();
+            drawObjectiveContours();
+            drawConstraints();
+            drawGradients();
+            drawOptimalPoint();
+            drawAnalysisPoint();
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const canvasX = event.clientX - rect.left;
+            const canvasY = event.clientY - rect.top;
+            
+            analysisPoint.x = fromCanvasX(canvasX);
+            analysisPoint.y = fromCanvasY(canvasY);
+            
+            document.getElementById('analysisX').value = analysisPoint.x;
+            document.getElementById('analysisY').value = analysisPoint.y;
+            document.getElementById('analysisXValue').textContent = analysisPoint.x.toFixed(1);
+            document.getElementById('analysisYValue').textContent = analysisPoint.y.toFixed(1);
+            
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        });
+        
+        document.getElementById('analysisX').addEventListener('input', function() {
+            analysisPoint.x = parseFloat(this.value);
+            document.getElementById('analysisXValue').textContent = analysisPoint.x.toFixed(1);
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        });
+        
+        document.getElementById('analysisY').addEventListener('input', function() {
+            analysisPoint.y = parseFloat(this.value);
+            document.getElementById('analysisYValue').textContent = analysisPoint.y.toFixed(1);
+            updateKKTConditions();
+            updatePointAnalysis();
+            draw();
+        });
+        
+        // Initialize
+        selectProblem('equality');
+    </script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa Newton's Method</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .control-row label {
+            min-width: 120px;
+            margin-right: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .method-comparison {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .method-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .method-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .method-card.newton {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+        .method-card.gradient {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+        .function-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .function-selector button {
+            flex: 1;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+        .function-selector button.active {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Minh họa Newton's Method</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Hàm mục tiêu</h3>
+                <div class="function-selector">
+                    <button onclick="setFunction('quadratic')" class="active">f(x) = x² + 2</button>
+                    <button onclick="setFunction('cubic')">f(x) = x³ - 3x</button>
+                    <button onclick="setFunction('exponential')">f(x) = e^(x²/2)</button>
+                </div>
+                <div class="formula">
+                    <strong>Newton: </strong> x_{t+1} = x_t - f'(x_t)/f''(x_t)
+                </div>
+                <div class="formula">
+                    <strong>Gradient: </strong> x_{t+1} = x_t - αf'(x_t)
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>⚙️ Tham số tối ưu hóa</h3>
+                <div class="control-row">
+                    <label>Learning rate (α):</label>
+                    <input type="range" id="learningRate" min="0.01" max="0.5" value="0.1" step="0.01">
+                    <input type="number" id="learningRateValue" value="0.1" min="0.01" max="0.5" step="0.01">
+                </div>
+                <div class="control-row">
+                    <label>Điểm bắt đầu (x):</label>
+                    <input type="range" id="startX" min="-5" max="5" value="-2" step="0.1">
+                    <input type="number" id="startXValue" value="-2" min="-5" max="5" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Số bước tối đa:</label>
+                    <input type="range" id="maxIterations" min="5" max="50" value="20" step="5">
+                    <input type="number" id="maxIterationsValue" value="20" min="5" max="50" step="5">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎮 Điều khiển</h3>
+                <div class="control-row">
+                    <button onclick="startComparison()">▶️ So sánh</button>
+                    <button onclick="stepComparison()">⏭️ Bước tiếp</button>
+                    <button onclick="resetComparison()">🔄 Làm lại</button>
+                </div>
+                <div class="control-row">
+                    <button onclick="setAutoPlay()">🔄 Tự động</button>
+                    <button onclick="stopAutoPlay()">⏹️ Dừng</button>
+                </div>
+                <div class="method-comparison">
+                    <strong>Trạng thái:</strong> <span id="comparisonStatus">Sẵn sàng</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="newtonCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📈 So sánh phương pháp</h3>
+            <div class="method-info" id="methodInfo">
+                <!-- Method information will be displayed here -->
+            </div>
+            
+            <h4>📊 Thông tin chi tiết:</h4>
+            <div id="detailInfo">
+                <p><strong>Hàm hiện tại:</strong> <span id="currentFunction">f(x) = x² + 2</span></p>
+                <p><strong>Đạo hàm bậc 1:</strong> <span id="firstDerivative">f'(x) = 2x</span></p>
+                <p><strong>Đạo hàm bậc 2:</strong> <span id="secondDerivative">f''(x) = 2</span></p>
+                <p><strong>Điểm hiện tại:</strong> <span id="currentPoint">x = -2.0</span></p>
+                <p><strong>Giá trị hàm:</strong> <span id="currentValue">f(x) = 6.0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('newtonCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Optimization state
+        let currentFunction = 'quadratic';
+        let learningRate = 0.1;
+        let startX = -2;
+        let maxIterations = 20;
+        let currentIteration = 0;
+        let newtonX = startX;
+        let gradientX = startX;
+        let newtonHistory = [];
+        let gradientHistory = [];
+        let isRunning = false;
+        let autoPlayInterval = null;
+        
+        // Function definitions
+        const functions = {
+            quadratic: {
+                name: 'f(x) = x² + 2',
+                firstDerivativeString: 'f\'(x) = 2x',
+                secondDerivativeString: 'f\'\'(x) = 2',
+                evaluate: (x) => x * x + 2,
+                firstDerivative: (x) => 2 * x,
+                secondDerivative: (x) => 2
+            },
+            cubic: {
+                name: 'f(x) = x³ - 3x',
+                firstDerivativeString: 'f\'(x) = 3x² - 3',
+                secondDerivativeString: 'f\'\'(x) = 6x',
+                evaluate: (x) => x * x * x - 3 * x,
+                firstDerivative: (x) => 3 * x * x - 3,
+                secondDerivative: (x) => 6 * x
+            },
+            exponential: {
+                name: 'f(x) = e^(x²/2)',
+                firstDerivativeString: 'f\'(x) = xe^(x²/2)',
+                secondDerivativeString: 'f\'\'(x) = (1+x²)e^(x²/2)',
+                evaluate: (x) => Math.exp(x * x / 2),
+                firstDerivative: (x) => x * Math.exp(x * x / 2),
+                secondDerivative: (x) => (1 + x * x) * Math.exp(x * x / 2)
+            }
+        };
+        
+        // Update parameters
+        function updateParameters() {
+            learningRate = parseFloat(document.getElementById('learningRateValue').value);
+            startX = parseFloat(document.getElementById('startXValue').value);
+            maxIterations = parseInt(document.getElementById('maxIterationsValue').value);
+        }
+        
+        // Set function
+        function setFunction(funcName) {
+            currentFunction = funcName;
+            document.querySelectorAll('.function-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            resetComparison();
+            drawComparison();
+        }
+        
+        // Start comparison
+        function startComparison() {
+            updateParameters();
+            resetComparison();
+            stepComparison();
+        }
+        
+        // Step comparison
+        function stepComparison() {
+            if (currentIteration >= maxIterations) {
+                document.getElementById('comparisonStatus').textContent = 'Hoàn thành';
+                return;
+            }
+            
+            const currentFunc = functions[currentFunction];
+            
+            // Newton's method
+            const newtonValue = currentFunc.evaluate(newtonX);
+            const newtonGradient = currentFunc.firstDerivative(newtonX);
+            const newtonHessian = currentFunc.secondDerivative(newtonX);
+            const newtonStep = newtonGradient / newtonHessian;
+            const newNewtonX = newtonX - newtonStep;
+            
+            // Gradient descent
+            const gradientValue = currentFunc.evaluate(gradientX);
+            const gradientGradient = currentFunc.firstDerivative(gradientX);
+            const gradientStep = learningRate * gradientGradient;
+            const newGradientX = gradientX - gradientStep;
+            
+            newtonHistory.push({
+                iteration: currentIteration,
+                x: newtonX,
+                value: newtonValue,
+                gradient: newtonGradient,
+                hessian: newtonHessian,
+                step: newtonStep
+            });
+            
+            gradientHistory.push({
+                iteration: currentIteration,
+                x: gradientX,
+                value: gradientValue,
+                gradient: gradientGradient,
+                step: gradientStep
+            });
+            
+            newtonX = newNewtonX;
+            gradientX = newGradientX;
+            currentIteration++;
+            
+            updateDisplay();
+            drawComparison();
+        }
+        
+        // Reset comparison
+        function resetComparison() {
+            currentIteration = 0;
+            newtonX = startX;
+            gradientX = startX;
+            newtonHistory = [];
+            gradientHistory = [];
+            isRunning = false;
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            document.getElementById('comparisonStatus').textContent = 'Sẵn sàng';
+            updateDisplay();
+            drawComparison();
+        }
+        
+        // Auto play
+        function setAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+            }
+            autoPlayInterval = setInterval(() => {
+                if (currentIteration < maxIterations) {
+                    stepComparison();
+                } else {
+                    stopAutoPlay();
+                }
+            }, 800);
+            isRunning = true;
+            document.getElementById('comparisonStatus').textContent = 'Đang chạy...';
+        }
+        
+        // Stop auto play
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            isRunning = false;
+            document.getElementById('comparisonStatus').textContent = 'Đã dừng';
+        }
+        
+        // Update display
+        function updateDisplay() {
+            const currentFunc = functions[currentFunction];
+            const newtonValue = currentFunc.evaluate(newtonX);
+            const newtonGradient = currentFunc.firstDerivative(newtonX);
+            const newtonHessian = currentFunc.secondDerivative(newtonX);
+            const gradientValue = currentFunc.evaluate(gradientX);
+            const gradientGradient = currentFunc.firstDerivative(gradientX);
+            
+            document.getElementById('currentFunction').textContent = currentFunc.name;
+            document.getElementById('firstDerivative').textContent = currentFunc.firstDerivativeString;
+            document.getElementById('secondDerivative').textContent = currentFunc.secondDerivativeString;
+            document.getElementById('currentPoint').textContent = `x = ${newtonX.toFixed(3)}`;
+            document.getElementById('currentValue').textContent = `f(x) = ${newtonValue.toFixed(3)}`;
+            
+            // Update method info
+            const container = document.getElementById('methodInfo');
+            const newtonLast = newtonHistory.length > 0 ? newtonHistory[newtonHistory.length - 1] : null;
+            const gradientLast = gradientHistory.length > 0 ? gradientHistory[gradientHistory.length - 1] : null;
+            
+            container.innerHTML = `
+                <div class="method-card newton">
+                    <strong>Newton's Method</strong><br>
+                    <strong>Bước ${currentIteration}</strong><br>
+                    x = ${newtonX.toFixed(3)}<br>
+                    f(x) = ${newtonValue.toFixed(3)}<br>
+                    f'(x) = ${newtonGradient.toFixed(3)}<br>
+                    f''(x) = ${newtonHessian.toFixed(3)}<br>
+                    ${newtonLast ? `Step = ${newtonLast.step.toFixed(3)}` : ''}
+                </div>
+                <div class="method-card gradient">
+                    <strong>Gradient Descent</strong><br>
+                    <strong>Bước ${currentIteration}</strong><br>
+                    x = ${gradientX.toFixed(3)}<br>
+                    f(x) = ${gradientValue.toFixed(3)}<br>
+                    f'(x) = ${gradientGradient.toFixed(3)}<br>
+                    α = ${learningRate}<br>
+                    ${gradientLast ? `Step = ${gradientLast.step.toFixed(3)}` : ''}
+                </div>
+            `;
+        }
+        
+        // Draw comparison
+        function drawComparison() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const margin = 50;
+            const width = canvas.width - 2 * margin;
+            const height = canvas.height - 2 * margin;
+            const xMin = -5;
+            const xMax = 5;
+            const scaleX = width / (xMax - xMin);
+            const scaleY = height / 20;
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: margin + (x - xMin) * scaleX,
+                    y: canvas.height - margin - (y + 10) * scaleY
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = xMin; i <= xMax; i++) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, margin);
+                ctx.lineTo(pos.x, canvas.height - margin);
+                ctx.stroke();
+            }
+            for (let i = -10; i <= 10; i++) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(margin, pos.y);
+                ctx.lineTo(canvas.width - margin, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, margin);
+            ctx.lineTo(origin.x, canvas.height - margin);
+            ctx.moveTo(margin, origin.y);
+            ctx.lineTo(canvas.width - margin, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('f(x)', 0, 0);
+            ctx.restore();
+            
+            // Draw function
+            const currentFunc = functions[currentFunction];
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = currentFunc.evaluate(x);
+                const pos = transform(x, y);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw Newton's method path
+            if (newtonHistory.length > 0) {
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                
+                newtonHistory.forEach((step, index) => {
+                    const pos = transform(step.x, step.value);
+                    if (index === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                });
+                
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw Newton points
+                newtonHistory.forEach((step, index) => {
+                    const pos = transform(step.x, step.value);
+                    ctx.fillStyle = index === newtonHistory.length - 1 ? '#ff6b6b' : '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            }
+            
+            // Draw Gradient descent path
+            if (gradientHistory.length > 0) {
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                
+                gradientHistory.forEach((step, index) => {
+                    const pos = transform(step.x, step.value);
+                    if (index === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                });
+                
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw Gradient points
+                gradientHistory.forEach((step, index) => {
+                    const pos = transform(step.x, step.value);
+                    ctx.fillStyle = index === gradientHistory.length - 1 ? '#4ecdc4' : '#4ecdc4';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            }
+            
+            // Draw current points
+            const newtonValue = currentFunc.evaluate(newtonX);
+            const gradientValue = currentFunc.evaluate(gradientX);
+            const newtonPos = transform(newtonX, newtonValue);
+            const gradientPos = transform(gradientX, gradientValue);
+            
+            // Newton point
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(newtonPos.x, newtonPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Newton', newtonPos.x + 10, newtonPos.y - 10);
+            
+            // Gradient point
+            ctx.fillStyle = '#4ecdc4';
+            ctx.beginPath();
+            ctx.arc(gradientPos.x, gradientPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Gradient', gradientPos.x + 10, gradientPos.y - 10);
+            
+            // Draw legend
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Newton\'s Method', margin, margin - 20);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(margin, margin - 15, 20, 3);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Gradient Descent', margin, margin - 5);
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(margin, margin, 20, 3);
+        }
+        
+        // Event listeners
+        document.getElementById('learningRate').addEventListener('input', function() {
+            document.getElementById('learningRateValue').value = this.value;
+        });
+        
+        document.getElementById('learningRateValue').addEventListener('input', function() {
+            document.getElementById('learningRate').value = this.value;
+        });
+        
+        document.getElementById('startX').addEventListener('input', function() {
+            document.getElementById('startXValue').value = this.value;
+        });
+        
+        document.getElementById('startXValue').addEventListener('input', function() {
+            document.getElementById('startX').value = this.value;
+        });
+        
+        document.getElementById('maxIterations').addEventListener('input', function() {
+            document.getElementById('maxIterationsValue').value = this.value;
+        });
+        
+        document.getElementById('maxIterationsValue').addEventListener('input', function() {
+            document.getElementById('maxIterations').value = this.value;
+        });
+        
+        // Initialize
+        drawComparison();
+        updateDisplay();
+    </script>
+</body>
+</html> 

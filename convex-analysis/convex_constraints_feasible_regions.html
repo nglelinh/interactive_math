@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convex Constraints & Feasible Regions - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 420px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .constraint-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .constraint-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border-left: 3px solid #0ff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            position: relative;
+        }
+        
+        .constraint-item .remove-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: #e74c3c;
+            border: none;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+        
+        .constraint-type {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .constraint-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .constraint-button:hover {
+            background: #555;
+        }
+        
+        .constraint-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .problem-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .feasible-stats {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffff00;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 350px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .constraint-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .constraint-inputs input {
+            width: 100%;
+            padding: 6px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .constraint-inputs select {
+            padding: 6px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .objective-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .objective-inputs input {
+            width: 100%;
+            padding: 6px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .objective-inputs select {
+            padding: 6px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .preset-problems {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .preset-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .preset-button:hover {
+            background: #555;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>🎯 Convex Constraints & Feasible Regions</strong><br/>
+                Interactive exploration of constrained optimization and feasible region geometry.
+                <div class="legend">
+                    <div class="legend-item" style="color: #2ecc71;">🟢 Feasible Region</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Constraint Boundaries</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Objective Function</div>
+                    <div class="legend-item" style="color: #9b59b6;">🟣 Optimal Point</div>
+                    <div class="legend-item" style="color: #3498db;">🔵 Gradient Direction</div>
+                    <div class="legend-item" style="color: #e67e22;">🟤 Vertices/Extreme Points</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Objective Function</h3>
+                <div class="objective-inputs">
+                    <input type="number" id="objA" step="0.1" value="1" placeholder="coeff x">
+                    <input type="number" id="objB" step="0.1" value="1" placeholder="coeff y">
+                    <select id="objType">
+                        <option value="minimize">Minimize</option>
+                        <option value="maximize">Maximize</option>
+                    </select>
+                </div>
+                <div id="objective-display" class="problem-info">
+                    Minimize: f(x,y) = x + y
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Add Constraint</h3>
+                <div class="constraint-inputs">
+                    <input type="number" id="constraintA" step="0.1" value="1" placeholder="a">
+                    <input type="number" id="constraintB" step="0.1" value="0" placeholder="b">
+                    <select id="constraintType">
+                        <option value="≤">≤</option>
+                        <option value="≥">≥</option>
+                        <option value="=">=</option>
+                    </select>
+                    <input type="number" id="constraintC" step="0.1" value="1" placeholder="c">
+                </div>
+                <div class="constraint-type">
+                    <button class="constraint-button" onclick="addConstraint()">Add Constraint</button>
+                    <button class="constraint-button" onclick="clearConstraints()">Clear All</button>
+                    <button class="constraint-button" onclick="solveOptimization()">🎯 Solve</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Preset Problems</h3>
+                <div class="preset-problems">
+                    <button class="preset-button" onclick="loadPreset('simple')">Simple LP</button>
+                    <button class="preset-button" onclick="loadPreset('bounded')">Bounded Region</button>
+                    <button class="preset-button" onclick="loadPreset('unbounded')">Unbounded</button>
+                    <button class="preset-button" onclick="loadPreset('infeasible')">Infeasible</button>
+                    <button class="preset-button" onclick="loadPreset('degenerate')">Degenerate</button>
+                    <button class="preset-button" onclick="loadPreset('polytope')">Complex Polytope</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Constraints</h3>
+                <div id="constraint-list" class="constraint-list">
+                    <!-- Constraints will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-feasible" onclick="toggleVisualization('feasible')">
+                        Feasible Region
+                    </div>
+                    <div class="toggle-button active" id="toggle-constraints" onclick="toggleVisualization('constraints')">
+                        Constraint Lines
+                    </div>
+                    <div class="toggle-button active" id="toggle-objective" onclick="toggleVisualization('objective')">
+                        Objective Lines
+                    </div>
+                    <div class="toggle-button active" id="toggle-gradient" onclick="toggleVisualization('gradient')">
+                        Gradient
+                    </div>
+                    <div class="toggle-button active" id="toggle-vertices" onclick="toggleVisualization('vertices')">
+                        Vertices
+                    </div>
+                    <div class="toggle-button active" id="toggle-optimal" onclick="toggleVisualization('optimal')">
+                        Optimal Point
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Problem Analysis</h3>
+                <div id="feasible-stats" class="feasible-stats">
+                    <!-- Problem statistics will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Interactive Controls</h3>
+                <div class="slider-group">
+                    <label>Objective Level:</label>
+                    <input type="range" id="objectiveLevel" min="-10" max="10" step="0.1" value="0">
+                    <div class="slider-value" id="objectiveLevelValue">0.0</div>
+                </div>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="resetView()">
+                        🔄 Reset View
+                    </div>
+                    <div class="toggle-button" onclick="randomProblem()">
+                        🎲 Random Problem
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 60;
+        
+        // Problem state
+        let constraints = [];
+        let objective = { a: 1, b: 1, type: 'minimize' };
+        let feasibleRegion = [];
+        let vertices = [];
+        let optimalPoint = null;
+        let optimalValue = null;
+        let objectiveLevel = 0;
+        
+        // Visualization options
+        let showOptions = {
+            feasible: true,
+            constraints: true,
+            objective: true,
+            gradient: true,
+            vertices: true,
+            optimal: true
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return (canvasX - centerX) / scale;
+        }
+        
+        function fromCanvasY(canvasY) {
+            return (centerY - canvasY) / scale;
+        }
+        
+        function addConstraint() {
+            const a = parseFloat(document.getElementById('constraintA').value) || 0;
+            const b = parseFloat(document.getElementById('constraintB').value) || 0;
+            const type = document.getElementById('constraintType').value;
+            const c = parseFloat(document.getElementById('constraintC').value) || 0;
+            
+            if (Math.abs(a) < 1e-10 && Math.abs(b) < 1e-10) {
+                alert('Both coefficients cannot be zero');
+                return;
+            }
+            
+            const constraint = { a, b, type, c, id: Date.now() };
+            constraints.push(constraint);
+            
+            updateConstraintList();
+            updateProblem();
+        }
+        
+        function removeConstraint(id) {
+            constraints = constraints.filter(c => c.id !== id);
+            updateConstraintList();
+            updateProblem();
+        }
+        
+        function clearConstraints() {
+            constraints = [];
+            updateConstraintList();
+            updateProblem();
+        }
+        
+        function updateConstraintList() {
+            const list = document.getElementById('constraint-list');
+            list.innerHTML = '';
+            
+            constraints.forEach((constraint, index) => {
+                const div = document.createElement('div');
+                div.className = 'constraint-item';
+                div.innerHTML = `
+                    <span>${constraint.a.toFixed(2)}x + ${constraint.b.toFixed(2)}y ${constraint.type} ${constraint.c.toFixed(2)}</span>
+                    <button class="remove-btn" onclick="removeConstraint(${constraint.id})">×</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+        
+        function updateObjective() {
+            const a = parseFloat(document.getElementById('objA').value) || 0;
+            const b = parseFloat(document.getElementById('objB').value) || 0;
+            const type = document.getElementById('objType').value;
+            
+            objective = { a, b, type };
+            
+            document.getElementById('objective-display').innerHTML = 
+                `${type.charAt(0).toUpperCase() + type.slice(1)}: f(x,y) = ${a.toFixed(2)}x + ${b.toFixed(2)}y`;
+            
+            updateProblem();
+        }
+        
+        function updateProblem() {
+            findFeasibleRegion();
+            findVertices();
+            solveOptimization();
+            updateProblemStats();
+            draw();
+        }
+        
+        function findFeasibleRegion() {
+            feasibleRegion = [];
+            
+            // Create a grid of points and test each one
+            const step = 0.2;
+            for (let x = -8; x <= 8; x += step) {
+                for (let y = -6; y <= 6; y += step) {
+                    if (isPointFeasible(x, y)) {
+                        feasibleRegion.push({ x, y });
+                    }
+                }
+            }
+        }
+        
+        function isPointFeasible(x, y) {
+            return constraints.every(constraint => {
+                const value = constraint.a * x + constraint.b * y;
+                switch (constraint.type) {
+                    case '≤': return value <= constraint.c + 1e-10;
+                    case '≥': return value >= constraint.c - 1e-10;
+                    case '=': return Math.abs(value - constraint.c) < 1e-6;
+                    default: return true;
+                }
+            });
+        }
+        
+        function findVertices() {
+            vertices = [];
+            
+            if (constraints.length < 2) return;
+            
+            // Find intersections of constraint lines
+            for (let i = 0; i < constraints.length; i++) {
+                for (let j = i + 1; j < constraints.length; j++) {
+                    const intersection = findIntersection(constraints[i], constraints[j]);
+                    if (intersection && isPointFeasible(intersection.x, intersection.y)) {
+                        // Check if vertex is not too close to existing vertices
+                        const isDuplicate = vertices.some(v => 
+                            Math.abs(v.x - intersection.x) < 1e-6 && 
+                            Math.abs(v.y - intersection.y) < 1e-6
+                        );
+                        
+                        if (!isDuplicate && Math.abs(intersection.x) < 20 && Math.abs(intersection.y) < 20) {
+                            vertices.push(intersection);
+                        }
+                    }
+                }
+            }
+            
+            // Also check intersections with axes bounds
+            const bounds = [
+                { a: 1, b: 0, c: 8 },   // x ≤ 8
+                { a: -1, b: 0, c: 8 },  // x ≥ -8
+                { a: 0, b: 1, c: 6 },   // y ≤ 6
+                { a: 0, b: -1, c: 6 }   // y ≥ -6
+            ];
+            
+            bounds.forEach(bound => {
+                constraints.forEach(constraint => {
+                    const intersection = findIntersection(bound, constraint);
+                    if (intersection && isPointFeasible(intersection.x, intersection.y)) {
+                        const isDuplicate = vertices.some(v => 
+                            Math.abs(v.x - intersection.x) < 1e-6 && 
+                            Math.abs(v.y - intersection.y) < 1e-6
+                        );
+                        
+                        if (!isDuplicate) {
+                            vertices.push(intersection);
+                        }
+                    }
+                });
+            });
+        }
+        
+        function findIntersection(constraint1, constraint2) {
+            const { a: a1, b: b1, c: c1 } = constraint1;
+            const { a: a2, b: b2, c: c2 } = constraint2;
+            
+            const det = a1 * b2 - a2 * b1;
+            if (Math.abs(det) < 1e-10) return null; // Parallel lines
+            
+            const x = (c1 * b2 - c2 * b1) / det;
+            const y = (a1 * c2 - a2 * c1) / det;
+            
+            return { x, y };
+        }
+        
+        function solveOptimization() {
+            optimalPoint = null;
+            optimalValue = null;
+            
+            if (vertices.length === 0) return;
+            
+            let bestPoint = null;
+            let bestValue = objective.type === 'minimize' ? Infinity : -Infinity;
+            
+            vertices.forEach(vertex => {
+                const value = objective.a * vertex.x + objective.b * vertex.y;
+                
+                if ((objective.type === 'minimize' && value < bestValue) ||
+                    (objective.type === 'maximize' && value > bestValue)) {
+                    bestValue = value;
+                    bestPoint = vertex;
+                }
+            });
+            
+            optimalPoint = bestPoint;
+            optimalValue = bestValue;
+        }
+        
+        function updateProblemStats() {
+            const stats = document.getElementById('feasible-stats');
+            
+            let status = 'Unknown';
+            if (feasibleRegion.length === 0) {
+                status = 'Infeasible - No feasible points found';
+            } else if (vertices.length === 0) {
+                status = 'Unbounded - No vertices found';
+            } else if (optimalPoint) {
+                status = 'Optimal solution found';
+            }
+            
+            stats.innerHTML = `
+                <strong>Problem Analysis:</strong><br/>
+                Status: ${status}<br/>
+                Feasible Points: ${feasibleRegion.length}<br/>
+                Vertices: ${vertices.length}<br/>
+                ${optimalPoint ? `Optimal Point: (${optimalPoint.x.toFixed(3)}, ${optimalPoint.y.toFixed(3)})<br/>` : ''}
+                ${optimalValue !== null ? `Optimal Value: ${optimalValue.toFixed(3)}` : ''}
+            `;
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -20; i <= 20; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawFeasibleRegion() {
+            if (!showOptions.feasible || feasibleRegion.length === 0) return;
+            
+            ctx.fillStyle = 'rgba(46, 204, 113, 0.3)';
+            feasibleRegion.forEach(point => {
+                ctx.fillRect(toCanvasX(point.x) - 1, toCanvasY(point.y) - 1, 2, 2);
+            });
+        }
+        
+        function drawConstraints() {
+            if (!showOptions.constraints) return;
+            
+            constraints.forEach((constraint, index) => {
+                const colors = ['#e74c3c', '#3498db', '#f39c12', '#9b59b6', '#e67e22', '#2ecc71'];
+                ctx.strokeStyle = colors[index % colors.length];
+                ctx.lineWidth = 2;
+                
+                // Draw constraint line
+                drawConstraintLine(constraint);
+                
+                // Draw constraint label
+                ctx.fillStyle = colors[index % colors.length];
+                ctx.font = '12px Arial';
+                ctx.fillText(
+                    `${constraint.a.toFixed(1)}x + ${constraint.b.toFixed(1)}y ${constraint.type} ${constraint.c.toFixed(1)}`,
+                    10,
+                    20 + index * 16
+                );
+            });
+        }
+        
+        function drawConstraintLine(constraint) {
+            const { a, b, c } = constraint;
+            
+            // Find two points on the line ax + by = c
+            let x1, y1, x2, y2;
+            
+            if (Math.abs(b) > 1e-10) {
+                // Vertical line case
+                x1 = -10;
+                y1 = (c - a * x1) / b;
+                x2 = 10;
+                y2 = (c - a * x2) / b;
+            } else {
+                // Horizontal line case
+                x1 = c / a;
+                y1 = -10;
+                x2 = c / a;
+                y2 = 10;
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+            ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+            ctx.stroke();
+        }
+        
+        function drawObjectiveFunction() {
+            if (!showOptions.objective) return;
+            
+            const { a, b } = objective;
+            
+            // Draw objective function level curves
+            for (let level = -10; level <= 10; level += 2) {
+                ctx.strokeStyle = `rgba(243, 156, 18, ${level === objectiveLevel ? 1 : 0.3})`;
+                ctx.lineWidth = level === objectiveLevel ? 3 : 1;
+                
+                // Draw line ax + by = level
+                let x1, y1, x2, y2;
+                
+                if (Math.abs(b) > 1e-10) {
+                    x1 = -10;
+                    y1 = (level - a * x1) / b;
+                    x2 = 10;
+                    y2 = (level - a * x2) / b;
+                } else {
+                    x1 = level / a;
+                    y1 = -10;
+                    x2 = level / a;
+                    y2 = 10;
+                }
+                
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+                ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+                ctx.stroke();
+            }
+        }
+        
+        function drawGradient() {
+            if (!showOptions.gradient) return;
+            
+            const { a, b } = objective;
+            const magnitude = Math.sqrt(a * a + b * b);
+            
+            if (magnitude > 0) {
+                const direction = objective.type === 'minimize' ? 1 : -1;
+                const arrowLength = 2;
+                
+                ctx.strokeStyle = '#3498db';
+                ctx.fillStyle = '#3498db';
+                ctx.lineWidth = 3;
+                
+                const startX = 0;
+                const startY = 0;
+                const endX = direction * a * arrowLength / magnitude;
+                const endY = direction * b * arrowLength / magnitude;
+                
+                // Draw arrow
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(startX), toCanvasY(startY));
+                ctx.lineTo(toCanvasX(endX), toCanvasY(endY));
+                ctx.stroke();
+                
+                // Draw arrowhead
+                const angle = Math.atan2(endY - startY, endX - startX);
+                const headLength = 0.3;
+                
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(endX), toCanvasY(endY));
+                ctx.lineTo(
+                    toCanvasX(endX - headLength * Math.cos(angle - Math.PI / 6)),
+                    toCanvasY(endY - headLength * Math.sin(angle - Math.PI / 6))
+                );
+                ctx.moveTo(toCanvasX(endX), toCanvasY(endY));
+                ctx.lineTo(
+                    toCanvasX(endX - headLength * Math.cos(angle + Math.PI / 6)),
+                    toCanvasY(endY - headLength * Math.sin(angle + Math.PI / 6))
+                );
+                ctx.stroke();
+                
+                // Label
+                ctx.fillStyle = '#3498db';
+                ctx.font = '12px Arial';
+                ctx.fillText(
+                    `∇f = (${a.toFixed(1)}, ${b.toFixed(1)})`,
+                    toCanvasX(endX) + 10,
+                    toCanvasY(endY) - 10
+                );
+            }
+        }
+        
+        function drawVertices() {
+            if (!showOptions.vertices) return;
+            
+            ctx.fillStyle = '#e67e22';
+            vertices.forEach(vertex => {
+                ctx.beginPath();
+                ctx.arc(toCanvasX(vertex.x), toCanvasY(vertex.y), 6, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+        
+        function drawOptimalPoint() {
+            if (!showOptions.optimal || !optimalPoint) return;
+            
+            ctx.fillStyle = '#9b59b6';
+            ctx.strokeStyle = '#9b59b6';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(optimalPoint.x), toCanvasY(optimalPoint.y), 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(optimalPoint.x), toCanvasY(optimalPoint.y), 12, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Label
+            ctx.fillStyle = '#9b59b6';
+            ctx.font = '12px Arial';
+            ctx.fillText(
+                `Optimal: (${optimalPoint.x.toFixed(2)}, ${optimalPoint.y.toFixed(2)})`,
+                toCanvasX(optimalPoint.x) + 15,
+                toCanvasY(optimalPoint.y) - 15
+            );
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            drawFeasibleRegion();
+            drawConstraints();
+            drawObjectiveFunction();
+            drawGradient();
+            drawVertices();
+            drawOptimalPoint();
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        function resetView() {
+            clearConstraints();
+            objective = { a: 1, b: 1, type: 'minimize' };
+            document.getElementById('objA').value = 1;
+            document.getElementById('objB').value = 1;
+            document.getElementById('objType').value = 'minimize';
+            objectiveLevel = 0;
+            document.getElementById('objectiveLevel').value = 0;
+            document.getElementById('objectiveLevelValue').textContent = '0.0';
+            updateObjective();
+        }
+        
+        function randomProblem() {
+            clearConstraints();
+            
+            // Generate random objective
+            const objA = Math.round((Math.random() - 0.5) * 4 * 10) / 10;
+            const objB = Math.round((Math.random() - 0.5) * 4 * 10) / 10;
+            document.getElementById('objA').value = objA;
+            document.getElementById('objB').value = objB;
+            
+            // Generate random constraints
+            const numConstraints = 3 + Math.floor(Math.random() * 3);
+            for (let i = 0; i < numConstraints; i++) {
+                const a = Math.round((Math.random() - 0.5) * 4 * 10) / 10;
+                const b = Math.round((Math.random() - 0.5) * 4 * 10) / 10;
+                const c = Math.round(Math.random() * 6);
+                const type = Math.random() < 0.7 ? '≤' : '≥';
+                
+                if (Math.abs(a) > 0.1 || Math.abs(b) > 0.1) {
+                    constraints.push({ a, b, type, c, id: Date.now() + i });
+                }
+            }
+            
+            updateObjective();
+            updateConstraintList();
+        }
+        
+        function loadPreset(presetName) {
+            clearConstraints();
+            
+            const presets = {
+                simple: {
+                    objective: { a: 1, b: 1, type: 'minimize' },
+                    constraints: [
+                        { a: 1, b: 0, type: '≥', c: 0 },
+                        { a: 0, b: 1, type: '≥', c: 0 },
+                        { a: 1, b: 1, type: '≤', c: 3 }
+                    ]
+                },
+                bounded: {
+                    objective: { a: 3, b: 2, type: 'maximize' },
+                    constraints: [
+                        { a: 1, b: 0, type: '≥', c: 0 },
+                        { a: 0, b: 1, type: '≥', c: 0 },
+                        { a: 2, b: 1, type: '≤', c: 6 },
+                        { a: 1, b: 2, type: '≤', c: 6 },
+                        { a: 1, b: 0, type: '≤', c: 4 }
+                    ]
+                },
+                unbounded: {
+                    objective: { a: 1, b: 1, type: 'maximize' },
+                    constraints: [
+                        { a: 1, b: -1, type: '≤', c: 2 },
+                        { a: -1, b: 1, type: '≤', c: 2 }
+                    ]
+                },
+                infeasible: {
+                    objective: { a: 1, b: 1, type: 'minimize' },
+                    constraints: [
+                        { a: 1, b: 0, type: '≤', c: 1 },
+                        { a: 1, b: 0, type: '≥', c: 2 },
+                        { a: 0, b: 1, type: '≥', c: 0 }
+                    ]
+                },
+                degenerate: {
+                    objective: { a: 1, b: 0, type: 'minimize' },
+                    constraints: [
+                        { a: 1, b: 0, type: '≥', c: 0 },
+                        { a: 0, b: 1, type: '≥', c: 0 },
+                        { a: 1, b: 1, type: '≤', c: 2 },
+                        { a: 1, b: -1, type: '≤', c: 0 }
+                    ]
+                },
+                polytope: {
+                    objective: { a: 2, b: 3, type: 'maximize' },
+                    constraints: [
+                        { a: 1, b: 0, type: '≥', c: 0 },
+                        { a: 0, b: 1, type: '≥', c: 0 },
+                        { a: 3, b: 2, type: '≤', c: 18 },
+                        { a: 2, b: 3, type: '≤', c: 18 },
+                        { a: 1, b: 3, type: '≤', c: 12 },
+                        { a: 4, b: 1, type: '≤', c: 16 }
+                    ]
+                }
+            };
+            
+            const preset = presets[presetName];
+            if (!preset) return;
+            
+            // Set objective
+            document.getElementById('objA').value = preset.objective.a;
+            document.getElementById('objB').value = preset.objective.b;
+            document.getElementById('objType').value = preset.objective.type;
+            
+            // Set constraints
+            preset.constraints.forEach((constraint, index) => {
+                constraints.push({ ...constraint, id: Date.now() + index });
+            });
+            
+            updateObjective();
+            updateConstraintList();
+        }
+        
+        // Event listeners
+        document.getElementById('objA').addEventListener('input', updateObjective);
+        document.getElementById('objB').addEventListener('input', updateObjective);
+        document.getElementById('objType').addEventListener('change', updateObjective);
+        
+        document.getElementById('objectiveLevel').addEventListener('input', function() {
+            objectiveLevel = parseFloat(this.value);
+            document.getElementById('objectiveLevelValue').textContent = objectiveLevel.toFixed(1);
+            draw();
+        });
+        
+        // Initialize
+        loadPreset('simple');
+        draw();
+    </script>
+</body>
+</html>

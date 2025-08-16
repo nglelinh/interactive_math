@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVD (Singular Value Decomposition) - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .matrix-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .matrix-input input {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .preset-buttons button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .preset-buttons button:hover {
+            background: #555;
+        }
+        
+        .svd-display {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .matrix-component {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        
+        .u-matrix {
+            border-left: 3px solid #e74c3c;
+        }
+        
+        .sigma-matrix {
+            border-left: 3px solid #f39c12;
+        }
+        
+        .v-matrix {
+            border-left: 3px solid #2ecc71;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 350px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .step-display {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            border-left: 3px solid #ffff00;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>🔍 SVD Decomposition</strong><br/>
+                Interactive exploration of A = UΣV^T decomposition showing rotation-scaling-rotation.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Unit Circle (Original)</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Step 1: V^T (Rotation)</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Step 2: Σ (Scaling)</div>
+                    <div class="legend-item" style="color: #2ecc71;">🟢 Step 3: U (Final Rotation)</div>
+                    <div class="legend-item" style="color: #9b59b6;">🟣 Singular Vectors</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>2×2 Matrix Input</h3>
+                <div class="matrix-input">
+                    <input type="number" id="a11" step="0.1" value="3" placeholder="a₁₁">
+                    <input type="number" id="a12" step="0.1" value="1" placeholder="a₁₂">
+                    <input type="number" id="a21" step="0.1" value="1" placeholder="a₂₁">
+                    <input type="number" id="a22" step="0.1" value="2" placeholder="a₂₂">
+                </div>
+                <div class="preset-buttons">
+                    <button onclick="loadPreset('identity')">Identity</button>
+                    <button onclick="loadPreset('scale')">Scale</button>
+                    <button onclick="loadPreset('rotation')">Rotation</button>
+                    <button onclick="loadPreset('shear')">Shear</button>
+                    <button onclick="loadPreset('asymmetric')">Asymmetric</button>
+                    <button onclick="loadPreset('singular')">Near-Singular</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>SVD Decomposition: A = UΣV^T</h3>
+                <div id="svd-display" class="svd-display">
+                    <!-- SVD components will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Step-by-Step Animation</h3>
+                <div class="step-display" id="step-display">
+                    Step 1: Apply V^T (First Rotation)
+                </div>
+                <div class="slider-group">
+                    <label>Animation Progress:</label>
+                    <input type="range" id="animProgress" min="0" max="3" step="0.05" value="3">
+                    <div class="slider-value" id="animProgressValue">Complete (3.0)</div>
+                </div>
+                <div class="toggle-section">
+                    <div class="toggle-button" id="toggle-animation" onclick="toggleAnimation()">
+                        ▶ Auto Play
+                    </div>
+                    <div class="toggle-button" onclick="resetAnimation()">
+                        🔄 Reset
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-steps" onclick="toggleVisualization('steps')">
+                        Show Steps
+                    </div>
+                    <div class="toggle-button active" id="toggle-vectors" onclick="toggleVisualization('vectors')">
+                        Singular Vectors
+                    </div>
+                    <div class="toggle-button active" id="toggle-grid" onclick="toggleVisualization('grid')">
+                        Grid Lines
+                    </div>
+                    <div class="toggle-button active" id="toggle-labels" onclick="toggleVisualization('labels')">
+                        Labels
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 80;
+        
+        // Matrix elements
+        let matrix = {
+            a11: 3, a12: 1,
+            a21: 1, a22: 2
+        };
+        
+        // SVD components
+        let svdData = {
+            U: [[1, 0], [0, 1]],
+            S: [1, 1],
+            VT: [[1, 0], [0, 1]]
+        };
+        
+        // Animation state
+        let animationId = null;
+        let animationProgress = 3;
+        let isAnimating = false;
+        let animationSpeed = 0.02;
+        
+        // Visualization options
+        let showOptions = {
+            steps: true,
+            vectors: true,
+            grid: true,
+            labels: true
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function matrixMultiply(A, B) {
+            return [
+                [A[0][0]*B[0][0] + A[0][1]*B[1][0], A[0][0]*B[0][1] + A[0][1]*B[1][1]],
+                [A[1][0]*B[0][0] + A[1][1]*B[1][0], A[1][0]*B[0][1] + A[1][1]*B[1][1]]
+            ];
+        }
+        
+        function applyMatrix(point, mat) {
+            if (Array.isArray(mat)) {
+                // 2x2 matrix format
+                return {
+                    x: mat[0][0] * point.x + mat[0][1] * point.y,
+                    y: mat[1][0] * point.x + mat[1][1] * point.y
+                };
+            } else {
+                // Object format
+                return {
+                    x: mat.a11 * point.x + mat.a12 * point.y,
+                    y: mat.a21 * point.x + mat.a22 * point.y
+                };
+            }
+        }
+        
+        function calculateSVD() {
+            const a = matrix.a11;
+            const b = matrix.a12;
+            const c = matrix.a21;
+            const d = matrix.a22;
+            
+            // Compute A^T * A
+            const ATA = [
+                [a*a + c*c, a*b + c*d],
+                [a*b + c*d, b*b + d*d]
+            ];
+            
+            // Eigenvalues of A^T * A
+            const trace = ATA[0][0] + ATA[1][1];
+            const det = ATA[0][0] * ATA[1][1] - ATA[0][1] * ATA[1][0];
+            const discriminant = trace * trace - 4 * det;
+            
+            let lambda1, lambda2;
+            if (discriminant >= 0) {
+                const sqrt_disc = Math.sqrt(discriminant);
+                lambda1 = (trace + sqrt_disc) / 2;
+                lambda2 = (trace - sqrt_disc) / 2;
+            } else {
+                lambda1 = trace / 2;
+                lambda2 = trace / 2;
+            }
+            
+            // Singular values
+            const s1 = Math.sqrt(Math.max(0, lambda1));
+            const s2 = Math.sqrt(Math.max(0, lambda2));
+            
+            // V matrix (eigenvectors of A^T * A)
+            let v1 = [1, 0];
+            let v2 = [0, 1];
+            
+            if (Math.abs(ATA[0][1]) > 1e-10) {
+                const ratio1 = (lambda1 - ATA[0][0]) / ATA[0][1];
+                const norm1 = Math.sqrt(1 + ratio1 * ratio1);
+                v1 = [1 / norm1, ratio1 / norm1];
+                
+                const ratio2 = (lambda2 - ATA[0][0]) / ATA[0][1];
+                const norm2 = Math.sqrt(1 + ratio2 * ratio2);
+                v2 = [1 / norm2, ratio2 / norm2];
+            } else if (lambda1 !== lambda2) {
+                if (Math.abs(lambda1 - ATA[0][0]) < 1e-10) {
+                    v1 = [1, 0];
+                    v2 = [0, 1];
+                } else {
+                    v1 = [0, 1];
+                    v2 = [1, 0];
+                }
+            }
+            
+            const V = [v1, v2];
+            const VT = [[V[0][0], V[1][0]], [V[0][1], V[1][1]]]; // Transpose
+            
+            // U matrix calculation
+            let u1 = [1, 0];
+            let u2 = [0, 1];
+            
+            if (s1 > 1e-10) {
+                const Av1 = [a * v1[0] + b * v1[1], c * v1[0] + d * v1[1]];
+                const norm = Math.sqrt(Av1[0] * Av1[0] + Av1[1] * Av1[1]);
+                u1 = [Av1[0] / norm, Av1[1] / norm];
+            }
+            
+            if (s2 > 1e-10) {
+                const Av2 = [a * v2[0] + b * v2[1], c * v2[0] + d * v2[1]];
+                const norm = Math.sqrt(Av2[0] * Av2[0] + Av2[1] * Av2[1]);
+                u2 = [Av2[0] / norm, Av2[1] / norm];
+            }
+            
+            // Ensure proper orientation
+            if (u1[0] * u2[1] - u1[1] * u2[0] < 0) {
+                u2 = [-u2[0], -u2[1]];
+            }
+            
+            const U = [[u1[0], u2[0]], [u1[1], u2[1]]];
+            
+            svdData = {
+                U: U,
+                S: [s1, s2],
+                VT: VT
+            };
+            
+            updateSVDDisplay();
+        }
+        
+        function updateSVDDisplay() {
+            const display = document.getElementById('svd-display');
+            const U = svdData.U;
+            const S = svdData.S;
+            const VT = svdData.VT;
+            
+            const html = `
+                <div class="matrix-component u-matrix">
+                    <strong>U (Final Rotation)</strong><br/>
+                    [${U[0][0].toFixed(3)}  ${U[0][1].toFixed(3)}]<br/>
+                    [${U[1][0].toFixed(3)}  ${U[1][1].toFixed(3)}]
+                </div>
+                <div class="matrix-component sigma-matrix">
+                    <strong>Σ (Scaling)</strong><br/>
+                    [${S[0].toFixed(3)}  0.000]<br/>
+                    [0.000  ${S[1].toFixed(3)}]
+                </div>
+                <div class="matrix-component v-matrix">
+                    <strong>V^T (First Rotation)</strong><br/>
+                    [${VT[0][0].toFixed(3)}  ${VT[0][1].toFixed(3)}]<br/>
+                    [${VT[1][0].toFixed(3)}  ${VT[1][1].toFixed(3)}]
+                </div>
+            `;
+            
+            display.innerHTML = html;
+        }
+        
+        function drawGrid() {
+            if (!showOptions.grid) return;
+            
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -10; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawCircle(transformation = null, color = '#0ff', lineWidth = 2) {
+            const numPoints = 100;
+            const points = [];
+            
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * 2 * Math.PI;
+                let point = { x: Math.cos(angle), y: Math.sin(angle) };
+                
+                if (transformation) {
+                    point = applyMatrix(point, transformation);
+                }
+                
+                points.push(point);
+            }
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i];
+                if (i === 0) {
+                    ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
+                } else {
+                    ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y));
+                }
+            }
+            
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
+        function drawArrow(from, to, color, lineWidth = 2) {
+            const fromX = toCanvasX(from.x);
+            const fromY = toCanvasY(from.y);
+            const toX = toCanvasX(to.x);
+            const toY = toCanvasY(to.y);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            
+            // Arrow body
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const headLength = 8;
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle - Math.PI / 6),
+                toY - headLength * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle + Math.PI / 6),
+                toY - headLength * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+        }
+        
+        function drawSingularVectors() {
+            if (!showOptions.vectors) return;
+            
+            const U = svdData.U;
+            const VT = svdData.VT;
+            const S = svdData.S;
+            
+            // Draw V vectors (right singular vectors)
+            const v1 = { x: VT[0][0], y: VT[1][0] };
+            const v2 = { x: VT[0][1], y: VT[1][1] };
+            
+            drawArrow({ x: 0, y: 0 }, { x: v1.x * 1.5, y: v1.y * 1.5 }, '#2ecc71', 2);
+            drawArrow({ x: 0, y: 0 }, { x: v2.x * 1.5, y: v2.y * 1.5 }, '#2ecc71', 2);
+            
+            // Draw U vectors (left singular vectors)
+            const u1 = { x: U[0][0] * S[0], y: U[1][0] * S[0] };
+            const u2 = { x: U[0][1] * S[1], y: U[1][1] * S[1] };
+            
+            drawArrow({ x: 0, y: 0 }, { x: u1.x * 0.8, y: u1.y * 0.8 }, '#e74c3c', 2);
+            drawArrow({ x: 0, y: 0 }, { x: u2.x * 0.8, y: u2.y * 0.8 }, '#e74c3c', 2);
+            
+            if (showOptions.labels) {
+                ctx.fillStyle = '#2ecc71';
+                ctx.font = '12px Arial';
+                ctx.fillText('v₁', toCanvasX(v1.x * 1.7), toCanvasY(v1.y * 1.7));
+                ctx.fillText('v₂', toCanvasX(v2.x * 1.7), toCanvasY(v2.y * 1.7));
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillText('σ₁u₁', toCanvasX(u1.x * 0.9), toCanvasY(u1.y * 0.9));
+                ctx.fillText('σ₂u₂', toCanvasX(u2.x * 0.9), toCanvasY(u2.y * 0.9));
+            }
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            
+            // Draw original unit circle
+            drawCircle(null, '#0ff', 2);
+            
+            if (showOptions.steps) {
+                const progress = animationProgress;
+                
+                if (progress >= 1) {
+                    // Step 1: Apply V^T
+                    drawCircle(svdData.VT, '#e74c3c', 2);
+                }
+                
+                if (progress >= 2) {
+                    // Step 2: Apply Σ (scaling)
+                    const sigma = [[svdData.S[0], 0], [0, svdData.S[1]]];
+                    const step2Matrix = matrixMultiply(sigma, svdData.VT);
+                    drawCircle(step2Matrix, '#f39c12', 2);
+                }
+                
+                if (progress >= 3) {
+                    // Step 3: Apply U (final transformation)
+                    drawCircle(matrix, '#2ecc71', 3);
+                }
+                
+                // Intermediate steps for smooth animation
+                if (progress > 0 && progress < 1) {
+                    const t = progress;
+                    const interpolatedVT = [
+                        [1 + t * (svdData.VT[0][0] - 1), t * svdData.VT[0][1]],
+                        [t * svdData.VT[1][0], 1 + t * (svdData.VT[1][1] - 1)]
+                    ];
+                    drawCircle(interpolatedVT, '#e74c3c', 2);
+                } else if (progress > 1 && progress < 2) {
+                    const t = progress - 1;
+                    const sigma = [[1 + t * (svdData.S[0] - 1), 0], [0, 1 + t * (svdData.S[1] - 1)]];
+                    const step2Matrix = matrixMultiply(sigma, svdData.VT);
+                    drawCircle(step2Matrix, '#f39c12', 2);
+                } else if (progress > 2 && progress < 3) {
+                    const t = progress - 2;
+                    const sigma = [[svdData.S[0], 0], [0, svdData.S[1]]];
+                    const step2Matrix = matrixMultiply(sigma, svdData.VT);
+                    const partialU = [
+                        [1 + t * (svdData.U[0][0] - 1), t * svdData.U[0][1]],
+                        [t * svdData.U[1][0], 1 + t * (svdData.U[1][1] - 1)]
+                    ];
+                    const step3Matrix = matrixMultiply(partialU, step2Matrix);
+                    drawCircle(step3Matrix, '#2ecc71', 3);
+                }
+            } else {
+                // Just show final transformation
+                drawCircle(matrix, '#2ecc71', 3);
+            }
+            
+            drawSingularVectors();
+        }
+        
+        function updateStepDisplay() {
+            const progress = animationProgress;
+            const display = document.getElementById('step-display');
+            
+            if (progress < 1) {
+                display.textContent = "Step 1: Apply V^T (First Rotation)";
+                display.style.borderLeftColor = "#e74c3c";
+            } else if (progress < 2) {
+                display.textContent = "Step 2: Apply Σ (Scaling)";
+                display.style.borderLeftColor = "#f39c12";
+            } else if (progress < 3) {
+                display.textContent = "Step 3: Apply U (Final Rotation)";
+                display.style.borderLeftColor = "#2ecc71";
+            } else {
+                display.textContent = "Complete: A = UΣV^T";
+                display.style.borderLeftColor = "#0ff";
+            }
+        }
+        
+        function updateMatrix() {
+            matrix.a11 = parseFloat(document.getElementById('a11').value) || 0;
+            matrix.a12 = parseFloat(document.getElementById('a12').value) || 0;
+            matrix.a21 = parseFloat(document.getElementById('a21').value) || 0;
+            matrix.a22 = parseFloat(document.getElementById('a22').value) || 0;
+            
+            calculateSVD();
+            draw();
+        }
+        
+        function loadPreset(type) {
+            const presets = {
+                identity: [1, 0, 0, 1],
+                scale: [2, 0, 0, 0.5],
+                rotation: [0.707, -0.707, 0.707, 0.707],
+                shear: [1, 0.5, 0.3, 1],
+                asymmetric: [2, 1, 0.5, 1.5],
+                singular: [2, 1, 2, 1]
+            };
+            
+            const values = presets[type];
+            document.getElementById('a11').value = values[0];
+            document.getElementById('a12').value = values[1];
+            document.getElementById('a21').value = values[2];
+            document.getElementById('a22').value = values[3];
+            
+            updateMatrix();
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            const button = document.getElementById('toggle-animation');
+            
+            if (isAnimating) {
+                button.textContent = '⏸ Pause';
+                animate();
+            } else {
+                button.textContent = '▶ Auto Play';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        }
+        
+        function animate() {
+            if (!isAnimating) return;
+            
+            animationProgress += animationSpeed;
+            if (animationProgress > 3) {
+                animationProgress = 0;
+            }
+            
+            document.getElementById('animProgress').value = animationProgress;
+            document.getElementById('animProgressValue').textContent = 
+                animationProgress === 3 ? 'Complete (3.0)' : `Step ${Math.floor(animationProgress) + 1} (${animationProgress.toFixed(2)})`;
+            
+            updateStepDisplay();
+            draw();
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function resetAnimation() {
+            isAnimating = false;
+            animationProgress = 0;
+            document.getElementById('toggle-animation').textContent = '▶ Auto Play';
+            document.getElementById('animProgress').value = 0;
+            document.getElementById('animProgressValue').textContent = 'Step 1 (0.00)';
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            updateStepDisplay();
+            draw();
+        }
+        
+        // Event listeners
+        document.getElementById('a11').addEventListener('input', updateMatrix);
+        document.getElementById('a12').addEventListener('input', updateMatrix);
+        document.getElementById('a21').addEventListener('input', updateMatrix);
+        document.getElementById('a22').addEventListener('input', updateMatrix);
+        
+        document.getElementById('animProgress').addEventListener('input', function() {
+            animationProgress = parseFloat(this.value);
+            document.getElementById('animProgressValue').textContent = 
+                animationProgress === 3 ? 'Complete (3.0)' : `Step ${Math.floor(animationProgress) + 1} (${animationProgress.toFixed(2)})`;
+            updateStepDisplay();
+            draw();
+        });
+        
+        // Initialize
+        updateMatrix();
+        updateStepDisplay();
+        draw();
+    </script>
+</body>
+</html>

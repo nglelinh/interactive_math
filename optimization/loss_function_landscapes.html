@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loss Function Landscapes - 3D Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #renderer {
+            background: #000;
+        }
+        
+        .controls {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .loss-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .loss-button {
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .loss-button:hover {
+            background: #555;
+        }
+        
+        .loss-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .loss-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .optimization-display {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffff00;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .optimizer-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .optimizer-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+        }
+        
+        .optimizer-button.active {
+            background: #f39c12;
+            color: #000;
+        }
+        
+        .stats-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            margin-bottom: 15px;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <div id="renderer"></div>
+            <div class="info-panel">
+                <strong>🏔️ Loss Function Landscapes</strong><br/>
+                Interactive 3D visualization of cost functions and optimization paths in machine learning.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Loss Surface</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Gradient Descent Path</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Newton's Method Path</div>
+                    <div class="legend-item" style="color: #2ecc71;">🟢 Adam Optimizer Path</div>
+                    <div class="legend-item" style="color: #9b59b6;">🟣 Global Minimum</div>
+                    <div class="legend-item" style="color: #e67e22;">🟤 Local Minima</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Loss Function Selection</h3>
+                <div class="loss-selector">
+                    <button class="loss-button active" onclick="selectLossFunction('quadratic')">Quadratic</button>
+                    <button class="loss-button" onclick="selectLossFunction('rosenbrock')">Rosenbrock</button>
+                    <button class="loss-button" onclick="selectLossFunction('himmelblau')">Himmelblau</button>
+                    <button class="loss-button" onclick="selectLossFunction('beale')">Beale</button>
+                    <button class="loss-button" onclick="selectLossFunction('ackley')">Ackley</button>
+                    <button class="loss-button" onclick="selectLossFunction('rastrigin')">Rastrigin</button>
+                    <button class="loss-button" onclick="selectLossFunction('sphere')">Sphere</button>
+                    <button class="loss-button" onclick="selectLossFunction('booth')">Booth</button>
+                    <button class="loss-button" onclick="selectLossFunction('matyas')">Matyas</button>
+                    <button class="loss-button" onclick="selectLossFunction('mccormick')">McCormick</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Loss Function</h3>
+                <div id="loss-info" class="loss-info">
+                    <!-- Loss function information will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Optimization Algorithm</h3>
+                <div class="optimizer-controls">
+                    <button class="optimizer-button active" onclick="selectOptimizer('gd')">Gradient Descent</button>
+                    <button class="optimizer-button" onclick="selectOptimizer('newton')">Newton</button>
+                    <button class="optimizer-button" onclick="selectOptimizer('adam')">Adam</button>
+                    <button class="optimizer-button" onclick="selectOptimizer('momentum')">Momentum</button>
+                    <button class="optimizer-button" onclick="selectOptimizer('rmsprop')">RMSprop</button>
+                    <button class="optimizer-button" onclick="selectOptimizer('adagrad')">AdaGrad</button>
+                </div>
+                <div class="slider-group">
+                    <label>Learning Rate:</label>
+                    <input type="range" id="learningRate" min="0.001" max="0.5" step="0.001" value="0.1">
+                    <div class="slider-value" id="learningRateValue">0.100</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-surface" onclick="toggleVisualization('surface')">
+                        Loss Surface
+                    </div>
+                    <div class="toggle-button active" id="toggle-contour" onclick="toggleVisualization('contour')">
+                        Contour Lines
+                    </div>
+                    <div class="toggle-button active" id="toggle-gradient" onclick="toggleVisualization('gradient')">
+                        Gradient Field
+                    </div>
+                    <div class="toggle-button active" id="toggle-path" onclick="toggleVisualization('path')">
+                        Optimization Path
+                    </div>
+                    <div class="toggle-button" id="toggle-wireframe" onclick="toggleVisualization('wireframe')">
+                        Wireframe
+                    </div>
+                    <div class="toggle-button" id="toggle-animation" onclick="toggleVisualization('animation')">
+                        Live Animation
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Starting Point</h3>
+                <div class="slider-group">
+                    <label>Start X:</label>
+                    <input type="range" id="startX" min="-3" max="3" step="0.1" value="2">
+                    <div class="slider-value" id="startXValue">2.0</div>
+                </div>
+                <div class="slider-group">
+                    <label>Start Y:</label>
+                    <input type="range" id="startY" min="-3" max="3" step="0.1" value="2">
+                    <div class="slider-value" id="startYValue">2.0</div>
+                </div>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="runOptimization()">
+                        🏃 Run Optimization
+                    </div>
+                    <div class="toggle-button" onclick="clearPaths()">
+                        🧹 Clear Paths
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Optimization Statistics</h3>
+                <div id="stats-display" class="stats-display">
+                    <!-- Optimization statistics will be displayed here -->
+                </div>
+                <div id="optimization-display" class="optimization-display">
+                    Click "Run Optimization" to start
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>View Controls</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="resetCamera()">
+                        📷 Reset Camera
+                    </div>
+                    <div class="toggle-button" onclick="topView()">
+                        ⬇️ Top View
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Use ES6 modules with import maps -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        const container = document.getElementById('renderer');
+        const containerRect = container.getBoundingClientRect();
+        renderer.setSize(containerRect.width, containerRect.height);
+        renderer.setClearColor(0x111111);
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        camera.position.set(8, 8, 8);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        // Global variables
+        let currentLossFunction = 'quadratic';
+        let currentOptimizer = 'gd';
+        let learningRate = 0.1;
+        let startX = 2;
+        let startY = 2;
+        let optimizationPaths = [];
+        let animationId = null;
+        
+        // Visualization options
+        let showOptions = {
+            surface: true,
+            contour: true,
+            gradient: true,
+            path: true,
+            wireframe: false,
+            animation: false
+        };
+
+        // Scene objects
+        let lossSurface = null;
+        let contourLines = null;
+        let gradientField = null;
+        let pathLines = [];
+        let minima = [];
+
+        // Loss function definitions
+        const lossFunctions = {
+            quadratic: {
+                name: 'Quadratic Function',
+                formula: 'f(x,y) = x² + y²',
+                func: (x, y) => x*x + y*y,
+                gradient: (x, y) => [2*x, 2*y],
+                hessian: (x, y) => [[2, 0], [0, 2]],
+                globalMin: [0, 0],
+                range: [-3, 3],
+                description: 'Simple convex quadratic bowl - ideal for optimization'
+            },
+            rosenbrock: {
+                name: 'Rosenbrock Function',
+                formula: 'f(x,y) = (1-x)² + 100(y-x²)²',
+                func: (x, y) => Math.pow(1-x, 2) + 100 * Math.pow(y - x*x, 2),
+                gradient: (x, y) => [
+                    -2*(1-x) - 400*x*(y - x*x),
+                    200*(y - x*x)
+                ],
+                hessian: (x, y) => [
+                    [2 + 1200*x*x - 400*y, -400*x],
+                    [-400*x, 200]
+                ],
+                globalMin: [1, 1],
+                range: [-2, 2],
+                description: 'Classic banana-shaped valley - challenging for optimization'
+            },
+            himmelblau: {
+                name: "Himmelblau's Function",
+                formula: 'f(x,y) = (x²+y-11)² + (x+y²-7)²',
+                func: (x, y) => Math.pow(x*x + y - 11, 2) + Math.pow(x + y*y - 7, 2),
+                gradient: (x, y) => [
+                    4*x*(x*x + y - 11) + 2*(x + y*y - 7),
+                    2*(x*x + y - 11) + 4*y*(x + y*y - 7)
+                ],
+                hessian: (x, y) => [
+                    [12*x*x + 4*y - 42, 4*x + 4*y],
+                    [4*x + 4*y, 12*y*y + 4*x - 26]
+                ],
+                globalMin: [3, 2],
+                range: [-5, 5],
+                description: 'Multi-modal function with 4 identical global minima'
+            },
+            beale: {
+                name: 'Beale Function',
+                formula: 'f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)²',
+                func: (x, y) => {
+                    const t1 = 1.5 - x + x*y;
+                    const t2 = 2.25 - x + x*y*y;
+                    const t3 = 2.625 - x + x*y*y*y;
+                    return t1*t1 + t2*t2 + t3*t3;
+                },
+                gradient: (x, y) => {
+                    const t1 = 1.5 - x + x*y;
+                    const t2 = 2.25 - x + x*y*y;
+                    const t3 = 2.625 - x + x*y*y*y;
+                    return [
+                        2*t1*(-1 + y) + 2*t2*(-1 + y*y) + 2*t3*(-1 + y*y*y),
+                        2*t1*x + 2*t2*x*2*y + 2*t3*x*3*y*y
+                    ];
+                },
+                hessian: (x, y) => [[0, 0], [0, 0]], // Simplified
+                globalMin: [3, 0.5],
+                range: [-4.5, 4.5],
+                description: 'Non-convex function with narrow global minimum'
+            },
+            ackley: {
+                name: 'Ackley Function',
+                formula: 'f(x,y) = -20exp(-0.2√(x²+y²)) - exp(cos(2πx)+cos(2πy)) + 20 + e',
+                func: (x, y) => {
+                    const r = Math.sqrt(x*x + y*y);
+                    return -20 * Math.exp(-0.2 * r) - Math.exp(0.5*(Math.cos(2*Math.PI*x) + Math.cos(2*Math.PI*y))) + 20 + Math.E;
+                },
+                gradient: (x, y) => {
+                    const r = Math.sqrt(x*x + y*y);
+                    const exp1 = Math.exp(-0.2 * r);
+                    const exp2 = Math.exp(0.5*(Math.cos(2*Math.PI*x) + Math.cos(2*Math.PI*y)));
+                    return [
+                        4*x*exp1/r + Math.PI*exp2*Math.sin(2*Math.PI*x),
+                        4*y*exp1/r + Math.PI*exp2*Math.sin(2*Math.PI*y)
+                    ];
+                },
+                hessian: (x, y) => [[0, 0], [0, 0]], // Simplified
+                globalMin: [0, 0],
+                range: [-5, 5],
+                description: 'Highly multi-modal function with many local minima'
+            },
+            rastrigin: {
+                name: 'Rastrigin Function',
+                formula: 'f(x,y) = 20 + x² + y² - 10cos(2πx) - 10cos(2πy)',
+                func: (x, y) => 20 + x*x + y*y - 10*Math.cos(2*Math.PI*x) - 10*Math.cos(2*Math.PI*y),
+                gradient: (x, y) => [
+                    2*x + 20*Math.PI*Math.sin(2*Math.PI*x),
+                    2*y + 20*Math.PI*Math.sin(2*Math.PI*y)
+                ],
+                hessian: (x, y) => [[0, 0], [0, 0]], // Simplified
+                globalMin: [0, 0],
+                range: [-5, 5],
+                description: 'Highly multi-modal with regularly distributed local minima'
+            },
+            sphere: {
+                name: 'Sphere Function',
+                formula: 'f(x,y) = x² + y²',
+                func: (x, y) => x*x + y*y,
+                gradient: (x, y) => [2*x, 2*y],
+                hessian: (x, y) => [[2, 0], [0, 2]],
+                globalMin: [0, 0],
+                range: [-3, 3],
+                description: 'Simple spherical function - convex and unimodal'
+            },
+            booth: {
+                name: 'Booth Function',
+                formula: 'f(x,y) = (x + 2y - 7)² + (2x + y - 5)²',
+                func: (x, y) => Math.pow(x + 2*y - 7, 2) + Math.pow(2*x + y - 5, 2),
+                gradient: (x, y) => [
+                    2*(x + 2*y - 7) + 4*(2*x + y - 5),
+                    4*(x + 2*y - 7) + 2*(2*x + y - 5)
+                ],
+                hessian: (x, y) => [[10, 8], [8, 10]],
+                globalMin: [1, 3],
+                range: [-10, 10],
+                description: 'Convex quadratic function with global minimum at (1,3)'
+            },
+            matyas: {
+                name: 'Matyas Function',
+                formula: 'f(x,y) = 0.26(x² + y²) - 0.48xy',
+                func: (x, y) => 0.26*(x*x + y*y) - 0.48*x*y,
+                gradient: (x, y) => [0.52*x - 0.48*y, 0.52*y - 0.48*x],
+                hessian: (x, y) => [[0.52, -0.48], [-0.48, 0.52]],
+                globalMin: [0, 0],
+                range: [-10, 10],
+                description: 'Convex function with correlated variables'
+            },
+            mccormick: {
+                name: 'McCormick Function',
+                formula: 'f(x,y) = sin(x + y) + (x - y)² - 1.5x + 2.5y + 1',
+                func: (x, y) => Math.sin(x + y) + Math.pow(x - y, 2) - 1.5*x + 2.5*y + 1,
+                gradient: (x, y) => [
+                    Math.cos(x + y) + 2*(x - y) - 1.5,
+                    Math.cos(x + y) - 2*(x - y) + 2.5
+                ],
+                hessian: (x, y) => [
+                    [-Math.sin(x + y) + 2, -Math.sin(x + y) - 2],
+                    [-Math.sin(x + y) - 2, -Math.sin(x + y) + 2]
+                ],
+                globalMin: [-0.54719, -1.54719],
+                range: [-3, 4],
+                description: 'Non-convex function with trigonometric components'
+            }
+        };
+
+        // Optimizer implementations
+        const optimizers = {
+            gd: {
+                name: 'Gradient Descent',
+                step: (x, y, grad, lr) => [x - lr * grad[0], y - lr * grad[1]]
+            },
+            newton: {
+                name: 'Newton\'s Method',
+                step: (x, y, grad, lr) => {
+                    const func = lossFunctions[currentLossFunction];
+                    const H = func.hessian(x, y);
+                    const det = H[0][0] * H[1][1] - H[0][1] * H[1][0];
+                    if (Math.abs(det) < 1e-10) return [x - lr * grad[0], y - lr * grad[1]];
+                    
+                    const invH = [
+                        [H[1][1]/det, -H[0][1]/det],
+                        [-H[1][0]/det, H[0][0]/det]
+                    ];
+                    return [
+                        x - lr * (invH[0][0] * grad[0] + invH[0][1] * grad[1]),
+                        y - lr * (invH[1][0] * grad[0] + invH[1][1] * grad[1])
+                    ];
+                }
+            },
+            adam: {
+                name: 'Adam Optimizer',
+                m: [0, 0],
+                v: [0, 0],
+                t: 0,
+                step: (x, y, grad, lr) => {
+                    const adam = optimizers.adam;
+                    adam.t++;
+                    const beta1 = 0.9, beta2 = 0.999, eps = 1e-8;
+                    
+                    adam.m[0] = beta1 * adam.m[0] + (1 - beta1) * grad[0];
+                    adam.m[1] = beta1 * adam.m[1] + (1 - beta1) * grad[1];
+                    adam.v[0] = beta2 * adam.v[0] + (1 - beta2) * grad[0] * grad[0];
+                    adam.v[1] = beta2 * adam.v[1] + (1 - beta2) * grad[1] * grad[1];
+                    
+                    const mHat0 = adam.m[0] / (1 - Math.pow(beta1, adam.t));
+                    const mHat1 = adam.m[1] / (1 - Math.pow(beta1, adam.t));
+                    const vHat0 = adam.v[0] / (1 - Math.pow(beta2, adam.t));
+                    const vHat1 = adam.v[1] / (1 - Math.pow(beta2, adam.t));
+                    
+                    return [
+                        x - lr * mHat0 / (Math.sqrt(vHat0) + eps),
+                        y - lr * mHat1 / (Math.sqrt(vHat1) + eps)
+                    ];
+                }
+            },
+            momentum: {
+                name: 'Momentum',
+                velocity: [0, 0],
+                step: (x, y, grad, lr) => {
+                    const momentum = optimizers.momentum;
+                    const gamma = 0.9;
+                    momentum.velocity[0] = gamma * momentum.velocity[0] + lr * grad[0];
+                    momentum.velocity[1] = gamma * momentum.velocity[1] + lr * grad[1];
+                    return [x - momentum.velocity[0], y - momentum.velocity[1]];
+                }
+            },
+            rmsprop: {
+                name: 'RMSprop',
+                cache: [0, 0],
+                step: (x, y, grad, lr) => {
+                    const rmsprop = optimizers.rmsprop;
+                    const decay = 0.9, eps = 1e-8;
+                    rmsprop.cache[0] = decay * rmsprop.cache[0] + (1 - decay) * grad[0] * grad[0];
+                    rmsprop.cache[1] = decay * rmsprop.cache[1] + (1 - decay) * grad[1] * grad[1];
+                    return [
+                        x - lr * grad[0] / (Math.sqrt(rmsprop.cache[0]) + eps),
+                        y - lr * grad[1] / (Math.sqrt(rmsprop.cache[1]) + eps)
+                    ];
+                }
+            },
+            adagrad: {
+                name: 'AdaGrad',
+                cache: [0, 0],
+                step: (x, y, grad, lr) => {
+                    const adagrad = optimizers.adagrad;
+                    const eps = 1e-8;
+                    adagrad.cache[0] += grad[0] * grad[0];
+                    adagrad.cache[1] += grad[1] * grad[1];
+                    return [
+                        x - lr * grad[0] / (Math.sqrt(adagrad.cache[0]) + eps),
+                        y - lr * grad[1] / (Math.sqrt(adagrad.cache[1]) + eps)
+                    ];
+                }
+            }
+        };
+
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+
+        function createLossSurface() {
+            if (lossSurface) {
+                scene.remove(lossSurface);
+                lossSurface.geometry.dispose();
+                lossSurface.material.dispose();
+            }
+
+            const func = lossFunctions[currentLossFunction];
+            const range = func.range;
+            const steps = 60;
+            const geometry = new THREE.PlaneGeometry(range[1] - range[0], range[1] - range[0], steps, steps);
+            const positions = geometry.attributes.position;
+            const colors = [];
+
+            let minZ = Infinity, maxZ = -Infinity;
+
+            // First pass: calculate Z values and find min/max
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i);
+                const y = positions.getY(i);
+                const z = func.func(x, y);
+                
+                if (isFinite(z)) {
+                    positions.setZ(i, Math.min(z, 20)); // Clamp extreme values
+                    minZ = Math.min(minZ, z);
+                    maxZ = Math.max(maxZ, z);
+                } else {
+                    positions.setZ(i, 20);
+                }
+            }
+
+            // Second pass: assign colors based on height
+            for (let i = 0; i < positions.count; i++) {
+                const z = positions.getZ(i);
+                const t = (z - minZ) / (maxZ - minZ);
+                
+                // Color gradient: blue (low) -> green -> yellow -> red (high)
+                let r, g, b;
+                if (t < 0.25) {
+                    r = 0;
+                    g = t * 4;
+                    b = 1;
+                } else if (t < 0.5) {
+                    r = (t - 0.25) * 4;
+                    g = 1;
+                    b = 1 - (t - 0.25) * 4;
+                } else if (t < 0.75) {
+                    r = 1;
+                    g = 1 - (t - 0.5) * 4;
+                    b = 0;
+                } else {
+                    r = 1;
+                    g = 0;
+                    b = (t - 0.75) * 4;
+                }
+                
+                colors.push(r, g, b);
+            }
+
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.computeVertexNormals();
+
+            const material = new THREE.MeshLambertMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: showOptions.wireframe ? 0.3 : 0.9,
+                wireframe: showOptions.wireframe,
+                side: THREE.DoubleSide
+            });
+
+            lossSurface = new THREE.Mesh(geometry, material);
+            scene.add(lossSurface);
+        }
+
+        function createContourLines() {
+            if (contourLines) {
+                scene.remove(contourLines);
+                contourLines = null;
+            }
+
+            if (!showOptions.contour) return;
+
+            const func = lossFunctions[currentLossFunction];
+            const range = func.range;
+            const group = new THREE.Group();
+            
+            // Create contour lines at different height levels
+            const levels = 10;
+            const minVal = func.func(0, 0); // Approximate minimum value
+            const maxVal = func.func(range[1], range[1]); // Approximate maximum value
+            
+            for (let level = 0; level < levels; level++) {
+                const value = minVal + (maxVal - minVal) * (level + 1) / (levels + 1);
+                if (value > 0 && value < 100) {
+                    const points = [];
+                    const step = 0.1;
+                    
+                    for (let x = range[0]; x <= range[1]; x += step) {
+                        for (let y = range[0]; y <= range[1]; y += step) {
+                            const z = func.func(x, y);
+                            if (Math.abs(z - value) < step * 2) {
+                                points.push(new THREE.Vector3(x, y, 0.01));
+                            }
+                        }
+                    }
+                    
+                    if (points.length > 0) {
+                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                        const material = new THREE.PointsMaterial({
+                            color: 0x888888,
+                            size: 0.02,
+                            transparent: true,
+                            opacity: 0.6
+                        });
+                        const contour = new THREE.Points(geometry, material);
+                        group.add(contour);
+                    }
+                }
+            }
+            
+            contourLines = group;
+            scene.add(contourLines);
+        }
+
+        function createGradientField() {
+            if (gradientField) {
+                scene.remove(gradientField);
+                gradientField = null;
+            }
+
+            if (!showOptions.gradient) return;
+
+            const func = lossFunctions[currentLossFunction];
+            const range = func.range;
+            const group = new THREE.Group();
+            const step = (range[1] - range[0]) / 10;
+
+            for (let x = range[0]; x <= range[1]; x += step) {
+                for (let y = range[0]; y <= range[1]; y += step) {
+                    const grad = func.gradient(x, y);
+                    const magnitude = Math.sqrt(grad[0] * grad[0] + grad[1] * grad[1]);
+                    
+                    if (magnitude > 0.01) {
+                        const arrowLength = Math.min(0.5, magnitude * 0.1);
+                        const direction = new THREE.Vector3(-grad[0], -grad[1], 0).normalize();
+                        const origin = new THREE.Vector3(x, y, 0.1);
+                        
+                        const arrowHelper = new THREE.ArrowHelper(direction, origin, arrowLength, 0x888888, arrowLength * 0.3, arrowLength * 0.2);
+                        arrowHelper.line.material.transparent = true;
+                        arrowHelper.line.material.opacity = 0.6;
+                        arrowHelper.cone.material.transparent = true;
+                        arrowHelper.cone.material.opacity = 0.6;
+                        group.add(arrowHelper);
+                    }
+                }
+            }
+
+            gradientField = group;
+            scene.add(gradientField);
+        }
+
+        function createOptimizationPath(path, color) {
+            if (path.length < 2) return null;
+
+            const points = path.map(point => new THREE.Vector3(point[0], point[1], 0.2));
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: color, linewidth: 3 });
+            const line = new THREE.Line(geometry, material);
+
+            // Add points at each step
+            const pointGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+            const pointMaterial = new THREE.MeshBasicMaterial({ color: color });
+            
+            path.forEach((point, index) => {
+                const sphere = new THREE.Mesh(pointGeometry, pointMaterial);
+                sphere.position.set(point[0], point[1], 0.2);
+                line.add(sphere);
+            });
+
+            return line;
+        }
+
+        function runOptimization() {
+            clearPaths();
+            resetOptimizer();
+
+            const func = lossFunctions[currentLossFunction];
+            const optimizer = optimizers[currentOptimizer];
+            const maxIterations = 100;
+            const tolerance = 1e-6;
+            
+            let x = startX;
+            let y = startY;
+            const path = [[x, y]];
+            
+            let prevLoss = func.func(x, y);
+            let convergenceData = [];
+            
+            for (let i = 0; i < maxIterations; i++) {
+                const grad = func.gradient(x, y);
+                const gradMagnitude = Math.sqrt(grad[0] * grad[0] + grad[1] * grad[1]);
+                
+                if (gradMagnitude < tolerance) break;
+                
+                const newPos = optimizer.step(x, y, grad, learningRate);
+                x = newPos[0];
+                y = newPos[1];
+                
+                const currentLoss = func.func(x, y);
+                path.push([x, y]);
+                convergenceData.push({
+                    iteration: i + 1,
+                    loss: currentLoss,
+                    gradMagnitude: gradMagnitude,
+                    x: x,
+                    y: y
+                });
+                
+                // Early stopping if loss increases significantly (divergence)
+                if (currentLoss > prevLoss * 10 && currentLoss > 100) break;
+                
+                prevLoss = currentLoss;
+            }
+
+            // Create and add path visualization
+            const colors = {
+                gd: 0xe74c3c,
+                newton: 0xf39c12,
+                adam: 0x2ecc71,
+                momentum: 0x3498db,
+                rmsprop: 0x9b59b6,
+                adagrad: 0xe67e22
+            };
+
+            if (showOptions.path) {
+                const pathLine = createOptimizationPath(path, colors[currentOptimizer]);
+                if (pathLine) {
+                    pathLines.push(pathLine);
+                    scene.add(pathLine);
+                }
+            }
+
+            // Update statistics display
+            updateOptimizationStats(convergenceData, path);
+        }
+
+        function updateOptimizationStats(convergenceData, path) {
+            const func = lossFunctions[currentLossFunction];
+            const finalPoint = path[path.length - 1];
+            const finalLoss = func.func(finalPoint[0], finalPoint[1]);
+            const globalMin = func.globalMin;
+            const distanceToGlobal = Math.sqrt(
+                Math.pow(finalPoint[0] - globalMin[0], 2) + 
+                Math.pow(finalPoint[1] - globalMin[1], 2)
+            );
+
+            document.getElementById('stats-display').innerHTML = `
+                <strong>Optimization Results:</strong><br/>
+                Optimizer: ${optimizers[currentOptimizer].name}<br/>
+                Iterations: ${convergenceData.length}<br/>
+                Final Loss: ${finalLoss.toFixed(6)}<br/>
+                Final Point: (${finalPoint[0].toFixed(3)}, ${finalPoint[1].toFixed(3)})<br/>
+                Distance to Global Min: ${distanceToGlobal.toFixed(4)}
+            `;
+
+            document.getElementById('optimization-display').innerHTML = `
+                <strong>Convergence Analysis:</strong><br/>
+                Starting Loss: ${convergenceData[0]?.loss.toFixed(6) || 'N/A'}<br/>
+                Final Loss: ${finalLoss.toFixed(6)}<br/>
+                Loss Reduction: ${convergenceData[0] ? ((convergenceData[0].loss - finalLoss) / convergenceData[0].loss * 100).toFixed(2) + '%' : 'N/A'}<br/>
+                Final Gradient Magnitude: ${convergenceData[convergenceData.length - 1]?.gradMagnitude.toFixed(6) || 'N/A'}
+            `;
+        }
+
+        function resetOptimizer() {
+            // Reset optimizer state
+            optimizers.adam.m = [0, 0];
+            optimizers.adam.v = [0, 0];
+            optimizers.adam.t = 0;
+            optimizers.momentum.velocity = [0, 0];
+            optimizers.rmsprop.cache = [0, 0];
+            optimizers.adagrad.cache = [0, 0];
+        }
+
+        function clearPaths() {
+            pathLines.forEach(line => {
+                scene.remove(line);
+                if (line.geometry) line.geometry.dispose();
+                if (line.material) line.material.dispose();
+            });
+            pathLines = [];
+        }
+
+        function updateScene() {
+            createLossSurface();
+            createContourLines();
+            createGradientField();
+        }
+
+        // Global functions for HTML onclick events
+        window.selectLossFunction = function(funcName) {
+            currentLossFunction = funcName;
+            
+            // Update active button
+            document.querySelectorAll('.loss-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateLossFunctionInfo();
+            updateScene();
+        };
+
+        window.selectOptimizer = function(optimizerName) {
+            currentOptimizer = optimizerName;
+            
+            // Update active button
+            document.querySelectorAll('.optimizer-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        window.toggleVisualization = function(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            updateScene();
+        };
+
+        window.runOptimization = runOptimization;
+        window.clearPaths = clearPaths;
+
+        window.resetCamera = function() {
+            camera.position.set(8, 8, 8);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        };
+
+        window.topView = function() {
+            camera.position.set(0, 0, 15);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        };
+
+        function updateLossFunctionInfo() {
+            const func = lossFunctions[currentLossFunction];
+            document.getElementById('loss-info').innerHTML = `
+                <strong>${func.name}</strong><br/>
+                ${func.formula}<br/>
+                Global Minimum: (${func.globalMin[0]}, ${func.globalMin[1]})<br/>
+                <small>${func.description}</small>
+            `;
+        }
+
+        // Event listeners
+        document.getElementById('learningRate').addEventListener('input', function() {
+            learningRate = parseFloat(this.value);
+            document.getElementById('learningRateValue').textContent = learningRate.toFixed(3);
+        });
+
+        document.getElementById('startX').addEventListener('input', function() {
+            startX = parseFloat(this.value);
+            document.getElementById('startXValue').textContent = startX.toFixed(1);
+        });
+
+        document.getElementById('startY').addEventListener('input', function() {
+            startY = parseFloat(this.value);
+            document.getElementById('startYValue').textContent = startY.toFixed(1);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const containerRect = container.getBoundingClientRect();
+            camera.aspect = containerRect.width / containerRect.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(containerRect.width, containerRect.height);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        updateLossFunctionInfo();
+        updateScene();
+        animate();
+    </script>
+</body>
+</html>

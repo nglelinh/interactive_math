@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannon's Algorithm for Parallel Matrix Multiplication</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .control-group input, .control-group select {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .matrix-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .matrix-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .matrix-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+        .matrix-grid {
+            display: grid;
+            gap: 5px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .matrix-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .matrix-cell.active {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: #4CAF50;
+            transform: scale(1.1);
+        }
+        .matrix-cell.computing {
+            background: rgba(255, 152, 0, 0.5);
+            border-color: #FF9800;
+            animation: pulse 1s infinite;
+        }
+        .matrix-cell.moving {
+            background: rgba(33, 150, 243, 0.5);
+            border-color: #2196F3;
+            animation: slide 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .algorithm-steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .algorithm-steps h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .step-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .step-item.active {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .metric-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .metric-item strong {
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .communication-lines {
+            position: relative;
+            height: 100px;
+            margin: 20px 0;
+        }
+        .comm-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            animation: flow 2s infinite;
+        }
+        @keyframes flow {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .result-matrix {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .result-matrix h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Cannon's Algorithm for Parallel Matrix Multiplication</h1>
+        
+        <div class="info-panel">
+            <h3>📚 Giới thiệu về Cannon's Algorithm</h3>
+            <p>
+                <strong>Cannon's Algorithm</strong> là một thuật toán song song để nhân hai ma trận n×n sử dụng p processors 
+                được sắp xếp trong lưới √p × √p. Thuật toán này tối ưu hóa việc di chuyển dữ liệu và tính toán.
+            </p>
+            <p>
+                <strong>Ý tưởng chính:</strong> Sử dụng phép dịch chuyển dữ liệu thông minh để giảm communication overhead 
+                và tối ưu hóa locality của dữ liệu.
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="matrix-size">Kích thước ma trận:</label>
+                <select id="matrix-size">
+                    <option value="4">4×4 (2×2 processors)</option>
+                    <option value="6">6×6 (2×3 processors)</option>
+                    <option value="8">8×8 (2×4 processors)</option>
+                    <option value="9">9×9 (3×3 processors)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="animation-speed">Tốc độ animation:</label>
+                <input type="range" id="animation-speed" min="0.5" max="3" step="0.1" value="1">
+                <span id="speed-value">1.0x</span>
+            </div>
+            <div class="control-group">
+                <label for="show-details">Hiển thị chi tiết:</label>
+                <select id="show-details">
+                    <option value="basic">Cơ bản</option>
+                    <option value="detailed">Chi tiết</option>
+                    <option value="expert">Chuyên sâu</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button onclick="startAlgorithm()">🚀 Bắt đầu thuật toán</button>
+                <button onclick="resetAlgorithm()">🔄 Reset</button>
+                <button onclick="stepByStep()">⏭️ Từng bước</button>
+            </div>
+        </div>
+
+        <div class="matrix-container">
+            <div class="matrix-panel">
+                <h3>Matrix A</h3>
+                <div class="matrix-grid" id="matrix-a">
+                    <!-- Matrix A will be generated here -->
+                </div>
+            </div>
+            
+            <div class="matrix-panel">
+                <h3>Matrix B</h3>
+                <div class="matrix-grid" id="matrix-b">
+                    <!-- Matrix B will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="result-matrix">
+            <h3>Result Matrix C = A × B</h3>
+            <div class="matrix-grid" id="result-matrix">
+                <!-- Result matrix will be generated here -->
+            </div>
+        </div>
+
+        <div class="algorithm-steps">
+            <h3>🔧 Các bước của Cannon's Algorithm</h3>
+            <div class="step-item" id="step-1">
+                <strong>Bước 1: Initial Alignment</strong><br>
+                Dịch chuyển các block của ma trận A và B để đạt được alignment ban đầu
+            </div>
+            <div class="step-item" id="step-2">
+                <strong>Bước 2: Computation Phase</strong><br>
+                Mỗi processor tính toán local matrix multiplication
+            </div>
+            <div class="step-item" id="step-3">
+                <strong>Bước 3: Data Movement</strong><br>
+                Dịch chuyển dữ liệu theo pattern: A sang trái, B lên trên
+            </div>
+            <div class="step-item" id="step-4">
+                <strong>Bước 4: Repeat</strong><br>
+                Lặp lại bước 2-3 cho đến khi hoàn thành tất cả phép nhân
+            </div>
+        </div>
+
+        <div class="performance-metrics">
+            <div class="metric-item">
+                <strong>Time Complexity:</strong><br>
+                <span id="time-complexity">O(n³/p + n²/√p)</span>
+            </div>
+            <div class="metric-item">
+                <strong>Communication Complexity:</strong><br>
+                <span id="comm-complexity">O(n²/√p)</span>
+            </div>
+            <div class="metric-item">
+                <strong>Current Step:</strong><br>
+                <span id="current-step">Initial</span>
+            </div>
+            <div class="metric-item">
+                <strong>Processors Used:</strong><br>
+                <span id="processors-used">4</span>
+            </div>
+            <div class="metric-item">
+                <strong>Communication Cost:</strong><br>
+                <span id="comm-cost">0</span>
+            </div>
+            <div class="metric-item">
+                <strong>Computation Cost:</strong><br>
+                <span id="comp-cost">0</span>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>🔧 Mathematical Framework</h3>
+            <div style="font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <strong>Initial Alignment:</strong><br>
+                A[i,j] ← A[i,(j+i) mod √p]<br>
+                B[i,j] ← B[(i+j) mod √p,j]<br><br>
+                <strong>Data Movement:</strong><br>
+                A[i,j] ← A[i,(j+1) mod √p]<br>
+                B[i,j] ← B[(i+1) mod √p,j]<br><br>
+                <strong>Local Computation:</strong><br>
+                C[i,j] += A[i,j] × B[i,j]
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let matrixSize = 4;
+        let animationSpeed = 1.0;
+        let showDetails = 'basic';
+        let currentStep = 0;
+        let isRunning = false;
+        let matrices = {
+            A: [],
+            B: [],
+            C: []
+        };
+        let processors = [];
+        let stepInterval;
+
+        // Initialize matrices
+        function initializeMatrices() {
+            matrices.A = [];
+            matrices.B = [];
+            matrices.C = [];
+            
+            for (let i = 0; i < matrixSize; i++) {
+                matrices.A[i] = [];
+                matrices.B[i] = [];
+                matrices.C[i] = [];
+                for (let j = 0; j < matrixSize; j++) {
+                    matrices.A[i][j] = Math.floor(Math.random() * 10);
+                    matrices.B[i][j] = Math.floor(Math.random() * 10);
+                    matrices.C[i][j] = 0;
+                }
+            }
+            
+            displayMatrices();
+        }
+
+        // Display matrices
+        function displayMatrices() {
+            displayMatrix('matrix-a', matrices.A, 'A');
+            displayMatrix('matrix-b', matrices.B, 'B');
+            displayMatrix('result-matrix', matrices.C, 'C');
+        }
+
+        function displayMatrix(containerId, matrix, name) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${matrixSize}, 1fr)`;
+            
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = matrix[i][j];
+                    cell.id = `${name}-${i}-${j}`;
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        // Cannon's Algorithm implementation
+        async function startAlgorithm() {
+            if (isRunning) return;
+            isRunning = true;
+            currentStep = 0;
+            
+            // Step 1: Initial Alignment
+            await performStep(1, 'Initial Alignment');
+            
+            // Step 2-4: Main computation loop
+            for (let iteration = 0; iteration < matrixSize; iteration++) {
+                await performStep(2, `Computation Phase ${iteration + 1}`);
+                if (iteration < matrixSize - 1) {
+                    await performStep(3, `Data Movement ${iteration + 1}`);
+                }
+            }
+            
+            await performStep(4, 'Final Result');
+            isRunning = false;
+        }
+
+        async function performStep(stepNum, description) {
+            currentStep = stepNum;
+            updateStepDisplay(stepNum);
+            updateMetrics(description);
+            
+            switch (stepNum) {
+                case 1:
+                    await performInitialAlignment();
+                    break;
+                case 2:
+                    await performComputation();
+                    break;
+                case 3:
+                    await performDataMovement();
+                    break;
+                case 4:
+                    await finalizeResult();
+                    break;
+            }
+        }
+
+        async function performInitialAlignment() {
+            // Simulate initial alignment
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('moving');
+                    setTimeout(() => {
+                        cell.classList.remove('moving');
+                    }, 500);
+                }, index * 100 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000 * animationSpeed));
+        }
+
+        async function performComputation() {
+            // Simulate computation
+            const resultCells = document.querySelectorAll('#result-matrix .matrix-cell');
+            resultCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('computing');
+                    // Simulate computation result
+                    const i = Math.floor(index / matrixSize);
+                    const j = index % matrixSize;
+                    let sum = 0;
+                    for (let k = 0; k < matrixSize; k++) {
+                        sum += matrices.A[i][k] * matrices.B[k][j];
+                    }
+                    matrices.C[i][j] = sum;
+                    cell.textContent = sum;
+                    setTimeout(() => {
+                        cell.classList.remove('computing');
+                    }, 1000);
+                }, index * 200 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 3000 * animationSpeed));
+        }
+
+        async function performDataMovement() {
+            // Simulate data movement
+            const aCells = document.querySelectorAll('#matrix-a .matrix-cell');
+            const bCells = document.querySelectorAll('#matrix-b .matrix-cell');
+            
+            // Move A left, B up
+            [...aCells, ...bCells].forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('moving');
+                    setTimeout(() => {
+                        cell.classList.remove('moving');
+                    }, 800);
+                }, index * 50 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000 * animationSpeed));
+        }
+
+        async function finalizeResult() {
+            // Highlight final result
+            const resultCells = document.querySelectorAll('#result-matrix .matrix-cell');
+            resultCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('active');
+                }, index * 100 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000 * animationSpeed));
+        }
+
+        function updateStepDisplay(stepNum) {
+            // Reset all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            }
+            // Activate current step
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+        }
+
+        function updateMetrics(description) {
+            document.getElementById('current-step').textContent = description;
+            
+            // Update complexity metrics
+            const n = matrixSize;
+            const p = Math.floor(Math.sqrt(matrixSize * matrixSize));
+            
+            document.getElementById('time-complexity').textContent = `O(${n}³/${p} + ${n}²/√${p})`;
+            document.getElementById('comm-complexity').textContent = `O(${n}²/√${p})`;
+            document.getElementById('processors-used').textContent = p;
+            
+            // Simulate costs
+            const compCost = Math.floor((n * n * n) / p);
+            const commCost = Math.floor((n * n) / Math.sqrt(p));
+            
+            document.getElementById('comp-cost').textContent = compCost;
+            document.getElementById('comm-cost').textContent = commCost;
+        }
+
+        function stepByStep() {
+            if (isRunning) return;
+            
+            if (currentStep === 0) {
+                startAlgorithm();
+            } else {
+                // Continue from current step
+                performStep(currentStep + 1, `Step ${currentStep + 1}`);
+            }
+        }
+
+        function resetAlgorithm() {
+            isRunning = false;
+            currentStep = 0;
+            
+            // Reset all cells
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.remove('active', 'computing', 'moving');
+            });
+            
+            // Reset steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            }
+            
+            // Reset result matrix
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    matrices.C[i][j] = 0;
+                }
+            }
+            
+            displayMatrices();
+            updateMetrics('Initial');
+        }
+
+        // Event listeners
+        document.getElementById('matrix-size').addEventListener('change', function() {
+            matrixSize = parseInt(this.value);
+            initializeMatrices();
+            resetAlgorithm();
+        });
+
+        document.getElementById('animation-speed').addEventListener('input', function() {
+            animationSpeed = parseFloat(this.value);
+            document.getElementById('speed-value').textContent = this.value + 'x';
+        });
+
+        document.getElementById('show-details').addEventListener('change', function() {
+            showDetails = this.value;
+            // Update display based on detail level
+        });
+
+        // Initialize
+        initializeMatrices();
+    </script>
+</body>
+</html> 

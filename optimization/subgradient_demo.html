@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Subgradient Descent Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 350px;
+      font-size: 14px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 220px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #9C27B0;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #7B1FA2;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #E91E63;
+      font-weight: bold;
+    }
+    .warning {
+      color: #FFC107;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .non-diff-point {
+      color: #FF5722;
+      font-weight: bold;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Subgradient Descent Demo</h3>
+    <div>Function: <span id="functionName">f(x,y) = |x| + |y|</span></div>
+    <div>Current Position: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>Function Value: <span id="currentValue" class="value-display">0.00</span></div>
+    <div>Subgradient: (∂f = <span id="subgradientX">0.00</span>, <span id="subgradientY">0.00</span>)</div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div>Step Size: <span id="stepDisplay">0.1</span></div>
+    <div id="nonDiffInfo" class="non-diff-point"></div>
+    <br>
+    <div><strong>About Subgradients:</strong></div>
+    <div>• Used for non-differentiable functions</div>
+    <div>• At non-differentiable points, any vector in the subdifferential works</div>
+    <div>• Convergence may be slower than gradient descent</div>
+    <div>• Red points show non-differentiable locations</div>
+    <div class="warning">Note: May oscillate near non-differentiable points</div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Function:</label>
+      <select id="functionSelect">
+        <option value="l1norm">L1 Norm (|x| + |y|)</option>
+        <option value="l1regularized">L1 Regularized (x² + y² + λ(|x| + |y|))</option>
+        <option value="huber">Huber Loss</option>
+        <option value="maxabs">Max Absolute (max(|x|, |y|))</option>
+        <option value="piecewise">Piecewise Linear</option>
+        <option value="elastic">Elastic Net</option>
+        <option value="l1ball">L1 Ball Constraint</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Learning Rate:</label>
+      <input type="range" id="learningRate" min="0.001" max="0.3" step="0.001" value="0.05">
+      <span id="learningRateValue">0.05</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="100" max="2000" step="100" value="300">
+      <span id="animSpeedValue">300ms</span>
+    </div>
+
+    <div class="control-group">
+      <label>Regularization λ:</label>
+      <input type="range" id="lambda" min="0.1" max="2" step="0.1" value="0.5">
+      <span id="lambdaValue">0.5</span>
+    </div>
+
+    <div class="control-group">
+      <label>Starting Point:</label>
+      <div>
+        X: <input type="number" id="startX" value="3" step="0.1" min="-5" max="5">
+        Y: <input type="number" id="startY" value="2" step="0.1" min="-5" max="5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start Subgradient Descent</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <input type="checkbox" id="showPath" checked> Show Path
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showNonDiff" checked> Show Non-Diff Points
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(6, 6, 6);
+    controls.update();
+
+    // Subgradient descent parameters
+    let currentX = 3, currentY = 2;
+    let learningRate = 0.05;
+    let animationSpeed = 300;
+    let lambda = 0.5;
+    let isRunning = false;
+    let iteration = 0;
+    let currentFunction = 'l1norm';
+    let pathPoints = [];
+    let animationId = null;
+
+    // Helper functions
+    function sign(x) {
+      if (x > 0) return 1;
+      if (x < 0) return -1;
+      return Math.random() > 0.5 ? 1 : -1; // Random subgradient at 0
+    }
+
+    function subgradientSign(x, epsilon = 1e-6) {
+      if (Math.abs(x) < epsilon) {
+        return Math.random() * 2 - 1; // Random value in [-1, 1]
+      }
+      return x > 0 ? 1 : -1;
+    }
+
+    function huberLoss(x, delta = 1) {
+      if (Math.abs(x) <= delta) {
+        return 0.5 * x * x;
+      }
+      return delta * Math.abs(x) - 0.5 * delta * delta;
+    }
+
+    function huberSubgradient(x, delta = 1) {
+      if (Math.abs(x) <= delta) {
+        return x;
+      }
+      return delta * sign(x);
+    }
+
+    // Function definitions with subgradients
+    const functions = {
+      l1norm: {
+        f: (x, y) => Math.abs(x) + Math.abs(y),
+        subgradX: (x, y) => subgradientSign(x),
+        subgradY: (x, y) => subgradientSign(y),
+        name: '|x| + |y|',
+        range: 4,
+        scale: 0.5,
+        nonDiffPoints: [[0, 0]]
+      },
+      l1regularized: {
+        f: (x, y) => x*x + y*y + lambda * (Math.abs(x) + Math.abs(y)),
+        subgradX: (x, y) => 2*x + lambda * subgradientSign(x),
+        subgradY: (x, y) => 2*y + lambda * subgradientSign(y),
+        name: `x² + y² + ${lambda}(|x| + |y|)`,
+        range: 4,
+        scale: 0.2,
+        nonDiffPoints: [[0, 0]]
+      },
+      huber: {
+        f: (x, y) => huberLoss(x, 1) + huberLoss(y, 1),
+        subgradX: (x, y) => huberSubgradient(x, 1),
+        subgradY: (x, y) => huberSubgradient(y, 1),
+        name: 'Huber(x) + Huber(y)',
+        range: 4,
+        scale: 0.3,
+        nonDiffPoints: [[1, 0], [-1, 0], [0, 1], [0, -1]]
+      },
+      maxabs: {
+        f: (x, y) => Math.max(Math.abs(x), Math.abs(y)),
+        subgradX: (x, y) => {
+          const ax = Math.abs(x), ay = Math.abs(y);
+          if (ax > ay) return subgradientSign(x);
+          if (ax < ay) return 0;
+          return subgradientSign(x) * Math.random(); // Random when |x| = |y|
+        },
+        subgradY: (x, y) => {
+          const ax = Math.abs(x), ay = Math.abs(y);
+          if (ay > ax) return subgradientSign(y);
+          if (ay < ax) return 0;
+          return subgradientSign(y) * Math.random(); // Random when |x| = |y|
+        },
+        name: 'max(|x|, |y|)',
+        range: 4,
+        scale: 0.8,
+        nonDiffPoints: [[0, 0]]
+      },
+      piecewise: {
+        f: (x, y) => Math.max(0, x) + Math.max(0, y) + Math.max(0, -x-y+1),
+        subgradX: (x, y) => {
+          let grad = 0;
+          if (x > 0) grad += 1;
+          if (x < 0) grad += 0;
+          if (x === 0) grad += Math.random(); // Random subgradient
+          if (-x-y+1 > 0) grad -= 1;
+          return grad;
+        },
+        subgradY: (x, y) => {
+          let grad = 0;
+          if (y > 0) grad += 1;
+          if (y < 0) grad += 0;
+          if (y === 0) grad += Math.random(); // Random subgradient
+          if (-x-y+1 > 0) grad -= 1;
+          return grad;
+        },
+        name: 'max(0,x) + max(0,y) + max(0,-x-y+1)',
+        range: 3,
+        scale: 0.6,
+        nonDiffPoints: [[0, 0], [1, 0], [0, 1]]
+      },
+      elastic: {
+        f: (x, y) => 0.5*(x*x + y*y) + lambda*Math.abs(x) + 0.5*lambda*Math.abs(y),
+        subgradX: (x, y) => x + lambda * subgradientSign(x),
+        subgradY: (x, y) => y + 0.5*lambda * subgradientSign(y),
+        name: `0.5(x² + y²) + ${lambda}|x| + ${0.5*lambda}|y|`,
+        range: 4,
+        scale: 0.3,
+        nonDiffPoints: [[0, 0]]
+      },
+      l1ball: {
+        f: (x, y) => {
+          const r = Math.sqrt(x*x + y*y);
+          return r > 2 ? (r - 2) * 10 : 0;
+        },
+        subgradX: (x, y) => {
+          const r = Math.sqrt(x*x + y*y);
+          if (r > 2) return 10 * x / r;
+          if (r < 2) return 0;
+          return 10 * Math.random() - 5; // Random subgradient at boundary
+        },
+        subgradY: (x, y) => {
+          const r = Math.sqrt(x*x + y*y);
+          if (r > 2) return 10 * y / r;
+          if (r < 2) return 0;
+          return 10 * Math.random() - 5; // Random subgradient at boundary
+        },
+        name: 'L1 Ball Constraint',
+        range: 4,
+        scale: 0.1,
+        nonDiffPoints: [] // Boundary circle
+      }
+    };
+
+    // Create surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const func = functions[currentFunction];
+      const range = func.range;
+      const steps = 80;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = func.f(x, y) * func.scale;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0x9C27B0,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // Subgradient arrow
+    const arrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0xE91E63,
+      1,
+      0.5
+    );
+    scene.add(arrowHelper);
+
+    // Non-differentiable points markers
+    let nonDiffMarkers = [];
+    function updateNonDiffMarkers() {
+      // Remove existing markers
+      nonDiffMarkers.forEach(marker => scene.remove(marker));
+      nonDiffMarkers = [];
+
+      if (!document.getElementById('showNonDiff').checked) return;
+
+      const func = functions[currentFunction];
+      const markerGeo = new THREE.SphereGeometry(0.05, 8, 8);
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0xff5722 });
+
+      func.nonDiffPoints.forEach(([x, y]) => {
+        const marker = new THREE.Mesh(markerGeo, markerMat);
+        const z = func.f(x, y) * func.scale;
+        marker.position.set(x, y, z);
+        scene.add(marker);
+        nonDiffMarkers.push(marker);
+      });
+    }
+
+    // Path visualization
+    let pathLine;
+    function updatePath() {
+      if (pathLine) scene.remove(pathLine);
+      
+      if (pathPoints.length < 2 || !document.getElementById('showPath').checked) return;
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const material = new THREE.LineBasicMaterial({ color: 0xff9800, linewidth: 3 });
+      pathLine = new THREE.Line(geometry, material);
+      scene.add(pathLine);
+    }
+
+    // Check if point is non-differentiable
+    function isNonDifferentiable(x, y, epsilon = 0.1) {
+      const func = functions[currentFunction];
+      return func.nonDiffPoints.some(([px, py]) => 
+        Math.abs(x - px) < epsilon && Math.abs(y - py) < epsilon
+      );
+    }
+
+    // Update display
+    function updateDisplay() {
+      const func = functions[currentFunction];
+      const z = func.f(currentX, currentY);
+      const sx = func.subgradX(currentX, currentY);
+      const sy = func.subgradY(currentX, currentY);
+      
+      document.getElementById('functionName').textContent = `f(x,y) = ${func.name}`;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = z.toFixed(3);
+      document.getElementById('subgradientX').textContent = sx.toFixed(3);
+      document.getElementById('subgradientY').textContent = sy.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('stepDisplay').textContent = learningRate.toFixed(3);
+      
+      // Check if at non-differentiable point
+      const nonDiffInfo = document.getElementById('nonDiffInfo');
+      if (isNonDifferentiable(currentX, currentY)) {
+        nonDiffInfo.textContent = '⚠ Near non-differentiable point';
+      } else {
+        nonDiffInfo.textContent = '';
+      }
+      
+      // Update 3D visualization
+      const scaledZ = z * func.scale;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update subgradient arrow
+      const subgradMagnitude = Math.sqrt(sx*sx + sy*sy);
+      if (subgradMagnitude > 0) {
+        const normalizedSubgrad = new THREE.Vector3(-sx, -sy, 0).normalize();
+        arrowHelper.setDirection(normalizedSubgrad);
+        arrowHelper.position.set(currentX, currentY, scaledZ);
+        arrowHelper.setLength(Math.min(subgradMagnitude * 0.2, 1.5));
+      }
+    }
+
+    // Subgradient descent step
+    function subgradientDescentStep() {
+      const func = functions[currentFunction];
+      const sx = func.subgradX(currentX, currentY);
+      const sy = func.subgradY(currentX, currentY);
+      
+      // Add current point to path
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      // Update position using subgradient
+      currentX -= learningRate * sx;
+      currentY -= learningRate * sy;
+      
+      // Clamp to bounds
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      iteration++;
+      updateDisplay();
+      updatePath();
+      
+      // Check convergence (more lenient for subgradient methods)
+      const subgradMagnitude = Math.sqrt(sx*sx + sy*sy);
+      if (subgradMagnitude < 0.01 && iteration > 50) {
+        stopSubgradientDescent();
+      }
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        subgradientDescentStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start subgradient descent
+    function startSubgradientDescent() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop subgradient descent
+    function stopSubgradientDescent() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopSubgradientDescent();
+      currentX = parseFloat(document.getElementById('startX').value);
+      currentY = parseFloat(document.getElementById('startY').value);
+      iteration = 0;
+      pathPoints = [];
+      updateDisplay();
+      updatePath();
+    }
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      if (isRunning) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        iteration = 0;
+        pathPoints = [];
+        updateDisplay();
+        updatePath();
+      }
+    });
+
+    // Event listeners
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      createSurface();
+      updateNonDiffMarkers();
+      reset();
+    });
+
+    document.getElementById('learningRate').addEventListener('input', (e) => {
+      learningRate = parseFloat(e.target.value);
+      document.getElementById('learningRateValue').textContent = learningRate.toFixed(3);
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('lambda').addEventListener('input', (e) => {
+      lambda = parseFloat(e.target.value);
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(1);
+      // Update functions that use lambda
+      functions.l1regularized.name = `x² + y² + ${lambda}(|x| + |y|)`;
+      functions.elastic.name = `0.5(x² + y²) + ${lambda}|x| + ${0.5*lambda}|y|`;
+      if (currentFunction === 'l1regularized' || currentFunction === 'elastic') {
+        createSurface();
+        updateDisplay();
+      }
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startSubgradientDescent);
+    document.getElementById('stopBtn').addEventListener('click', stopSubgradientDescent);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        subgradientDescentStep();
+      }
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePath);
+    document.getElementById('showNonDiff').addEventListener('change', updateNonDiffMarkers);
+
+    document.getElementById('startX').addEventListener('change', reset);
+    document.getElementById('startY').addEventListener('change', reset);
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    updateNonDiffMarkers();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

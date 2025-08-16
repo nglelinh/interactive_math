@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fourier Epicycles</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: #000;
+    }
+    #controls {
+      margin: 10px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <h2>Fourier Epicycles - Square Wave</h2>
+  <div id="controls">
+    Terms: <input type="range" id="termsSlider" min="1" max="50" value="5" />
+    <span id="termLabel">5</span>
+  </div>
+  <canvas id="canvas" width="900" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const termsSlider = document.getElementById("termsSlider");
+    const termLabel = document.getElementById("termLabel");
+
+    let time = 0;
+    let path = [];
+
+    function drawCircle(x, y, radius) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
+    function fourierEpicycles(x, y, time, terms) {
+      for (let i = 0; i < terms; i++) {
+        const n = 2 * i + 1;
+        const radius = 75 * (4 / (n * Math.PI));
+        const prevX = x;
+        const prevY = y;
+
+        x += radius * Math.cos(n * time);
+        y += radius * Math.sin(n * time);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        drawCircle(prevX, prevY, radius);
+
+        ctx.strokeStyle = "#0f0";
+        drawLine(prevX, prevY, x, y);
+      }
+
+      return { x, y };
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const terms = parseInt(termsSlider.value);
+      termLabel.textContent = terms;
+
+      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let originX = 200;
+      let originY = canvas.height / 2;
+
+      ctx.lineWidth = 1;
+
+      const { x, y } = fourierEpicycles(originX, originY, time, terms);
+
+      path.unshift({ x: 400, y: y });
+
+      drawLine(x, y, 400, y); // line to waveform
+
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x + i, path[i].y);
+      }
+      ctx.strokeStyle = "#00f";
+      ctx.stroke();
+
+      time += 0.02;
+
+      if (path.length > 500) path.pop();
+    }
+
+    animate();
+  </script>
+</body>
+</html>
+

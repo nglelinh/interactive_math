@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quasi-Newton Methods Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 420px;
+      font-size: 13px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 250px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #9C27B0;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #7B1FA2;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #9C27B0;
+      font-weight: bold;
+    }
+    .approx-hessian {
+      background: rgba(156, 39, 176, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .method-info {
+      color: #E91E63;
+      font-size: 12px;
+      margin: 5px 0;
+    }
+    .comparison {
+      background: rgba(0, 150, 136, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    .update-info {
+      color: #FF9800;
+      font-size: 11px;
+      margin: 3px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #666;
+      padding: 3px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+    }
+    .matrix {
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .bfgs { color: #9C27B0; }
+    .dfp { color: #E91E63; }
+    .sr1 { color: #FF9800; }
+    .lbfgs { color: #4CAF50; }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Quasi-Newton Methods</h3>
+    <div>Method: <span id="methodName" class="method-info">BFGS</span></div>
+    <div>Function: <span id="functionName">f(x,y) = x² + y²</span></div>
+    <div>Current: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>f(x,y): <span id="currentValue" class="value-display">0.00</span></div>
+    <div>‖∇f‖: <span id="gradNorm" class="value-display">0.00</span></div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div class="method-info">QN Direction: (<span id="qnDx">0.00</span>, <span id="qnDy">0.00</span>)</div>
+    <br>
+    
+    <div class="approx-hessian">
+      <strong>Approximate Hessian (B<sub>k</sub>):</strong><br>
+      <div class="matrix">
+        [<span id="b11">0.00</span> <span id="b12">0.00</span>]<br>
+        [<span id="b21">0.00</span> <span id="b22">0.00</span>]
+      </div>
+      <div>det(B): <span id="bfgsdet">0.00</span></div>
+      <div>Condition #: <span id="bfgscond">0.00</span></div>
+    </div>
+    
+    <div class="comparison">
+      <strong>Method Comparison:</strong><br>
+      <div><span class="bfgs">BFGS:</span> Updates B<sub>k</sub> ≈ H<sub>k</sub></div>
+      <div><span class="dfp">DFP:</span> Updates H<sub>k</sub> ≈ H<sub>k</sub><sup>-1</sup></div>
+      <div><span class="sr1">SR1:</span> Symmetric Rank-1 update</div>
+      <div><span class="lbfgs">L-BFGS:</span> Limited memory BFGS</div>
+    </div>
+    
+    <div class="update-info">
+      <strong>Last Update:</strong><br>
+      <div>s<sub>k</sub> = (<span id="sk_x">0.00</span>, <span id="sk_y">0.00</span>)</div>
+      <div>y<sub>k</sub> = (<span id="yk_x">0.00</span>, <span id="yk_y">0.00</span>)</div>
+      <div>s<sub>k</sub><sup>T</sup>y<sub>k</sub> = <span id="skyk">0.00</span></div>
+    </div>
+    
+    <div><strong>Quasi-Newton:</strong></div>
+    <div>• Approximates Hessian using gradient info</div>
+    <div>• Superlinear convergence</div>
+    <div>• No second derivatives needed</div>
+    <div>• Purple: QN direction, Green: Gradient</div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Method:</label>
+      <select id="methodSelect">
+        <option value="bfgs">BFGS</option>
+        <option value="dfp">DFP</option>
+        <option value="sr1">SR1</option>
+        <option value="lbfgs">L-BFGS</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Function:</label>
+      <select id="functionSelect">
+        <option value="quadratic">Quadratic Bowl</option>
+        <option value="rosenbrock">Rosenbrock Function</option>
+        <option value="himmelblau">Himmelblau's Function</option>
+        <option value="beale">Beale Function</option>
+        <option value="booth">Booth Function</option>
+        <option value="elliptic">Elliptic Paraboloid</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Line Search Parameter:</label>
+      <input type="range" id="lineSearchParam" min="0.01" max="0.3" step="0.01" value="0.1">
+      <span id="lineSearchValue">0.1</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="500" max="3000" step="250" value="1000">
+      <span id="animSpeedValue">1000ms</span>
+    </div>
+
+    <div class="control-group">
+      <label>Starting Point:</label>
+      <div>
+        X: <input type="number" id="startX" value="2" step="0.1" min="-5" max="5">
+        Y: <input type="number" id="startY" value="1.5" step="0.1" min="-5" max="5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start Quasi-Newton</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <button id="gradientBtn">Gradient Step</button>
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showPath" checked> Show Path
+      <input type="checkbox" id="showQNDir" checked> Show QN Direction
+      <input type="checkbox" id="showGradient" checked> Show Gradient
+    </div>
+
+    <div class="control-group">
+      <label>L-BFGS Memory:</label>
+      <input type="range" id="lbfgsMemory" min="3" max="20" step="1" value="10">
+      <span id="lbfgsMemoryValue">10</span>
+    </div>
+
+    <div class="control-group">
+      <table>
+        <tr><th>Step</th><th>f(x)</th><th>‖∇f‖</th><th>Method</th></tr>
+        <tbody id="convergenceTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(6, 6, 6);
+    controls.update();
+
+    // Quasi-Newton parameters
+    let currentX = 2, currentY = 1.5;
+    let lineSearchParam = 0.1;
+    let animationSpeed = 1000;
+    let lbfgsMemory = 10;
+    let isRunning = false;
+    let iteration = 0;
+    let currentMethod = 'bfgs';
+    let currentFunction = 'quadratic';
+    let pathPoints = [];
+    let animationId = null;
+    let convergenceHistory = [];
+
+    // Quasi-Newton state
+    let B = [[1, 0], [0, 1]]; // BFGS approximate Hessian
+    let H = [[1, 0], [0, 1]]; // DFP approximate inverse Hessian
+    let lbfgsHistory = []; // L-BFGS history
+    let previousGradient = null;
+    let previousPosition = null;
+
+    // Function definitions
+    const functions = {
+      quadratic: {
+        f: (x, y) => x*x + y*y,
+        gradient: (x, y) => [2*x, 2*y],
+        name: 'x² + y²',
+        range: 4,
+        scale: 0.5
+      },
+      rosenbrock: {
+        f: (x, y) => (1-x)*(1-x) + 100*(y-x*x)*(y-x*x),
+        gradient: (x, y) => [
+          -2*(1-x) + 400*x*(x*x-y),
+          200*(y-x*x)
+        ],
+        name: 'Rosenbrock function',
+        range: 3,
+        scale: 0.01
+      },
+      himmelblau: {
+        f: (x, y) => (x*x + y - 11)*(x*x + y - 11) + (x + y*y - 7)*(x + y*y - 7),
+        gradient: (x, y) => [
+          2*(x*x + y - 11)*2*x + 2*(x + y*y - 7),
+          2*(x*x + y - 11) + 2*(x + y*y - 7)*2*y
+        ],
+        name: "Himmelblau's function",
+        range: 5,
+        scale: 0.01
+      },
+      beale: {
+        f: (x, y) => {
+          const a = 1.5 - x + x*y;
+          const b = 2.25 - x + x*y*y;
+          const c = 2.625 - x + x*y*y*y;
+          return a*a + b*b + c*c;
+        },
+        gradient: (x, y) => [
+          2*(1.5 - x + x*y)*(-1 + y) + 2*(2.25 - x + x*y*y)*(-1 + y*y) + 2*(2.625 - x + x*y*y*y)*(-1 + y*y*y),
+          2*(1.5 - x + x*y)*x + 2*(2.25 - x + x*y*y)*2*x*y + 2*(2.625 - x + x*y*y*y)*3*x*y*y
+        ],
+        name: 'Beale function',
+        range: 3,
+        scale: 0.01
+      },
+      booth: {
+        f: (x, y) => (x + 2*y - 7)*(x + 2*y - 7) + (2*x + y - 5)*(2*x + y - 5),
+        gradient: (x, y) => [
+          2*(x + 2*y - 7) + 2*(2*x + y - 5)*2,
+          2*(x + 2*y - 7)*2 + 2*(2*x + y - 5)
+        ],
+        name: 'Booth function',
+        range: 5,
+        scale: 0.1
+      },
+      elliptic: {
+        f: (x, y) => 2*x*x + y*y + x*y,
+        gradient: (x, y) => [4*x + y, 2*y + x],
+        name: 'Elliptic Paraboloid',
+        range: 3,
+        scale: 0.3
+      }
+    };
+
+    // Matrix operations
+    function matrixAdd(A, B) {
+      return [[A[0][0] + B[0][0], A[0][1] + B[0][1]], 
+              [A[1][0] + B[1][0], A[1][1] + B[1][1]]];
+    }
+
+    function matrixMultiply(A, B) {
+      return [[A[0][0]*B[0][0] + A[0][1]*B[1][0], A[0][0]*B[0][1] + A[0][1]*B[1][1]], 
+              [A[1][0]*B[0][0] + A[1][1]*B[1][0], A[1][0]*B[0][1] + A[1][1]*B[1][1]]];
+    }
+
+    function matrixScale(A, s) {
+      return [[A[0][0]*s, A[0][1]*s], [A[1][0]*s, A[1][1]*s]];
+    }
+
+    function matrixVectorMultiply(A, v) {
+      return [A[0][0]*v[0] + A[0][1]*v[1], A[1][0]*v[0] + A[1][1]*v[1]];
+    }
+
+    function vectorDot(a, b) {
+      return a[0]*b[0] + a[1]*b[1];
+    }
+
+    function vectorOuterProduct(a, b) {
+      return [[a[0]*b[0], a[0]*b[1]], [a[1]*b[0], a[1]*b[1]]];
+    }
+
+    function matrixDeterminant(A) {
+      return A[0][0]*A[1][1] - A[0][1]*A[1][0];
+    }
+
+    function matrixInverse(A) {
+      const det = matrixDeterminant(A);
+      if (Math.abs(det) < 1e-12) return null;
+      return [[A[1][1]/det, -A[0][1]/det], [-A[1][0]/det, A[0][0]/det]];
+    }
+
+    function matrixConditionNumber(A) {
+      const trace = A[0][0] + A[1][1];
+      const det = matrixDeterminant(A);
+      const discriminant = trace*trace - 4*det;
+      if (discriminant < 0) return Infinity;
+      const lambda1 = (trace + Math.sqrt(discriminant)) / 2;
+      const lambda2 = (trace - Math.sqrt(discriminant)) / 2;
+      return Math.abs(lambda1 / lambda2);
+    }
+
+    // BFGS update
+    function bfgsUpdate(B, s, y) {
+      const sy = vectorDot(s, y);
+      if (sy <= 0) return B; // Skip update if not positive definite
+      
+      const Bs = matrixVectorMultiply(B, s);
+      const sBs = vectorDot(s, Bs);
+      
+      const term1 = matrixScale(vectorOuterProduct(y, y), 1/sy);
+      const term2 = matrixScale(vectorOuterProduct(Bs, Bs), 1/sBs);
+      
+      return matrixAdd(matrixAdd(B, term1), matrixScale(term2, -1));
+    }
+
+    // DFP update
+    function dfpUpdate(H, s, y) {
+      const sy = vectorDot(s, y);
+      if (sy <= 0) return H; // Skip update if not positive definite
+      
+      const Hy = matrixVectorMultiply(H, y);
+      const yHy = vectorDot(y, Hy);
+      
+      const term1 = matrixScale(vectorOuterProduct(s, s), 1/sy);
+      const term2 = matrixScale(vectorOuterProduct(Hy, Hy), 1/yHy);
+      
+      return matrixAdd(matrixAdd(H, term1), matrixScale(term2, -1));
+    }
+
+    // SR1 update
+    function sr1Update(B, s, y) {
+      const diff = [y[0] - matrixVectorMultiply(B, s)[0], y[1] - matrixVectorMultiply(B, s)[1]];
+      const denom = vectorDot(diff, s);
+      if (Math.abs(denom) < 1e-8) return B;
+      
+      const update = matrixScale(vectorOuterProduct(diff, diff), 1/denom);
+      return matrixAdd(B, update);
+    }
+
+    // L-BFGS two-loop recursion
+    function lbfgsDirection(grad, history, memory) {
+      if (history.length === 0) return [-grad[0], -grad[1]];
+      
+      let q = [grad[0], grad[1]];
+      const alphas = [];
+      
+      // First loop
+      for (let i = history.length - 1; i >= Math.max(0, history.length - memory); i--) {
+        const {s, y} = history[i];
+        const sy = vectorDot(s, y);
+        if (sy > 0) {
+          const alpha = vectorDot(s, q) / sy;
+          alphas.unshift(alpha);
+          q[0] -= alpha * y[0];
+          q[1] -= alpha * y[1];
+        } else {
+          alphas.unshift(0);
+        }
+      }
+      
+      // Initial Hessian approximation
+      if (history.length > 0) {
+        const last = history[history.length - 1];
+        const sy = vectorDot(last.s, last.y);
+        const yy = vectorDot(last.y, last.y);
+        if (sy > 0 && yy > 0) {
+          const gamma = sy / yy;
+          q[0] *= gamma;
+          q[1] *= gamma;
+        }
+      }
+      
+      // Second loop
+      const start = Math.max(0, history.length - memory);
+      for (let i = start; i < history.length; i++) {
+        const {s, y} = history[i];
+        const sy = vectorDot(s, y);
+        if (sy > 0) {
+          const beta = vectorDot(y, q) / sy;
+          const alpha = alphas[i - start];
+          q[0] += (alpha - beta) * s[0];
+          q[1] += (alpha - beta) * s[1];
+        }
+      }
+      
+      return [-q[0], -q[1]];
+    }
+
+    // Create surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const func = functions[currentFunction];
+      const range = func.range;
+      const steps = 50;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = func.f(x, y) * func.scale;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0x9C27B0,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // QN direction arrow
+    const qnArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0x9C27B0,
+      1,
+      0.5
+    );
+    scene.add(qnArrowHelper);
+
+    // Gradient arrow
+    const gradientArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0x4CAF50,
+      1,
+      0.5
+    );
+    scene.add(gradientArrowHelper);
+
+    // Path visualization
+    let pathLine;
+    function updatePath() {
+      if (pathLine) scene.remove(pathLine);
+      
+      if (pathPoints.length < 2 || !document.getElementById('showPath').checked) return;
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const material = new THREE.LineBasicMaterial({ color: 0x9C27B0, linewidth: 3 });
+      pathLine = new THREE.Line(geometry, material);
+      scene.add(pathLine);
+    }
+
+    // Update display
+    function updateDisplay() {
+      const func = functions[currentFunction];
+      const fval = func.f(currentX, currentY);
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const gradNorm = Math.sqrt(gx*gx + gy*gy);
+      
+      // Quasi-Newton direction
+      let qnDirection = [0, 0];
+      if (currentMethod === 'bfgs') {
+        const Binv = matrixInverse(B);
+        if (Binv) qnDirection = matrixVectorMultiply(Binv, [-gx, -gy]);
+      } else if (currentMethod === 'dfp') {
+        qnDirection = matrixVectorMultiply(H, [-gx, -gy]);
+      } else if (currentMethod === 'sr1') {
+        const Binv = matrixInverse(B);
+        if (Binv) qnDirection = matrixVectorMultiply(Binv, [-gx, -gy]);
+      } else if (currentMethod === 'lbfgs') {
+        qnDirection = lbfgsDirection([gx, gy], lbfgsHistory, lbfgsMemory);
+      }
+      
+      document.getElementById('methodName').textContent = currentMethod.toUpperCase();
+      document.getElementById('functionName').textContent = `f(x,y) = ${func.name}`;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = fval.toFixed(3);
+      document.getElementById('gradNorm').textContent = gradNorm.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('qnDx').textContent = qnDirection[0].toFixed(3);
+      document.getElementById('qnDy').textContent = qnDirection[1].toFixed(3);
+      
+      // Update matrix display
+      const matrix = (currentMethod === 'dfp') ? H : B;
+      document.getElementById('b11').textContent = matrix[0][0].toFixed(3);
+      document.getElementById('b12').textContent = matrix[0][1].toFixed(3);
+      document.getElementById('b21').textContent = matrix[1][0].toFixed(3);
+      document.getElementById('b22').textContent = matrix[1][1].toFixed(3);
+      
+      const det = matrixDeterminant(matrix);
+      const condNum = matrixConditionNumber(matrix);
+      document.getElementById('bfgsdet').textContent = det.toFixed(3);
+      document.getElementById('bfgscond').textContent = condNum.toFixed(1);
+      
+      // Update last step info
+      if (previousPosition && previousGradient) {
+        const sx = currentX - previousPosition[0];
+        const sy = currentY - previousPosition[1];
+        const [oldGx, oldGy] = previousGradient;
+        const yx = gx - oldGx;
+        const yy = gy - oldGy;
+        const skyk = sx*yx + sy*yy;
+        
+        document.getElementById('sk_x').textContent = sx.toFixed(3);
+        document.getElementById('sk_y').textContent = sy.toFixed(3);
+        document.getElementById('yk_x').textContent = yx.toFixed(3);
+        document.getElementById('yk_y').textContent = yy.toFixed(3);
+        document.getElementById('skyk').textContent = skyk.toFixed(3);
+      }
+      
+      // Update 3D visualization
+      const scaledZ = fval * func.scale;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update arrows
+      if (document.getElementById('showQNDir').checked) {
+        const qnMagnitude = Math.sqrt(qnDirection[0]*qnDirection[0] + qnDirection[1]*qnDirection[1]);
+        if (qnMagnitude > 0) {
+          const normalizedQN = new THREE.Vector3(qnDirection[0], qnDirection[1], 0).normalize();
+          qnArrowHelper.setDirection(normalizedQN);
+          qnArrowHelper.position.set(currentX, currentY, scaledZ);
+          qnArrowHelper.setLength(Math.min(qnMagnitude * 0.5, 2));
+          qnArrowHelper.visible = true;
+        } else {
+          qnArrowHelper.visible = false;
+        }
+      } else {
+        qnArrowHelper.visible = false;
+      }
+      
+      if (document.getElementById('showGradient').checked && gradNorm > 0) {
+        const normalizedGrad = new THREE.Vector3(-gx, -gy, 0).normalize();
+        gradientArrowHelper.setDirection(normalizedGrad);
+        gradientArrowHelper.position.set(currentX, currentY, scaledZ);
+        gradientArrowHelper.setLength(Math.min(gradNorm * 0.3, 1.5));
+        gradientArrowHelper.visible = true;
+      } else {
+        gradientArrowHelper.visible = false;
+      }
+    }
+
+    // Quasi-Newton step
+    function quasiNewtonStep() {
+      const func = functions[currentFunction];
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const gradNorm = Math.sqrt(gx*gx + gy*gy);
+      
+      // Store previous state
+      const prevX = currentX;
+      const prevY = currentY;
+      const prevGrad = [gx, gy];
+      
+      // Add current point to path
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      // Compute quasi-Newton direction
+      let direction = [0, 0];
+      if (currentMethod === 'bfgs') {
+        const Binv = matrixInverse(B);
+        if (Binv) direction = matrixVectorMultiply(Binv, [-gx, -gy]);
+      } else if (currentMethod === 'dfp') {
+        direction = matrixVectorMultiply(H, [-gx, -gy]);
+      } else if (currentMethod === 'sr1') {
+        const Binv = matrixInverse(B);
+        if (Binv) direction = matrixVectorMultiply(Binv, [-gx, -gy]);
+      } else if (currentMethod === 'lbfgs') {
+        direction = lbfgsDirection([gx, gy], lbfgsHistory, lbfgsMemory);
+      }
+      
+      // Line search (simplified)
+      const stepSize = lineSearchParam;
+      currentX += stepSize * direction[0];
+      currentY += stepSize * direction[1];
+      
+      // Clamp to bounds
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      // Update quasi-Newton approximation
+      if (iteration > 0 && previousPosition && previousGradient) {
+        const s = [currentX - previousPosition[0], currentY - previousPosition[1]];
+        const y = [gx - previousGradient[0], gy - previousGradient[1]];
+        
+        if (currentMethod === 'bfgs') {
+          B = bfgsUpdate(B, s, y);
+        } else if (currentMethod === 'dfp') {
+          H = dfpUpdate(H, s, y);
+        } else if (currentMethod === 'sr1') {
+          B = sr1Update(B, s, y);
+        } else if (currentMethod === 'lbfgs') {
+          lbfgsHistory.push({s: s, y: y});
+          if (lbfgsHistory.length > lbfgsMemory) {
+            lbfgsHistory.shift();
+          }
+        }
+      }
+      
+      // Store for next iteration
+      previousPosition = [prevX, prevY];
+      previousGradient = prevGrad;
+      
+      iteration++;
+      
+      // Update convergence history
+      convergenceHistory.push({
+        iteration: iteration,
+        fval: func.f(currentX, currentY),
+        gradNorm: gradNorm,
+        method: currentMethod.toUpperCase()
+      });
+      
+      updateConvergenceTable();
+      updateDisplay();
+      updatePath();
+      
+      // Check convergence
+      if (gradNorm < 1e-6) {
+        stopQuasiNewton();
+      }
+    }
+
+    // Update convergence table
+    function updateConvergenceTable() {
+      const table = document.getElementById('convergenceTable');
+      const maxRows = 10;
+      
+      table.innerHTML = '';
+      
+      const startIndex = Math.max(0, convergenceHistory.length - maxRows);
+      for (let i = startIndex; i < convergenceHistory.length; i++) {
+        const row = table.insertRow();
+        const state = convergenceHistory[i];
+        
+        row.insertCell(0).textContent = state.iteration;
+        row.insertCell(1).textContent = state.fval.toFixed(4);
+        row.insertCell(2).textContent = state.gradNorm.toFixed(4);
+        row.insertCell(3).textContent = state.method;
+      }
+    }
+
+    // Gradient step (for comparison)
+    function gradientStep() {
+      const func = functions[currentFunction];
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const stepSize = 0.1;
+      
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      currentX -= stepSize * gx;
+      currentY -= stepSize * gy;
+      
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      iteration++;
+      updateDisplay();
+      updatePath();
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        quasiNewtonStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start quasi-Newton
+    function startQuasiNewton() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop quasi-Newton
+    function stopQuasiNewton() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopQuasiNewton();
+      currentX = parseFloat(document.getElementById('startX').value);
+      currentY = parseFloat(document.getElementById('startY').value);
+      iteration = 0;
+      pathPoints = [];
+      convergenceHistory = [];
+      
+      // Reset matrices
+      B = [[1, 0], [0, 1]];
+      H = [[1, 0], [0, 1]];
+      lbfgsHistory = [];
+      previousPosition = null;
+      previousGradient = null;
+      
+      updateDisplay();
+      updatePath();
+      updateConvergenceTable();
+    }
+
+    // Event listeners
+    document.getElementById('methodSelect').addEventListener('change', (e) => {
+      currentMethod = e.target.value;
+      reset();
+    });
+
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('lineSearchParam').addEventListener('input', (e) => {
+      lineSearchParam = parseFloat(e.target.value);
+      document.getElementById('lineSearchValue').textContent = lineSearchParam.toFixed(2);
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('lbfgsMemory').addEventListener('input', (e) => {
+      lbfgsMemory = parseInt(e.target.value);
+      document.getElementById('lbfgsMemoryValue').textContent = lbfgsMemory;
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startQuasiNewton);
+    document.getElementById('stopBtn').addEventListener('click', stopQuasiNewton);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        quasiNewtonStep();
+      }
+    });
+
+    document.getElementById('gradientBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        gradientStep();
+      }
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePath);
+    document.getElementById('showQNDir').addEventListener('change', updateDisplay);
+    document.getElementById('showGradient').addEventListener('change', updateDisplay);
+
+    document.getElementById('startX').addEventListener('change', reset);
+    document.getElementById('startY').addEventListener('change', reset);
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      if (isRunning) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        reset();
+      }
+    });
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

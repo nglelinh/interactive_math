@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stochastic Gradient Descent Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 350px;
+      font-size: 13px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 220px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #E91E63;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #C2185B;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #FF4081;
+      font-weight: bold;
+    }
+    .batch-info {
+      color: #FFA726;
+      font-size: 12px;
+    }
+    .data-point {
+      color: #00E676;
+      font-size: 12px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Stochastic Gradient Descent</h3>
+    <div>Loss: <span id="lossFunction">Linear Regression</span></div>
+    <div>Current: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>Avg Loss: <span id="avgLoss" class="value-display">0.00</span></div>
+    <div>Current Sample Loss: <span id="currentSampleLoss" class="value-display">0.00</span></div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div>Epoch: <span id="epoch">0</span></div>
+    <div>Learning Rate: <span id="stepDisplay">0.01</span></div>
+    <div class="batch-info">Batch Size: <span id="batchSize">1</span></div>
+    <div class="data-point">Current Sample: <span id="currentSample">0</span>/<span id="totalSamples">100</span></div>
+    <br>
+    <div><strong>Algorithm:</strong></div>
+    <div>• Sample random data point(s)</div>
+    <div>• Compute gradient for sample</div>
+    <div>• Update: θ = θ - α∇L(θ, sample)</div>
+    <div>• Green points: data samples</div>
+    <div>• Red path: noisy SGD trajectory</div>
+    <div>• Blue path: batch gradient (comparison)</div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Problem Type:</label>
+      <select id="problemSelect">
+        <option value="linear">Linear Regression</option>
+        <option value="logistic">Logistic Regression</option>
+        <option value="quadratic">Quadratic Loss</option>
+        <option value="neural">Neural Network (simple)</option>
+        <option value="svm">SVM Hinge Loss</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Learning Rate:</label>
+      <input type="range" id="learningRate" min="0.001" max="0.1" step="0.001" value="0.01">
+      <span id="learningRateValue">0.01</span>
+    </div>
+
+    <div class="control-group">
+      <label>Batch Size:</label>
+      <input type="range" id="batchSizeSlider" min="1" max="20" step="1" value="1">
+      <span id="batchSizeValue">1</span>
+    </div>
+
+    <div class="control-group">
+      <label>Number of Samples:</label>
+      <input type="range" id="numSamples" min="20" max="200" step="20" value="100">
+      <span id="numSamplesValue">100</span>
+    </div>
+
+    <div class="control-group">
+      <label>Noise Level:</label>
+      <input type="range" id="noiseLevel" min="0" max="2" step="0.1" value="0.5">
+      <span id="noiseLevelValue">0.5</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="100" max="1000" step="50" value="200">
+      <span id="animSpeedValue">200ms</span>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start SGD</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <button id="newDataBtn">New Data</button>
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showPath" checked> Show SGD Path
+      <input type="checkbox" id="showBatch" checked> Show Batch GD
+      <input type="checkbox" id="showSamples" checked> Show Data Points
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(6, 6, 6);
+    controls.update();
+
+    // SGD parameters
+    let currentX = 2, currentY = 2;
+    let learningRate = 0.01;
+    let batchSize = 1;
+    let animationSpeed = 200;
+    let noiseLevel = 0.5;
+    let isRunning = false;
+    let iteration = 0;
+    let epoch = 0;
+    let currentProblem = 'linear';
+    let sgdPathPoints = [];
+    let batchPathPoints = [];
+    let animationId = null;
+    let currentSampleIndex = 0;
+    let dataPoints = [];
+    let numSamples = 100;
+
+    // Data generation
+    function generateData() {
+      dataPoints = [];
+      for (let i = 0; i < numSamples; i++) {
+        const x = (Math.random() - 0.5) * 8;
+        const y = (Math.random() - 0.5) * 8;
+        let target;
+        
+        switch (currentProblem) {
+          case 'linear':
+            target = 2 * x + 1 * y + Math.random() * noiseLevel - noiseLevel/2;
+            break;
+          case 'logistic':
+            target = x + y > 0 ? 1 : -1;
+            break;
+          case 'quadratic':
+            target = x*x + y*y + Math.random() * noiseLevel - noiseLevel/2;
+            break;
+          case 'neural':
+            target = Math.tanh(x + y) + Math.random() * noiseLevel - noiseLevel/2;
+            break;
+          case 'svm':
+            target = x + y > 0 ? 1 : -1;
+            break;
+        }
+        
+        dataPoints.push({x, y, target});
+      }
+      updateDataVisualization();
+    }
+
+    // Problem definitions
+    const problems = {
+      linear: {
+        loss: (theta1, theta2, sample) => {
+          const pred = theta1 * sample.x + theta2 * sample.y;
+          return 0.5 * (pred - sample.target) * (pred - sample.target);
+        },
+        gradient: (theta1, theta2, sample) => {
+          const pred = theta1 * sample.x + theta2 * sample.y;
+          const error = pred - sample.target;
+          return [error * sample.x, error * sample.y];
+        },
+        name: 'Linear Regression'
+      },
+      logistic: {
+        loss: (theta1, theta2, sample) => {
+          const z = theta1 * sample.x + theta2 * sample.y;
+          return Math.log(1 + Math.exp(-sample.target * z));
+        },
+        gradient: (theta1, theta2, sample) => {
+          const z = theta1 * sample.x + theta2 * sample.y;
+          const sigmoid = 1 / (1 + Math.exp(sample.target * z));
+          return [-sample.target * sigmoid * sample.x, -sample.target * sigmoid * sample.y];
+        },
+        name: 'Logistic Regression'
+      },
+      quadratic: {
+        loss: (theta1, theta2, sample) => {
+          const pred = theta1 * sample.x + theta2 * sample.y;
+          return 0.5 * (pred - sample.target) * (pred - sample.target);
+        },
+        gradient: (theta1, theta2, sample) => {
+          const pred = theta1 * sample.x + theta2 * sample.y;
+          const error = pred - sample.target;
+          return [error * sample.x, error * sample.y];
+        },
+        name: 'Quadratic Loss'
+      },
+      neural: {
+        loss: (theta1, theta2, sample) => {
+          const pred = Math.tanh(theta1 * sample.x + theta2 * sample.y);
+          return 0.5 * (pred - sample.target) * (pred - sample.target);
+        },
+        gradient: (theta1, theta2, sample) => {
+          const z = theta1 * sample.x + theta2 * sample.y;
+          const pred = Math.tanh(z);
+          const error = pred - sample.target;
+          const sech2 = 1 - pred * pred;
+          return [error * sech2 * sample.x, error * sech2 * sample.y];
+        },
+        name: 'Neural Network (tanh)'
+      },
+      svm: {
+        loss: (theta1, theta2, sample) => {
+          const margin = sample.target * (theta1 * sample.x + theta2 * sample.y);
+          return Math.max(0, 1 - margin);
+        },
+        gradient: (theta1, theta2, sample) => {
+          const margin = sample.target * (theta1 * sample.x + theta2 * sample.y);
+          if (margin >= 1) return [0, 0];
+          return [-sample.target * sample.x, -sample.target * sample.y];
+        },
+        name: 'SVM Hinge Loss'
+      }
+    };
+
+    // Create loss surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const range = 4;
+      const steps = 40;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        let avgLoss = 0;
+        
+        // Compute average loss over all samples
+        for (const sample of dataPoints) {
+          avgLoss += problems[currentProblem].loss(x, y, sample);
+        }
+        avgLoss /= dataPoints.length;
+        
+        pos.setZ(i, avgLoss * 0.1);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0xE91E63,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.6
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Data points visualization
+    let dataPointsGroup = new THREE.Group();
+    scene.add(dataPointsGroup);
+
+    function updateDataVisualization() {
+      // Clear existing points
+      dataPointsGroup.clear();
+      
+      if (!document.getElementById('showSamples').checked) return;
+      
+      dataPoints.forEach((point, index) => {
+        const geo = new THREE.SphereGeometry(0.02, 8, 8);
+        const color = index === currentSampleIndex ? 0xffff00 : 0x00ff00;
+        const mat = new THREE.MeshBasicMaterial({ color });
+        const sphere = new THREE.Mesh(geo, mat);
+        sphere.position.set(point.x, point.y, 0);
+        dataPointsGroup.add(sphere);
+      });
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // Batch gradient position marker
+    const batchPointGeo = new THREE.SphereGeometry(0.06, 16, 16);
+    const batchPointMat = new THREE.MeshBasicMaterial({ color: 0x0066ff });
+    const batchPoint = new THREE.Mesh(batchPointGeo, batchPointMat);
+    scene.add(batchPoint);
+
+    // Path visualization
+    let sgdPathLine, batchPathLine;
+    
+    function updatePaths() {
+      if (sgdPathLine) scene.remove(sgdPathLine);
+      if (batchPathLine) scene.remove(batchPathLine);
+      
+      if (document.getElementById('showPath').checked && sgdPathPoints.length > 1) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(sgdPathPoints);
+        const material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2 });
+        sgdPathLine = new THREE.Line(geometry, material);
+        scene.add(sgdPathLine);
+      }
+      
+      if (document.getElementById('showBatch').checked && batchPathPoints.length > 1) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(batchPathPoints);
+        const material = new THREE.LineBasicMaterial({ color: 0x0066ff, linewidth: 2 });
+        batchPathLine = new THREE.Line(geometry, material);
+        scene.add(batchPathLine);
+      }
+    }
+
+    // Batch gradient computation
+    let batchX = 2, batchY = 2;
+    function computeBatchGradient() {
+      let avgGradX = 0, avgGradY = 0;
+      
+      for (const sample of dataPoints) {
+        const [gradX, gradY] = problems[currentProblem].gradient(batchX, batchY, sample);
+        avgGradX += gradX;
+        avgGradY += gradY;
+      }
+      
+      avgGradX /= dataPoints.length;
+      avgGradY /= dataPoints.length;
+      
+      batchX -= learningRate * avgGradX;
+      batchY -= learningRate * avgGradY;
+      
+      // Clamp to bounds
+      batchX = Math.max(-4, Math.min(4, batchX));
+      batchY = Math.max(-4, Math.min(4, batchY));
+      
+      // Update batch path
+      let avgLoss = 0;
+      for (const sample of dataPoints) {
+        avgLoss += problems[currentProblem].loss(batchX, batchY, sample);
+      }
+      avgLoss /= dataPoints.length;
+      
+      batchPathPoints.push(new THREE.Vector3(batchX, batchY, avgLoss * 0.1));
+      batchPoint.position.set(batchX, batchY, avgLoss * 0.1);
+    }
+
+    // Update display
+    function updateDisplay() {
+      const problem = problems[currentProblem];
+      
+      // Compute average loss
+      let avgLoss = 0;
+      for (const sample of dataPoints) {
+        avgLoss += problem.loss(currentX, currentY, sample);
+      }
+      avgLoss /= dataPoints.length;
+      
+      // Compute current sample loss
+      let currentSampleLoss = 0;
+      if (dataPoints.length > 0) {
+        const currentSample = dataPoints[currentSampleIndex];
+        currentSampleLoss = problem.loss(currentX, currentY, currentSample);
+      }
+      
+      document.getElementById('lossFunction').textContent = problem.name;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('avgLoss').textContent = avgLoss.toFixed(3);
+      document.getElementById('currentSampleLoss').textContent = currentSampleLoss.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('epoch').textContent = epoch;
+      document.getElementById('stepDisplay').textContent = learningRate.toFixed(3);
+      document.getElementById('batchSize').textContent = batchSize;
+      document.getElementById('currentSample').textContent = currentSampleIndex + 1;
+      document.getElementById('totalSamples').textContent = dataPoints.length;
+      
+      // Update 3D visualization
+      const scaledZ = avgLoss * 0.1;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+    }
+
+    // SGD step
+    function sgdStep() {
+      if (dataPoints.length === 0) return;
+      
+      // Select random batch
+      const batch = [];
+      for (let i = 0; i < batchSize; i++) {
+        const index = Math.floor(Math.random() * dataPoints.length);
+        batch.push(dataPoints[index]);
+        currentSampleIndex = index; // Show last selected sample
+      }
+      
+      // Compute gradient for batch
+      let avgGradX = 0, avgGradY = 0;
+      for (const sample of batch) {
+        const [gradX, gradY] = problems[currentProblem].gradient(currentX, currentY, sample);
+        avgGradX += gradX;
+        avgGradY += gradY;
+      }
+      avgGradX /= batch.length;
+      avgGradY /= batch.length;
+      
+      // Add current point to SGD path
+      let avgLoss = 0;
+      for (const sample of dataPoints) {
+        avgLoss += problems[currentProblem].loss(currentX, currentY, sample);
+      }
+      avgLoss /= dataPoints.length;
+      sgdPathPoints.push(new THREE.Vector3(currentX, currentY, avgLoss * 0.1));
+      
+      // Update position
+      currentX -= learningRate * avgGradX;
+      currentY -= learningRate * avgGradY;
+      
+      // Clamp to bounds
+      currentX = Math.max(-4, Math.min(4, currentX));
+      currentY = Math.max(-4, Math.min(4, currentY));
+      
+      // Update batch gradient for comparison
+      computeBatchGradient();
+      
+      iteration++;
+      if (iteration % dataPoints.length === 0) {
+        epoch++;
+      }
+      
+      updateDisplay();
+      updateDataVisualization();
+      updatePaths();
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        sgdStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start SGD
+    function startSGD() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop SGD
+    function stopSGD() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopSGD();
+      currentX = 2;
+      currentY = 2;
+      batchX = 2;
+      batchY = 2;
+      iteration = 0;
+      epoch = 0;
+      currentSampleIndex = 0;
+      sgdPathPoints = [];
+      batchPathPoints = [];
+      updateDisplay();
+      updateDataVisualization();
+      updatePaths();
+    }
+
+    // Event listeners
+    document.getElementById('problemSelect').addEventListener('change', (e) => {
+      currentProblem = e.target.value;
+      generateData();
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('learningRate').addEventListener('input', (e) => {
+      learningRate = parseFloat(e.target.value);
+      document.getElementById('learningRateValue').textContent = learningRate.toFixed(3);
+    });
+
+    document.getElementById('batchSizeSlider').addEventListener('input', (e) => {
+      batchSize = parseInt(e.target.value);
+      document.getElementById('batchSizeValue').textContent = batchSize;
+    });
+
+    document.getElementById('numSamples').addEventListener('input', (e) => {
+      numSamples = parseInt(e.target.value);
+      document.getElementById('numSamplesValue').textContent = numSamples;
+      generateData();
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('noiseLevel').addEventListener('input', (e) => {
+      noiseLevel = parseFloat(e.target.value);
+      document.getElementById('noiseLevelValue').textContent = noiseLevel.toFixed(1);
+      generateData();
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startSGD);
+    document.getElementById('stopBtn').addEventListener('click', stopSGD);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        sgdStep();
+      }
+    });
+
+    document.getElementById('newDataBtn').addEventListener('click', () => {
+      generateData();
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePaths);
+    document.getElementById('showBatch').addEventListener('change', updatePaths);
+    document.getElementById('showSamples').addEventListener('change', updateDataVisualization);
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    generateData();
+    createSurface();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

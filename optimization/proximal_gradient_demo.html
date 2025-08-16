@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Proximal Gradient Descent Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 350px;
+      font-size: 13px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 220px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #673AB7;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #5E35B1;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #9C27B0;
+      font-weight: bold;
+    }
+    .prox-step {
+      color: #FF9800;
+      font-size: 12px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Proximal Gradient Descent</h3>
+    <div>Problem: min f(x,y) + g(x,y)</div>
+    <div>f(x,y): <span id="smoothPart">x² + y²</span></div>
+    <div>g(x,y): <span id="nonsmoothPart">λ|x| + λ|y|</span></div>
+    <div>Current: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>Total Value: <span id="currentValue" class="value-display">0.00</span></div>
+    <div>∇f: (<span id="gradientX">0.00</span>, <span id="gradientY">0.00</span>)</div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div>Step Size: <span id="stepDisplay">0.1</span></div>
+    <div class="prox-step">Proximal Step: <span id="proxInfo">Soft thresholding</span></div>
+    <br>
+    <div><strong>Algorithm:</strong></div>
+    <div>1. Gradient step: z = x - α∇f(x)</div>
+    <div>2. Proximal step: x⁺ = prox_{αg}(z)</div>
+    <div>• Combines smooth optimization with non-smooth regularization</div>
+    <div>• Yellow arrow: gradient direction</div>
+    <div>• Purple arrow: proximal correction</div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Problem Type:</label>
+      <select id="problemSelect">
+        <option value="l1regularized">L1 Regularized (Lasso)</option>
+        <option value="l2regularized">L2 Regularized (Ridge)</option>
+        <option value="elasticnet">Elastic Net</option>
+        <option value="groupsparsity">Group Sparsity</option>
+        <option value="totalvariation">Total Variation</option>
+        <option value="nuclearNorm">Nuclear Norm</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Learning Rate (α):</label>
+      <input type="range" id="learningRate" min="0.001" max="0.2" step="0.001" value="0.05">
+      <span id="learningRateValue">0.05</span>
+    </div>
+
+    <div class="control-group">
+      <label>Regularization (λ):</label>
+      <input type="range" id="lambda" min="0.1" max="3" step="0.1" value="1">
+      <span id="lambdaValue">1</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="200" max="2000" step="100" value="400">
+      <span id="animSpeedValue">400ms</span>
+    </div>
+
+    <div class="control-group">
+      <label>Starting Point:</label>
+      <div>
+        X: <input type="number" id="startX" value="4" step="0.1" min="-5" max="5">
+        Y: <input type="number" id="startY" value="3" step="0.1" min="-5" max="5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start Prox-Gradient</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <input type="checkbox" id="showPath" checked> Show Path
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showProxStep" checked> Show Prox Step
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(6, 6, 6);
+    controls.update();
+
+    // Proximal gradient descent parameters
+    let currentX = 4, currentY = 3;
+    let learningRate = 0.05;
+    let lambda = 1;
+    let animationSpeed = 400;
+    let isRunning = false;
+    let iteration = 0;
+    let currentProblem = 'l1regularized';
+    let pathPoints = [];
+    let animationId = null;
+
+    // Soft thresholding operator
+    function softThreshold(x, threshold) {
+      if (x > threshold) return x - threshold;
+      if (x < -threshold) return x + threshold;
+      return 0;
+    }
+
+    // Proximal operators
+    const proximalOperators = {
+      l1: (x, y, alpha, lambda) => [
+        softThreshold(x, alpha * lambda),
+        softThreshold(y, alpha * lambda)
+      ],
+      l2: (x, y, alpha, lambda) => {
+        const factor = 1 / (1 + alpha * lambda);
+        return [x * factor, y * factor];
+      },
+      elasticnet: (x, y, alpha, lambda) => {
+        const l1_thresh = alpha * lambda * 0.5;
+        const l2_factor = 1 / (1 + alpha * lambda * 0.5);
+        return [
+          softThreshold(x, l1_thresh) * l2_factor,
+          softThreshold(y, l1_thresh) * l2_factor
+        ];
+      },
+      groupsparsity: (x, y, alpha, lambda) => {
+        const norm = Math.sqrt(x*x + y*y);
+        if (norm === 0) return [0, 0];
+        const factor = Math.max(0, 1 - alpha * lambda / norm);
+        return [x * factor, y * factor];
+      },
+      totalvariation: (x, y, alpha, lambda) => {
+        // Simplified TV proximal operator
+        const thresh = alpha * lambda;
+        return [
+          softThreshold(x, thresh),
+          softThreshold(y, thresh)
+        ];
+      },
+      nuclear: (x, y, alpha, lambda) => {
+        // Simplified nuclear norm proximal operator
+        const factor = Math.max(0, 1 - alpha * lambda / Math.max(Math.abs(x), Math.abs(y)));
+        return [x * factor, y * factor];
+      }
+    };
+
+    // Problem definitions
+    const problems = {
+      l1regularized: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => lambda * (Math.abs(x) + Math.abs(y)),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.l1(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${lambda}(|x| + |y|)`,
+        range: 5,
+        scale: 0.3
+      },
+      l2regularized: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => 0.5 * lambda * (x*x + y*y),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.l2(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${0.5*lambda}(x² + y²)`,
+        range: 5,
+        scale: 0.3
+      },
+      elasticnet: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => lambda * (Math.abs(x) + Math.abs(y)) + 0.5 * lambda * (x*x + y*y),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.elasticnet(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${lambda}(|x| + |y|) + ${0.5*lambda}(x² + y²)`,
+        range: 5,
+        scale: 0.2
+      },
+      groupsparsity: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => lambda * Math.sqrt(x*x + y*y),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.groupsparsity(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${lambda}√(x² + y²)`,
+        range: 5,
+        scale: 0.3
+      },
+      totalvariation: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => lambda * (Math.abs(x) + Math.abs(y)),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.totalvariation(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${lambda}TV(x,y)`,
+        range: 5,
+        scale: 0.3
+      },
+      nuclearNorm: {
+        smoothF: (x, y) => x*x + y*y,
+        nonsmoothG: (x, y) => lambda * Math.max(Math.abs(x), Math.abs(y)),
+        gradF: (x, y) => [2*x, 2*y],
+        proxG: (x, y, alpha) => proximalOperators.nuclear(x, y, alpha, lambda),
+        smoothName: 'x² + y²',
+        nonsmoothName: `${lambda}max(|x|,|y|)`,
+        range: 5,
+        scale: 0.3
+      }
+    };
+
+    // Create surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const problem = problems[currentProblem];
+      const range = problem.range;
+      const steps = 60;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = (problem.smoothF(x, y) + problem.nonsmoothG(x, y)) * problem.scale;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0x673AB7,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // Gradient step marker
+    const gradStepGeo = new THREE.SphereGeometry(0.06, 16, 16);
+    const gradStepMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const gradStepPoint = new THREE.Mesh(gradStepGeo, gradStepMat);
+    scene.add(gradStepPoint);
+
+    // Gradient arrow
+    const gradArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0xffff00,
+      1,
+      0.5
+    );
+    scene.add(gradArrowHelper);
+
+    // Proximal step arrow
+    const proxArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0x9C27B0,
+      1,
+      0.5
+    );
+    scene.add(proxArrowHelper);
+
+    // Path visualization
+    let pathLine;
+    function updatePath() {
+      if (pathLine) scene.remove(pathLine);
+      
+      if (pathPoints.length < 2 || !document.getElementById('showPath').checked) return;
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const material = new THREE.LineBasicMaterial({ color: 0xff9800, linewidth: 3 });
+      pathLine = new THREE.Line(geometry, material);
+      scene.add(pathLine);
+    }
+
+    // Update display
+    function updateDisplay() {
+      const problem = problems[currentProblem];
+      const fVal = problem.smoothF(currentX, currentY);
+      const gVal = problem.nonsmoothG(currentX, currentY);
+      const totalVal = fVal + gVal;
+      const [gradX, gradY] = problem.gradF(currentX, currentY);
+      
+      document.getElementById('smoothPart').textContent = problem.smoothName;
+      document.getElementById('nonsmoothPart').textContent = problem.nonsmoothName;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = totalVal.toFixed(3);
+      document.getElementById('gradientX').textContent = gradX.toFixed(3);
+      document.getElementById('gradientY').textContent = gradY.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('stepDisplay').textContent = learningRate.toFixed(3);
+      
+      // Update 3D visualization
+      const scaledZ = totalVal * problem.scale;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update gradient arrow
+      const gradMagnitude = Math.sqrt(gradX*gradX + gradY*gradY);
+      if (gradMagnitude > 0) {
+        const normalizedGrad = new THREE.Vector3(-gradX, -gradY, 0).normalize();
+        gradArrowHelper.setDirection(normalizedGrad);
+        gradArrowHelper.position.set(currentX, currentY, scaledZ);
+        gradArrowHelper.setLength(Math.min(gradMagnitude * 0.2, 1.5));
+      }
+    }
+
+    // Proximal gradient descent step
+    function proximalGradientStep() {
+      const problem = problems[currentProblem];
+      const [gradX, gradY] = problem.gradF(currentX, currentY);
+      
+      // Add current point to path
+      const totalVal = problem.smoothF(currentX, currentY) + problem.nonsmoothG(currentX, currentY);
+      const scaledZ = totalVal * problem.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, scaledZ));
+      
+      // Gradient step
+      const gradStepX = currentX - learningRate * gradX;
+      const gradStepY = currentY - learningRate * gradY;
+      
+      // Show gradient step if enabled
+      if (document.getElementById('showProxStep').checked) {
+        const gradStepZ = (problem.smoothF(gradStepX, gradStepY) + problem.nonsmoothG(gradStepX, gradStepY)) * problem.scale;
+        gradStepPoint.position.set(gradStepX, gradStepY, gradStepZ);
+        gradStepPoint.visible = true;
+      } else {
+        gradStepPoint.visible = false;
+      }
+      
+      // Proximal step
+      const [proxX, proxY] = problem.proxG(gradStepX, gradStepY, learningRate);
+      
+      // Update position
+      currentX = proxX;
+      currentY = proxY;
+      
+      // Clamp to bounds
+      const range = problem.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      // Show proximal step arrow
+      if (document.getElementById('showProxStep').checked) {
+        const proxDirection = new THREE.Vector3(currentX - gradStepX, currentY - gradStepY, 0);
+        if (proxDirection.length() > 0.01) {
+          proxDirection.normalize();
+          proxArrowHelper.setDirection(proxDirection);
+          proxArrowHelper.position.set(gradStepX, gradStepY, gradStepPoint.position.z);
+          proxArrowHelper.setLength(Math.sqrt((currentX - gradStepX)**2 + (currentY - gradStepY)**2));
+          proxArrowHelper.visible = true;
+        } else {
+          proxArrowHelper.visible = false;
+        }
+      } else {
+        proxArrowHelper.visible = false;
+      }
+      
+      iteration++;
+      updateDisplay();
+      updatePath();
+      
+      // Check convergence
+      const gradMagnitude = Math.sqrt(gradX*gradX + gradY*gradY);
+      if (gradMagnitude < 0.001 && iteration > 20) {
+        stopProximalGradient();
+      }
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        proximalGradientStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start proximal gradient descent
+    function startProximalGradient() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop proximal gradient descent
+    function stopProximalGradient() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopProximalGradient();
+      currentX = parseFloat(document.getElementById('startX').value);
+      currentY = parseFloat(document.getElementById('startY').value);
+      iteration = 0;
+      pathPoints = [];
+      updateDisplay();
+      updatePath();
+    }
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      if (isRunning) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        iteration = 0;
+        pathPoints = [];
+        updateDisplay();
+        updatePath();
+      }
+    });
+
+    // Event listeners
+    document.getElementById('problemSelect').addEventListener('change', (e) => {
+      currentProblem = e.target.value;
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('learningRate').addEventListener('input', (e) => {
+      learningRate = parseFloat(e.target.value);
+      document.getElementById('learningRateValue').textContent = learningRate.toFixed(3);
+    });
+
+    document.getElementById('lambda').addEventListener('input', (e) => {
+      lambda = parseFloat(e.target.value);
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(1);
+      // Update problem names
+      problems.l1regularized.nonsmoothName = `${lambda}(|x| + |y|)`;
+      problems.l2regularized.nonsmoothName = `${0.5*lambda}(x² + y²)`;
+      problems.elasticnet.nonsmoothName = `${lambda}(|x| + |y|) + ${0.5*lambda}(x² + y²)`;
+      problems.groupsparsity.nonsmoothName = `${lambda}√(x² + y²)`;
+      problems.totalvariation.nonsmoothName = `${lambda}TV(x,y)`;
+      problems.nuclearNorm.nonsmoothName = `${lambda}max(|x|,|y|)`;
+      createSurface();
+      updateDisplay();
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startProximalGradient);
+    document.getElementById('stopBtn').addEventListener('click', stopProximalGradient);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        proximalGradientStep();
+      }
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePath);
+    document.getElementById('showProxStep').addEventListener('change', () => {
+      gradStepPoint.visible = document.getElementById('showProxStep').checked;
+      proxArrowHelper.visible = document.getElementById('showProxStep').checked;
+    });
+
+    document.getElementById('startX').addEventListener('change', reset);
+    document.getElementById('startY').addEventListener('change', reset);
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Gradient Descent Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 300px;
+      font-size: 14px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 200px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Gradient Descent Demo</h3>
+    <div>Function: <span id="functionName">f(x,y) = x² + y²</span></div>
+    <div>Current Position: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>Function Value: <span id="currentValue" class="value-display">0.00</span></div>
+    <div>Gradient: (∇f = <span id="gradientX">0.00</span>, <span id="gradientY">0.00</span>)</div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div>Step Size: <span id="stepDisplay">0.1</span></div>
+    <br>
+    <div><strong>Instructions:</strong></div>
+    <div>• Click on surface to set starting point</div>
+    <div>• Use controls to adjust parameters</div>
+    <div>• Watch the red ball follow the gradient!</div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Function:</label>
+      <select id="functionSelect">
+        <option value="quadratic">Quadratic Bowl (x² + y²)</option>
+        <option value="rosenbrock">Rosenbrock (banana)</option>
+        <option value="himmelblau">Himmelblau's function</option>
+        <option value="rastrigin">Rastrigin (multiple minima)</option>
+        <option value="beale">Beale function</option>
+        <option value="booth">Booth function</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Learning Rate:</label>
+      <input type="range" id="learningRate" min="0.001" max="0.5" step="0.001" value="0.1">
+      <span id="learningRateValue">0.1</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="50" max="1000" step="50" value="200">
+      <span id="animSpeedValue">200ms</span>
+    </div>
+
+    <div class="control-group">
+      <label>Starting Point:</label>
+      <div>
+        X: <input type="number" id="startX" value="2" step="0.1" min="-5" max="5">
+        Y: <input type="number" id="startY" value="2" step="0.1" min="-5" max="5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start Gradient Descent</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <input type="checkbox" id="showPath"> Show Path
+    </div>
+  </div>
+
+  <!-- Use unpkg CDN with cache busting -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(8, 8, 8);
+    controls.update();
+
+    // Gradient descent parameters
+    let currentX = 2, currentY = 2;
+    let learningRate = 0.1;
+    let animationSpeed = 200;
+    let isRunning = false;
+    let iteration = 0;
+    let currentFunction = 'quadratic';
+    let pathPoints = [];
+    let animationId = null;
+
+    // Function definitions
+    const functions = {
+      quadratic: {
+        f: (x, y) => x*x + y*y,
+        dfdx: (x, y) => 2*x,
+        dfdy: (x, y) => 2*y,
+        name: 'x² + y²',
+        range: 5,
+        scale: 1
+      },
+      rosenbrock: {
+        f: (x, y) => (1-x)*(1-x) + 100*(y-x*x)*(y-x*x),
+        dfdx: (x, y) => -2*(1-x) + 400*x*(x*x-y),
+        dfdy: (x, y) => 200*(y-x*x),
+        name: 'Rosenbrock function',
+        range: 3,
+        scale: 0.01
+      },
+      himmelblau: {
+        f: (x, y) => (x*x + y - 11)*(x*x + y - 11) + (x + y*y - 7)*(x + y*y - 7),
+        dfdx: (x, y) => 2*(x*x + y - 11)*2*x + 2*(x + y*y - 7),
+        dfdy: (x, y) => 2*(x*x + y - 11) + 2*(x + y*y - 7)*2*y,
+        name: "Himmelblau's function",
+        range: 5,
+        scale: 0.01
+      },
+      rastrigin: {
+        f: (x, y) => 20 + x*x + y*y - 10*Math.cos(2*Math.PI*x) - 10*Math.cos(2*Math.PI*y),
+        dfdx: (x, y) => 2*x + 20*Math.PI*Math.sin(2*Math.PI*x),
+        dfdy: (x, y) => 2*y + 20*Math.PI*Math.sin(2*Math.PI*y),
+        name: 'Rastrigin function',
+        range: 3,
+        scale: 0.1
+      },
+      beale: {
+        f: (x, y) => {
+          const a = 1.5 - x + x*y;
+          const b = 2.25 - x + x*y*y;
+          const c = 2.625 - x + x*y*y*y;
+          return a*a + b*b + c*c;
+        },
+        dfdx: (x, y) => {
+          const a = 1.5 - x + x*y;
+          const b = 2.25 - x + x*y*y;
+          const c = 2.625 - x + x*y*y*y;
+          return 2*a*(-1 + y) + 2*b*(-1 + y*y) + 2*c*(-1 + y*y*y);
+        },
+        dfdy: (x, y) => {
+          const a = 1.5 - x + x*y;
+          const b = 2.25 - x + x*y*y;
+          const c = 2.625 - x + x*y*y*y;
+          return 2*a*x + 2*b*2*x*y + 2*c*3*x*y*y;
+        },
+        name: 'Beale function',
+        range: 3,
+        scale: 0.01
+      },
+      booth: {
+        f: (x, y) => (x + 2*y - 7)*(x + 2*y - 7) + (2*x + y - 5)*(2*x + y - 5),
+        dfdx: (x, y) => 2*(x + 2*y - 7) + 2*(2*x + y - 5)*2,
+        dfdy: (x, y) => 2*(x + 2*y - 7)*2 + 2*(2*x + y - 5),
+        name: 'Booth function',
+        range: 5,
+        scale: 0.1
+      }
+    };
+
+    // Create surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const func = functions[currentFunction];
+      const range = func.range;
+      const steps = 60;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = func.f(x, y) * func.scale;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0x00ffcc,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.1, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // Gradient arrow
+    const arrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0xffff00,
+      1,
+      0.5
+    );
+    scene.add(arrowHelper);
+
+    // Path visualization
+    let pathLine;
+    function updatePath() {
+      if (pathLine) scene.remove(pathLine);
+      
+      if (pathPoints.length < 2 || !document.getElementById('showPath').checked) return;
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 3 });
+      pathLine = new THREE.Line(geometry, material);
+      scene.add(pathLine);
+    }
+
+    // Update display
+    function updateDisplay() {
+      const func = functions[currentFunction];
+      const z = func.f(currentX, currentY);
+      const dx = func.dfdx(currentX, currentY);
+      const dy = func.dfdy(currentX, currentY);
+      
+      document.getElementById('functionName').textContent = `f(x,y) = ${func.name}`;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = z.toFixed(3);
+      document.getElementById('gradientX').textContent = dx.toFixed(3);
+      document.getElementById('gradientY').textContent = dy.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('stepDisplay').textContent = learningRate.toFixed(3);
+      
+      // Update 3D visualization
+      const scaledZ = z * func.scale;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update gradient arrow
+      const gradMagnitude = Math.sqrt(dx*dx + dy*dy);
+      if (gradMagnitude > 0) {
+        const normalizedGrad = new THREE.Vector3(-dx, -dy, 0).normalize();
+        arrowHelper.setDirection(normalizedGrad);
+        arrowHelper.position.set(currentX, currentY, scaledZ);
+        arrowHelper.setLength(Math.min(gradMagnitude * 0.1, 2));
+      }
+    }
+
+    // Gradient descent step
+    function gradientDescentStep() {
+      const func = functions[currentFunction];
+      const dx = func.dfdx(currentX, currentY);
+      const dy = func.dfdy(currentX, currentY);
+      
+      // Add current point to path
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      // Update position
+      currentX -= learningRate * dx;
+      currentY -= learningRate * dy;
+      
+      // Clamp to bounds
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      iteration++;
+      updateDisplay();
+      updatePath();
+      
+      // Check convergence
+      const gradMagnitude = Math.sqrt(dx*dx + dy*dy);
+      if (gradMagnitude < 0.001) {
+        stopGradientDescent();
+      }
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        gradientDescentStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start gradient descent
+    function startGradientDescent() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop gradient descent
+    function stopGradientDescent() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopGradientDescent();
+      currentX = parseFloat(document.getElementById('startX').value);
+      currentY = parseFloat(document.getElementById('startY').value);
+      iteration = 0;
+      pathPoints = [];
+      updateDisplay();
+      updatePath();
+    }
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      if (isRunning) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        iteration = 0;
+        pathPoints = [];
+        updateDisplay();
+        updatePath();
+      }
+    });
+
+    // Event listeners
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('learningRate').addEventListener('input', (e) => {
+      learningRate = parseFloat(e.target.value);
+      document.getElementById('learningRateValue').textContent = learningRate.toFixed(3);
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startGradientDescent);
+    document.getElementById('stopBtn').addEventListener('click', stopGradientDescent);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        gradientDescentStep();
+      }
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePath);
+
+    document.getElementById('startX').addEventListener('change', reset);
+    document.getElementById('startY').addEventListener('change', reset);
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

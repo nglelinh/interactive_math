@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa Linear Programming</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .control-row label {
+            min-width: 120px;
+            margin-right: 10px;
+        }
+        input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .optimal-solution {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .corner-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .corner-point {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .corner-point.optimal {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Minh họa Linear Programming</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Hàm mục tiêu</h3>
+                <div class="control-row">
+                    <label>Lợi nhuận bàn:</label>
+                    <input type="range" id="profitTable" min="10" max="100" value="40" step="5">
+                    <input type="number" id="profitTableValue" value="40" min="10" max="100">
+                </div>
+                <div class="control-row">
+                    <label>Lợi nhuận ghế:</label>
+                    <input type="range" id="profitChair" min="10" max="100" value="30" step="5">
+                    <input type="number" id="profitChairValue" value="30" min="10" max="100">
+                </div>
+                <div class="formula">
+                    <strong>Z = <span id="objectiveFormula">40x + 30y</span></strong>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🔧 Ràng buộc lao động</h3>
+                <div class="control-row">
+                    <label>Giờ/bàn:</label>
+                    <input type="range" id="laborTable" min="1" max="5" value="2" step="0.5">
+                    <input type="number" id="laborTableValue" value="2" min="1" max="5" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>Giờ/ghế:</label>
+                    <input type="range" id="laborChair" min="0.5" max="3" value="1" step="0.5">
+                    <input type="number" id="laborChairValue" value="1" min="0.5" max="3" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>Tổng giờ:</label>
+                    <input type="range" id="totalLabor" min="50" max="200" value="100" step="10">
+                    <input type="number" id="totalLaborValue" value="100" min="50" max="200">
+                </div>
+                <div class="formula">
+                    <strong><span id="laborFormula">2x + y ≤ 100</span></strong>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🌳 Ràng buộc gỗ</h3>
+                <div class="control-row">
+                    <label>Đơn vị/bàn:</label>
+                    <input type="range" id="woodTable" min="1" max="5" value="3" step="0.5">
+                    <input type="number" id="woodTableValue" value="3" min="1" max="5" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>Đơn vị/ghế:</label>
+                    <input type="range" id="woodChair" min="1" max="5" value="2" step="0.5">
+                    <input type="number" id="woodChairValue" value="2" min="1" max="5" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>Tổng gỗ:</label>
+                    <input type="range" id="totalWood" min="50" max="300" value="120" step="10">
+                    <input type="number" id="totalWoodValue" value="120" min="50" max="300">
+                </div>
+                <div class="formula">
+                    <strong><span id="woodFormula">3x + 2y ≤ 120</span></strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="lpCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📈 Kết quả phân tích</h3>
+            <div class="optimal-solution">
+                <strong>Nghiệm tối ưu:</strong> <span id="optimalSolution">x = 20, y = 60, Z = 2600</span>
+            </div>
+            
+            <h4>🎯 Các điểm góc (Corner Points):</h4>
+            <div class="corner-points" id="cornerPoints">
+                <!-- Corner points will be populated here -->
+            </div>
+            
+            <h4>📊 Phân tích:</h4>
+            <div id="analysis">
+                <p><strong>Vùng khả thi:</strong> Đa giác lồi được tạo bởi các ràng buộc</p>
+                <p><strong>Phương pháp giải:</strong> Điểm góc (Corner Point Method)</p>
+                <p><strong>Lý thuyết:</strong> Nghiệm tối ưu luôn nằm tại một điểm góc của vùng khả thi</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('lpCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Problem parameters
+        let problem = {
+            profitTable: 40,
+            profitChair: 30,
+            laborTable: 2,
+            laborChair: 1,
+            totalLabor: 100,
+            woodTable: 3,
+            woodChair: 2,
+            totalWood: 120
+        };
+        
+        // Update problem parameters
+        function updateProblem() {
+            problem.profitTable = parseFloat(document.getElementById('profitTableValue').value);
+            problem.profitChair = parseFloat(document.getElementById('profitChairValue').value);
+            problem.laborTable = parseFloat(document.getElementById('laborTableValue').value);
+            problem.laborChair = parseFloat(document.getElementById('laborChairValue').value);
+            problem.totalLabor = parseFloat(document.getElementById('totalLaborValue').value);
+            problem.woodTable = parseFloat(document.getElementById('woodTableValue').value);
+            problem.woodChair = parseFloat(document.getElementById('woodChairValue').value);
+            problem.totalWood = parseFloat(document.getElementById('totalWoodValue').value);
+            
+            updateFormulas();
+            drawLP();
+            updateCornerPoints();
+        }
+        
+        // Update formulas display
+        function updateFormulas() {
+            document.getElementById('objectiveFormula').textContent = 
+                `${problem.profitTable}x + ${problem.profitChair}y`;
+            document.getElementById('laborFormula').textContent = 
+                `${problem.laborTable}x + ${problem.laborChair}y ≤ ${problem.totalLabor}`;
+            document.getElementById('woodFormula').textContent = 
+                `${problem.woodTable}x + ${problem.woodChair}y ≤ ${problem.totalWood}`;
+        }
+        
+        // Calculate corner points
+        function calculateCornerPoints() {
+            const points = [];
+            
+            // Origin (0,0)
+            points.push({x: 0, y: 0, label: 'Origin'});
+            
+            // Labor constraint intercepts
+            const laborX = problem.totalLabor / problem.laborTable;
+            const laborY = problem.totalLabor / problem.laborChair;
+            points.push({x: laborX, y: 0, label: 'Labor X-intercept'});
+            points.push({x: 0, y: laborY, label: 'Labor Y-intercept'});
+            
+            // Wood constraint intercepts
+            const woodX = problem.totalWood / problem.woodTable;
+            const woodY = problem.totalWood / problem.woodChair;
+            points.push({x: woodX, y: 0, label: 'Wood X-intercept'});
+            points.push({x: 0, y: woodY, label: 'Wood Y-intercept'});
+            
+            // Intersection of constraints
+            const det = problem.laborTable * problem.woodChair - problem.woodTable * problem.laborChair;
+            if (Math.abs(det) > 1e-10) {
+                const x = (problem.totalLabor * problem.woodChair - problem.totalWood * problem.laborChair) / det;
+                const y = (problem.laborTable * problem.totalWood - problem.woodTable * problem.totalLabor) / det;
+                if (x >= 0 && y >= 0) {
+                    points.push({x: x, y: y, label: 'Intersection'});
+                }
+            }
+            
+            // Filter feasible points
+            return points.filter(point => 
+                point.x >= 0 && point.y >= 0 &&
+                problem.laborTable * point.x + problem.laborChair * point.y <= problem.totalLabor &&
+                problem.woodTable * point.x + problem.woodChair * point.y <= problem.totalWood
+            );
+        }
+        
+        // Calculate objective value
+        function calculateObjective(x, y) {
+            return problem.profitTable * x + problem.profitChair * y;
+        }
+        
+        // Find optimal solution
+        function findOptimalSolution() {
+            const cornerPoints = calculateCornerPoints();
+            let optimal = cornerPoints[0];
+            let maxValue = calculateObjective(optimal.x, optimal.y);
+            
+            cornerPoints.forEach(point => {
+                const value = calculateObjective(point.x, point.y);
+                if (value > maxValue) {
+                    maxValue = value;
+                    optimal = point;
+                }
+            });
+            
+            return {point: optimal, value: maxValue};
+        }
+        
+        // Draw the LP visualization
+        function drawLP() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const margin = 50;
+            const width = canvas.width - 2 * margin;
+            const height = canvas.height - 2 * margin;
+            
+            // Find bounds
+            const maxX = Math.max(problem.totalLabor / problem.laborTable, problem.totalWood / problem.woodTable) * 1.2;
+            const maxY = Math.max(problem.totalLabor / problem.laborChair, problem.totalWood / problem.woodChair) * 1.2;
+            
+            // Scale factors
+            const scaleX = width / maxX;
+            const scaleY = height / maxY;
+            const scale = Math.min(scaleX, scaleY);
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: margin + x * scale,
+                    y: canvas.height - margin - y * scale
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= maxX; i += 10) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, margin);
+                ctx.lineTo(pos.x, canvas.height - margin);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= maxY; i += 10) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(margin, pos.y);
+                ctx.lineTo(canvas.width - margin, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, margin);
+            ctx.lineTo(origin.x, canvas.height - margin);
+            ctx.moveTo(margin, origin.y);
+            ctx.lineTo(canvas.width - margin, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x (Bàn)', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('y (Ghế)', 0, 0);
+            ctx.restore();
+            
+            // Draw constraints
+            ctx.lineWidth = 3;
+            
+            // Labor constraint
+            ctx.strokeStyle = '#ff6b6b';
+            const laborPoints = [
+                transform(0, problem.totalLabor / problem.laborChair),
+                transform(problem.totalLabor / problem.laborTable, 0)
+            ];
+            ctx.beginPath();
+            ctx.moveTo(laborPoints[0].x, laborPoints[0].y);
+            ctx.lineTo(laborPoints[1].x, laborPoints[1].y);
+            ctx.stroke();
+            
+            // Wood constraint
+            ctx.strokeStyle = '#4ecdc4';
+            const woodPoints = [
+                transform(0, problem.totalWood / problem.woodChair),
+                transform(problem.totalWood / problem.woodTable, 0)
+            ];
+            ctx.beginPath();
+            ctx.moveTo(woodPoints[0].x, woodPoints[0].y);
+            ctx.lineTo(woodPoints[1].x, woodPoints[1].y);
+            ctx.stroke();
+            
+            // Fill feasible region
+            const cornerPoints = calculateCornerPoints();
+            if (cornerPoints.length > 2) {
+                ctx.fillStyle = 'rgba(255, 107, 107, 0.2)';
+                ctx.beginPath();
+                const firstPoint = transform(cornerPoints[0].x, cornerPoints[0].y);
+                ctx.moveTo(firstPoint.x, firstPoint.y);
+                for (let i = 1; i < cornerPoints.length; i++) {
+                    const point = transform(cornerPoints[i].x, cornerPoints[i].y);
+                    ctx.lineTo(point.x, point.y);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw corner points
+            ctx.fillStyle = '#333';
+            cornerPoints.forEach(point => {
+                const pos = transform(point.x, point.y);
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`(${Math.round(point.x)}, ${Math.round(point.y)})`, pos.x + 10, pos.y - 10);
+            });
+            
+            // Highlight optimal solution
+            const optimal = findOptimalSolution();
+            const optimalPos = transform(optimal.point.x, optimal.point.y);
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.arc(optimalPos.x, optimalPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('⭐ OPTIMAL', optimalPos.x, optimalPos.y - 20);
+            
+            // Draw objective function contours
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            for (let z = 0; z <= optimal.value; z += optimal.value / 5) {
+                const x1 = 0;
+                const y1 = z / problem.profitChair;
+                const x2 = z / problem.profitTable;
+                const y2 = 0;
+                
+                if (y1 <= maxY && x2 <= maxX) {
+                    const p1 = transform(x1, y1);
+                    const p2 = transform(x2, y2);
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+            ctx.setLineDash([]);
+        }
+        
+        // Update corner points display
+        function updateCornerPoints() {
+            const cornerPoints = calculateCornerPoints();
+            const optimal = findOptimalSolution();
+            
+            const container = document.getElementById('cornerPoints');
+            container.innerHTML = '';
+            
+            cornerPoints.forEach(point => {
+                const value = calculateObjective(point.x, point.y);
+                const isOptimal = point.x === optimal.point.x && point.y === optimal.point.y;
+                
+                const div = document.createElement('div');
+                div.className = `corner-point ${isOptimal ? 'optimal' : ''}`;
+                div.innerHTML = `
+                    <strong>${point.label}</strong><br>
+                    x = ${Math.round(point.x)}, y = ${Math.round(point.y)}<br>
+                    Z = ${Math.round(value)}
+                `;
+                container.appendChild(div);
+            });
+            
+            // Update optimal solution display
+            document.getElementById('optimalSolution').textContent = 
+                `x = ${Math.round(optimal.point.x)}, y = ${Math.round(optimal.point.y)}, Z = ${Math.round(optimal.value)}`;
+        }
+        
+        // Event listeners
+        document.getElementById('profitTable').addEventListener('input', function() {
+            document.getElementById('profitTableValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('profitTableValue').addEventListener('input', function() {
+            document.getElementById('profitTable').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('profitChair').addEventListener('input', function() {
+            document.getElementById('profitChairValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('profitChairValue').addEventListener('input', function() {
+            document.getElementById('profitChair').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('laborTable').addEventListener('input', function() {
+            document.getElementById('laborTableValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('laborTableValue').addEventListener('input', function() {
+            document.getElementById('laborTable').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('laborChair').addEventListener('input', function() {
+            document.getElementById('laborChairValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('laborChairValue').addEventListener('input', function() {
+            document.getElementById('laborChair').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('totalLabor').addEventListener('input', function() {
+            document.getElementById('totalLaborValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('totalLaborValue').addEventListener('input', function() {
+            document.getElementById('totalLabor').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('woodTable').addEventListener('input', function() {
+            document.getElementById('woodTableValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('woodTableValue').addEventListener('input', function() {
+            document.getElementById('woodTable').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('woodChair').addEventListener('input', function() {
+            document.getElementById('woodChairValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('woodChairValue').addEventListener('input', function() {
+            document.getElementById('woodChair').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('totalWood').addEventListener('input', function() {
+            document.getElementById('totalWoodValue').value = this.value;
+            updateProblem();
+        });
+        
+        document.getElementById('totalWoodValue').addEventListener('input', function() {
+            document.getElementById('totalWood').value = this.value;
+            updateProblem();
+        });
+        
+        // Initialize
+        updateProblem();
+    </script>
+</body>
+</html> 

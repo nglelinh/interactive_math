@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LASSO Regression Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      background: #222;
+    }
+    #info {
+      width: 450px;
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    .objective-section {
+      border-left: 4px solid #2196F3;
+    }
+    .regularization-section {
+      border-left: 4px solid #FF9800;
+    }
+    .solution-section {
+      border-left: 4px solid #4CAF50;
+    }
+    .comparison-section {
+      border-left: 4px solid #9C27B0;
+    }
+    .control-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 3px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 3px;
+      font-size: 11px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .solve-btn {
+      background: #2196F3;
+    }
+    .solve-btn:hover {
+      background: #1976D2;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 8px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      font-size: 11px;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .math-formula {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    .coefficients-table {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+    }
+    .coefficients-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .coefficients-table th, .coefficients-table td {
+      border: 1px solid #555;
+      padding: 3px 5px;
+      text-align: center;
+    }
+    .coefficients-table th {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    .zero-coeff {
+      color: #666;
+      text-decoration: line-through;
+    }
+    .nonzero-coeff {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .result-info {
+      background: rgba(33, 150, 243, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    .path-info {
+      background: rgba(255, 152, 0, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    
+    /* SVG styles */
+    .data-point {
+      fill: #2196F3;
+      stroke: white;
+      stroke-width: 1;
+    }
+    .regression-line {
+      stroke: #4CAF50;
+      stroke-width: 3;
+      fill: none;
+    }
+    .ols-line {
+      stroke: #FF9800;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 5,5;
+    }
+    .ridge-line {
+      stroke: #9C27B0;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 3,3;
+    }
+    .l1-constraint {
+      stroke: #f44336;
+      stroke-width: 2;
+      fill: rgba(244, 67, 54, 0.1);
+    }
+    .l2-constraint {
+      stroke: #2196F3;
+      stroke-width: 2;
+      fill: rgba(33, 150, 243, 0.1);
+      stroke-dasharray: 5,5;
+    }
+    .contour-line {
+      stroke: #00BCD4;
+      stroke-width: 1;
+      fill: none;
+      opacity: 0.6;
+    }
+    .solution-point {
+      fill: #FFEB3B;
+      stroke: #FF9800;
+      stroke-width: 3;
+    }
+    .axis {
+      stroke: #666;
+      stroke-width: 1;
+    }
+    .grid-line {
+      stroke: #333;
+      stroke-width: 0.5;
+    }
+    .label {
+      fill: white;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .feature-bar {
+      fill: #4CAF50;
+      stroke: white;
+      stroke-width: 1;
+    }
+    .zero-bar {
+      fill: #666;
+    }
+    .regularization-path {
+      stroke: #FF5722;
+      stroke-width: 2;
+      fill: none;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    
+    <div id="info">
+      <h3>LASSO Regression Demo</h3>
+      
+      <div class="section objective-section">
+        <h4>LASSO Objective Function</h4>
+        <div class="math-formula">
+          minimize ||y - Xβ||² + λ||β||₁
+        </div>
+        <div>• <strong>Data Fidelity:</strong> ||y - Xβ||² (fit the data)</div>
+        <div>• <strong>L1 Regularization:</strong> λ||β||₁ (sparsity)</div>
+        <div>• <strong>Trade-off:</strong> λ controls bias-variance balance</div>
+      </div>
+
+      <div class="section regularization-section">
+        <h4>Controls</h4>
+        <div class="control-group">
+          <label>Dataset:</label>
+          <select id="datasetSelect">
+            <option value="linear">Linear (2D)</option>
+            <option value="polynomial">Polynomial Features</option>
+            <option value="noisy">High Noise</option>
+            <option value="sparse">Sparse Features</option>
+            <option value="correlated">Correlated Features</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label>Regularization (λ):</label>
+          <input type="range" id="lambda" min="0" max="2" step="0.01" value="0.1">
+          <span id="lambdaValue">0.10</span>
+        </div>
+        
+        <div class="control-group">
+          <label>Number of Features:</label>
+          <input type="range" id="numFeatures" min="2" max="8" step="1" value="4">
+          <span id="numFeaturesValue">4</span>
+        </div>
+        
+        <div class="control-group">
+          <label>Sample Size:</label>
+          <input type="range" id="sampleSize" min="20" max="100" step="10" value="50">
+          <span id="sampleSizeValue">50</span>
+        </div>
+        
+        <div class="control-group">
+          <button id="generateBtn">Generate New Data</button>
+          <button id="solveBtn" class="solve-btn">Solve LASSO</button>
+          <button id="pathBtn">Regularization Path</button>
+          <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+      </div>
+
+      <div class="section solution-section">
+        <h4>Current Solution</h4>
+        <div class="result-info">
+          <div><strong>λ:</strong> <span id="currentLambda" class="value-display">0.10</span></div>
+          <div><strong>Active Features:</strong> <span id="activeFeatures" class="value-display">0</span></div>
+          <div><strong>MSE:</strong> <span id="mseValue" class="value-display">-</span></div>
+          <div><strong>R²:</strong> <span id="r2Value" class="value-display">-</span></div>
+          <div><strong>Sparsity:</strong> <span id="sparsityValue" class="value-display">-</span></div>
+        </div>
+        
+        <div class="coefficients-table" id="coefficientsTable">
+          <div>Solve LASSO to see coefficients</div>
+        </div>
+      </div>
+
+      <div class="section comparison-section">
+        <h4>Method Comparison</h4>
+        <div class="path-info">
+          <div><strong>OLS (Orange):</strong> <span id="olsMSE">-</span> MSE</div>
+          <div><strong>Ridge (Purple):</strong> <span id="ridgeMSE">-</span> MSE</div>
+          <div><strong>LASSO (Green):</strong> <span id="lassoMSE">-</span> MSE</div>
+        </div>
+        
+        <div class="control-group">
+          <input type="checkbox" id="showOLS" checked> Show OLS
+          <input type="checkbox" id="showRidge" checked> Show Ridge
+          <input type="checkbox" id="showConstraints"> Show Constraint Regions
+          <input type="checkbox" id="showPath"> Show Regularization Path
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Key Properties</h4>
+        <div style="font-size: 11px;">
+          <div><strong>• Feature Selection:</strong> Sets coefficients exactly to zero</div>
+          <div><strong>• Convex Optimization:</strong> Global optimum guaranteed</div>
+          <div><strong>• Coordinate Descent:</strong> Efficient solving algorithm</div>
+          <div><strong>• Cross-Validation:</strong> Choose λ via CV</div>
+          <div><strong>• Geometric View:</strong> L1 ball has corners → sparsity</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Applications</h4>
+        <div style="font-size: 11px;">
+          <div><strong>• Gene Selection:</strong> Identify relevant genes</div>
+          <div><strong>• Finance:</strong> Portfolio optimization</div>
+          <div><strong>• Signal Processing:</strong> Compressed sensing</div>
+          <div><strong>• Image Processing:</strong> Denoising and reconstruction</div>
+          <div><strong>• Machine Learning:</strong> Feature selection</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Algorithm: Coordinate Descent</h4>
+        <div style="font-size: 11px;">
+          <div><strong>1.</strong> Initialize β = 0</div>
+          <div><strong>2.</strong> For each feature j:</div>
+          <div class="math-formula" style="font-size: 10px; margin: 5px 0;">
+            β_j ← S(X_j^T(y - X₋ⱼβ₋ⱼ), λ) / ||X_j||²
+          </div>
+          <div><strong>3.</strong> S(z,λ) = sign(z)max(|z|-λ, 0) (soft thresholding)</div>
+          <div><strong>4.</strong> Repeat until convergence</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Interactive Guide</h4>
+        <div style="font-size: 11px;">
+          <div>• Adjust λ to see sparsity vs fit trade-off</div>
+          <div>• Try different datasets to see LASSO behavior</div>
+          <div>• Compare with OLS and Ridge regression</div>
+          <div>• Watch regularization path animation</div>
+          <div>• Green bars: non-zero coefficients</div>
+          <div>• Gray bars: zero coefficients (eliminated)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const container = document.getElementById('canvas-container');
+    
+    // Problem parameters
+    let currentDataset = 'linear';
+    let lambda = 0.1;
+    let numFeatures = 4;
+    let sampleSize = 50;
+    let X = [], y = [], beta = [];
+    let olsBeta = [], ridgeBeta = [];
+    let isShowingPath = false;
+    let regularizationPath = [];
+
+    // Dataset configurations
+    const datasets = {
+      linear: {
+        name: 'Linear Relationship',
+        trueBeta: [1, -0.5, 0.8, 0, 0, 0, 0, 0],
+        noiseLevel: 0.1
+      },
+      polynomial: {
+        name: 'Polynomial Features', 
+        trueBeta: [2, 1, -1, 0.5, 0, 0, 0, 0],
+        noiseLevel: 0.2
+      },
+      noisy: {
+        name: 'High Noise',
+        trueBeta: [1, 0.5, 0, 0, 0, 0, 0, 0],
+        noiseLevel: 0.5
+      },
+      sparse: {
+        name: 'Sparse Features',
+        trueBeta: [2, 0, 0, 1, 0, 0, 0, 0],
+        noiseLevel: 0.15
+      },
+      correlated: {
+        name: 'Correlated Features',
+        trueBeta: [1, 0.8, 0, 0, 0, 0, 0, 0],
+        noiseLevel: 0.1
+      }
+    };
+
+    // Setup SVG
+    function setupSVG() {
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+
+    // Generate synthetic data
+    function generateData() {
+      const config = datasets[currentDataset];
+      X = [];
+      y = [];
+      
+      // Generate feature matrix
+      for (let i = 0; i < sampleSize; i++) {
+        const row = [];
+        for (let j = 0; j < numFeatures; j++) {
+          if (currentDataset === 'correlated' && j === 1) {
+            // Make second feature correlated with first
+            row.push(row[0] + Math.random() * 0.2 - 0.1);
+          } else if (currentDataset === 'polynomial') {
+            // Polynomial features
+            const x = Math.random() * 2 - 1;
+            row.push(Math.pow(x, j + 1));
+          } else {
+            row.push(Math.random() * 2 - 1);
+          }
+        }
+        X.push(row);
+        
+        // Generate response
+        let response = 0;
+        for (let j = 0; j < numFeatures; j++) {
+          response += config.trueBeta[j] * row[j];
+        }
+        response += (Math.random() - 0.5) * config.noiseLevel;
+        y.push(response);
+      }
+      
+      // Standardize features
+      standardizeFeatures();
+      
+      // Solve comparison methods
+      solveOLS();
+      solveRidge();
+      
+      updateDisplay();
+      drawVisualization();
+    }
+
+    // Standardize features (important for regularization)
+    function standardizeFeatures() {
+      for (let j = 0; j < numFeatures; j++) {
+        const mean = X.reduce((sum, row) => sum + row[j], 0) / sampleSize;
+        const std = Math.sqrt(X.reduce((sum, row) => sum + (row[j] - mean) ** 2, 0) / sampleSize);
+        
+        if (std > 1e-10) {
+          for (let i = 0; i < sampleSize; i++) {
+            X[i][j] = (X[i][j] - mean) / std;
+          }
+        }
+      }
+    }
+
+    // Soft thresholding operator
+    function softThreshold(z, lambda) {
+      if (z > lambda) return z - lambda;
+      if (z < -lambda) return z + lambda;
+      return 0;
+    }
+
+    // Solve LASSO using coordinate descent
+    function solveLASSO() {
+      beta = new Array(numFeatures).fill(0);
+      const maxIter = 1000;
+      const tolerance = 1e-6;
+      
+      for (let iter = 0; iter < maxIter; iter++) {
+        const oldBeta = [...beta];
+        
+        for (let j = 0; j < numFeatures; j++) {
+          // Compute partial residual
+          let partialResidual = 0;
+          for (let i = 0; i < sampleSize; i++) {
+            let prediction = 0;
+            for (let k = 0; k < numFeatures; k++) {
+              if (k !== j) prediction += X[i][k] * beta[k];
+            }
+            partialResidual += X[i][j] * (y[i] - prediction);
+          }
+          
+          // Compute X_j^T X_j
+          let xTx = 0;
+          for (let i = 0; i < sampleSize; i++) {
+            xTx += X[i][j] * X[i][j];
+          }
+          
+          // Update coefficient with soft thresholding
+          if (xTx > 1e-10) {
+            beta[j] = softThreshold(partialResidual / xTx, lambda);
+          }
+        }
+        
+        // Check convergence
+        let diff = 0;
+        for (let j = 0; j < numFeatures; j++) {
+          diff += Math.abs(beta[j] - oldBeta[j]);
+        }
+        if (diff < tolerance) break;
+      }
+      
+      updateDisplay();
+      drawVisualization();
+    }
+
+    // Solve OLS for comparison
+    function solveOLS() {
+      // Simple normal equation: β = (X^T X)^(-1) X^T y
+      const XTX = new Array(numFeatures).fill(0).map(() => new Array(numFeatures).fill(0));
+      const XTy = new Array(numFeatures).fill(0);
+      
+      // Compute X^T X and X^T y
+      for (let i = 0; i < numFeatures; i++) {
+        for (let j = 0; j < numFeatures; j++) {
+          for (let k = 0; k < sampleSize; k++) {
+            XTX[i][j] += X[k][i] * X[k][j];
+          }
+        }
+        for (let k = 0; k < sampleSize; k++) {
+          XTy[i] += X[k][i] * y[k];
+        }
+      }
+      
+      // Solve using Gaussian elimination (simplified)
+      olsBeta = gaussianElimination(XTX, XTy);
+    }
+
+    // Solve Ridge regression
+    function solveRidge() {
+      const ridgeLambda = 0.1;
+      const XTX = new Array(numFeatures).fill(0).map(() => new Array(numFeatures).fill(0));
+      const XTy = new Array(numFeatures).fill(0);
+      
+      // Compute X^T X + λI and X^T y
+      for (let i = 0; i < numFeatures; i++) {
+        for (let j = 0; j < numFeatures; j++) {
+          for (let k = 0; k < sampleSize; k++) {
+            XTX[i][j] += X[k][i] * X[k][j];
+          }
+          if (i === j) XTX[i][j] += ridgeLambda;
+        }
+        for (let k = 0; k < sampleSize; k++) {
+          XTy[i] += X[k][i] * y[k];
+        }
+      }
+      
+      ridgeBeta = gaussianElimination(XTX, XTy);
+    }
+
+    // Gaussian elimination for small matrices
+    function gaussianElimination(A, b) {
+      const n = A.length;
+      const augmented = A.map((row, i) => [...row, b[i]]);
+      
+      // Forward elimination
+      for (let i = 0; i < n; i++) {
+        // Find pivot
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
+            maxRow = k;
+          }
+        }
+        [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+        
+        // Make all rows below this one 0 in current column
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(augmented[i][i]) > 1e-10) {
+            const c = augmented[k][i] / augmented[i][i];
+            for (let j = i; j <= n; j++) {
+              augmented[k][j] -= c * augmented[i][j];
+            }
+          }
+        }
+      }
+      
+      // Back substitution
+      const x = new Array(n).fill(0);
+      for (let i = n - 1; i >= 0; i--) {
+        x[i] = augmented[i][n];
+        for (let j = i + 1; j < n; j++) {
+          x[i] -= augmented[i][j] * x[j];
+        }
+        if (Math.abs(augmented[i][i]) > 1e-10) {
+          x[i] /= augmented[i][i];
+        }
+      }
+      
+      return x;
+    }
+
+    // Compute predictions
+    function predict(beta_vals) {
+      const predictions = [];
+      for (let i = 0; i < sampleSize; i++) {
+        let pred = 0;
+        for (let j = 0; j < numFeatures; j++) {
+          pred += X[i][j] * beta_vals[j];
+        }
+        predictions.push(pred);
+      }
+      return predictions;
+    }
+
+    // Compute MSE
+    function computeMSE(predictions) {
+      let mse = 0;
+      for (let i = 0; i < sampleSize; i++) {
+        mse += (y[i] - predictions[i]) ** 2;
+      }
+      return mse / sampleSize;
+    }
+
+    // Compute R²
+    function computeR2(predictions) {
+      const yMean = y.reduce((sum, val) => sum + val, 0) / sampleSize;
+      let ssRes = 0, ssTot = 0;
+      for (let i = 0; i < sampleSize; i++) {
+        ssRes += (y[i] - predictions[i]) ** 2;
+        ssTot += (y[i] - yMean) ** 2;
+      }
+      return 1 - (ssRes / ssTot);
+    }
+
+    // Generate regularization path
+    async function generateRegularizationPath() {
+      if (isShowingPath) return;
+      
+      isShowingPath = true;
+      document.getElementById('pathBtn').disabled = true;
+      regularizationPath = [];
+      
+      const lambdaValues = [];
+      for (let l = 0; l <= 2; l += 0.05) {
+        lambdaValues.push(l);
+      }
+      
+      for (const l of lambdaValues) {
+        const originalLambda = lambda;
+        lambda = l;
+        
+        // Solve LASSO for this lambda
+        const pathBeta = new Array(numFeatures).fill(0);
+        const maxIter = 1000;
+        const tolerance = 1e-6;
+        
+        for (let iter = 0; iter < maxIter; iter++) {
+          const oldBeta = [...pathBeta];
+          
+          for (let j = 0; j < numFeatures; j++) {
+            let partialResidual = 0;
+            for (let i = 0; i < sampleSize; i++) {
+              let prediction = 0;
+              for (let k = 0; k < numFeatures; k++) {
+                if (k !== j) prediction += X[i][k] * pathBeta[k];
+              }
+              partialResidual += X[i][j] * (y[i] - prediction);
+            }
+            
+            let xTx = 0;
+            for (let i = 0; i < sampleSize; i++) {
+              xTx += X[i][j] * X[i][j];
+            }
+            
+            if (xTx > 1e-10) {
+              pathBeta[j] = softThreshold(partialResidual / xTx, lambda);
+            }
+          }
+          
+          let diff = 0;
+          for (let j = 0; j < numFeatures; j++) {
+            diff += Math.abs(pathBeta[j] - oldBeta[j]);
+          }
+          if (diff < tolerance) break;
+        }
+        
+        regularizationPath.push({
+          lambda: l,
+          beta: [...pathBeta],
+          activeFeatures: pathBeta.filter(b => Math.abs(b) > 1e-6).length
+        });
+        
+        // Update display
+        beta = [...pathBeta];
+        document.getElementById('lambda').value = lambda;
+        document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+        updateDisplay();
+        drawVisualization();
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      // Restore original lambda
+      lambda = originalLambda;
+      document.getElementById('lambda').value = lambda;
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+      solveLASSO();
+      
+      isShowingPath = false;
+      document.getElementById('pathBtn').disabled = false;
+    }
+
+    // Update display
+    function updateDisplay() {
+      document.getElementById('currentLambda').textContent = lambda.toFixed(3);
+      
+      if (beta.length > 0) {
+        const activeFeatures = beta.filter(b => Math.abs(b) > 1e-6).length;
+        const predictions = predict(beta);
+        const mse = computeMSE(predictions);
+        const r2 = computeR2(predictions);
+        const sparsity = ((numFeatures - activeFeatures) / numFeatures * 100).toFixed(1);
+        
+        document.getElementById('activeFeatures').textContent = activeFeatures;
+        document.getElementById('mseValue').textContent = mse.toFixed(4);
+        document.getElementById('r2Value').textContent = r2.toFixed(3);
+        document.getElementById('sparsityValue').textContent = sparsity + '%';
+        document.getElementById('lassoMSE').textContent = mse.toFixed(4);
+        
+        // Update coefficients table
+        updateCoefficientsTable();
+      }
+      
+      // Update comparison methods
+      if (olsBeta.length > 0) {
+        const olsPredictions = predict(olsBeta);
+        const olsMSE = computeMSE(olsPredictions);
+        document.getElementById('olsMSE').textContent = olsMSE.toFixed(4);
+      }
+      
+      if (ridgeBeta.length > 0) {
+        const ridgePredictions = predict(ridgeBeta);
+        const ridgeMSE = computeMSE(ridgePredictions);
+        document.getElementById('ridgeMSE').textContent = ridgeMSE.toFixed(4);
+      }
+    }
+
+    // Update coefficients table
+    function updateCoefficientsTable() {
+      const container = document.getElementById('coefficientsTable');
+      
+      let html = '<table><tr><th>Feature</th><th>Coefficient</th><th>Status</th></tr>';
+      
+      for (let j = 0; j < numFeatures; j++) {
+        const coeff = beta[j];
+        const isZero = Math.abs(coeff) < 1e-6;
+        const coeffClass = isZero ? 'zero-coeff' : 'nonzero-coeff';
+        const status = isZero ? 'Eliminated' : 'Active';
+        
+        html += `<tr>
+          <td>x${j + 1}</td>
+          <td class="${coeffClass}">${coeff.toFixed(4)}</td>
+          <td class="${coeffClass}">${status}</td>
+        </tr>`;
+      }
+      
+      html += '</table>';
+      container.innerHTML = html;
+    }
+
+    // Draw visualization
+    function drawVisualization() {
+      svg.innerHTML = '';
+      
+      const rect = container.getBoundingClientRect();
+      const leftWidth = rect.width * 0.7;
+      const rightWidth = rect.width * 0.3;
+      
+      // Draw coefficient plot on the right
+      drawCoefficientBars(leftWidth, rightWidth, rect.height);
+      
+      // Draw main visualization on the left
+      if (numFeatures === 2) {
+        drawConstraintVisualization(leftWidth, rect.height);
+      } else {
+        drawDataAndFit(leftWidth, rect.height);
+      }
+      
+      // Draw regularization path if requested
+      if (document.getElementById('showPath').checked && regularizationPath.length > 0) {
+        drawRegularizationPath(leftWidth, rect.height);
+      }
+    }
+
+    // Draw coefficient bars
+    function drawCoefficientBars(leftWidth, rightWidth, height) {
+      const margin = 20;
+      const barWidth = (rightWidth - 2 * margin) / numFeatures;
+      const maxCoeff = Math.max(...beta.map(Math.abs), 1);
+      const barHeight = (height - 2 * margin) * 0.8;
+      
+      // Title
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      title.setAttribute('x', leftWidth + rightWidth / 2);
+      title.setAttribute('y', margin);
+      title.setAttribute('text-anchor', 'middle');
+      title.setAttribute('class', 'label');
+      title.textContent = 'LASSO Coefficients';
+      svg.appendChild(title);
+      
+      // Draw bars
+      for (let j = 0; j < numFeatures; j++) {
+        const x = leftWidth + margin + j * barWidth;
+        const coeff = beta[j] || 0;
+        const isZero = Math.abs(coeff) < 1e-6;
+        const h = Math.abs(coeff) / maxCoeff * barHeight / 2;
+        const y = height / 2 + (coeff < 0 ? 0 : -h);
+        
+        const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        bar.setAttribute('x', x);
+        bar.setAttribute('y', y);
+        bar.setAttribute('width', barWidth * 0.8);
+        bar.setAttribute('height', h);
+        bar.setAttribute('class', isZero ? 'zero-bar' : 'feature-bar');
+        svg.appendChild(bar);
+        
+        // Feature label
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', x + barWidth * 0.4);
+        label.setAttribute('y', height - margin / 2);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('class', 'label');
+        label.setAttribute('font-size', '10');
+        label.textContent = `x${j + 1}`;
+        svg.appendChild(label);
+        
+        // Coefficient value
+        const value = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        value.setAttribute('x', x + barWidth * 0.4);
+        value.setAttribute('y', y + (coeff < 0 ? h + 15 : -5));
+        value.setAttribute('text-anchor', 'middle');
+        value.setAttribute('class', 'label');
+        value.setAttribute('font-size', '9');
+        value.textContent = coeff.toFixed(2);
+        svg.appendChild(value);
+      }
+      
+      // Zero line
+      const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      zeroLine.setAttribute('x1', leftWidth + margin);
+      zeroLine.setAttribute('y1', height / 2);
+      zeroLine.setAttribute('x2', leftWidth + rightWidth - margin);
+      zeroLine.setAttribute('y2', height / 2);
+      zeroLine.setAttribute('class', 'axis');
+      svg.appendChild(zeroLine);
+    }
+
+    // Draw constraint visualization for 2D case
+    function drawConstraintVisualization(width, height) {
+      if (numFeatures !== 2) return;
+      
+      const margin = 40;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const scale = Math.min(width, height) / 6;
+      
+      // Draw grid
+      for (let i = -2; i <= 2; i++) {
+        if (i === 0) continue;
+        // Vertical lines
+        const x = centerX + i * scale;
+        const vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        vLine.setAttribute('x1', x);
+        vLine.setAttribute('y1', margin);
+        vLine.setAttribute('x2', x);
+        vLine.setAttribute('y2', height - margin);
+        vLine.setAttribute('class', 'grid-line');
+        svg.appendChild(vLine);
+        
+        // Horizontal lines
+        const y = centerY + i * scale;
+        const hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        hLine.setAttribute('x1', margin);
+        hLine.setAttribute('y1', y);
+        hLine.setAttribute('x2', width - margin);
+        hLine.setAttribute('y2', y);
+        hLine.setAttribute('class', 'grid-line');
+        svg.appendChild(hLine);
+      }
+      
+      // Draw axes
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', margin);
+      xAxis.setAttribute('y1', centerY);
+      xAxis.setAttribute('x2', width - margin);
+      xAxis.setAttribute('y2', centerY);
+      xAxis.setAttribute('class', 'axis');
+      svg.appendChild(xAxis);
+      
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', centerX);
+      yAxis.setAttribute('y1', margin);
+      yAxis.setAttribute('x2', centerX);
+      yAxis.setAttribute('y2', height - margin);
+      yAxis.setAttribute('class', 'axis');
+      svg.appendChild(yAxis);
+      
+      // Draw constraint regions if requested
+      if (document.getElementById('showConstraints').checked) {
+        // L1 constraint (diamond)
+        const l1Radius = lambda * scale;
+        const l1Path = `M ${centerX} ${centerY - l1Radius} 
+                        L ${centerX + l1Radius} ${centerY} 
+                        L ${centerX} ${centerY + l1Radius} 
+                        L ${centerX - l1Radius} ${centerY} Z`;
+        const l1Constraint = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        l1Constraint.setAttribute('d', l1Path);
+        l1Constraint.setAttribute('class', 'l1-constraint');
+        svg.appendChild(l1Constraint);
+        
+        // L2 constraint (circle)
+        const l2Constraint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        l2Constraint.setAttribute('cx', centerX);
+        l2Constraint.setAttribute('cy', centerY);
+        l2Constraint.setAttribute('r', l1Radius);
+        l2Constraint.setAttribute('class', 'l2-constraint');
+        svg.appendChild(l2Constraint);
+      }
+      
+      // Draw solution point
+      if (beta.length >= 2) {
+        const solX = centerX + beta[0] * scale;
+        const solY = centerY - beta[1] * scale;
+        const solPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        solPoint.setAttribute('cx', solX);
+        solPoint.setAttribute('cy', solY);
+        solPoint.setAttribute('r', 6);
+        solPoint.setAttribute('class', 'solution-point');
+        svg.appendChild(solPoint);
+        
+        // Label
+        const solLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        solLabel.setAttribute('x', solX + 10);
+        solLabel.setAttribute('y', solY - 10);
+        solLabel.setAttribute('class', 'label');
+        solLabel.textContent = `LASSO (${beta[0].toFixed(2)}, ${beta[1].toFixed(2)})`;
+        svg.appendChild(solLabel);
+      }
+      
+      // Add axis labels
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      xLabel.setAttribute('x', width - margin + 10);
+      xLabel.setAttribute('y', centerY + 5);
+      xLabel.setAttribute('class', 'label');
+      xLabel.textContent = 'β₁';
+      svg.appendChild(xLabel);
+      
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.setAttribute('x', centerX - 10);
+      yLabel.setAttribute('y', margin - 10);
+      yLabel.setAttribute('class', 'label');
+      yLabel.textContent = 'β₂';
+      svg.appendChild(yLabel);
+    }
+
+    // Draw data and fit for higher dimensions
+    function drawDataAndFit(width, height) {
+      if (X.length === 0) return;
+      
+      const margin = 40;
+      const plotWidth = width - 2 * margin;
+      const plotHeight = height - 2 * margin;
+      
+      // Use first feature for x-axis, response for y-axis
+      const xMin = Math.min(...X.map(row => row[0]));
+      const xMax = Math.max(...X.map(row => row[0]));
+      const yMin = Math.min(...y);
+      const yMax = Math.max(...y);
+      
+      const xScale = plotWidth / (xMax - xMin);
+      const yScale = plotHeight / (yMax - yMin);
+      
+      // Transform coordinates
+      function toSVG(x, y_val) {
+        return {
+          x: margin + (x - xMin) * xScale,
+          y: height - margin - (y_val - yMin) * yScale
+        };
+      }
+      
+      // Draw axes
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', margin);
+      xAxis.setAttribute('y1', height - margin);
+      xAxis.setAttribute('x2', width - margin);
+      xAxis.setAttribute('y2', height - margin);
+      xAxis.setAttribute('class', 'axis');
+      svg.appendChild(xAxis);
+      
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', margin);
+      yAxis.setAttribute('y1', margin);
+      yAxis.setAttribute('x2', margin);
+      yAxis.setAttribute('y2', height - margin);
+      yAxis.setAttribute('class', 'axis');
+      svg.appendChild(yAxis);
+      
+      // Draw data points
+      for (let i = 0; i < sampleSize; i++) {
+        const point = toSVG(X[i][0], y[i]);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', point.x);
+        circle.setAttribute('cy', point.y);
+        circle.setAttribute('r', 3);
+        circle.setAttribute('class', 'data-point');
+        svg.appendChild(circle);
+      }
+      
+      // Draw regression lines
+      if (beta.length > 0) {
+        drawRegressionLine(toSVG, xMin, xMax, beta, 'regression-line', 'LASSO');
+      }
+      
+      if (document.getElementById('showOLS').checked && olsBeta.length > 0) {
+        drawRegressionLine(toSVG, xMin, xMax, olsBeta, 'ols-line', 'OLS');
+      }
+      
+      if (document.getElementById('showRidge').checked && ridgeBeta.length > 0) {
+        drawRegressionLine(toSVG, xMin, xMax, ridgeBeta, 'ridge-line', 'Ridge');
+      }
+      
+      // Add labels
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      xLabel.setAttribute('x', width / 2);
+      xLabel.setAttribute('y', height - 5);
+      xLabel.setAttribute('text-anchor', 'middle');
+      xLabel.setAttribute('class', 'label');
+      xLabel.textContent = 'Feature 1';
+      svg.appendChild(xLabel);
+      
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.setAttribute('x', 15);
+      yLabel.setAttribute('y', height / 2);
+      yLabel.setAttribute('text-anchor', 'middle');
+      yLabel.setAttribute('transform', `rotate(-90 15 ${height / 2})`);
+      yLabel.setAttribute('class', 'label');
+      yLabel.textContent = 'Response';
+      svg.appendChild(yLabel);
+    }
+
+    // Draw regression line
+    function drawRegressionLine(toSVG, xMin, xMax, coeffs, className, label) {
+      const points = [];
+      
+      for (let x = xMin; x <= xMax; x += (xMax - xMin) / 100) {
+        // For visualization, only use first feature
+        let y_pred = coeffs[0] * x;
+        // Add mean effect of other features
+        for (let j = 1; j < coeffs.length; j++) {
+          y_pred += coeffs[j] * 0; // Assume other features at mean (0 after standardization)
+        }
+        
+        const svgPoint = toSVG(x, y_pred);
+        points.push(`${svgPoint.x},${svgPoint.y}`);
+      }
+      
+      if (points.length > 0) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        line.setAttribute('points', points.join(' '));
+        line.setAttribute('class', className);
+        svg.appendChild(line);
+      }
+    }
+
+    // Draw regularization path
+    function drawRegularizationPath(width, height) {
+      if (regularizationPath.length === 0) return;
+      
+      const margin = 40;
+      const plotHeight = height / 2 - margin;
+      
+      // Draw path for each coefficient
+      for (let j = 0; j < numFeatures; j++) {
+        const points = [];
+        
+        for (const pathPoint of regularizationPath) {
+          const x = margin + (pathPoint.lambda / 2) * (width - 2 * margin);
+          const y = height - margin - pathPoint.beta[j] * plotHeight / 2;
+          points.push(`${x},${y}`);
+        }
+        
+        if (points.length > 1) {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+          path.setAttribute('points', points.join(' '));
+          path.setAttribute('class', 'regularization-path');
+          path.setAttribute('stroke', `hsl(${j * 360 / numFeatures}, 70%, 60%)`);
+          svg.appendChild(path);
+        }
+      }
+      
+      // Add path labels
+      const pathTitle = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      pathTitle.setAttribute('x', width / 2);
+      pathTitle.setAttribute('y', height - plotHeight - margin / 2);
+      pathTitle.setAttribute('text-anchor', 'middle');
+      pathTitle.setAttribute('class', 'label');
+      pathTitle.textContent = 'Regularization Path';
+      svg.appendChild(pathTitle);
+    }
+
+    // Event listeners
+    document.getElementById('datasetSelect').addEventListener('change', (e) => {
+      currentDataset = e.target.value;
+      generateData();
+    });
+
+    document.getElementById('lambda').addEventListener('input', (e) => {
+      lambda = parseFloat(e.target.value);
+      document.getElementById('lambdaValue').textContent = lambda.toFixed(2);
+      if (X.length > 0) {
+        solveLASSO();
+      }
+    });
+
+    document.getElementById('numFeatures').addEventListener('input', (e) => {
+      numFeatures = parseInt(e.target.value);
+      document.getElementById('numFeaturesValue').textContent = numFeatures;
+      if (X.length > 0) {
+        generateData();
+      }
+    });
+
+    document.getElementById('sampleSize').addEventListener('input', (e) => {
+      sampleSize = parseInt(e.target.value);
+      document.getElementById('sampleSizeValue').textContent = sampleSize;
+      if (X.length > 0) {
+        generateData();
+      }
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', generateData);
+    document.getElementById('solveBtn').addEventListener('click', solveLASSO);
+    document.getElementById('pathBtn').addEventListener('click', generateRegularizationPath);
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      X = [];
+      y = [];
+      beta = [];
+      olsBeta = [];
+      ridgeBeta = [];
+      regularizationPath = [];
+      updateDisplay();
+      drawVisualization();
+    });
+
+    // Checkbox event listeners
+    ['showOLS', 'showRidge', 'showConstraints', 'showPath'].forEach(id => {
+      document.getElementById(id).addEventListener('change', drawVisualization);
+    });
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      setupSVG();
+      drawVisualization();
+    });
+
+    // Initialize
+    setupSVG();
+    generateData();
+  </script>
+</body>
+</html>

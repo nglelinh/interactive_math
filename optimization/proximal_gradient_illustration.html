@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa Proximal Gradient Descent</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 2.5em;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        
+        label {
+            min-width: 120px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .canvas-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .info-panel {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .info-panel h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .formula {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .proximal-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .optimization-info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .function-selector {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .function-selector button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .function-selector button.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .method-selector button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .method-selector button.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-card h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Minh họa Proximal Gradient Descent</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Proximal Operator</h3>
+                <div class="function-selector">
+                    <button onclick="setFunction('l1')" class="active">L1 Norm</button>
+                    <button onclick="setFunction('l2')">L2 Norm</button>
+                    <button onclick="setFunction('indicator')">Indicator</button>
+                </div>
+                <div class="control-row">
+                    <label>Điểm v:</label>
+                    <input type="range" id="pointV" min="-3" max="3" value="1" step="0.1">
+                    <input type="number" id="pointVValue" value="1" min="-3" max="3" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Tham số α:</label>
+                    <input type="range" id="parameterAlpha" min="0.1" max="2" value="0.5" step="0.1">
+                    <input type="number" id="parameterAlphaValue" value="0.5" min="0.1" max="2" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Tham số λ:</label>
+                    <input type="range" id="parameterLambda" min="0.1" max="2" value="1" step="0.1">
+                    <input type="number" id="parameterLambdaValue" value="1" min="0.1" max="2" step="0.1">
+                </div>
+                <div class="proximal-info">
+                    <strong>Kết quả Proximal Operator:</strong><br>
+                    <span id="proximalResult">Đang tính...</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎯 Proximal Gradient Descent</h3>
+                <div class="method-selector">
+                    <button onclick="setMethod('proximal')" class="active">Proximal GD</button>
+                    <button onclick="setMethod('gradient')">Gradient Descent</button>
+                </div>
+                <div class="control-row">
+                    <label>Điểm bắt đầu:</label>
+                    <input type="range" id="startPoint" min="-2" max="2" value="1" step="0.1">
+                    <input type="number" id="startPointValue" value="1" min="-2" max="2" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>Learning rate:</label>
+                    <input type="range" id="learningRate" min="0.01" max="0.5" value="0.1" step="0.01">
+                    <input type="number" id="learningRateValue" value="0.1" min="0.01" max="0.5" step="0.01">
+                </div>
+                <div class="control-row">
+                    <label>Số bước:</label>
+                    <input type="range" id="maxSteps" min="10" max="50" value="20" step="5">
+                    <input type="number" id="maxStepsValue" value="20" min="10" max="50" step="5">
+                </div>
+                <div class="control-row">
+                    <button onclick="startOptimization()">▶️ Bắt đầu</button>
+                    <button onclick="stepOptimization()">⏭️ Bước tiếp</button>
+                    <button onclick="resetOptimization()">🔄 Làm lại</button>
+                </div>
+                <div class="optimization-info">
+                    <strong>Kết quả tối ưu:</strong><br>
+                    <span id="optimizationResult">Sẵn sàng</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="proximalCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📚 Thông tin Chi tiết</h3>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>🎯 Proximal Operator</h4>
+                    <div class="formula">
+                        <strong>Định nghĩa:</strong> prox_{αg}(v) = argmin_x {g(x) + 1/(2α)||x-v||²}<br>
+                        <strong>Soft Thresholding:</strong> S_λ(v) = sign(v) max(|v| - λ, 0)
+                    </div>
+                    <ul>
+                        <li>Xử lý hàm không khả vi</li>
+                        <li>Kết hợp gradient và proximal step</li>
+                        <li>Hiệu quả cho regularization</li>
+                        <li>Áp dụng cho Lasso, Ridge</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-card">
+                    <h4>📉 Gradient Descent</h4>
+                    <div class="formula">
+                        <strong>Định nghĩa:</strong> x_{k+1} = x_k - α∇f(x_k)<br>
+                        <strong>Yêu cầu:</strong> Hàm khả vi
+                    </div>
+                    <ul>
+                        <li>Chỉ hoạt động với hàm khả vi</li>
+                        <li>Không xử lý được regularization</li>
+                        <li>Đơn giản và nhanh</li>
+                        <li>Không có proximal step</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="formula">
+                <strong>Proximal Gradient Descent:</strong><br>
+                <strong>Bước 1:</strong> y_k = x_k - α∇f(x_k) (Gradient step)<br>
+                <strong>Bước 2:</strong> x_{k+1} = prox_{αg}(y_k) (Proximal step)
+            </div>
+            
+            <div class="formula">
+                <strong>Lasso Regression:</strong><br>
+                min_β {½||y - Xβ||² + λ||β||₁}<br>
+                <strong>Soft Thresholding:</strong> β_j = S_λ(ρ_j) = sign(ρ_j) max(|ρ_j| - λ, 0)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('proximalCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // State
+        let currentFunction = 'l1';
+        let currentMethod = 'proximal';
+        let pointV = 1;
+        let parameterAlpha = 0.5;
+        let parameterLambda = 1;
+        let startPoint = 1;
+        let learningRate = 0.1;
+        let maxSteps = 20;
+        let currentStep = 0;
+        let optimizationHistory = [];
+        let isRunning = false;
+        
+        // Function definitions
+        const functions = {
+            l1: {
+                name: 'g(x) = λ|x|',
+                evaluate: (x) => parameterLambda * Math.abs(x),
+                proximal: (v, alpha) => {
+                    const threshold = alpha * parameterLambda;
+                    if (v > threshold) return v - threshold;
+                    if (v < -threshold) return v + threshold;
+                    return 0;
+                },
+                gradient: (x) => {
+                    if (x > 0) return parameterLambda;
+                    if (x < 0) return -parameterLambda;
+                    return 0; // Not differentiable at x = 0
+                }
+            },
+            l2: {
+                name: 'g(x) = ½λx²',
+                evaluate: (x) => 0.5 * parameterLambda * x * x,
+                proximal: (v, alpha) => {
+                    return v / (1 + alpha * parameterLambda);
+                },
+                gradient: (x) => parameterLambda * x
+            },
+            indicator: {
+                name: 'g(x) = I_{[-1,1]}(x)',
+                evaluate: (x) => {
+                    if (Math.abs(x) <= 1) return 0;
+                    return Infinity;
+                },
+                proximal: (v, alpha) => {
+                    return Math.max(-1, Math.min(1, v));
+                },
+                gradient: (x) => {
+                    if (Math.abs(x) <= 1) return 0;
+                    return x > 1 ? 1 : -1;
+                }
+            }
+        };
+        
+        // Smooth function (for optimization)
+        const smoothFunction = {
+            name: 'f(x) = ½x²',
+            evaluate: (x) => 0.5 * x * x,
+            gradient: (x) => x
+        };
+        
+        // Update parameters
+        function updateParameters() {
+            pointV = parseFloat(document.getElementById('pointVValue').value);
+            parameterAlpha = parseFloat(document.getElementById('parameterAlphaValue').value);
+            parameterLambda = parseFloat(document.getElementById('parameterLambdaValue').value);
+            startPoint = parseFloat(document.getElementById('startPointValue').value);
+            learningRate = parseFloat(document.getElementById('learningRateValue').value);
+            maxSteps = parseInt(document.getElementById('maxStepsValue').value);
+        }
+        
+        // Set function
+        function setFunction(funcName) {
+            currentFunction = funcName;
+            document.querySelectorAll('.function-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateProximalResult();
+            drawVisualization();
+        }
+        
+        // Set method
+        function setMethod(methodName) {
+            currentMethod = methodName;
+            document.querySelectorAll('.method-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            resetOptimization();
+        }
+        
+        // Update proximal result
+        function updateProximalResult() {
+            const func = functions[currentFunction];
+            const proximalResult = func.proximal(pointV, parameterAlpha);
+            const gValue = func.evaluate(proximalResult);
+            const distance = 0.5 / parameterAlpha * Math.pow(pointV - proximalResult, 2);
+            const totalCost = gValue + distance;
+            
+            document.getElementById('proximalResult').innerHTML = `
+                v = ${pointV.toFixed(2)}<br>
+                prox_{αg}(v) = ${proximalResult.toFixed(3)}<br>
+                g(prox) = ${gValue.toFixed(3)}<br>
+                Distance term = ${distance.toFixed(3)}<br>
+                <strong>Tổng chi phí:</strong> ${totalCost.toFixed(3)}
+            `;
+        }
+        
+        // Start optimization
+        function startOptimization() {
+            updateParameters();
+            resetOptimization();
+            stepOptimization();
+        }
+        
+        // Step optimization
+        function stepOptimization() {
+            if (currentStep >= maxSteps) {
+                document.getElementById('optimizationResult').textContent = 'Hoàn thành';
+                return;
+            }
+            
+            const currentX = optimizationHistory.length > 0 ? 
+                optimizationHistory[optimizationHistory.length - 1].x : startPoint;
+            
+            let newX;
+            if (currentMethod === 'proximal') {
+                // Proximal Gradient Descent
+                const gradientStep = currentX - learningRate * smoothFunction.gradient(currentX);
+                const func = functions[currentFunction];
+                newX = func.proximal(gradientStep, learningRate);
+            } else {
+                // Standard Gradient Descent (only on smooth part)
+                newX = currentX - learningRate * smoothFunction.gradient(currentX);
+            }
+            
+            const currentValue = smoothFunction.evaluate(currentX) + functions[currentFunction].evaluate(currentX);
+            const newValue = smoothFunction.evaluate(newX) + functions[currentFunction].evaluate(newX);
+            
+            optimizationHistory.push({
+                step: currentStep,
+                x: currentX,
+                value: currentValue,
+                newX: newX,
+                newValue: newValue
+            });
+            
+            currentStep++;
+            updateOptimizationResult();
+            drawVisualization();
+        }
+        
+        // Reset optimization
+        function resetOptimization() {
+            currentStep = 0;
+            optimizationHistory = [];
+            isRunning = false;
+            document.getElementById('optimizationResult').textContent = 'Sẵn sàng';
+            drawVisualization();
+        }
+        
+        // Update optimization result
+        function updateOptimizationResult() {
+            if (optimizationHistory.length === 0) return;
+            
+            const lastStep = optimizationHistory[optimizationHistory.length - 1];
+            const optimalX = 0; // For our functions, optimal is at x = 0
+            const optimalValue = smoothFunction.evaluate(optimalX) + functions[currentFunction].evaluate(optimalX);
+            
+            document.getElementById('optimizationResult').innerHTML = `
+                <strong>Bước ${currentStep}:</strong><br>
+                x = ${lastStep.x.toFixed(3)} → ${lastStep.newX.toFixed(3)}<br>
+                f(x) + g(x) = ${lastStep.value.toFixed(3)} → ${lastStep.newValue.toFixed(3)}<br>
+                <strong>Giá trị tối ưu:</strong> f(0) + g(0) = ${optimalValue.toFixed(3)}
+            `;
+        }
+        
+        // Draw visualization
+        function drawVisualization() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const margin = 50;
+            const width = canvas.width - 2 * margin;
+            const height = canvas.height - 2 * margin;
+            const xMin = -3;
+            const xMax = 3;
+            const scaleX = width / (xMax - xMin);
+            const scaleY = height / 15;
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: margin + (x - xMin) * scaleX,
+                    y: canvas.height - margin - (y + 7.5) * scaleY
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = xMin; i <= xMax; i++) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, margin);
+                ctx.lineTo(pos.x, canvas.height - margin);
+                ctx.stroke();
+            }
+            for (let i = -7; i <= 7; i++) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(margin, pos.y);
+                ctx.lineTo(canvas.width - margin, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, margin);
+            ctx.lineTo(origin.x, canvas.height - margin);
+            ctx.moveTo(margin, origin.y);
+            ctx.lineTo(canvas.width - margin, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('f(x) + g(x)', 0, 0);
+            ctx.restore();
+            
+            // Draw smooth function
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = smoothFunction.evaluate(x);
+                const pos = transform(x, y);
+                if (i === 0) {
+                    ctx.moveTo(pos.x, pos.y);
+                } else {
+                    ctx.lineTo(pos.x, pos.y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw non-smooth function
+            const func = functions[currentFunction];
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = func.evaluate(x);
+                if (y !== Infinity) {
+                    const pos = transform(x, y);
+                    if (i === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // Draw total function
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= width; i++) {
+                const x = xMin + (i / width) * (xMax - xMin);
+                const y = smoothFunction.evaluate(x) + func.evaluate(x);
+                if (y !== Infinity) {
+                    const pos = transform(x, y);
+                    if (i === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // Draw proximal operator visualization
+            const proximalResult = func.proximal(pointV, parameterAlpha);
+            const posV = transform(pointV, 0);
+            const posProx = transform(proximalResult, 0);
+            
+            // Draw input point
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(posV.x, posV.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw proximal result
+            ctx.fillStyle = '#28a745';
+            ctx.beginPath();
+            ctx.arc(posProx.x, posProx.y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw arrow
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(posV.x, posV.y);
+            ctx.lineTo(posProx.x, posProx.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`v = ${pointV.toFixed(1)}`, posV.x + 5, posV.y - 5);
+            ctx.fillText(`prox(v) = ${proximalResult.toFixed(2)}`, posProx.x + 5, posProx.y - 5);
+            
+            // Draw optimization path
+            if (optimizationHistory.length > 0) {
+                ctx.strokeStyle = currentMethod === 'proximal' ? '#28a745' : '#dc3545';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                
+                optimizationHistory.forEach((step, index) => {
+                    const totalValue = smoothFunction.evaluate(step.x) + func.evaluate(step.x);
+                    const pos = transform(step.x, totalValue);
+                    if (index === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                });
+                
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw points
+                optimizationHistory.forEach((step, index) => {
+                    const totalValue = smoothFunction.evaluate(step.x) + func.evaluate(step.x);
+                    const pos = transform(step.x, totalValue);
+                    ctx.fillStyle = index === optimizationHistory.length - 1 ? 
+                        (currentMethod === 'proximal' ? '#28a745' : '#dc3545') : '#6c757d';
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+            }
+            
+            // Draw current point
+            if (optimizationHistory.length > 0) {
+                const lastStep = optimizationHistory[optimizationHistory.length - 1];
+                const totalValue = smoothFunction.evaluate(lastStep.newX) + func.evaluate(lastStep.newX);
+                const currentPos = transform(lastStep.newX, totalValue);
+                
+                ctx.fillStyle = currentMethod === 'proximal' ? '#28a745' : '#dc3545';
+                ctx.beginPath();
+                ctx.arc(currentPos.x, currentPos.y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${currentMethod === 'proximal' ? 'Proximal GD' : 'Gradient Descent'}`, 
+                    currentPos.x + 10, currentPos.y - 10);
+            }
+            
+            // Draw legend
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`f(x) = ½x²`, margin + 10, margin + 20);
+            ctx.fillText(`g(x) = ${func.name}`, margin + 10, margin + 40);
+            ctx.fillText(`f(x) + g(x)`, margin + 10, margin + 60);
+        }
+        
+        // Event listeners
+        document.getElementById('pointV').addEventListener('input', function() {
+            document.getElementById('pointVValue').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('pointVValue').addEventListener('input', function() {
+            document.getElementById('pointV').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('parameterAlpha').addEventListener('input', function() {
+            document.getElementById('parameterAlphaValue').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('parameterAlphaValue').addEventListener('input', function() {
+            document.getElementById('parameterAlpha').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('parameterLambda').addEventListener('input', function() {
+            document.getElementById('parameterLambdaValue').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('parameterLambdaValue').addEventListener('input', function() {
+            document.getElementById('parameterLambda').value = this.value;
+            updateParameters();
+            updateProximalResult();
+            drawVisualization();
+        });
+        
+        document.getElementById('startPoint').addEventListener('input', function() {
+            document.getElementById('startPointValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('startPointValue').addEventListener('input', function() {
+            document.getElementById('startPoint').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('learningRate').addEventListener('input', function() {
+            document.getElementById('learningRateValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('learningRateValue').addEventListener('input', function() {
+            document.getElementById('learningRate').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('maxSteps').addEventListener('input', function() {
+            document.getElementById('maxStepsValue').value = this.value;
+            updateParameters();
+        });
+        
+        document.getElementById('maxStepsValue').addEventListener('input', function() {
+            document.getElementById('maxSteps').value = this.value;
+            updateParameters();
+        });
+        
+        // Initialize
+        updateParameters();
+        updateProximalResult();
+        drawVisualization();
+    </script>
+</body>
+</html> 

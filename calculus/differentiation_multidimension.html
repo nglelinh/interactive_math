@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multidimensional Differentiation - Interactive 3D Visualization</title>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background: #111; 
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #info {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      max-width: 350px;
+      line-height: 1.4;
+    }
+    #controls {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #444;
+    }
+    #controls h3 {
+      margin: 0 0 10px 0;
+      color: #0ff;
+    }
+    #controls select, #controls button {
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      padding: 6px;
+      border-radius: 4px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    #controls button:hover {
+      background: #555;
+    }
+    .function-info {
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 4px;
+      font-size: 12px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <strong>🔬 Multidimensional Differentiation</strong><br/>
+    Click anywhere on the 3D surface to explore partial derivatives and gradients.<br/>
+    <span id="values">Click to start exploring...</span>
+  </div>
+  
+  <div id="controls">
+    <h3>Function Selection</h3>
+    <select id="functionSelect">
+      <option value="sincos">f(x,y) = sin(x)cos(y)</option>
+      <option value="paraboloid">f(x,y) = x² + y²</option>
+      <option value="saddle">f(x,y) = x² - y²</option>
+      <option value="ripple">f(x,y) = sin(√(x²+y²))</option>
+      <option value="gaussian">f(x,y) = e^(-(x²+y²))</option>
+    </select>
+    <div class="function-info" id="functionInfo">
+      Function: f(x,y) = sin(x)cos(y)<br/>
+      ∂f/∂x = cos(x)cos(y)<br/>
+      ∂f/∂y = -sin(x)sin(y)
+    </div>
+    <button onclick="resetView()">Reset View</button>
+  </div>
+
+  <!-- Use ES6 modules with import maps -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+      }
+    }
+  </script>
+  
+  <!-- Global variables and functions -->
+  <script>
+    let camera, controls, scene, renderer, updateAt;
+    
+    function resetView() {
+      if (camera && controls) {
+        camera.position.set(5, 5, 8);
+        controls.target.set(0, 0, 0);
+        controls.update();
+        if (updateAt) {
+          updateAt(0, 0);
+        }
+      }
+    }
+  </script>
+  
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // Scene setup - assign to global variables
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x111111);
+    document.body.appendChild(renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(5, 5, 8);
+    controls.update();
+
+    let currentFunction = 'sincos';
+    let surface, movingPoint, arrowHelper;
+
+    // Function definitions
+    const functions = {
+      sincos: {
+        f: (x, y) => Math.sin(x) * Math.cos(y),
+        dfdx: (x, y) => Math.cos(x) * Math.cos(y),
+        dfdy: (x, y) => -Math.sin(x) * Math.sin(y),
+        name: 'f(x,y) = sin(x)cos(y)',
+        partialX: '∂f/∂x = cos(x)cos(y)',
+        partialY: '∂f/∂y = -sin(x)sin(y)',
+        range: Math.PI * 2,
+        color: 0x00ffcc
+      },
+      paraboloid: {
+        f: (x, y) => (x * x + y * y) * 0.2,
+        dfdx: (x, y) => 0.4 * x,
+        dfdy: (x, y) => 0.4 * y,
+        name: 'f(x,y) = x² + y²',
+        partialX: '∂f/∂x = 2x',
+        partialY: '∂f/∂y = 2y',
+        range: 6,
+        color: 0xff6b6b
+      },
+      saddle: {
+        f: (x, y) => (x * x - y * y) * 0.2,
+        dfdx: (x, y) => 0.4 * x,
+        dfdy: (x, y) => -0.4 * y,
+        name: 'f(x,y) = x² - y²',
+        partialX: '∂f/∂x = 2x',
+        partialY: '∂f/∂y = -2y',
+        range: 6,
+        color: 0x4ecdc4
+      },
+      ripple: {
+        f: (x, y) => {
+          const r = Math.sqrt(x * x + y * y);
+          return r === 0 ? 1 : Math.sin(r) / r;
+        },
+        dfdx: (x, y) => {
+          const r = Math.sqrt(x * x + y * y);
+          if (r === 0) return 0;
+          return (x / r) * (Math.cos(r) / r - Math.sin(r) / (r * r));
+        },
+        dfdy: (x, y) => {
+          const r = Math.sqrt(x * x + y * y);
+          if (r === 0) return 0;
+          return (y / r) * (Math.cos(r) / r - Math.sin(r) / (r * r));
+        },
+        name: 'f(x,y) = sin(√(x²+y²))/√(x²+y²)',
+        partialX: '∂f/∂x = x·[cos(r)/r - sin(r)/r²]/r',
+        partialY: '∂f/∂y = y·[cos(r)/r - sin(r)/r²]/r',
+        range: 8,
+        color: 0xf39c12
+      },
+      gaussian: {
+        f: (x, y) => Math.exp(-(x * x + y * y) * 0.5),
+        dfdx: (x, y) => -x * Math.exp(-(x * x + y * y) * 0.5),
+        dfdy: (x, y) => -y * Math.exp(-(x * x + y * y) * 0.5),
+        name: 'f(x,y) = e^(-(x²+y²)/2)',
+        partialX: '∂f/∂x = -x·e^(-(x²+y²)/2)',
+        partialY: '∂f/∂y = -y·e^(-(x²+y²)/2)',
+        range: 6,
+        color: 0x9b59b6
+      }
+    };
+
+    const f = (x, y) => functions[currentFunction].f(x, y);
+    const dfdx = (x, y) => functions[currentFunction].dfdx(x, y);
+    const dfdy = (x, y) => functions[currentFunction].dfdy(x, y);
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 8);
+    scene.add(light);
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function createSurface() {
+      if (surface) {
+        scene.remove(surface);
+        surface.geometry.dispose();
+        surface.material.dispose();
+      }
+
+      const func = functions[currentFunction];
+      const range = func.range;
+      const steps = 80;
+      const geo = new THREE.PlaneGeometry(range, range, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        pos.setZ(i, func.f(x, y));
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: func.color,
+        flatShading: false,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    function createPoint() {
+      if (movingPoint) {
+        scene.remove(movingPoint);
+        movingPoint.geometry.dispose();
+        movingPoint.material.dispose();
+      }
+
+      const pointGeo = new THREE.SphereGeometry(0.15, 16, 16);
+      const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      movingPoint = new THREE.Mesh(pointGeo, pointMat);
+      scene.add(movingPoint);
+    }
+
+    function createArrow() {
+      if (arrowHelper) {
+        scene.remove(arrowHelper);
+      }
+
+      arrowHelper = new THREE.ArrowHelper(
+        new THREE.Vector3(0, 0, 1), 
+        new THREE.Vector3(), 
+        1, 
+        0xffff00,
+        undefined,
+        0.3
+      );
+      scene.add(arrowHelper);
+    }
+
+    updateAt = function(x, y) {
+      const z = f(x, y);
+      const dx = dfdx(x, y);
+      const dy = dfdy(x, y);
+      
+      movingPoint.position.set(x, y, z);
+      
+      // Create gradient vector and normalize for visualization
+      const gradLength = Math.sqrt(dx * dx + dy * dy);
+      const grad = new THREE.Vector3(dx, dy, 0);
+      
+      if (gradLength > 0) {
+        grad.normalize();
+        arrowHelper.setDirection(grad);
+        arrowHelper.setLength(Math.min(gradLength * 2 + 0.5, 3)); // Scale for visibility
+      } else {
+        arrowHelper.setDirection(new THREE.Vector3(0, 0, 1));
+        arrowHelper.setLength(0.1);
+      }
+      
+      arrowHelper.position.set(x, y, z + 0.1);
+      
+      document.getElementById('values').innerHTML =
+        `<strong>Point:</strong> (${x.toFixed(2)}, ${y.toFixed(2)})<br/>` +
+        `<strong>f(x,y) =</strong> ${z.toFixed(3)}<br/>` +
+        `<strong>∂f/∂x =</strong> ${dx.toFixed(3)}<br/>` +
+        `<strong>∂f/∂y =</strong> ${dy.toFixed(3)}<br/>` +
+        `<strong>|∇f| =</strong> ${gradLength.toFixed(3)}`;
+    }
+
+    function updateFunctionInfo() {
+      const func = functions[currentFunction];
+      document.getElementById('functionInfo').innerHTML = 
+        `Function: ${func.name}<br/>${func.partialX}<br/>${func.partialY}`;
+    }
+
+    function switchFunction(newFunction) {
+      currentFunction = newFunction;
+      createSurface();
+      updateFunctionInfo();
+      updateAt(0, 0); // Reset to origin
+    }
+
+    // Event listeners
+    window.addEventListener('pointerdown', (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      
+      const intersects = raycaster.intersectObject(surface);
+      if (intersects.length > 0) {
+        const pt = intersects[0].point;
+        updateAt(pt.x, pt.y);
+      }
+    });
+
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      switchFunction(e.target.value);
+    });
+
+    // resetView is defined globally above
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    createPoint();
+    createArrow();
+    updateFunctionInfo();
+    updateAt(0, 0);
+    animate();
+  </script>
+</body>
+</html>

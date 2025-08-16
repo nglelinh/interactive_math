@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quasi-Newton Methods Illustration</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .control-group input, .control-group select {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .control-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .plot-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .plot {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            height: 500px;
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .method-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .method-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .method-card h4 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .iteration-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .iteration-info h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .matrix-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .step-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .step-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .step-item strong {
+            color: #ffd700;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Quasi-Newton Methods Illustration</h1>
+        
+        <div class="info-panel">
+            <h3>📚 Giới thiệu về Quasi-Newton Methods</h3>
+            <p>
+                <strong>Quasi-Newton methods</strong> là các thuật toán tối ưu hóa sử dụng xấp xỉ của ma trận Hessian 
+                thay vì tính toán chính xác. Điều này giúp giảm chi phí tính toán đáng kể so với Newton's method 
+                trong khi vẫn duy trì tốc độ hội tụ nhanh.
+            </p>
+            <p>
+                <strong>Ý tưởng chính:</strong> Thay vì tính toán Hessian chính xác ∇²f(xₖ), chúng ta duy trì 
+                một xấp xỉ Bₖ ≈ ∇²f(xₖ) và cập nhật nó dựa trên thông tin gradient.
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="function-select">Hàm mục tiêu:</label>
+                <select id="function-select">
+                    <option value="rosenbrock">Rosenbrock Function</option>
+                    <option value="quadratic">Quadratic Function</option>
+                    <option value="beale">Beale Function</option>
+                    <option value="himmelblau">Himmelblau Function</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="learning-rate">Learning Rate (α):</label>
+                <input type="range" id="learning-rate" min="0.01" max="0.5" step="0.01" value="0.1">
+                <span id="lr-value">0.1</span>
+            </div>
+            <div class="control-group">
+                <label for="max-iterations">Số lần lặp tối đa:</label>
+                <input type="range" id="max-iterations" min="10" max="100" step="5" value="50">
+                <span id="iter-value">50</span>
+            </div>
+            <div class="control-group">
+                <label for="tolerance">Tolerance:</label>
+                <input type="range" id="tolerance" min="0.001" max="0.1" step="0.001" value="0.01">
+                <span id="tol-value">0.01</span>
+            </div>
+            <div class="control-group">
+                <button onclick="startOptimization()">🚀 Bắt đầu tối ưu hóa</button>
+                <button onclick="resetOptimization()">🔄 Reset</button>
+            </div>
+        </div>
+
+        <div class="plot-container">
+            <div class="plot" id="contour-plot"></div>
+            <div class="plot" id="convergence-plot"></div>
+        </div>
+
+        <div class="method-comparison">
+            <div class="method-card">
+                <h4>🔬 Newton's Method</h4>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Hội tụ bậc hai (quadratic convergence)</li>
+                    <li>Chính xác với Hessian thực</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Chi phí tính toán Hessian cao</li>
+                    <li>Khó khăn với hàm không khả vi</li>
+                </ul>
+                <div class="matrix-display" id="newton-hessian">
+                    Hessian Matrix sẽ hiển thị ở đây
+                </div>
+            </div>
+            
+            <div class="method-card">
+                <h4>🎯 Quasi-Newton Method (BFGS)</h4>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Chi phí tính toán thấp hơn</li>
+                    <li>Hội tụ siêu tuyến tính</li>
+                    <li>Duy trì tính positive definite</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Xấp xỉ Hessian có thể không chính xác</li>
+                    <li>Cần lưu trữ ma trận Hessian</li>
+                </ul>
+                <div class="matrix-display" id="quasi-hessian">
+                    Approximated Hessian sẽ hiển thị ở đây
+                </div>
+            </div>
+        </div>
+
+        <div class="iteration-info">
+            <h3>📊 Thông tin lặp hiện tại</h3>
+            <div class="step-info">
+                <div class="step-item">
+                    <strong>Lặp:</strong><br>
+                    <span id="current-iteration">0</span>
+                </div>
+                <div class="step-item">
+                    <strong>Vị trí hiện tại:</strong><br>
+                    <span id="current-position">(0, 0)</span>
+                </div>
+                <div class="step-item">
+                    <strong>Giá trị hàm:</strong><br>
+                    <span id="current-value">0</span>
+                </div>
+                <div class="step-item">
+                    <strong>Norm gradient:</strong><br>
+                    <span id="gradient-norm">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentIteration = 0;
+        let newtonPath = [];
+        let quasiNewtonPath = [];
+        let newtonValues = [];
+        let quasiNewtonValues = [];
+        let currentFunction = 'rosenbrock';
+        let learningRate = 0.1;
+        let maxIterations = 50;
+        let tolerance = 0.01;
+        let isOptimizing = false;
+
+        // Function definitions
+        const functions = {
+            rosenbrock: {
+                name: 'Rosenbrock Function',
+                f: (x, y) => Math.pow(1 - x, 2) + 100 * Math.pow(y - x * x, 2),
+                grad: (x, y) => [
+                    -2 * (1 - x) - 400 * x * (y - x * x),
+                    200 * (y - x * x)
+                ],
+                hessian: (x, y) => [
+                    [2 + 1200 * x * x - 400 * y, -400 * x],
+                    [-400 * x, 200]
+                ],
+                domain: { x: [-2, 2], y: [-1, 3] }
+            },
+            quadratic: {
+                name: 'Quadratic Function',
+                f: (x, y) => x * x + 2 * y * y,
+                grad: (x, y) => [2 * x, 4 * y],
+                hessian: (x, y) => [[2, 0], [0, 4]],
+                domain: { x: [-3, 3], y: [-3, 3] }
+            },
+            beale: {
+                name: 'Beale Function',
+                f: (x, y) => Math.pow(1.5 - x + x * y, 2) + Math.pow(2.25 - x + x * y * y, 2) + Math.pow(2.625 - x + x * y * y * y, 2),
+                grad: (x, y) => [
+                    2 * (1.5 - x + x * y) * (-1 + y) + 2 * (2.25 - x + x * y * y) * (-1 + y * y) + 2 * (2.625 - x + x * y * y * y) * (-1 + y * y * y),
+                    2 * (1.5 - x + x * y) * x + 2 * (2.25 - x + x * y * y) * 2 * x * y + 2 * (2.625 - x + x * y * y * y) * 3 * x * y * y
+                ],
+                hessian: (x, y) => {
+                    // Simplified Hessian for demonstration
+                    return [[2, 0], [0, 2]];
+                },
+                domain: { x: [-4.5, 4.5], y: [-4.5, 4.5] }
+            },
+            himmelblau: {
+                name: 'Himmelblau Function',
+                f: (x, y) => Math.pow(x * x + y - 11, 2) + Math.pow(x + y * y - 7, 2),
+                grad: (x, y) => [
+                    4 * x * (x * x + y - 11) + 2 * (x + y * y - 7),
+                    2 * (x * x + y - 11) + 4 * y * (x + y * y - 7)
+                ],
+                hessian: (x, y) => {
+                    // Simplified Hessian for demonstration
+                    return [[12 * x * x + 4 * y - 42, 4 * x + 4 * y], [4 * x + 4 * y, 12 * y * y + 4 * x - 26]];
+                },
+                domain: { x: [-5, 5], y: [-5, 5] }
+            }
+        };
+
+        // Initialize plots
+        function initializePlots() {
+            const func = functions[currentFunction];
+            
+            // Generate contour data
+            const xRange = func.domain.x;
+            const yRange = func.domain.y;
+            const x = [];
+            const y = [];
+            const z = [];
+            
+            for (let i = 0; i < 100; i++) {
+                x[i] = xRange[0] + (xRange[1] - xRange[0]) * i / 99;
+                y[i] = [];
+                z[i] = [];
+                for (let j = 0; j < 100; j++) {
+                    y[i][j] = yRange[0] + (yRange[1] - yRange[0]) * j / 99;
+                    z[i][j] = func.f(x[i], y[i][j]);
+                }
+            }
+
+            // Contour plot
+            const contourData = [{
+                type: 'contour',
+                x: x,
+                y: y[0],
+                z: z,
+                colorscale: 'Viridis',
+                showscale: true,
+                name: 'Function Contours'
+            }];
+
+            const contourLayout = {
+                title: `Contour Plot: ${func.name}`,
+                xaxis: { title: 'x' },
+                yaxis: { title: 'y' },
+                width: 600,
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            };
+
+            Plotly.newPlot('contour-plot', contourData, contourLayout);
+
+            // Convergence plot
+            const convergenceData = [{
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Newton',
+                line: { color: 'red' }
+            }, {
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Quasi-Newton',
+                line: { color: 'blue' }
+            }];
+
+            const convergenceLayout = {
+                title: 'Convergence Comparison',
+                xaxis: { title: 'Iteration' },
+                yaxis: { title: 'Function Value', type: 'log' },
+                width: 600,
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            };
+
+            Plotly.newPlot('convergence-plot', convergenceData, convergenceLayout);
+        }
+
+        // BFGS update formula
+        function bfgsUpdate(H, s, y) {
+            const rho = 1 / (y[0] * s[0] + y[1] * s[1]);
+            const I = [[1, 0], [0, 1]];
+            
+            // (I - ρsy^T)
+            const term1 = [
+                [I[0][0] - rho * s[0] * y[0], I[0][1] - rho * s[0] * y[1]],
+                [I[1][0] - rho * s[1] * y[0], I[1][1] - rho * s[1] * y[1]]
+            ];
+            
+            // (I - ρys^T)
+            const term2 = [
+                [I[0][0] - rho * y[0] * s[0], I[0][1] - rho * y[0] * s[1]],
+                [I[1][0] - rho * y[1] * s[0], I[1][1] - rho * y[1] * s[1]]
+            ];
+            
+            // H_{k+1} = (I - ρsy^T)H_k(I - ρys^T) + ρss^T
+            const H_new = matrixMultiply(matrixMultiply(term1, H), term2);
+            const ssT = [[rho * s[0] * s[0], rho * s[0] * s[1]], [rho * s[1] * s[0], rho * s[1] * s[1]]];
+            
+            return matrixAdd(H_new, ssT);
+        }
+
+        // Matrix operations
+        function matrixMultiply(A, B) {
+            return [
+                [A[0][0] * B[0][0] + A[0][1] * B[1][0], A[0][0] * B[0][1] + A[0][1] * B[1][1]],
+                [A[1][0] * B[0][0] + A[1][1] * B[1][0], A[1][0] * B[0][1] + A[1][1] * B[1][1]]
+            ];
+        }
+
+        function matrixAdd(A, B) {
+            return [
+                [A[0][0] + B[0][0], A[0][1] + B[0][1]],
+                [A[1][0] + B[1][0], A[1][1] + B[1][1]]
+            ];
+        }
+
+        function matrixInverse(A) {
+            const det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+            return [
+                [A[1][1] / det, -A[0][1] / det],
+                [-A[1][0] / det, A[0][0] / det]
+            ];
+        }
+
+        // Optimization algorithms
+        function newtonStep(x, y, func) {
+            const grad = func.grad(x, y);
+            const hessian = func.hessian(x, y);
+            const hessianInv = matrixInverse(hessian);
+            
+            const step = [
+                hessianInv[0][0] * grad[0] + hessianInv[0][1] * grad[1],
+                hessianInv[1][0] * grad[0] + hessianInv[1][1] * grad[1]
+            ];
+            
+            return [x - learningRate * step[0], y - learningRate * step[1]];
+        }
+
+        function quasiNewtonStep(x, y, func, H) {
+            const grad = func.grad(x, y);
+            
+            const step = [
+                H[0][0] * grad[0] + H[0][1] * grad[1],
+                H[1][0] * grad[0] + H[1][1] * grad[1]
+            ];
+            
+            return [x - learningRate * step[0], y - learningRate * step[1]];
+        }
+
+        // Main optimization function
+        async function startOptimization() {
+            if (isOptimizing) return;
+            isOptimizing = true;
+            
+            const func = functions[currentFunction];
+            
+            // Initialize starting points
+            let newtonX = -1, newtonY = -1;
+            let quasiX = -1, quasiY = -1;
+            
+            // Initialize Hessian approximation for Quasi-Newton
+            let H = [[1, 0], [0, 1]]; // Identity matrix as initial approximation
+            
+            newtonPath = [[newtonX, newtonY]];
+            quasiNewtonPath = [[quasiX, quasiY]];
+            newtonValues = [func.f(newtonX, newtonY)];
+            quasiNewtonValues = [func.f(quasiX, quasiY)];
+            
+            currentIteration = 0;
+            
+            // Update displays
+            updateMatrixDisplay('newton-hessian', func.hessian(newtonX, newtonY), 'Newton Hessian');
+            updateMatrixDisplay('quasi-hessian', H, 'Quasi-Newton Hessian Approx.');
+            updateIterationInfo(newtonX, newtonY, func.f(newtonX, newtonY), func.grad(newtonX, newtonY));
+            
+            // Optimization loop
+            for (let i = 0; i < maxIterations; i++) {
+                currentIteration = i + 1;
+                
+                // Newton step
+                const [newNewtonX, newNewtonY] = newtonStep(newtonX, newtonY, func);
+                newtonPath.push([newNewtonX, newNewtonY]);
+                newtonValues.push(func.f(newNewtonX, newNewtonY));
+                
+                // Quasi-Newton step
+                const [newQuasiX, newQuasiY] = quasiNewtonStep(quasiX, quasiY, func, H);
+                quasiNewtonPath.push([newQuasiX, newQuasiY]);
+                quasiNewtonValues.push(func.f(newQuasiX, newQuasiY));
+                
+                // Update Hessian approximation for Quasi-Newton
+                const s = [newQuasiX - quasiX, newQuasiY - quasiY];
+                const y = [
+                    func.grad(newQuasiX, newQuasiY)[0] - func.grad(quasiX, quasiY)[0],
+                    func.grad(newQuasiX, newQuasiY)[1] - func.grad(quasiX, quasiY)[1]
+                ];
+                
+                if (i > 0) { // Skip first iteration for BFGS update
+                    H = bfgsUpdate(H, s, y);
+                }
+                
+                // Update positions
+                newtonX = newNewtonX;
+                newtonY = newNewtonY;
+                quasiX = newQuasiX;
+                quasiY = newQuasiY;
+                
+                // Update displays
+                updateMatrixDisplay('newton-hessian', func.hessian(newtonX, newtonY), 'Newton Hessian');
+                updateMatrixDisplay('quasi-hessian', H, 'Quasi-Newton Hessian Approx.');
+                updateIterationInfo(quasiX, quasiY, func.f(quasiX, quasiY), func.grad(quasiX, quasiY));
+                
+                // Update plots
+                updatePlots();
+                
+                // Check convergence
+                const gradNorm = Math.sqrt(func.grad(quasiX, quasiY)[0]**2 + func.grad(quasiX, quasiY)[1]**2);
+                if (gradNorm < tolerance) {
+                    console.log(`Converged after ${i + 1} iterations`);
+                    break;
+                }
+                
+                // Add delay for visualization
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            isOptimizing = false;
+        }
+
+        function updatePlots() {
+            const func = functions[currentFunction];
+            
+            // Update contour plot with paths
+            const contourData = [{
+                type: 'contour',
+                x: Array.from({length: 100}, (_, i) => func.domain.x[0] + (func.domain.x[1] - func.domain.x[0]) * i / 99),
+                y: Array.from({length: 100}, (_, i) => func.domain.y[0] + (func.domain.y[1] - func.domain.y[0]) * i / 99),
+                z: Array.from({length: 100}, (_, i) => 
+                    Array.from({length: 100}, (_, j) => {
+                        const x = func.domain.x[0] + (func.domain.x[1] - func.domain.x[0]) * i / 99;
+                        const y = func.domain.y[0] + (func.domain.y[1] - func.domain.y[0]) * j / 99;
+                        return func.f(x, y);
+                    })
+                ),
+                colorscale: 'Viridis',
+                showscale: true,
+                name: 'Function Contours'
+            }, {
+                x: newtonPath.map(p => p[0]),
+                y: newtonPath.map(p => p[1]),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Newton Path',
+                line: { color: 'red', width: 3 },
+                marker: { size: 8 }
+            }, {
+                x: quasiNewtonPath.map(p => p[0]),
+                y: quasiNewtonPath.map(p => p[1]),
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Quasi-Newton Path',
+                line: { color: 'blue', width: 3 },
+                marker: { size: 8 }
+            }];
+
+            Plotly.react('contour-plot', contourData, {
+                title: `Contour Plot: ${func.name}`,
+                xaxis: { title: 'x' },
+                yaxis: { title: 'y' },
+                width: 600,
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            });
+
+            // Update convergence plot
+            const convergenceData = [{
+                x: Array.from({length: newtonValues.length}, (_, i) => i),
+                y: newtonValues,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Newton',
+                line: { color: 'red' }
+            }, {
+                x: Array.from({length: quasiNewtonValues.length}, (_, i) => i),
+                y: quasiNewtonValues,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Quasi-Newton',
+                line: { color: 'blue' }
+            }];
+
+            Plotly.react('convergence-plot', convergenceData, {
+                title: 'Convergence Comparison',
+                xaxis: { title: 'Iteration' },
+                yaxis: { title: 'Function Value', type: 'log' },
+                width: 600,
+                height: 500,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            });
+        }
+
+        function updateMatrixDisplay(elementId, matrix, title) {
+            const display = document.getElementById(elementId);
+            display.innerHTML = `
+                <strong>${title}:</strong><br>
+                [${matrix[0][0].toFixed(3)}, ${matrix[0][1].toFixed(3)}]<br>
+                [${matrix[1][0].toFixed(3)}, ${matrix[1][1].toFixed(3)}]
+            `;
+        }
+
+        function updateIterationInfo(x, y, value, grad) {
+            document.getElementById('current-iteration').textContent = currentIteration;
+            document.getElementById('current-position').textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
+            document.getElementById('current-value').textContent = value.toFixed(6);
+            document.getElementById('gradient-norm').textContent = Math.sqrt(grad[0]**2 + grad[1]**2).toFixed(6);
+        }
+
+        function resetOptimization() {
+            newtonPath = [];
+            quasiNewtonPath = [];
+            newtonValues = [];
+            quasiNewtonValues = [];
+            currentIteration = 0;
+            isOptimizing = false;
+            
+            initializePlots();
+            
+            document.getElementById('current-iteration').textContent = '0';
+            document.getElementById('current-position').textContent = '(0, 0)';
+            document.getElementById('current-value').textContent = '0';
+            document.getElementById('gradient-norm').textContent = '0';
+            
+            updateMatrixDisplay('newton-hessian', [[0, 0], [0, 0]], 'Newton Hessian');
+            updateMatrixDisplay('quasi-hessian', [[1, 0], [0, 1]], 'Quasi-Newton Hessian Approx.');
+        }
+
+        // Event listeners
+        document.getElementById('function-select').addEventListener('change', function() {
+            currentFunction = this.value;
+            resetOptimization();
+        });
+
+        document.getElementById('learning-rate').addEventListener('input', function() {
+            learningRate = parseFloat(this.value);
+            document.getElementById('lr-value').textContent = this.value;
+        });
+
+        document.getElementById('max-iterations').addEventListener('input', function() {
+            maxIterations = parseInt(this.value);
+            document.getElementById('iter-value').textContent = this.value;
+        });
+
+        document.getElementById('tolerance').addEventListener('input', function() {
+            tolerance = parseFloat(this.value);
+            document.getElementById('tol-value').textContent = this.value;
+        });
+
+        // Initialize
+        initializePlots();
+    </script>
+</body>
+</html> 

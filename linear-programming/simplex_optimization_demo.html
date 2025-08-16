@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simplex Method Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      background: #222;
+    }
+    #info {
+      width: 450px;
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .section {
+      margin-bottom: 15px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    .problem-section {
+      border-left: 4px solid #2196F3;
+    }
+    .tableau-section {
+      border-left: 4px solid #FF9800;
+    }
+    .solution-section {
+      border-left: 4px solid #4CAF50;
+    }
+    .algorithm-section {
+      border-left: 4px solid #9C27B0;
+    }
+    .control-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 50px;
+      padding: 2px;
+      margin: 0 3px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 3px;
+      font-size: 11px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .step-btn {
+      background: #2196F3;
+    }
+    .step-btn:hover {
+      background: #1976D2;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 8px;
+      background: #333;
+      color: white;
+      border: 1px solid #555;
+      font-size: 11px;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .tableau {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+    .tableau table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .tableau th, .tableau td {
+      border: 1px solid #555;
+      padding: 3px 5px;
+      text-align: center;
+      min-width: 35px;
+    }
+    .tableau th {
+      background: rgba(76, 175, 80, 0.3);
+    }
+    .pivot-cell {
+      background: rgba(255, 235, 59, 0.5) !important;
+      font-weight: bold;
+    }
+    .pivot-row {
+      background: rgba(255, 193, 7, 0.2);
+    }
+    .pivot-col {
+      background: rgba(255, 193, 7, 0.2);
+    }
+    .objective-row {
+      background: rgba(33, 150, 243, 0.2);
+    }
+    .math-notation {
+      font-style: italic;
+      font-family: 'Times New Roman', serif;
+    }
+    .step-info {
+      background: rgba(33, 150, 243, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    .optimal {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .infeasible {
+      color: #f44336;
+      font-weight: bold;
+    }
+    .unbounded {
+      color: #FF9800;
+      font-weight: bold;
+    }
+    
+    /* SVG styles for visualization */
+    .feasible-region {
+      fill: rgba(76, 175, 80, 0.2);
+      stroke: #4CAF50;
+      stroke-width: 2;
+    }
+    .constraint-line {
+      stroke: #2196F3;
+      stroke-width: 2;
+      fill: none;
+    }
+    .objective-line {
+      stroke: #FF9800;
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 5,5;
+    }
+    .vertex {
+      fill: #f44336;
+      stroke: white;
+      stroke-width: 2;
+    }
+    .current-vertex {
+      fill: #FFEB3B;
+      stroke: #FF9800;
+      stroke-width: 3;
+      r: 8;
+    }
+    .optimal-vertex {
+      fill: #4CAF50;
+      stroke: white;
+      stroke-width: 3;
+      r: 10;
+    }
+    .axis {
+      stroke: #666;
+      stroke-width: 1;
+    }
+    .grid-line {
+      stroke: #333;
+      stroke-width: 0.5;
+    }
+    .label {
+      fill: white;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .path-line {
+      stroke: #FFEB3B;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    
+    <div id="info">
+      <h3>Simplex Method Optimization</h3>
+      
+      <div class="section problem-section">
+        <h4>Linear Programming Problem</h4>
+        <div class="control-group">
+          <label>Problem Type:</label>
+          <select id="problemSelect">
+            <option value="standard">Standard Form (2D)</option>
+            <option value="product-mix">Product Mix Problem</option>
+            <option value="diet">Diet Problem</option>
+            <option value="transportation">Simple Transportation</option>
+            <option value="custom">Custom Problem</option>
+          </select>
+        </div>
+        
+        <div id="problemDescription">
+          <div><strong>Maximize:</strong> <span id="objectiveText" class="math-notation">3x₁ + 2x₂</span></div>
+          <div><strong>Subject to:</strong></div>
+          <div id="constraintsText">
+            <div class="math-notation">2x₁ + x₂ ≤ 6</div>
+            <div class="math-notation">x₁ + 2x₂ ≤ 6</div>
+            <div class="math-notation">x₁, x₂ ≥ 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section algorithm-section">
+        <h4>Algorithm Controls</h4>
+        <div class="control-group">
+          <button id="startBtn">Initialize Tableau</button>
+          <button id="stepBtn" disabled>Next Iteration</button>
+          <button id="autoBtn" disabled>Auto Solve</button>
+          <button id="resetBtn" class="reset-btn">Reset</button>
+        </div>
+        
+        <div class="step-info">
+          <div><strong>Current Step:</strong> <span id="currentStep">Not Started</span></div>
+          <div><strong>Iteration:</strong> <span id="iteration">0</span></div>
+          <div><strong>Status:</strong> <span id="status">Ready</span></div>
+          <div><strong>Pivot Element:</strong> <span id="pivotElement">None</span></div>
+        </div>
+      </div>
+
+      <div class="section tableau-section">
+        <h4>Simplex Tableau</h4>
+        <div id="tableauContainer" class="tableau">
+          <div>Click "Initialize Tableau" to start</div>
+        </div>
+      </div>
+
+      <div class="section solution-section">
+        <h4>Current Solution</h4>
+        <div id="solutionInfo">
+          <div><strong>Basic Variables:</strong> <span id="basicVars">-</span></div>
+          <div><strong>Solution Values:</strong> <span id="solutionValues">-</span></div>
+          <div><strong>Objective Value:</strong> <span id="objectiveValue" class="value-display">0</span></div>
+          <div><strong>Vertex:</strong> <span id="currentVertex">Origin</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Simplex Method Steps</h4>
+        <div style="font-size: 11px;">
+          <div><strong>1.</strong> Convert to standard form (≤ constraints)</div>
+          <div><strong>2.</strong> Add slack variables</div>
+          <div><strong>3.</strong> Set up initial tableau</div>
+          <div><strong>4.</strong> Choose entering variable (most negative in objective row)</div>
+          <div><strong>5.</strong> Choose leaving variable (minimum ratio test)</div>
+          <div><strong>6.</strong> Pivot to get new basic feasible solution</div>
+          <div><strong>7.</strong> Repeat until optimal or unbounded</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Optimality Conditions</h4>
+        <div style="font-size: 11px;">
+          <div><span class="optimal">Optimal:</span> All coefficients in objective row ≥ 0</div>
+          <div><span class="unbounded">Unbounded:</span> Entering variable has no positive ratios</div>
+          <div><span class="infeasible">Infeasible:</span> Artificial variables remain in solution</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Visualization</h4>
+        <div class="control-group">
+          <input type="checkbox" id="showConstraints" checked> Show Constraint Lines
+          <input type="checkbox" id="showObjective" checked> Show Objective Lines
+          <input type="checkbox" id="showVertices" checked> Show Vertices
+          <input type="checkbox" id="showPath" checked> Show Simplex Path
+          <input type="checkbox" id="showGrid"> Show Grid
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const container = document.getElementById('canvas-container');
+    
+    // Problem definition
+    let currentProblem = 'standard';
+    let c = [3, 2]; // Objective coefficients
+    let A = [[2, 1], [1, 2]]; // Constraint matrix
+    let b = [6, 6]; // RHS values
+    let tableau = [];
+    let basicVars = [];
+    let iteration = 0;
+    let isOptimal = false;
+    let isUnbounded = false;
+    let simplexPath = [];
+    let currentVertex = [0, 0];
+    let vertices = [];
+    let isRunning = false;
+
+    // Problem definitions
+    const problems = {
+      standard: {
+        name: "Standard 2D Problem",
+        objective: "3x₁ + 2x₂",
+        c: [3, 2],
+        A: [[2, 1], [1, 2]],
+        b: [6, 6],
+        constraints: ["2x₁ + x₂ ≤ 6", "x₁ + 2x₂ ≤ 6", "x₁, x₂ ≥ 0"]
+      },
+      "product-mix": {
+        name: "Product Mix Problem",
+        objective: "40x₁ + 30x₂",
+        c: [40, 30],
+        A: [[1, 1], [2, 1]],
+        b: [8, 12],
+        constraints: ["x₁ + x₂ ≤ 8 (labor)", "2x₁ + x₂ ≤ 12 (material)", "x₁, x₂ ≥ 0"]
+      },
+      diet: {
+        name: "Diet Problem (Minimization)",
+        objective: "2x₁ + 3x₂",
+        c: [-2, -3], // Convert to maximization
+        A: [[1, 2], [3, 1]],
+        b: [6, 9],
+        constraints: ["x₁ + 2x₂ ≥ 6 (protein)", "3x₁ + x₂ ≥ 9 (vitamins)", "x₁, x₂ ≥ 0"]
+      },
+      transportation: {
+        name: "Simple Transportation",
+        objective: "8x₁ + 6x₂",
+        c: [8, 6],
+        A: [[1, 1], [1, 0], [0, 1]],
+        b: [10, 7, 5],
+        constraints: ["x₁ + x₂ ≤ 10 (supply)", "x₁ ≤ 7 (demand 1)", "x₂ ≤ 5 (demand 2)"]
+      },
+      custom: {
+        name: "Custom Problem",
+        objective: "x₁ + x₂",
+        c: [1, 1],
+        A: [[1, 0], [0, 1]],
+        b: [5, 5],
+        constraints: ["x₁ ≤ 5", "x₂ ≤ 5", "x₁, x₂ ≥ 0"]
+      }
+    };
+
+    // Setup SVG
+    function setupSVG() {
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+
+    // Coordinate transformation
+    function toSVG(x, y) {
+      const rect = container.getBoundingClientRect();
+      const margin = 40;
+      const maxVal = 10;
+      
+      const scaleX = (rect.width - 2 * margin) / maxVal;
+      const scaleY = (rect.height - 2 * margin) / maxVal;
+      
+      return {
+        x: margin + x * scaleX,
+        y: rect.height - margin - y * scaleY
+      };
+    }
+
+    // Initialize tableau
+    function initializeTableau() {
+      const problem = problems[currentProblem];
+      c = [...problem.c];
+      A = problem.A.map(row => [...row]);
+      b = [...problem.b];
+      
+      const m = A.length; // Number of constraints
+      const n = c.length; // Number of variables
+      
+      // Create initial tableau with slack variables
+      tableau = [];
+      basicVars = [];
+      
+      // Add slack variables to constraints
+      for (let i = 0; i < m; i++) {
+        const row = [...A[i]];
+        // Add slack variables
+        for (let j = 0; j < m; j++) {
+          row.push(i === j ? 1 : 0);
+        }
+        row.push(b[i]); // RHS
+        tableau.push(row);
+        basicVars.push(n + i); // Slack variables are initially basic
+      }
+      
+      // Objective row (negate for maximization)
+      const objRow = [...c.map(x => -x)];
+      // Add zeros for slack variables
+      for (let j = 0; j < m; j++) {
+        objRow.push(0);
+      }
+      objRow.push(0); // Initial objective value
+      tableau.push(objRow);
+      
+      iteration = 0;
+      isOptimal = false;
+      isUnbounded = false;
+      simplexPath = [[0, 0]];
+      currentVertex = [0, 0];
+      
+      updateDisplay();
+      calculateVertices();
+      drawVisualization();
+    }
+
+    // Find entering variable (most negative in objective row)
+    function findEnteringVariable() {
+      const objRow = tableau[tableau.length - 1];
+      let minValue = 0;
+      let enteringVar = -1;
+      
+      for (let j = 0; j < objRow.length - 1; j++) {
+        if (objRow[j] < minValue) {
+          minValue = objRow[j];
+          enteringVar = j;
+        }
+      }
+      
+      return enteringVar;
+    }
+
+    // Find leaving variable (minimum ratio test)
+    function findLeavingVariable(enteringVar) {
+      let minRatio = Infinity;
+      let leavingVar = -1;
+      
+      for (let i = 0; i < tableau.length - 1; i++) {
+        const pivot = tableau[i][enteringVar];
+        const rhs = tableau[i][tableau[i].length - 1];
+        
+        if (pivot > 0) {
+          const ratio = rhs / pivot;
+          if (ratio < minRatio) {
+            minRatio = ratio;
+            leavingVar = i;
+          }
+        }
+      }
+      
+      return leavingVar;
+    }
+
+    // Perform pivot operation
+    function pivot(pivotRow, pivotCol) {
+      const pivotElement = tableau[pivotRow][pivotCol];
+      
+      // Normalize pivot row
+      for (let j = 0; j < tableau[pivotRow].length; j++) {
+        tableau[pivotRow][j] /= pivotElement;
+      }
+      
+      // Eliminate column
+      for (let i = 0; i < tableau.length; i++) {
+        if (i !== pivotRow) {
+          const factor = tableau[i][pivotCol];
+          for (let j = 0; j < tableau[i].length; j++) {
+            tableau[i][j] -= factor * tableau[pivotRow][j];
+          }
+        }
+      }
+      
+      // Update basic variables
+      basicVars[pivotRow] = pivotCol;
+    }
+
+    // Check if solution is optimal
+    function isOptimalSolution() {
+      const objRow = tableau[tableau.length - 1];
+      for (let j = 0; j < objRow.length - 1; j++) {
+        if (objRow[j] < 0) return false;
+      }
+      return true;
+    }
+
+    // Check if problem is unbounded
+    function isUnboundedProblem(enteringVar) {
+      for (let i = 0; i < tableau.length - 1; i++) {
+        if (tableau[i][enteringVar] > 0) return false;
+      }
+      return true;
+    }
+
+    // Get current solution
+    function getCurrentSolution() {
+      const solution = new Array(c.length).fill(0);
+      
+      for (let i = 0; i < basicVars.length; i++) {
+        const varIndex = basicVars[i];
+        if (varIndex < c.length) {
+          solution[varIndex] = tableau[i][tableau[i].length - 1];
+        }
+      }
+      
+      return solution;
+    }
+
+    // Calculate vertices of feasible region
+    function calculateVertices() {
+      vertices = [];
+      const problem = problems[currentProblem];
+      
+      // For 2D problems, find intersection points
+      if (c.length === 2) {
+        const constraints = [];
+        
+        // Add original constraints
+        for (let i = 0; i < A.length; i++) {
+          constraints.push({
+            a: A[i][0],
+            b: A[i][1],
+            c: b[i],
+            type: '<='
+          });
+        }
+        
+        // Add non-negativity constraints
+        constraints.push({a: 1, b: 0, c: 0, type: '>='});
+        constraints.push({a: 0, b: 1, c: 0, type: '>='});
+        
+        // Find all intersection points
+        for (let i = 0; i < constraints.length; i++) {
+          for (let j = i + 1; j < constraints.length; j++) {
+            const intersect = findIntersection(constraints[i], constraints[j]);
+            if (intersect && isFeasible(intersect, constraints)) {
+              vertices.push(intersect);
+            }
+          }
+        }
+        
+        // Remove duplicates and sort
+        vertices = vertices.filter((v, i, arr) => 
+          arr.findIndex(u => Math.abs(u.x - v.x) < 1e-6 && Math.abs(u.y - v.y) < 1e-6) === i
+        );
+      }
+    }
+
+    // Find intersection of two lines
+    function findIntersection(line1, line2) {
+      const det = line1.a * line2.b - line2.a * line1.b;
+      if (Math.abs(det) < 1e-10) return null; // Parallel lines
+      
+      const x = (line1.c * line2.b - line2.c * line1.b) / det;
+      const y = (line1.a * line2.c - line2.a * line1.c) / det;
+      
+      return {x, y};
+    }
+
+    // Check if point is feasible
+    function isFeasible(point, constraints) {
+      for (const constraint of constraints) {
+        const value = constraint.a * point.x + constraint.b * point.y;
+        if (constraint.type === '<=' && value > constraint.c + 1e-6) return false;
+        if (constraint.type === '>=' && value < constraint.c - 1e-6) return false;
+      }
+      return true;
+    }
+
+    // Perform one iteration of simplex
+    function simplexIteration() {
+      if (isOptimal || isUnbounded) return false;
+      
+      const enteringVar = findEnteringVariable();
+      
+      if (enteringVar === -1) {
+        isOptimal = true;
+        document.getElementById('status').textContent = 'Optimal';
+        document.getElementById('status').className = 'optimal';
+        return false;
+      }
+      
+      if (isUnboundedProblem(enteringVar)) {
+        isUnbounded = true;
+        document.getElementById('status').textContent = 'Unbounded';
+        document.getElementById('status').className = 'unbounded';
+        return false;
+      }
+      
+      const leavingVar = findLeavingVariable(enteringVar);
+      
+      if (leavingVar === -1) {
+        isUnbounded = true;
+        document.getElementById('status').textContent = 'Unbounded';
+        document.getElementById('status').className = 'unbounded';
+        return false;
+      }
+      
+      document.getElementById('pivotElement').textContent = 
+        `Row ${leavingVar + 1}, Col ${enteringVar + 1} = ${tableau[leavingVar][enteringVar].toFixed(3)}`;
+      
+      pivot(leavingVar, enteringVar);
+      iteration++;
+      
+      // Update current vertex
+      const solution = getCurrentSolution();
+      currentVertex = [solution[0] || 0, solution[1] || 0];
+      simplexPath.push([...currentVertex]);
+      
+      updateDisplay();
+      drawVisualization();
+      
+      return true;
+    }
+
+    // Auto solve
+    async function autoSolve() {
+      isRunning = true;
+      document.getElementById('autoBtn').disabled = true;
+      document.getElementById('stepBtn').disabled = true;
+      
+      while (!isOptimal && !isUnbounded && isRunning) {
+        if (!simplexIteration()) break;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      isRunning = false;
+      document.getElementById('autoBtn').disabled = false;
+      document.getElementById('stepBtn').disabled = isOptimal || isUnbounded;
+    }
+
+    // Update display
+    function updateDisplay() {
+      const problem = problems[currentProblem];
+      
+      // Update problem description
+      document.getElementById('objectiveText').textContent = problem.objective;
+      const constraintsDiv = document.getElementById('constraintsText');
+      constraintsDiv.innerHTML = problem.constraints.map(c => 
+        `<div class="math-notation">${c}</div>`
+      ).join('');
+      
+      // Update algorithm status
+      document.getElementById('iteration').textContent = iteration;
+      
+      if (!isOptimal && !isUnbounded) {
+        document.getElementById('status').textContent = 'In Progress';
+        document.getElementById('status').className = '';
+      }
+      
+      // Update tableau
+      updateTableauDisplay();
+      
+      // Update solution
+      const solution = getCurrentSolution();
+      const basicVarNames = basicVars.map(v => v < c.length ? `x${v+1}` : `s${v-c.length+1}`);
+      const solutionVals = basicVars.map((v, i) => tableau[i][tableau[i].length - 1].toFixed(3));
+      
+      document.getElementById('basicVars').textContent = basicVarNames.join(', ');
+      document.getElementById('solutionValues').textContent = solutionVals.join(', ');
+      document.getElementById('objectiveValue').textContent = 
+        (-tableau[tableau.length - 1][tableau[0].length - 1]).toFixed(3);
+      document.getElementById('currentVertex').textContent = 
+        `(${currentVertex[0].toFixed(2)}, ${currentVertex[1].toFixed(2)})`;
+      
+      // Update step description
+      if (iteration === 0) {
+        document.getElementById('currentStep').textContent = 'Initial Basic Feasible Solution';
+      } else if (isOptimal) {
+        document.getElementById('currentStep').textContent = 'Optimal Solution Found';
+      } else if (isUnbounded) {
+        document.getElementById('currentStep').textContent = 'Problem is Unbounded';
+      } else {
+        document.getElementById('currentStep').textContent = `Iteration ${iteration} - Moving to Adjacent Vertex`;
+      }
+    }
+
+    // Update tableau display
+    function updateTableauDisplay() {
+      const container = document.getElementById('tableauContainer');
+      
+      if (tableau.length === 0) {
+        container.innerHTML = '<div>Click "Initialize Tableau" to start</div>';
+        return;
+      }
+      
+      let html = '<table>';
+      
+      // Header row
+      html += '<tr><th>Basis</th>';
+      for (let j = 0; j < c.length; j++) {
+        html += `<th>x${j+1}</th>`;
+      }
+      for (let j = 0; j < A.length; j++) {
+        html += `<th>s${j+1}</th>`;
+      }
+      html += '<th>RHS</th></tr>';
+      
+      // Constraint rows
+      for (let i = 0; i < tableau.length - 1; i++) {
+        html += '<tr>';
+        const varName = basicVars[i] < c.length ? `x${basicVars[i]+1}` : `s${basicVars[i]-c.length+1}`;
+        html += `<td>${varName}</td>`;
+        
+        for (let j = 0; j < tableau[i].length; j++) {
+          html += `<td>${tableau[i][j].toFixed(3)}</td>`;
+        }
+        html += '</tr>';
+      }
+      
+      // Objective row
+      const objRow = tableau[tableau.length - 1];
+      html += '<tr class="objective-row"><td>z</td>';
+      for (let j = 0; j < objRow.length; j++) {
+        html += `<td>${objRow[j].toFixed(3)}</td>`;
+      }
+      html += '</tr>';
+      
+      html += '</table>';
+      container.innerHTML = html;
+    }
+
+    // Draw visualization
+    function drawVisualization() {
+      svg.innerHTML = '';
+      
+      if (c.length !== 2) return; // Only visualize 2D problems
+      
+      // Draw grid
+      if (document.getElementById('showGrid').checked) {
+        drawGrid();
+      }
+      
+      // Draw axes
+      drawAxes();
+      
+      // Draw constraints
+      if (document.getElementById('showConstraints').checked) {
+        drawConstraints();
+      }
+      
+      // Draw feasible region
+      drawFeasibleRegion();
+      
+      // Draw objective lines
+      if (document.getElementById('showObjective').checked) {
+        drawObjectiveLines();
+      }
+      
+      // Draw vertices
+      if (document.getElementById('showVertices').checked) {
+        drawVertices();
+      }
+      
+      // Draw simplex path
+      if (document.getElementById('showPath').checked) {
+        drawSimplexPath();
+      }
+      
+      // Draw current vertex
+      drawCurrentVertex();
+    }
+
+    // Draw grid
+    function drawGrid() {
+      for (let i = 0; i <= 10; i++) {
+        // Vertical lines
+        const start = toSVG(i, 0);
+        const end = toSVG(i, 10);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', 'grid-line');
+        svg.appendChild(line);
+        
+        // Horizontal lines
+        const start2 = toSVG(0, i);
+        const end2 = toSVG(10, i);
+        const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line2.setAttribute('x1', start2.x);
+        line2.setAttribute('y1', start2.y);
+        line2.setAttribute('x2', end2.x);
+        line2.setAttribute('y2', end2.y);
+        line2.setAttribute('class', 'grid-line');
+        svg.appendChild(line2);
+      }
+    }
+
+    // Draw axes
+    function drawAxes() {
+      // X-axis
+      const xStart = toSVG(0, 0);
+      const xEnd = toSVG(10, 0);
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', xStart.x);
+      xAxis.setAttribute('y1', xStart.y);
+      xAxis.setAttribute('x2', xEnd.x);
+      xAxis.setAttribute('y2', xEnd.y);
+      xAxis.setAttribute('class', 'axis');
+      svg.appendChild(xAxis);
+      
+      // Y-axis
+      const yStart = toSVG(0, 0);
+      const yEnd = toSVG(0, 10);
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', yStart.x);
+      yAxis.setAttribute('y1', yStart.y);
+      yAxis.setAttribute('x2', yEnd.x);
+      yAxis.setAttribute('y2', yEnd.y);
+      yAxis.setAttribute('class', 'axis');
+      svg.appendChild(yAxis);
+      
+      // Labels
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      xLabel.setAttribute('x', toSVG(10, 0).x + 10);
+      xLabel.setAttribute('y', toSVG(10, 0).y + 5);
+      xLabel.setAttribute('class', 'label');
+      xLabel.textContent = 'x₁';
+      svg.appendChild(xLabel);
+      
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.setAttribute('x', toSVG(0, 10).x - 15);
+      yLabel.setAttribute('y', toSVG(0, 10).y);
+      yLabel.setAttribute('class', 'label');
+      yLabel.textContent = 'x₂';
+      svg.appendChild(yLabel);
+    }
+
+    // Draw constraint lines
+    function drawConstraints() {
+      for (let i = 0; i < A.length; i++) {
+        const [a1, a2] = A[i];
+        const b_val = b[i];
+        
+        // Find two points on the line a1*x1 + a2*x2 = b
+        const points = [];
+        
+        // Intersection with x1-axis (x2 = 0)
+        if (Math.abs(a1) > 1e-10) {
+          const x1 = b_val / a1;
+          if (x1 >= 0 && x1 <= 10) {
+            points.push(toSVG(x1, 0));
+          }
+        }
+        
+        // Intersection with x2-axis (x1 = 0)
+        if (Math.abs(a2) > 1e-10) {
+          const x2 = b_val / a2;
+          if (x2 >= 0 && x2 <= 10) {
+            points.push(toSVG(0, x2));
+          }
+        }
+        
+        // Intersection with boundary lines
+        if (points.length < 2) {
+          // Check intersection with x1 = 10
+          if (Math.abs(a2) > 1e-10) {
+            const x2 = (b_val - a1 * 10) / a2;
+            if (x2 >= 0 && x2 <= 10) {
+              points.push(toSVG(10, x2));
+            }
+          }
+          
+          // Check intersection with x2 = 10
+          if (Math.abs(a1) > 1e-10) {
+            const x1 = (b_val - a2 * 10) / a1;
+            if (x1 >= 0 && x1 <= 10) {
+              points.push(toSVG(x1, 10));
+            }
+          }
+        }
+        
+        if (points.length >= 2) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', points[0].x);
+          line.setAttribute('y1', points[0].y);
+          line.setAttribute('x2', points[1].x);
+          line.setAttribute('y2', points[1].y);
+          line.setAttribute('class', 'constraint-line');
+          svg.appendChild(line);
+          
+          // Add constraint label
+          const midX = (points[0].x + points[1].x) / 2;
+          const midY = (points[0].y + points[1].y) / 2;
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', midX);
+          label.setAttribute('y', midY - 5);
+          label.setAttribute('class', 'label');
+          label.textContent = `C${i+1}`;
+          svg.appendChild(label);
+        }
+      }
+    }
+
+    // Draw feasible region
+    function drawFeasibleRegion() {
+      if (vertices.length < 3) return;
+      
+      // Sort vertices to form a polygon
+      const center = vertices.reduce((sum, v) => ({x: sum.x + v.x, y: sum.y + v.y}), {x: 0, y: 0});
+      center.x /= vertices.length;
+      center.y /= vertices.length;
+      
+      const sortedVertices = vertices.sort((a, b) => {
+        const angleA = Math.atan2(a.y - center.y, a.x - center.x);
+        const angleB = Math.atan2(b.y - center.y, b.x - center.x);
+        return angleA - angleB;
+      });
+      
+      const points = sortedVertices.map(v => {
+        const svgPoint = toSVG(v.x, v.y);
+        return `${svgPoint.x},${svgPoint.y}`;
+      }).join(' ');
+      
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', points);
+      polygon.setAttribute('class', 'feasible-region');
+      svg.appendChild(polygon);
+    }
+
+    // Draw objective lines
+    function drawObjectiveLines() {
+      const objValue = -tableau[tableau.length - 1][tableau[0].length - 1];
+      
+      // Draw current objective line
+      if (objValue > 0) {
+        drawObjectiveLine(objValue, '#FF9800');
+      }
+      
+      // Draw optimal objective line if optimal
+      if (isOptimal) {
+        drawObjectiveLine(objValue, '#4CAF50');
+      }
+    }
+
+    // Draw single objective line
+    function drawObjectiveLine(value, color) {
+      const [c1, c2] = c;
+      
+      // Line equation: c1*x1 + c2*x2 = value
+      const points = [];
+      
+      // Intersection with x1-axis
+      if (Math.abs(c1) > 1e-10) {
+        const x1 = value / c1;
+        if (x1 >= 0 && x1 <= 10) {
+          points.push(toSVG(x1, 0));
+        }
+      }
+      
+      // Intersection with x2-axis
+      if (Math.abs(c2) > 1e-10) {
+        const x2 = value / c2;
+        if (x2 >= 0 && x2 <= 10) {
+          points.push(toSVG(0, x2));
+        }
+      }
+      
+      if (points.length >= 2) {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', points[0].x);
+        line.setAttribute('y1', points[0].y);
+        line.setAttribute('x2', points[1].x);
+        line.setAttribute('y2', points[1].y);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke-dasharray', '5,5');
+        line.setAttribute('fill', 'none');
+        svg.appendChild(line);
+      }
+    }
+
+    // Draw vertices
+    function drawVertices() {
+      vertices.forEach(vertex => {
+        const point = toSVG(vertex.x, vertex.y);
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', point.x);
+        circle.setAttribute('cy', point.y);
+        circle.setAttribute('r', 4);
+        circle.setAttribute('class', 'vertex');
+        svg.appendChild(circle);
+      });
+    }
+
+    // Draw simplex path
+    function drawSimplexPath() {
+      if (simplexPath.length < 2) return;
+      
+      for (let i = 0; i < simplexPath.length - 1; i++) {
+        const start = toSVG(simplexPath[i][0], simplexPath[i][1]);
+        const end = toSVG(simplexPath[i + 1][0], simplexPath[i + 1][1]);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', start.x);
+        line.setAttribute('y1', start.y);
+        line.setAttribute('x2', end.x);
+        line.setAttribute('y2', end.y);
+        line.setAttribute('class', 'path-line');
+        svg.appendChild(line);
+        
+        // Add arrow
+        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+        const arrowLength = 10;
+        const arrowAngle = Math.PI / 6;
+        
+        const arrowX1 = end.x - arrowLength * Math.cos(angle - arrowAngle);
+        const arrowY1 = end.y - arrowLength * Math.sin(angle - arrowAngle);
+        const arrowX2 = end.x - arrowLength * Math.cos(angle + arrowAngle);
+        const arrowY2 = end.y - arrowLength * Math.sin(angle + arrowAngle);
+        
+        const arrow1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        arrow1.setAttribute('x1', end.x);
+        arrow1.setAttribute('y1', end.y);
+        arrow1.setAttribute('x2', arrowX1);
+        arrow1.setAttribute('y2', arrowY1);
+        arrow1.setAttribute('class', 'path-line');
+        svg.appendChild(arrow1);
+        
+        const arrow2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        arrow2.setAttribute('x1', end.x);
+        arrow2.setAttribute('y1', end.y);
+        arrow2.setAttribute('x2', arrowX2);
+        arrow2.setAttribute('y2', arrowY2);
+        arrow2.setAttribute('class', 'path-line');
+        svg.appendChild(arrow2);
+      }
+    }
+
+    // Draw current vertex
+    function drawCurrentVertex() {
+      const point = toSVG(currentVertex[0], currentVertex[1]);
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', isOptimal ? 10 : 8);
+      circle.setAttribute('class', isOptimal ? 'optimal-vertex' : 'current-vertex');
+      svg.appendChild(circle);
+    }
+
+    // Event listeners
+    document.getElementById('problemSelect').addEventListener('change', (e) => {
+      currentProblem = e.target.value;
+      reset();
+    });
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      initializeTableau();
+      document.getElementById('stepBtn').disabled = false;
+      document.getElementById('autoBtn').disabled = false;
+    });
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      simplexIteration();
+      if (isOptimal || isUnbounded) {
+        document.getElementById('stepBtn').disabled = true;
+      }
+    });
+
+    document.getElementById('autoBtn').addEventListener('click', autoSolve);
+
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    // Checkbox event listeners
+    ['showConstraints', 'showObjective', 'showVertices', 'showPath', 'showGrid'].forEach(id => {
+      document.getElementById(id).addEventListener('change', drawVisualization);
+    });
+
+    // Reset function
+    function reset() {
+      tableau = [];
+      basicVars = [];
+      iteration = 0;
+      isOptimal = false;
+      isUnbounded = false;
+      isRunning = false;
+      simplexPath = [];
+      currentVertex = [0, 0];
+      vertices = [];
+      
+      document.getElementById('stepBtn').disabled = true;
+      document.getElementById('autoBtn').disabled = true;
+      document.getElementById('status').textContent = 'Ready';
+      document.getElementById('status').className = '';
+      document.getElementById('pivotElement').textContent = 'None';
+      
+      updateDisplay();
+      drawVisualization();
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      setupSVG();
+      drawVisualization();
+    });
+
+    // Initialize
+    setupSVG();
+    updateDisplay();
+    drawVisualization();
+  </script>
+</body>
+</html>

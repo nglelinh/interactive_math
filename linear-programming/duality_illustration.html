@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minh họa Duality trong Linear Programming</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 2.5em;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        
+        label {
+            min-width: 120px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .canvas-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .info-panel {
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .info-panel h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .formula {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .duality-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .optimization-info {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .problem-selector {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .problem-selector button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .problem-selector button.active {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-card h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Minh họa Duality trong Linear Programming</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>📊 Primal Problem</h3>
+                <div class="problem-selector">
+                    <button onclick="setProblem('simple')" class="active">Simple LP</button>
+                    <button onclick="setProblem('svm')">SVM</button>
+                </div>
+                <div class="control-row">
+                    <label>c₁:</label>
+                    <input type="range" id="c1" min="1" max="5" value="3" step="0.5">
+                    <input type="number" id="c1Value" value="3" min="1" max="5" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>c₂:</label>
+                    <input type="range" id="c2" min="1" max="5" value="4" step="0.5">
+                    <input type="number" id="c2Value" value="4" min="1" max="5" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>b₁:</label>
+                    <input type="range" id="b1" min="5" max="10" value="7" step="0.5">
+                    <input type="number" id="b1Value" value="7" min="5" max="10" step="0.5">
+                </div>
+                <div class="control-row">
+                    <label>b₂:</label>
+                    <input type="range" id="b2" min="5" max="15" value="9" step="0.5">
+                    <input type="number" id="b2Value" value="9" min="5" max="15" step="0.5">
+                </div>
+                <div class="duality-info">
+                    <strong>Primal Problem:</strong><br>
+                    <span id="primalProblem">Đang tính...</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>🎯 Dual Problem</h3>
+                <div class="control-row">
+                    <label>y₁:</label>
+                    <input type="range" id="y1" min="0" max="3" value="1" step="0.1">
+                    <input type="number" id="y1Value" value="1" min="0" max="3" step="0.1">
+                </div>
+                <div class="control-row">
+                    <label>y₂:</label>
+                    <input type="range" id="y2" min="0" max="3" value="0.5" step="0.1">
+                    <input type="number" id="y2Value" value="0.5" min="0" max="3" step="0.1">
+                </div>
+                <div class="control-row">
+                    <button onclick="solveDual()">🔍 Giải Dual</button>
+                    <button onclick="checkDuality()">✅ Kiểm tra Duality</button>
+                </div>
+                <div class="optimization-info">
+                    <strong>Dual Problem:</strong><br>
+                    <span id="dualProblem">Đang tính...</span>
+                </div>
+                <div class="duality-info">
+                    <strong>Duality Results:</strong><br>
+                    <span id="dualityResult">Chưa tính</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="dualityCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <h3>📚 Thông tin Chi tiết</h3>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>📊 Primal Problem</h4>
+                    <div class="formula">
+                        <strong>Minimize:</strong> c₁x₁ + c₂x₂<br>
+                        <strong>Subject to:</strong><br>
+                        • x₁ + 2x₂ ≥ b₁<br>
+                        • 3x₁ + x₂ ≥ b₂<br>
+                        • x₁, x₂ ≥ 0
+                    </div>
+                    <ul>
+                        <li>Decision variables: x₁, x₂</li>
+                        <li>Objective: minimize cost</li>
+                        <li>Constraints: resource requirements</li>
+                        <li>Feasible region: convex polyhedron</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-card">
+                    <h4>🎯 Dual Problem</h4>
+                    <div class="formula">
+                        <strong>Maximize:</strong> b₁y₁ + b₂y₂<br>
+                        <strong>Subject to:</strong><br>
+                        • y₁ + 3y₂ ≤ c₁<br>
+                        • 2y₁ + y₂ ≤ c₂<br>
+                        • y₁, y₂ ≥ 0
+                    </div>
+                    <ul>
+                        <li>Dual variables: y₁, y₂</li>
+                        <li>Objective: maximize value</li>
+                        <li>Constraints: price constraints</li>
+                        <li>Shadow prices interpretation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="formula">
+                <strong>Weak Duality:</strong> bᵀy ≤ cᵀx (for any feasible x, y)<br>
+                <strong>Strong Duality:</strong> bᵀy* = cᵀx* (at optimal solutions)<br>
+                <strong>Complementary Slackness:</strong> yᵢ(Ax - b)ᵢ = 0, xⱼ(c - Aᵀy)ⱼ = 0
+            </div>
+            
+            <div class="formula">
+                <strong>SVM Duality:</strong><br>
+                <strong>Primal:</strong> min ½||w||² + CΣξᵢ s.t. yᵢ(w·xᵢ + b) ≥ 1 - ξᵢ<br>
+                <strong>Dual:</strong> max Σαᵢ - ½Σαᵢαⱼyᵢyⱼ(xᵢ·xⱼ) s.t. 0 ≤ αᵢ ≤ C
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('dualityCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // State
+        let currentProblem = 'simple';
+        let c1 = 3, c2 = 4, b1 = 7, b2 = 9;
+        let y1 = 1, y2 = 0.5;
+        let primalSolution = { x1: 0, x2: 0 };
+        let dualSolution = { y1: 0, y2: 0 };
+        
+        // Update parameters
+        function updateParameters() {
+            c1 = parseFloat(document.getElementById('c1Value').value);
+            c2 = parseFloat(document.getElementById('c2Value').value);
+            b1 = parseFloat(document.getElementById('b1Value').value);
+            b2 = parseFloat(document.getElementById('b2Value').value);
+            y1 = parseFloat(document.getElementById('y1Value').value);
+            y2 = parseFloat(document.getElementById('y2Value').value);
+        }
+        
+        // Set problem
+        function setProblem(problemName) {
+            currentProblem = problemName;
+            document.querySelectorAll('.problem-selector button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            updateProblemInfo();
+            drawVisualization();
+        }
+        
+        // Update problem info
+        function updateProblemInfo() {
+            if (currentProblem === 'simple') {
+                document.getElementById('primalProblem').innerHTML = `
+                    <strong>Minimize:</strong> ${c1}x₁ + ${c2}x₂<br>
+                    <strong>Subject to:</strong><br>
+                    • x₁ + 2x₂ ≥ ${b1}<br>
+                    • 3x₁ + x₂ ≥ ${b2}<br>
+                    • x₁, x₂ ≥ 0
+                `;
+                
+                document.getElementById('dualProblem').innerHTML = `
+                    <strong>Maximize:</strong> ${b1}y₁ + ${b2}y₂<br>
+                    <strong>Subject to:</strong><br>
+                    • y₁ + 3y₂ ≤ ${c1}<br>
+                    • 2y₁ + y₂ ≤ ${c2}<br>
+                    • y₁, y₂ ≥ 0
+                `;
+            } else {
+                document.getElementById('primalProblem').innerHTML = `
+                    <strong>SVM Primal:</strong><br>
+                    <strong>Minimize:</strong> ½||w||² + CΣξᵢ<br>
+                    <strong>Subject to:</strong><br>
+                    • yᵢ(w·xᵢ + b) ≥ 1 - ξᵢ<br>
+                    • ξᵢ ≥ 0
+                `;
+                
+                document.getElementById('dualProblem').innerHTML = `
+                    <strong>SVM Dual:</strong><br>
+                    <strong>Maximize:</strong> Σαᵢ - ½Σαᵢαⱼyᵢyⱼ(xᵢ·xⱼ)<br>
+                    <strong>Subject to:</strong><br>
+                    • 0 ≤ αᵢ ≤ C<br>
+                    • Σαᵢyᵢ = 0
+                `;
+            }
+        }
+        
+        // Solve dual problem
+        function solveDual() {
+            updateParameters();
+            
+            // Simple analytical solution for the dual
+            // y₁ + 3y₂ ≤ c₁ and 2y₁ + y₂ ≤ c₂
+            // We'll find the intersection of these constraints
+            
+            const det = 1 * 1 - 2 * 3; // determinant of coefficient matrix
+            if (Math.abs(det) > 1e-6) {
+                dualSolution.y1 = (c1 * 1 - c2 * 3) / det;
+                dualSolution.y2 = (c2 * 1 - c1 * 2) / det;
+                
+                // Ensure non-negativity
+                dualSolution.y1 = Math.max(0, dualSolution.y1);
+                dualSolution.y2 = Math.max(0, dualSolution.y2);
+            }
+            
+            updateDualityResult();
+            drawVisualization();
+        }
+        
+        // Check duality conditions
+        function checkDuality() {
+            updateParameters();
+            
+            // Calculate primal objective
+            const primalObj = c1 * primalSolution.x1 + c2 * primalSolution.x2;
+            
+            // Calculate dual objective
+            const dualObj = b1 * y1 + b2 * y2;
+            
+            // Check weak duality
+            const weakDuality = dualObj <= primalObj;
+            
+            // Check complementary slackness
+            const constraint1 = primalSolution.x1 + 2 * primalSolution.x2 - b1;
+            const constraint2 = 3 * primalSolution.x1 + primalSolution.x2 - b2;
+            const dualConstraint1 = c1 - (y1 + 3 * y2);
+            const dualConstraint2 = c2 - (2 * y1 + y2);
+            
+            const compSlack1 = y1 * constraint1;
+            const compSlack2 = y2 * constraint2;
+            const compSlack3 = primalSolution.x1 * dualConstraint1;
+            const compSlack4 = primalSolution.x2 * dualConstraint2;
+            
+            const complementarySlackness = Math.abs(compSlack1) < 1e-6 && 
+                                        Math.abs(compSlack2) < 1e-6 &&
+                                        Math.abs(compSlack3) < 1e-6 && 
+                                        Math.abs(compSlack4) < 1e-6;
+            
+            document.getElementById('dualityResult').innerHTML = `
+                <strong>Weak Duality:</strong> ${weakDuality ? '✅' : '❌'} (${dualObj.toFixed(3)} ≤ ${primalObj.toFixed(3)})<br>
+                <strong>Complementary Slackness:</strong> ${complementarySlackness ? '✅' : '❌'}<br>
+                <strong>Primal Objective:</strong> ${primalObj.toFixed(3)}<br>
+                <strong>Dual Objective:</strong> ${dualObj.toFixed(3)}
+            `;
+        }
+        
+        // Update duality result
+        function updateDualityResult() {
+            const primalObj = c1 * primalSolution.x1 + c2 * primalSolution.x2;
+            const dualObj = b1 * dualSolution.y1 + b2 * dualSolution.y2;
+            
+            document.getElementById('dualityResult').innerHTML = `
+                <strong>Primal Solution:</strong> x₁=${primalSolution.x1.toFixed(2)}, x₂=${primalSolution.x2.toFixed(2)}<br>
+                <strong>Dual Solution:</strong> y₁=${dualSolution.y1.toFixed(2)}, y₂=${dualSolution.y2.toFixed(2)}<br>
+                <strong>Primal Objective:</strong> ${primalObj.toFixed(3)}<br>
+                <strong>Dual Objective:</strong> ${dualObj.toFixed(3)}
+            `;
+        }
+        
+        // Draw visualization
+        function drawVisualization() {
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const margin = 50;
+            const width = canvas.width - 2 * margin;
+            const height = canvas.height - 2 * margin;
+            const xMin = 0;
+            const xMax = 10;
+            const yMin = 0;
+            const yMax = 10;
+            const scaleX = width / (xMax - xMin);
+            const scaleY = height / (yMax - yMin);
+            
+            // Transform function
+            function transform(x, y) {
+                return {
+                    x: margin + (x - xMin) * scaleX,
+                    y: canvas.height - margin - (y - yMin) * scaleY
+                };
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = xMin; i <= xMax; i++) {
+                const pos = transform(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, margin);
+                ctx.lineTo(pos.x, canvas.height - margin);
+                ctx.stroke();
+            }
+            for (let i = yMin; i <= yMax; i++) {
+                const pos = transform(0, i);
+                ctx.beginPath();
+                ctx.moveTo(margin, pos.y);
+                ctx.lineTo(canvas.width - margin, pos.y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            const origin = transform(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(origin.x, margin);
+            ctx.lineTo(origin.x, canvas.height - margin);
+            ctx.moveTo(margin, origin.y);
+            ctx.lineTo(canvas.width - margin, origin.y);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('x₁', canvas.width / 2, canvas.height - 10);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('x₂', 0, 0);
+            ctx.restore();
+            
+            // Draw constraint lines
+            // Constraint 1: x₁ + 2x₂ ≥ b₁
+            const constraint1_x1 = 0;
+            const constraint1_x2 = b1 / 2;
+            const constraint1_y1 = b1;
+            const constraint1_y2 = 0;
+            
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(transform(constraint1_x1, constraint1_x2).x, transform(constraint1_x1, constraint1_x2).y);
+            ctx.lineTo(transform(constraint1_y1, constraint1_y2).x, transform(constraint1_y1, constraint1_y2).y);
+            ctx.stroke();
+            
+            // Constraint 2: 3x₁ + x₂ ≥ b₂
+            const constraint2_x1 = 0;
+            const constraint2_x2 = b2;
+            const constraint2_y1 = b2 / 3;
+            const constraint2_y2 = 0;
+            
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(transform(constraint2_x1, constraint2_x2).x, transform(constraint2_x1, constraint2_x2).y);
+            ctx.lineTo(transform(constraint2_y1, constraint2_y2).x, transform(constraint2_y1, constraint2_y2).y);
+            ctx.stroke();
+            
+            // Find feasible region vertices
+            const vertices = [];
+            
+            // Intersection of constraints
+            const det = 1 * 1 - 2 * 3;
+            if (Math.abs(det) > 1e-6) {
+                const x1 = (b1 * 1 - b2 * 2) / det;
+                const x2 = (b2 * 1 - b1 * 3) / det;
+                if (x1 >= 0 && x2 >= 0) {
+                    vertices.push({ x: x1, y: x2 });
+                }
+            }
+            
+            // Intersection with axes
+            if (b1 >= 0) vertices.push({ x: b1, y: 0 });
+            if (b2 / 3 >= 0) vertices.push({ x: b2 / 3, y: 0 });
+            if (b1 / 2 >= 0) vertices.push({ x: 0, y: b1 / 2 });
+            if (b2 >= 0) vertices.push({ x: 0, y: b2 });
+            
+            // Draw feasible region
+            if (vertices.length > 2) {
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+                ctx.beginPath();
+                vertices.forEach((vertex, index) => {
+                    const pos = transform(vertex.x, vertex.y);
+                    if (index === 0) {
+                        ctx.moveTo(pos.x, pos.y);
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                });
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw objective function contours
+            const contourLevels = [10, 20, 30, 40, 50];
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            contourLevels.forEach(level => {
+                const x1 = 0;
+                const y1 = level / c2;
+                const x2 = level / c1;
+                const y2 = 0;
+                
+                if (y1 <= yMax && x2 <= xMax) {
+                    ctx.beginPath();
+                    ctx.moveTo(transform(x1, y1).x, transform(x1, y1).y);
+                    ctx.lineTo(transform(x2, y2).x, transform(x2, y2).y);
+                    ctx.stroke();
+                    
+                    // Add contour label
+                    const midX = (transform(x1, y1).x + transform(x2, y2).x) / 2;
+                    const midY = (transform(x1, y1).y + transform(x2, y2).y) / 2;
+                    ctx.fillStyle = '#667eea';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(level.toString(), midX, midY - 5);
+                }
+            });
+            ctx.setLineDash([]);
+            
+            // Draw optimal solution
+            if (vertices.length > 0) {
+                // Find minimum objective value
+                let minObj = Infinity;
+                let optimalVertex = vertices[0];
+                
+                vertices.forEach(vertex => {
+                    const obj = c1 * vertex.x + c2 * vertex.y;
+                    if (obj < minObj) {
+                        minObj = obj;
+                        optimalVertex = vertex;
+                    }
+                });
+                
+                primalSolution = optimalVertex;
+                
+                // Draw optimal point
+                const optimalPos = transform(optimalVertex.x, optimalVertex.y);
+                ctx.fillStyle = '#28a745';
+                ctx.beginPath();
+                ctx.arc(optimalPos.x, optimalPos.y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Optimal: (${optimalVertex.x.toFixed(2)}, ${optimalVertex.y.toFixed(2)})`, optimalPos.x + 10, optimalPos.y - 10);
+                ctx.fillText(`Obj: ${minObj.toFixed(2)}`, optimalPos.x + 10, optimalPos.y + 5);
+            }
+            
+            // Draw dual space (if selected)
+            if (currentProblem === 'simple') {
+                // Draw dual constraints
+                const dualMargin = 50;
+                const dualWidth = 200;
+                const dualHeight = 200;
+                const dualX = canvas.width - dualWidth - dualMargin;
+                const dualY = dualMargin;
+                
+                // Dual constraint 1: y₁ + 3y₂ ≤ c₁
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(dualX, dualY + dualHeight - (c1 / 3) * (dualHeight / 3));
+                ctx.lineTo(dualX + dualWidth - (c1) * (dualWidth / 3), dualY + dualHeight);
+                ctx.stroke();
+                
+                // Dual constraint 2: 2y₁ + y₂ ≤ c₂
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(dualX, dualY + dualHeight - (c2) * (dualHeight / 2));
+                ctx.lineTo(dualX + dualWidth - (c2 / 2) * (dualWidth / 2), dualY + dualHeight);
+                ctx.stroke();
+                
+                // Draw dual solution
+                const dualPos = {
+                    x: dualX + y1 * (dualWidth / 3),
+                    y: dualY + dualHeight - y2 * (dualHeight / 3)
+                };
+                
+                ctx.fillStyle = '#ffc107';
+                ctx.beginPath();
+                ctx.arc(dualPos.x, dualPos.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Dual space labels
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Dual Space', dualX + dualWidth / 2, dualY - 10);
+                ctx.fillText('y₁', dualX + dualWidth / 2, dualY + dualHeight + 15);
+                ctx.save();
+                ctx.translate(dualX - 10, dualY + dualHeight / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('y₂', 0, 0);
+                ctx.restore();
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Constraint 1: x₁ + 2x₂ ≥ ${b1}`, margin + 10, margin + 20);
+            ctx.fillText(`Constraint 2: 3x₁ + x₂ ≥ ${b2}`, margin + 10, margin + 40);
+            ctx.fillText(`Objective: ${c1}x₁ + ${c2}x₂`, margin + 10, margin + 60);
+        }
+        
+        // Event listeners
+        document.getElementById('c1').addEventListener('input', function() {
+            document.getElementById('c1Value').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('c1Value').addEventListener('input', function() {
+            document.getElementById('c1').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('c2').addEventListener('input', function() {
+            document.getElementById('c2Value').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('c2Value').addEventListener('input', function() {
+            document.getElementById('c2').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('b1').addEventListener('input', function() {
+            document.getElementById('b1Value').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('b1Value').addEventListener('input', function() {
+            document.getElementById('b1').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('b2').addEventListener('input', function() {
+            document.getElementById('b2Value').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('b2Value').addEventListener('input', function() {
+            document.getElementById('b2').value = this.value;
+            updateParameters();
+            updateProblemInfo();
+            drawVisualization();
+        });
+        
+        document.getElementById('y1').addEventListener('input', function() {
+            document.getElementById('y1Value').value = this.value;
+            updateParameters();
+            checkDuality();
+            drawVisualization();
+        });
+        
+        document.getElementById('y1Value').addEventListener('input', function() {
+            document.getElementById('y1').value = this.value;
+            updateParameters();
+            checkDuality();
+            drawVisualization();
+        });
+        
+        document.getElementById('y2').addEventListener('input', function() {
+            document.getElementById('y2Value').value = this.value;
+            updateParameters();
+            checkDuality();
+            drawVisualization();
+        });
+        
+        document.getElementById('y2Value').addEventListener('input', function() {
+            document.getElementById('y2').value = this.value;
+            updateParameters();
+            checkDuality();
+            drawVisualization();
+        });
+        
+        // Initialize
+        updateParameters();
+        updateProblemInfo();
+        drawVisualization();
+    </script>
+</body>
+</html> 

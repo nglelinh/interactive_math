@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallel Computing in Machine Learning</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .control-group input, .control-group select {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .control-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .visualization-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .visualization {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            height: 400px;
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .parallelism-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .parallelism-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .parallelism-card h4 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+        .performance-metrics {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .performance-metrics h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .metric-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .metric-item strong {
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .worker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .worker {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .worker.active {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.3);
+        }
+        .worker.busy {
+            border-color: #FF9800;
+            background: rgba(255, 152, 0, 0.3);
+        }
+        .communication-line {
+            height: 2px;
+            background: linear-gradient(90deg, #4CAF50, #2196F3);
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .communication-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            animation: flow 2s infinite;
+        }
+        @keyframes flow {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Parallel Computing in Machine Learning</h1>
+        
+        <div class="info-panel">
+            <h3>📚 Giới thiệu về Parallel Computing</h3>
+            <p>
+                <strong>Parallel computing</strong> trong machine learning sử dụng nhiều đơn vị xử lý (CPUs, GPUs, TPUs) 
+                hoặc nhiều máy để tăng tốc độ training và inference. Điều này trở nên quan trọng khi datasets 
+                và models ngày càng lớn.
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="parallelism-type">Loại Parallelism:</label>
+                <select id="parallelism-type">
+                    <option value="data">Data Parallelism</option>
+                    <option value="model">Model Parallelism</option>
+                    <option value="hybrid">Hybrid Parallelism</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="num-workers">Số Workers:</label>
+                <input type="range" id="num-workers" min="2" max="16" step="1" value="4">
+                <span id="workers-value">4</span>
+            </div>
+            <div class="control-group">
+                <label for="dataset-size">Dataset Size (MB):</label>
+                <input type="range" id="dataset-size" min="100" max="10000" step="100" value="1000">
+                <span id="dataset-value">1000</span>
+            </div>
+            <div class="control-group">
+                <label for="model-complexity">Model Complexity:</label>
+                <input type="range" id="model-complexity" min="1" max="10" step="1" value="5">
+                <span id="complexity-value">5</span>
+            </div>
+            <div class="control-group">
+                <button onclick="startSimulation()">🚀 Bắt đầu mô phỏng</button>
+                <button onclick="resetSimulation()">🔄 Reset</button>
+            </div>
+        </div>
+
+        <div class="visualization-container">
+            <div class="visualization" id="architecture-plot"></div>
+            <div class="visualization" id="performance-plot"></div>
+        </div>
+
+        <div class="parallelism-comparison">
+            <div class="parallelism-card">
+                <h4>🔄 Data Parallelism</h4>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Dễ implement</li>
+                    <li>Hiệu quả cho deep learning</li>
+                    <li>Scales tốt với data</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Memory overhead</li>
+                    <li>Communication cost</li>
+                </ul>
+                <div class="worker-grid" id="data-workers">
+                    <!-- Workers will be added here -->
+                </div>
+            </div>
+            
+            <div class="parallelism-card">
+                <h4>🏗️ Model Parallelism</h4>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Xử lý models lớn</li>
+                    <li>Memory efficient</li>
+                    <li>Phù hợp cho LLMs</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Communication overhead cao</li>
+                    <li>Load balancing khó</li>
+                </ul>
+                <div class="worker-grid" id="model-workers">
+                    <!-- Workers will be added here -->
+                </div>
+            </div>
+            
+            <div class="parallelism-card">
+                <h4>🔀 Hybrid Parallelism</h4>
+                <p><strong>Ưu điểm:</strong></p>
+                <ul>
+                    <li>Kết hợp ưu điểm cả hai</li>
+                    <li>Scales cực lớn</li>
+                    <li>Phù hợp cho GPT-3</li>
+                </ul>
+                <p><strong>Nhược điểm:</strong></p>
+                <ul>
+                    <li>Phức tạp implement</li>
+                    <li>Debugging khó</li>
+                </ul>
+                <div class="worker-grid" id="hybrid-workers">
+                    <!-- Workers will be added here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="performance-metrics">
+            <h3>📊 Performance Metrics</h3>
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <strong>Speedup:</strong><br>
+                    <span id="speedup-value">1.0</span>
+                </div>
+                <div class="metric-item">
+                    <strong>Efficiency:</strong><br>
+                    <span id="efficiency-value">100%</span>
+                </div>
+                <div class="metric-item">
+                    <strong>Communication Overhead:</strong><br>
+                    <span id="comm-overhead">0%</span>
+                </div>
+                <div class="metric-item">
+                    <strong>Memory Usage:</strong><br>
+                    <span id="memory-usage">0 MB</span>
+                </div>
+                <div class="metric-item">
+                    <strong>Training Time:</strong><br>
+                    <span id="training-time">0s</span>
+                </div>
+                <div class="metric-item">
+                    <strong>Throughput:</strong><br>
+                    <span id="throughput">0 samples/s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>🔧 Mathematical Framework</h3>
+            <div style="font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <strong>Data Parallelism:</strong><br>
+                ∇L_global(θ) = (1/K) Σᵏ₌₁ ∇L_Dₖ(θ)<br><br>
+                <strong>Speedup:</strong><br>
+                S_p = T₁ / T_p<br><br>
+                <strong>Efficiency:</strong><br>
+                E_p = S_p / p = T₁ / (p × T_p)<br><br>
+                <strong>Amdahl's Law:</strong><br>
+                S_p = 1 / ((1-P) + P/p)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentParallelism = 'data';
+        let numWorkers = 4;
+        let datasetSize = 1000;
+        let modelComplexity = 5;
+        let isSimulating = false;
+        let simulationData = {
+            speedup: [],
+            efficiency: [],
+            communication: [],
+            memory: [],
+            time: [],
+            throughput: []
+        };
+
+        // Initialize visualizations
+        function initializePlots() {
+            // Architecture plot
+            const architectureData = [{
+                x: [0, 1, 2, 3],
+                y: [0, 0, 0, 0],
+                type: 'scatter',
+                mode: 'markers+text',
+                text: ['Worker 1', 'Worker 2', 'Worker 3', 'Worker 4'],
+                textposition: 'top',
+                marker: { size: 20, color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'] },
+                name: 'Workers'
+            }];
+
+            const architectureLayout = {
+                title: 'Parallel Architecture',
+                xaxis: { title: 'Worker ID', range: [-0.5, 3.5] },
+                yaxis: { title: '', range: [-0.5, 0.5] },
+                width: 600,
+                height: 400,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            };
+
+            Plotly.newPlot('architecture-plot', architectureData, architectureLayout);
+
+            // Performance plot
+            const performanceData = [{
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Speedup',
+                line: { color: '#ff6b6b' }
+            }, {
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Efficiency',
+                line: { color: '#4ecdc4' }
+            }];
+
+            const performanceLayout = {
+                title: 'Performance Metrics',
+                xaxis: { title: 'Number of Workers' },
+                yaxis: { title: 'Value' },
+                width: 600,
+                height: 400,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            };
+
+            Plotly.newPlot('performance-plot', performanceData, performanceLayout);
+        }
+
+        // Create worker elements
+        function createWorkers() {
+            const containers = ['data-workers', 'model-workers', 'hybrid-workers'];
+            
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                
+                for (let i = 0; i < numWorkers; i++) {
+                    const worker = document.createElement('div');
+                    worker.className = 'worker';
+                    worker.innerHTML = `Worker ${i + 1}`;
+                    worker.id = `${containerId}-worker-${i}`;
+                    container.appendChild(worker);
+                }
+            });
+        }
+
+        // Calculate performance metrics
+        function calculateMetrics() {
+            const baseTime = datasetSize * modelComplexity / 100; // Base time for single worker
+            const parallelTime = baseTime / numWorkers + (currentParallelism === 'data' ? 0.1 : 0.3) * numWorkers;
+            
+            const speedup = baseTime / parallelTime;
+            const efficiency = speedup / numWorkers;
+            const communicationOverhead = (currentParallelism === 'data' ? 0.1 : 0.3) * numWorkers / parallelTime;
+            const memoryUsage = currentParallelism === 'data' ? numWorkers * modelComplexity * 100 : modelComplexity * 100;
+            const throughput = datasetSize / parallelTime;
+            
+            return {
+                speedup: speedup,
+                efficiency: efficiency,
+                communication: communicationOverhead,
+                memory: memoryUsage,
+                time: parallelTime,
+                throughput: throughput
+            };
+        }
+
+        // Update displays
+        function updateDisplays(metrics) {
+            document.getElementById('speedup-value').textContent = metrics.speedup.toFixed(2);
+            document.getElementById('efficiency-value').textContent = (metrics.efficiency * 100).toFixed(1) + '%';
+            document.getElementById('comm-overhead').textContent = (metrics.communication * 100).toFixed(1) + '%';
+            document.getElementById('memory-usage').textContent = Math.round(metrics.memory) + ' MB';
+            document.getElementById('training-time').textContent = metrics.time.toFixed(1) + 's';
+            document.getElementById('throughput').textContent = Math.round(metrics.throughput) + ' samples/s';
+        }
+
+        // Simulate parallel processing
+        async function startSimulation() {
+            if (isSimulating) return;
+            isSimulating = true;
+            
+            const metrics = calculateMetrics();
+            updateDisplays(metrics);
+            
+            // Animate workers
+            const workerIds = ['data-workers', 'model-workers', 'hybrid-workers'];
+            
+            for (let iteration = 0; iteration < 5; iteration++) {
+                // Activate workers in sequence
+                for (let i = 0; i < numWorkers; i++) {
+                    workerIds.forEach(containerId => {
+                        const worker = document.getElementById(`${containerId}-worker-${i}`);
+                        if (worker) {
+                            worker.classList.add('active');
+                            setTimeout(() => {
+                                worker.classList.remove('active');
+                                worker.classList.add('busy');
+                            }, 200);
+                        }
+                    });
+                    
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                
+                // Show communication
+                const commLines = document.querySelectorAll('.communication-line');
+                commLines.forEach(line => {
+                    line.style.display = 'block';
+                    setTimeout(() => {
+                        line.style.display = 'none';
+                    }, 2000);
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Reset workers
+                workerIds.forEach(containerId => {
+                    for (let i = 0; i < numWorkers; i++) {
+                        const worker = document.getElementById(`${containerId}-worker-${i}`);
+                        if (worker) {
+                            worker.classList.remove('active', 'busy');
+                        }
+                    }
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            isSimulating = false;
+        }
+
+        function resetSimulation() {
+            isSimulating = false;
+            
+            // Reset all workers
+            const workerIds = ['data-workers', 'model-workers', 'hybrid-workers'];
+            workerIds.forEach(containerId => {
+                for (let i = 0; i < numWorkers; i++) {
+                    const worker = document.getElementById(`${containerId}-worker-${i}`);
+                    if (worker) {
+                        worker.classList.remove('active', 'busy');
+                    }
+                }
+            });
+            
+            // Reset metrics
+            updateDisplays({
+                speedup: 1.0,
+                efficiency: 1.0,
+                communication: 0.0,
+                memory: 0,
+                time: 0,
+                throughput: 0
+            });
+        }
+
+        // Update performance plot
+        function updatePerformancePlot() {
+            const workers = Array.from({length: 16}, (_, i) => i + 1);
+            const speedupData = workers.map(w => {
+                const baseTime = datasetSize * modelComplexity / 100;
+                const parallelTime = baseTime / w + (currentParallelism === 'data' ? 0.1 : 0.3) * w;
+                return baseTime / parallelTime;
+            });
+            
+            const efficiencyData = speedupData.map(s => s / workers[speedupData.indexOf(s)]);
+            
+            const performanceData = [{
+                x: workers,
+                y: speedupData,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Speedup',
+                line: { color: '#ff6b6b' }
+            }, {
+                x: workers,
+                y: efficiencyData,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Efficiency',
+                line: { color: '#4ecdc4' }
+            }];
+
+            Plotly.react('performance-plot', performanceData, {
+                title: 'Performance vs Number of Workers',
+                xaxis: { title: 'Number of Workers' },
+                yaxis: { title: 'Value' },
+                width: 600,
+                height: 400,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            });
+        }
+
+        // Event listeners
+        document.getElementById('parallelism-type').addEventListener('change', function() {
+            currentParallelism = this.value;
+            updatePerformancePlot();
+        });
+
+        document.getElementById('num-workers').addEventListener('input', function() {
+            numWorkers = parseInt(this.value);
+            document.getElementById('workers-value').textContent = this.value;
+            createWorkers();
+            updatePerformancePlot();
+        });
+
+        document.getElementById('dataset-size').addEventListener('input', function() {
+            datasetSize = parseInt(this.value);
+            document.getElementById('dataset-value').textContent = this.value;
+            updatePerformancePlot();
+        });
+
+        document.getElementById('model-complexity').addEventListener('input', function() {
+            modelComplexity = parseInt(this.value);
+            document.getElementById('complexity-value').textContent = this.value;
+            updatePerformancePlot();
+        });
+
+        // Initialize
+        initializePlots();
+        createWorkers();
+        updatePerformancePlot();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Duality in Linear Programming Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; font-family: Arial, sans-serif; }
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      background: #333;
+    }
+    #info {
+      width: 400px;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .problem-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+    .primal {
+      border-left: 4px solid #2196F3;
+    }
+    .dual {
+      border-left: 4px solid #FF9800;
+    }
+    .solution {
+      border-left: 4px solid #4CAF50;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+      background: #444;
+      color: white;
+      border: 1px solid #666;
+    }
+    .value-display {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .constraint {
+      color: #FFC107;
+      font-family: monospace;
+    }
+    .optimal {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .gap {
+      color: #f44336;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid #666;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #444;
+    }
+    .feasible-region {
+      fill: rgba(76, 175, 80, 0.3);
+      stroke: #4CAF50;
+      stroke-width: 2;
+    }
+    .constraint-line {
+      stroke: #FFC107;
+      stroke-width: 2;
+    }
+    .objective-line {
+      stroke: #2196F3;
+      stroke-width: 3;
+    }
+    .dual-objective-line {
+      stroke: #FF9800;
+      stroke-width: 3;
+    }
+    .optimal-point {
+      fill: #4CAF50;
+      stroke: white;
+      stroke-width: 2;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div id="canvas-container">
+      <svg id="canvas"></svg>
+    </div>
+    
+    <div id="info">
+      <h3>Linear Programming Duality</h3>
+      
+      <div class="problem-section primal">
+        <h4>Primal Problem</h4>
+        <div>Maximize: <span id="primalObjective" class="constraint">c₁x₁ + c₂x₂</span></div>
+        <div>Subject to:</div>
+        <div id="primalConstraints" class="constraint">
+          a₁₁x₁ + a₁₂x₂ ≤ b₁<br>
+          a₂₁x₁ + a₂₂x₂ ≤ b₂<br>
+          x₁, x₂ ≥ 0
+        </div>
+        <div>Optimal Value: <span id="primalValue" class="value-display">0.00</span></div>
+        <div>Optimal Point: (<span id="primalX">0.00</span>, <span id="primalY">0.00</span>)</div>
+      </div>
+
+      <div class="problem-section dual">
+        <h4>Dual Problem</h4>
+        <div>Minimize: <span id="dualObjective" class="constraint">b₁y₁ + b₂y₂</span></div>
+        <div>Subject to:</div>
+        <div id="dualConstraints" class="constraint">
+          a₁₁y₁ + a₂₁y₂ ≥ c₁<br>
+          a₁₂y₁ + a₂₂y₂ ≥ c₂<br>
+          y₁, y₂ ≥ 0
+        </div>
+        <div>Optimal Value: <span id="dualValue" class="value-display">0.00</span></div>
+        <div>Optimal Point: (<span id="dualX">0.00</span>, <span id="dualY">0.00</span>)</div>
+      </div>
+
+      <div class="problem-section solution">
+        <h4>Duality Results</h4>
+        <div>Duality Gap: <span id="dualityGap" class="gap">0.00</span></div>
+        <div>Status: <span id="dualityStatus" class="optimal">Optimal</span></div>
+        <div>Strong Duality: <span id="strongDuality">Yes</span></div>
+        <div>Complementary Slackness: <span id="compSlackness">Satisfied</span></div>
+      </div>
+
+      <div class="control-group">
+        <label>Example Problems:</label>
+        <select id="problemSelect">
+          <option value="standard">Standard Example</option>
+          <option value="manufacturing">Manufacturing Problem</option>
+          <option value="diet">Diet Problem</option>
+          <option value="transportation">Transportation</option>
+          <option value="portfolio">Portfolio Optimization</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Objective Coefficients:</label>
+        <div>
+          c₁: <input type="number" id="c1" value="3" step="0.1" min="-10" max="10">
+          c₂: <input type="number" id="c2" value="2" step="0.1" min="-10" max="10">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Constraint Matrix A:</label>
+        <table>
+          <tr>
+            <th>a₁₁</th>
+            <th>a₁₂</th>
+            <th>b₁</th>
+          </tr>
+          <tr>
+            <td><input type="number" id="a11" value="1" step="0.1" min="0" max="10"></td>
+            <td><input type="number" id="a12" value="2" step="0.1" min="0" max="10"></td>
+            <td><input type="number" id="b1" value="6" step="0.1" min="0" max="20"></td>
+          </tr>
+          <tr>
+            <th>a₂₁</th>
+            <th>a₂₂</th>
+            <th>b₂</th>
+          </tr>
+          <tr>
+            <td><input type="number" id="a21" value="2" step="0.1" min="0" max="10"></td>
+            <td><input type="number" id="a22" value="1" step="0.1" min="0" max="10"></td>
+            <td><input type="number" id="b2" value="8" step="0.1" min="0" max="20"></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="control-group">
+        <button id="solveBtn">Solve Both Problems</button>
+        <button id="resetBtn">Reset to Default</button>
+      </div>
+
+      <div class="control-group">
+        <input type="checkbox" id="showFeasible" checked> Show Feasible Region
+        <input type="checkbox" id="showObjective" checked> Show Objective Lines
+        <input type="checkbox" id="showDual" checked> Show Dual Interpretation
+      </div>
+
+      <div class="problem-section">
+        <h4>Duality Theory</h4>
+        <div><strong>Weak Duality:</strong> Primal ≤ Dual</div>
+        <div><strong>Strong Duality:</strong> Primal = Dual (if optimal)</div>
+        <div><strong>Complementary Slackness:</strong></div>
+        <div>• If x*ⱼ > 0, then dual constraint j is tight</div>
+        <div>• If dual constraint j is slack, then x*ⱼ = 0</div>
+        <div>• If y*ᵢ > 0, then primal constraint i is tight</div>
+        <div>• If primal constraint i is slack, then y*ᵢ = 0</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svg = document.getElementById('canvas');
+    const container = document.getElementById('canvas-container');
+    
+    // Problem parameters
+    let c1 = 3, c2 = 2;
+    let a11 = 1, a12 = 2, b1 = 6;
+    let a21 = 2, a22 = 1, b2 = 8;
+    
+    // Solutions
+    let primalOptimal = {x: 0, y: 0, value: 0};
+    let dualOptimal = {x: 0, y: 0, value: 0};
+    
+    // Predefined problems
+    const problems = {
+      standard: {
+        c1: 3, c2: 2,
+        a11: 1, a12: 2, b1: 6,
+        a21: 2, a22: 1, b2: 8,
+        name: "Standard Example"
+      },
+      manufacturing: {
+        c1: 40, c2: 30,
+        a11: 1, a12: 1, b1: 12,
+        a21: 2, a22: 1, b2: 16,
+        name: "Manufacturing (profit per unit)"
+      },
+      diet: {
+        c1: 2, c2: 3,
+        a11: 3, a12: 1, b1: 6,
+        a21: 1, a22: 2, b2: 4,
+        name: "Diet Problem (minimize cost)"
+      },
+      transportation: {
+        c1: 5, c2: 3,
+        a11: 1, a12: 0, b1: 10,
+        a21: 0, a22: 1, b2: 15,
+        name: "Transportation"
+      },
+      portfolio: {
+        c1: 0.12, c2: 0.08,
+        a11: 1, a12: 1, b1: 1,
+        a21: 0.6, a22: 0.4, b2: 0.5,
+        name: "Portfolio (return vs risk)"
+      }
+    };
+
+    // Setup SVG
+    function setupSVG() {
+      const rect = container.getBoundingClientRect();
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+    }
+
+    // Convert problem coordinates to SVG coordinates
+    function toSVG(x, y) {
+      const rect = container.getBoundingClientRect();
+      const margin = 50;
+      const scale = Math.min(rect.width - 2 * margin, rect.height - 2 * margin) / 12;
+      
+      return {
+        x: margin + x * scale,
+        y: rect.height - margin - y * scale
+      };
+    }
+
+    // Solve primal problem using simplex method (simplified)
+    function solvePrimal() {
+      // Find feasible region vertices
+      const vertices = [];
+      
+      // Origin
+      vertices.push({x: 0, y: 0});
+      
+      // Intersections with axes
+      if (b1 / a11 > 0) vertices.push({x: b1 / a11, y: 0});
+      if (b1 / a12 > 0) vertices.push({x: 0, y: b1 / a12});
+      if (b2 / a21 > 0) vertices.push({x: b2 / a21, y: 0});
+      if (b2 / a22 > 0) vertices.push({x: 0, y: b2 / a22});
+      
+      // Intersection of constraint lines
+      const det = a11 * a22 - a12 * a21;
+      if (Math.abs(det) > 1e-10) {
+        const x = (b1 * a22 - b2 * a12) / det;
+        const y = (a11 * b2 - a21 * b1) / det;
+        if (x >= 0 && y >= 0) {
+          vertices.push({x, y});
+        }
+      }
+      
+      // Filter feasible vertices
+      const feasibleVertices = vertices.filter(v => 
+        a11 * v.x + a12 * v.y <= b1 + 1e-10 && 
+        a21 * v.x + a22 * v.y <= b2 + 1e-10 &&
+        v.x >= -1e-10 && v.y >= -1e-10
+      );
+      
+      // Find optimal vertex
+      let bestVertex = {x: 0, y: 0, value: 0};
+      let bestValue = -Infinity;
+      
+      feasibleVertices.forEach(v => {
+        const value = c1 * v.x + c2 * v.y;
+        if (value > bestValue) {
+          bestValue = value;
+          bestVertex = {x: v.x, y: v.y, value};
+        }
+      });
+      
+      return bestVertex;
+    }
+
+    // Solve dual problem
+    function solveDual() {
+      // Dual variables correspond to primal constraints
+      // For standard form: min b^T y, s.t. A^T y >= c, y >= 0
+      
+      // Find feasible region vertices for dual
+      const vertices = [];
+      
+      // Origin
+      vertices.push({x: 0, y: 0});
+      
+      // Intersections with axes
+      if (c1 / a11 > 0) vertices.push({x: c1 / a11, y: 0});
+      if (c1 / a21 > 0) vertices.push({x: 0, y: c1 / a21});
+      if (c2 / a12 > 0) vertices.push({x: c2 / a12, y: 0});
+      if (c2 / a22 > 0) vertices.push({x: 0, y: c2 / a22});
+      
+      // Intersection of dual constraint lines
+      const det = a11 * a22 - a12 * a21;
+      if (Math.abs(det) > 1e-10) {
+        const x = (c1 * a22 - c2 * a12) / det;
+        const y = (a11 * c2 - a21 * c1) / det;
+        if (x >= 0 && y >= 0) {
+          vertices.push({x, y});
+        }
+      }
+      
+      // Add some boundary points
+      const maxDual = 10;
+      for (let i = 0; i <= maxDual; i++) {
+        const y1 = i;
+        const y2_min = Math.max(0, (c1 - a11 * y1) / a21, (c2 - a12 * y1) / a22);
+        if (y2_min < maxDual) {
+          vertices.push({x: y1, y: y2_min});
+        }
+      }
+      
+      // Filter feasible vertices
+      const feasibleVertices = vertices.filter(v => 
+        a11 * v.x + a21 * v.y >= c1 - 1e-10 && 
+        a12 * v.x + a22 * v.y >= c2 - 1e-10 &&
+        v.x >= -1e-10 && v.y >= -1e-10
+      );
+      
+      // Find optimal vertex (minimize)
+      let bestVertex = {x: 0, y: 0, value: Infinity};
+      let bestValue = Infinity;
+      
+      feasibleVertices.forEach(v => {
+        const value = b1 * v.x + b2 * v.y;
+        if (value < bestValue) {
+          bestValue = value;
+          bestVertex = {x: v.x, y: v.y, value};
+        }
+      });
+      
+      return bestVertex;
+    }
+
+    // Draw feasible region
+    function drawFeasibleRegion() {
+      if (!document.getElementById('showFeasible').checked) return;
+      
+      const points = [];
+      
+      // Find intersection points
+      const vertices = [
+        {x: 0, y: 0},
+        {x: 0, y: Math.min(b1/a12, b2/a22)},
+        {x: Math.min(b1/a11, b2/a21), y: 0}
+      ];
+      
+      // Add constraint intersection
+      const det = a11 * a22 - a12 * a21;
+      if (Math.abs(det) > 1e-10) {
+        const x = (b1 * a22 - b2 * a12) / det;
+        const y = (a11 * b2 - a21 * b1) / det;
+        if (x >= 0 && y >= 0) {
+          vertices.push({x, y});
+        }
+      }
+      
+      // Filter feasible and convert to SVG coordinates
+      const feasibleVertices = vertices.filter(v => 
+        a11 * v.x + a12 * v.y <= b1 + 1e-10 && 
+        a21 * v.x + a22 * v.y <= b2 + 1e-10 &&
+        v.x >= -1e-10 && v.y >= -1e-10
+      );
+      
+      feasibleVertices.forEach(v => {
+        const svgPoint = toSVG(v.x, v.y);
+        points.push(`${svgPoint.x},${svgPoint.y}`);
+      });
+      
+      if (points.length > 0) {
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        polygon.setAttribute('points', points.join(' '));
+        polygon.setAttribute('class', 'feasible-region');
+        svg.appendChild(polygon);
+      }
+    }
+
+    // Draw constraint lines
+    function drawConstraints() {
+      const rect = container.getBoundingClientRect();
+      
+      // Constraint 1: a11*x + a12*y = b1
+      const x1_start = 0;
+      const y1_start = b1 / a12;
+      const x1_end = b1 / a11;
+      const y1_end = 0;
+      
+      const start1 = toSVG(x1_start, y1_start);
+      const end1 = toSVG(x1_end, y1_end);
+      
+      const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line1.setAttribute('x1', start1.x);
+      line1.setAttribute('y1', start1.y);
+      line1.setAttribute('x2', end1.x);
+      line1.setAttribute('y2', end1.y);
+      line1.setAttribute('class', 'constraint-line');
+      svg.appendChild(line1);
+      
+      // Constraint 2: a21*x + a22*y = b2
+      const x2_start = 0;
+      const y2_start = b2 / a22;
+      const x2_end = b2 / a21;
+      const y2_end = 0;
+      
+      const start2 = toSVG(x2_start, y2_start);
+      const end2 = toSVG(x2_end, y2_end);
+      
+      const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line2.setAttribute('x1', start2.x);
+      line2.setAttribute('y1', start2.y);
+      line2.setAttribute('x2', end2.x);
+      line2.setAttribute('y2', end2.y);
+      line2.setAttribute('class', 'constraint-line');
+      svg.appendChild(line2);
+    }
+
+    // Draw objective line
+    function drawObjective() {
+      if (!document.getElementById('showObjective').checked) return;
+      
+      // Draw objective line through optimal point
+      const optimalSVG = toSVG(primalOptimal.x, primalOptimal.y);
+      
+      // Direction perpendicular to objective
+      const dx = -c2;
+      const dy = c1;
+      const length = 100;
+      
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', optimalSVG.x - dx);
+      line.setAttribute('y1', optimalSVG.y - dy);
+      line.setAttribute('x2', optimalSVG.x + dx);
+      line.setAttribute('y2', optimalSVG.y + dy);
+      line.setAttribute('class', 'objective-line');
+      svg.appendChild(line);
+    }
+
+    // Draw optimal points
+    function drawOptimalPoints() {
+      // Primal optimal point
+      const primalSVG = toSVG(primalOptimal.x, primalOptimal.y);
+      const primalPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      primalPoint.setAttribute('cx', primalSVG.x);
+      primalPoint.setAttribute('cy', primalSVG.y);
+      primalPoint.setAttribute('r', 5);
+      primalPoint.setAttribute('class', 'optimal-point');
+      svg.appendChild(primalPoint);
+      
+      // Add label
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', primalSVG.x + 10);
+      label.setAttribute('y', primalSVG.y - 10);
+      label.setAttribute('fill', 'white');
+      label.setAttribute('font-size', '12');
+      label.textContent = `(${primalOptimal.x.toFixed(2)}, ${primalOptimal.y.toFixed(2)})`;
+      svg.appendChild(label);
+    }
+
+    // Draw axes
+    function drawAxes() {
+      const rect = container.getBoundingClientRect();
+      const margin = 50;
+      
+      // X-axis
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', margin);
+      xAxis.setAttribute('y1', rect.height - margin);
+      xAxis.setAttribute('x2', rect.width - margin);
+      xAxis.setAttribute('y2', rect.height - margin);
+      xAxis.setAttribute('stroke', '#666');
+      xAxis.setAttribute('stroke-width', 1);
+      svg.appendChild(xAxis);
+      
+      // Y-axis
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', margin);
+      yAxis.setAttribute('y1', margin);
+      yAxis.setAttribute('x2', margin);
+      yAxis.setAttribute('y2', rect.height - margin);
+      yAxis.setAttribute('stroke', '#666');
+      yAxis.setAttribute('stroke-width', 1);
+      svg.appendChild(yAxis);
+      
+      // Add axis labels
+      const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      xLabel.setAttribute('x', rect.width - margin - 10);
+      xLabel.setAttribute('y', rect.height - margin + 20);
+      xLabel.setAttribute('fill', '#666');
+      xLabel.setAttribute('font-size', '14');
+      xLabel.textContent = 'x₁';
+      svg.appendChild(xLabel);
+      
+      const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabel.setAttribute('x', margin - 20);
+      yLabel.setAttribute('y', margin + 10);
+      yLabel.setAttribute('fill', '#666');
+      yLabel.setAttribute('font-size', '14');
+      yLabel.textContent = 'x₂';
+      svg.appendChild(yLabel);
+    }
+
+    // Update display
+    function updateDisplay() {
+      // Clear SVG
+      svg.innerHTML = '';
+      
+      // Draw everything
+      drawAxes();
+      drawFeasibleRegion();
+      drawConstraints();
+      drawObjective();
+      drawOptimalPoints();
+      
+      // Update text displays
+      document.getElementById('primalObjective').textContent = `${c1}x₁ + ${c2}x₂`;
+      document.getElementById('primalConstraints').innerHTML = `
+        ${a11}x₁ + ${a12}x₂ ≤ ${b1}<br>
+        ${a21}x₁ + ${a22}x₂ ≤ ${b2}<br>
+        x₁, x₂ ≥ 0
+      `;
+      
+      document.getElementById('dualObjective').textContent = `${b1}y₁ + ${b2}y₂`;
+      document.getElementById('dualConstraints').innerHTML = `
+        ${a11}y₁ + ${a21}y₂ ≥ ${c1}<br>
+        ${a12}y₁ + ${a22}y₂ ≥ ${c2}<br>
+        y₁, y₂ ≥ 0
+      `;
+      
+      document.getElementById('primalValue').textContent = primalOptimal.value.toFixed(3);
+      document.getElementById('primalX').textContent = primalOptimal.x.toFixed(3);
+      document.getElementById('primalY').textContent = primalOptimal.y.toFixed(3);
+      
+      document.getElementById('dualValue').textContent = dualOptimal.value.toFixed(3);
+      document.getElementById('dualX').textContent = dualOptimal.x.toFixed(3);
+      document.getElementById('dualY').textContent = dualOptimal.y.toFixed(3);
+      
+      const gap = Math.abs(primalOptimal.value - dualOptimal.value);
+      document.getElementById('dualityGap').textContent = gap.toFixed(6);
+      
+      if (gap < 1e-6) {
+        document.getElementById('dualityStatus').textContent = 'Optimal';
+        document.getElementById('dualityStatus').className = 'optimal';
+        document.getElementById('strongDuality').textContent = 'Yes';
+        document.getElementById('compSlackness').textContent = 'Satisfied';
+      } else {
+        document.getElementById('dualityStatus').textContent = 'Suboptimal';
+        document.getElementById('dualityStatus').className = 'gap';
+        document.getElementById('strongDuality').textContent = 'No';
+        document.getElementById('compSlackness').textContent = 'Check required';
+      }
+    }
+
+    // Read parameters from inputs
+    function readParameters() {
+      c1 = parseFloat(document.getElementById('c1').value);
+      c2 = parseFloat(document.getElementById('c2').value);
+      a11 = parseFloat(document.getElementById('a11').value);
+      a12 = parseFloat(document.getElementById('a12').value);
+      a21 = parseFloat(document.getElementById('a21').value);
+      a22 = parseFloat(document.getElementById('a22').value);
+      b1 = parseFloat(document.getElementById('b1').value);
+      b2 = parseFloat(document.getElementById('b2').value);
+    }
+
+    // Solve both problems
+    function solve() {
+      readParameters();
+      primalOptimal = solvePrimal();
+      dualOptimal = solveDual();
+      updateDisplay();
+    }
+
+    // Load predefined problem
+    function loadProblem(problemKey) {
+      const problem = problems[problemKey];
+      document.getElementById('c1').value = problem.c1;
+      document.getElementById('c2').value = problem.c2;
+      document.getElementById('a11').value = problem.a11;
+      document.getElementById('a12').value = problem.a12;
+      document.getElementById('a21').value = problem.a21;
+      document.getElementById('a22').value = problem.a22;
+      document.getElementById('b1').value = problem.b1;
+      document.getElementById('b2').value = problem.b2;
+      solve();
+    }
+
+    // Event listeners
+    document.getElementById('problemSelect').addEventListener('change', (e) => {
+      loadProblem(e.target.value);
+    });
+
+    document.getElementById('solveBtn').addEventListener('click', solve);
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      loadProblem('standard');
+    });
+
+    // Input change listeners
+    ['c1', 'c2', 'a11', 'a12', 'a21', 'a22', 'b1', 'b2'].forEach(id => {
+      document.getElementById(id).addEventListener('change', solve);
+    });
+
+    // Checkbox listeners
+    document.getElementById('showFeasible').addEventListener('change', updateDisplay);
+    document.getElementById('showObjective').addEventListener('change', updateDisplay);
+    document.getElementById('showDual').addEventListener('change', updateDisplay);
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      setupSVG();
+      updateDisplay();
+    });
+
+    // Initialize
+    setupSVG();
+    solve();
+  </script>
+</body>
+</html>

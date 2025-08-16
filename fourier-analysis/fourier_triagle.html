@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fourier Epicycles - Triangle Wave</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      text-align: center;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: #000;
+    }
+    #controls {
+      margin: 10px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <h2>Fourier Epicycles - Triangle Wave</h2>
+  <div id="controls">
+    Terms: <input type="range" id="slider" min="1" max="50" value="10">
+    <span id="termLabel">10</span>
+  </div>
+  <canvas id="canvas" width="900" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const slider = document.getElementById("slider");
+    const termLabel = document.getElementById("termLabel");
+
+    let time = 0;
+    let path = [];
+
+    function drawCircle(x, y, r) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
+    function triangleEpicycles(x, y, time, terms) {
+      for (let k = 0; k < terms; k++) {
+        const n = 2 * k + 1; // odd harmonics
+        const sign = (k % 2 === 0) ? 1 : -1;
+        const amplitude = (8 / (Math.PI * Math.PI)) * (1 / (n * n));
+        const radius = 150 * amplitude * sign;
+
+        const prevX = x;
+        const prevY = y;
+
+        x += radius * Math.cos(n * time);
+        y += radius * Math.sin(n * time);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.4)";
+        drawCircle(prevX, prevY, Math.abs(radius));
+
+        ctx.strokeStyle = "#ff0";
+        drawLine(prevX, prevY, x, y);
+      }
+
+      return { x, y };
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const terms = parseInt(slider.value);
+      termLabel.textContent = terms;
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      let originX = 200;
+      let originY = canvas.height / 2;
+
+      const { x, y } = triangleEpicycles(originX, originY, time, terms);
+
+      path.unshift({ x: 400, y: y });
+      drawLine(x, y, 400, y);
+
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x + i, path[i].y);
+      }
+      ctx.strokeStyle = "#ff0";
+      ctx.stroke();
+
+      time += 0.02;
+
+      if (path.length > 600) path.pop();
+    }
+
+    animate();
+  </script>
+</body>
+</html>
+

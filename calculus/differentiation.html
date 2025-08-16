@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Minh Họa Tương Tác Đạo Hàm</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #ffffff;
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      font-size: 20px;
+      line-height: 1.8;
+    }
+    canvas {
+      background: #000;
+      margin-top: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid #444;
+    }
+    .controls {
+      margin: 30px 0;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      display: inline-block;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .controls label {
+      color: #00FFFF;
+      font-weight: 700;
+      margin-right: 15px;
+      font-size: 1.2em;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    }
+    .controls select, .controls button {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      margin: 0 8px;
+      font-weight: 600;
+      backdrop-filter: blur(5px);
+    }
+    .controls button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    }
+    .controls input[type="range"] {
+      width: 300px;
+      margin: 0 10px;
+    }
+    .view-controls {
+      margin: 10px 0;
+      padding: 10px;
+      background: #333;
+      border-radius: 8px;
+    }
+    .view-controls label {
+      margin-right: 15px;
+    }
+    .view-controls input[type="radio"] {
+      margin-right: 5px;
+    }
+    .info-panel {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 25px;
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      min-width: 280px;
+      max-width: 380px;
+      backdrop-filter: blur(10px);
+      font-size: 1.1em;
+      line-height: 1.6;
+    }
+    .function-info {
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 5px;
+      text-align: left;
+    }
+    .legend {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      text-align: left;
+      font-size: 12px;
+    }
+    .legend-item {
+      margin: 3px 0;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <h2 style="font-size: 3.2em; font-weight: 900; text-shadow: 4px 4px 8px rgba(0,0,0,0.8); margin-bottom: 40px; letter-spacing: 1px;">📐 Đạo Hàm - Lý Thuyết Toán Học & Giải Thích Hình Học</h2>
+  
+  <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 10px; margin: 20px auto; max-width: 800px; text-align: left;">
+    <h3 style="font-size: 2.2em; font-weight: 800; text-shadow: 3px 3px 6px rgba(0,0,0,0.7); color: #FFD700;">🔍 Nền Tảng Toán Học</h3>
+    <p><strong>Định nghĩa:</strong> Đạo hàm f'(x) = lim[h→0] [f(x+h) - f(x)]/h biểu diễn tốc độ thay đổi tức thời</p>
+    <p><strong>Ý Nghĩa Hình Học:</strong> Độ dốc của đường tiếp tuyến với đường cong tại điểm (x, f(x))</p>
+    <p><strong>Giải Thích Vật Lý:</strong> Vận tốc là đạo hàm của vị trí, gia tốc là đạo hàm của vận tốc</p>
+  </div>
+  
+  <div class="controls">
+    <label for="functionSelect">Chọn Hàm:</label>
+    <select id="functionSelect">
+      <option value="sin">f(x) = sin(x) → f'(x) = cos(x)</option>
+      <option value="cos">f(x) = cos(x) → f'(x) = -sin(x)</option>
+      <option value="polynomial">f(x) = x² → f'(x) = 2x</option>
+      <option value="cubic">f(x) = x³ → f'(x) = 3x²</option>
+      <option value="exp">f(x) = eˣ → f'(x) = eˣ</option>
+      <option value="ln">f(x) = ln(x) → f'(x) = 1/x</option>
+      <option value="sqrt">f(x) = √x → f'(x) = 1/(2√x)</option>
+      <option value="tan">f(x) = tan(x) → f'(x) = sec²(x)</option>
+      <option value="rational">f(x) = 1/x → f'(x) = -1/x²</option>
+      <option value="quartic">f(x) = x⁴ → f'(x) = 4x³</option>
+    </select>
+  </div>
+  
+  <div class="view-controls">
+    <label><input type="radio" name="viewMode" value="single" checked> Chế Độ Đơn</label>
+    <label><input type="radio" name="viewMode" value="split"> Chế Độ Tách (Hàm & Đạo Hàm)</label>
+  </div>
+  
+  <div class="controls">
+    <label>x = </label>
+    <input type="range" id="xSlider" min="-628" max="628" value="0" step="1">
+    <span id="xValueDisplay">0.00</span>
+    <button id="playPauseBtn">▶ Chơi</button>
+    <button id="resetBtn">Khởi Động Lại</button>
+  </div>
+  
+  <canvas id="canvas" width="900" height="600"></canvas>
+  
+  <div style="background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; margin: 20px auto; max-width: 1000px; text-align: left;">
+    <h3 style="color: #0ff;">📚 Quy Tắc Đạo Hàm & Lý Thuyết Toán Học</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+      <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #ffd700;">⚡ Quy Tắc Cơ Bản</h4>
+        <ul style="font-size: 14px; line-height: 1.6;">
+          <li><strong>Quy tắc Lũy thừa:</strong> d/dx[xⁿ] = n·xⁿ⁻¹</li>
+          <li><strong>Quy tắc Tổng:</strong> d/dx[f + g] = f' + g'</li>
+          <li><strong>Quy tắc Tích:</strong> d/dx[fg] = f'g + fg'</li>
+          <li><strong>Quy tắc Dây chuyền:</strong> d/dx[f(g(x))] = f'(g(x))·g'(x)</li>
+        </ul>
+      </div>
+      
+      <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #007bff;">📐 Hàm Lượng Giác</h4>
+        <ul style="font-size: 14px; line-height: 1.6;">
+          <li><strong>sin(x):</strong> d/dx[sin(x)] = cos(x)</li>
+          <li><strong>cos(x):</strong> d/dx[cos(x)] = -sin(x)</li>
+          <li><strong>tan(x):</strong> d/dx[tan(x)] = sec²(x)</li>
+          <li><strong>sec(x):</strong> d/dx[sec(x)] = sec(x)tan(x)</li>
+        </ul>
+      </div>
+      
+      <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #28a745;">🔢 Hàm Mũ & Logarithm</h4>
+        <ul style="font-size: 14px; line-height: 1.6;">
+          <li><strong>eˣ:</strong> d/dx[eˣ] = eˣ</li>
+          <li><strong>aˣ:</strong> d/dx[aˣ] = aˣ ln(a)</li>
+          <li><strong>ln(x):</strong> d/dx[ln(x)] = 1/x</li>
+          <li><strong>log_a(x):</strong> d/dx[log_a(x)] = 1/(x ln(a))</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px; margin-top: 20px;">
+      <h4 style="color: #dc3545;">🎯 Ứng Dụng Toán Học</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+        <div>
+          <h5>Vật Lý:</h5>
+          <ul style="font-size: 13px;">
+            <li>Vận tốc = dx/dt (đạo hàm của vị trí)</li>
+            <li>Gia tốc = dv/dt (đạo hàm của vận tốc)</li>
+            <li>Trường điện = -dV/dx (gradient âm của thế năng)</li>
+          </ul>
+        </div>
+        <div>
+          <h5>Kinh Tế:</h5>
+          <ul style="font-size: 13px;">
+            <li>Chi phí biên = dC/dq (đạo hàm của hàm chi phí)</li>
+            <li>Doanh thu biên = dR/dq (đạo hàm của doanh thu)</li>
+            <li>Đàn hồi liên quan đến đạo hàm của cầu</li>
+          </ul>
+        </div>
+        <div>
+          <h5>Hình Học:</h5>
+          <ul style="font-size: 13px;">
+            <li>Độ dốc của đường tiếp tuyến tại bất kỳ điểm nào</li>
+            <li>Tốc độ thay đổi của diện tích hoặc thể tích</li>
+            <li>Phân tích độ cong và tính lõm</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="info-panel" id="infoPanel">
+    <div style="color: #0ff; font-weight: bold;">Phân Tích Hàm</div>
+    <div id="functionInfo" class="function-info">
+      f(x) = sin(x)<br>
+      f'(x) = cos(x)
+    </div>
+    <div style="color: #ff0; margin-top: 10px;">
+      <div>Điểm: (<span id="xValue">0.00</span>, <span id="yValue">0.00</span>)</div>
+      <div>Độ dốc: <span id="slopeValue">0.00</span></div>
+      <div id="slopeInterpretation" style="font-size: 12px; margin-top: 5px;"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item" style="color: #0ff;">● Hàm f(x)</div>
+      <div class="legend-item" style="color: #f90;">● Đạo hàm f'(x)</div>
+      <div class="legend-item" style="color: #ff0;">— Đường Tiếp Tuyến</div>
+      <div class="legend-item" style="color: #f00;">● Điểm Hiện Tại</div>
+    </div>
+    <div style="background: rgba(0, 123, 255, 0.1); padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 11px;">
+      <div style="color: #0ff; font-weight: bold;">Quy Tắc Toán Học:</div>
+      <div id="derivativeRule" style="margin-top: 5px;"></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const functionSelect = document.getElementById('functionSelect');
+    const functionInfo = document.getElementById('functionInfo');
+    const xValue = document.getElementById('xValue');
+    const yValue = document.getElementById('yValue');
+    const slopeValue = document.getElementById('slopeValue');
+    const xSlider = document.getElementById('xSlider');
+    const xValueDisplay = document.getElementById('xValueDisplay');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const viewModeRadios = document.querySelectorAll('input[name="viewMode"]');
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Set scaling for axes
+    const scaleX = 60; // 1 unit = 60 pixels
+    const scaleY = 60;
+
+    let currentX = 0;
+    let currentFunction = 'sin';
+    let viewMode = 'single';
+    let isPlaying = false;
+    let animationFrame;
+
+    // View mode positions
+    const singleViewCenterY = centerY;
+    const splitViewTopY = height / 4;
+    const splitViewBottomY = (3 * height) / 4;
+
+    // Function definitions
+    const functions = {
+      sin: {
+        f: (x) => Math.sin(x),
+        df: (x) => Math.cos(x),
+        name: 'f(x) = sin(x)',
+        derivative: "f'(x) = cos(x)",
+        domain: [-2 * Math.PI, 2 * Math.PI],
+        range: [-1.5, 1.5],
+        rule: "Trigonometric rule: d/dx[sin(x)] = cos(x)"
+      },
+      cos: {
+        f: (x) => Math.cos(x),
+        df: (x) => -Math.sin(x),
+        name: 'f(x) = cos(x)',
+        derivative: "f'(x) = -sin(x)",
+        domain: [-2 * Math.PI, 2 * Math.PI],
+        range: [-1.5, 1.5],
+        rule: "Trigonometric rule: d/dx[cos(x)] = -sin(x)"
+      },
+      polynomial: {
+        f: (x) => x * x,
+        df: (x) => 2 * x,
+        name: 'f(x) = x²',
+        derivative: "f'(x) = 2x",
+        domain: [-4, 4],
+        range: [-1, 16],
+        rule: "Power rule: d/dx[x²] = 2x¹ = 2x"
+      },
+      cubic: {
+        f: (x) => x * x * x,
+        df: (x) => 3 * x * x,
+        name: 'f(x) = x³',
+        derivative: "f'(x) = 3x²",
+        domain: [-3, 3],
+        range: [-27, 27],
+        rule: "Power rule: d/dx[x³] = 3x² "
+      },
+      exp: {
+        f: (x) => Math.exp(x),
+        df: (x) => Math.exp(x),
+        name: 'f(x) = eˣ',
+        derivative: "f'(x) = eˣ",
+        domain: [-2, 2],
+        range: [0, 8],
+        rule: "Exponential rule: d/dx[eˣ] = eˣ (unique property!)"
+      },
+      ln: {
+        f: (x) => x > 0 ? Math.log(x) : NaN,
+        df: (x) => x > 0 ? 1/x : NaN,
+        name: 'f(x) = ln(x)',
+        derivative: "f'(x) = 1/x",
+        domain: [0.1, 4],
+        range: [-3, 2],
+        rule: "Logarithmic rule: d/dx[ln(x)] = 1/x"
+      },
+      sqrt: {
+        f: (x) => x >= 0 ? Math.sqrt(x) : NaN,
+        df: (x) => x > 0 ? 1/(2 * Math.sqrt(x)) : NaN,
+        name: 'f(x) = √x',
+        derivative: "f'(x) = 1/(2√x)",
+        domain: [0, 4],
+        range: [0, 2],
+        rule: "Power rule: d/dx[x^(1/2)] = (1/2)x^(-1/2)"
+      },
+      tan: {
+        f: (x) => Math.tan(x),
+        df: (x) => 1 / (Math.cos(x) * Math.cos(x)),
+        name: 'f(x) = tan(x)',
+        derivative: "f'(x) = sec²(x)",
+        domain: [-Math.PI/2 + 0.1, Math.PI/2 - 0.1],
+        range: [-5, 5],
+        rule: "Trigonometric rule: d/dx[tan(x)] = sec²(x)"
+      },
+      rational: {
+        f: (x) => x !== 0 ? 1/x : NaN,
+        df: (x) => x !== 0 ? -1/(x*x) : NaN,
+        name: 'f(x) = 1/x',
+        derivative: "f'(x) = -1/x²",
+        domain: [-3, -0.1].concat([0.1, 3]),
+        range: [-5, 5],
+        rule: "Power rule: d/dx[x⁻¹] = -1·x⁻²"
+      },
+      quartic: {
+        f: (x) => x * x * x * x,
+        df: (x) => 4 * x * x * x,
+        name: 'f(x) = x⁴',
+        derivative: "f'(x) = 4x³",
+        domain: [-2, 2],
+        range: [-1, 16],
+        rule: "Power rule: d/dx[xⁿ] = n·xⁿ⁻¹"
+      }
+    };
+
+    function f(x) {
+      return functions[currentFunction].f(x);
+    }
+
+    function df(x) {
+      return functions[currentFunction].df(x);
+    }
+
+    function updateFunctionInfo() {
+      const func = functions[currentFunction];
+      functionInfo.innerHTML = `${func.name}<br>${func.derivative}`;
+      document.getElementById('derivativeRule').innerHTML = func.rule || 'Mathematical rule not specified';
+    }
+
+    functionSelect.addEventListener('change', function() {
+      currentFunction = this.value;
+      updateFunctionInfo();
+      // Reset t to start of domain
+      const domain = functions[currentFunction].domain;
+      t = domain[0];
+    });
+
+    function drawAxes(centerYPos) {
+      ctx.strokeStyle = "#555";
+      ctx.lineWidth = 1;
+
+      // X-axis
+      ctx.beginPath();
+      ctx.moveTo(0, centerYPos);
+      ctx.lineTo(width, centerYPos);
+      ctx.stroke();
+
+      // Y-axis
+      ctx.beginPath();
+      ctx.moveTo(centerX, 0);
+      ctx.lineTo(centerX, height);
+      ctx.stroke();
+
+      // Grid lines
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 0.5;
+      
+      // Vertical grid lines
+      for (let x = -10; x <= 10; x++) {
+        const cx = toCanvasX(x);
+        if (cx >= 0 && cx <= width) {
+          ctx.beginPath();
+          ctx.moveTo(cx, 0);
+          ctx.lineTo(cx, height);
+          ctx.stroke();
+        }
+      }
+      
+      // Horizontal grid lines (only around the center)
+      for (let y = -10; y <= 10; y++) {
+        const cy = toCanvasY(y, centerYPos);
+        if (cy >= 0 && cy <= height) {
+          ctx.beginPath();
+          ctx.moveTo(0, cy);
+          ctx.lineTo(width, cy);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function toCanvasX(x) {
+      return centerX + x * scaleX;
+    }
+
+    function toCanvasY(y, centerYPos = centerY) {
+      return centerYPos - y * scaleY;
+    }
+
+    function drawFunction(fn, centerYPos, color, lineWidth = 2) {
+      const func = functions[currentFunction];
+      const domain = func.domain;
+      
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      
+      let started = false;
+      for (let x = domain[0]; x <= domain[1]; x += 0.01) {
+        const y = fn(x);
+        if (!isNaN(y) && isFinite(y)) {
+          const cx = toCanvasX(x);
+          const cy = toCanvasY(y, centerYPos);
+          
+          if (cx >= 0 && cx <= width && cy >= 0 && cy <= height) {
+            if (!started) {
+              ctx.moveTo(cx, cy);
+              started = true;
+            } else {
+              ctx.lineTo(cx, cy);
+            }
+          }
+        }
+      }
+      ctx.stroke();
+    }
+
+    function drawVisualization(x) {
+      ctx.clearRect(0, 0, width, height);
+      
+      if (viewMode === 'single') {
+        drawSingleView(x);
+      } else {
+        drawSplitView(x);
+      }
+      
+      updateInfoPanel(x);
+    }
+
+    function drawSingleView(x) {
+      const y = f(x);
+      const slope = df(x);
+
+      if (isNaN(y) || isNaN(slope) || !isFinite(y) || !isFinite(slope)) return;
+
+      drawAxes(singleViewCenterY);
+      drawFunction(f, singleViewCenterY, "#0ff");
+
+      // Tangent line
+      const cx = toCanvasX(x);
+      const cy = toCanvasY(y, singleViewCenterY);
+      const dx = 1;
+      const x1 = x - dx;
+      const x2 = x + dx;
+      const y1 = y - slope * dx;
+      const y2 = y + slope * dx;
+
+      ctx.strokeStyle = "#ff0";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(x1), toCanvasY(y1, singleViewCenterY));
+      ctx.lineTo(toCanvasX(x2), toCanvasY(y2, singleViewCenterY));
+      ctx.stroke();
+
+      // Point on curve
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function drawSplitView(x) {
+      const y = f(x);
+      const slope = df(x);
+
+      if (isNaN(y) || isNaN(slope) || !isFinite(y) || !isFinite(slope)) return;
+
+      // Draw both axes
+      drawAxes(splitViewTopY);
+      drawAxes(splitViewBottomY);
+
+      // Draw function and derivative
+      drawFunction(f, splitViewTopY, "#0ff");
+      drawFunction(df, splitViewBottomY, "#f90");
+
+      const cx = toCanvasX(x);
+      
+      // Points
+      const cy1 = toCanvasY(y, splitViewTopY);
+      const cy2 = toCanvasY(slope, splitViewBottomY);
+
+      // Tangent line on function
+      const dx = 0.5;
+      const x1 = x - dx;
+      const x2 = x + dx;
+      const y1 = y - slope * dx;
+      const y2 = y + slope * dx;
+
+      ctx.strokeStyle = "#ff0";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(x1), toCanvasY(y1, splitViewTopY));
+      ctx.lineTo(toCanvasX(x2), toCanvasY(y2, splitViewTopY));
+      ctx.stroke();
+
+      // Points on both graphs
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(cx, cy1, 5, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = "cyan";
+      ctx.beginPath();
+      ctx.arc(cx, cy2, 5, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Connection line
+      ctx.strokeStyle = "#aaa";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy1);
+      ctx.lineTo(cx, cy2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Labels
+      ctx.fillStyle = "white";
+      ctx.font = "16px sans-serif";
+      ctx.fillText("f(x)", 20, splitViewTopY - 100);
+      ctx.fillText("f'(x)", 20, splitViewBottomY - 100);
+    }
+
+    function updateInfoPanel(x) {
+      const y = f(x);
+      const slope = df(x);
+      
+      xValue.textContent = x.toFixed(3);
+      yValue.textContent = y.toFixed(3);
+      slopeValue.textContent = slope.toFixed(3);
+      xValueDisplay.textContent = x.toFixed(2);
+      
+      // Slope interpretation
+      const slopeInterpretation = document.getElementById('slopeInterpretation');
+      let interpretation = '';
+      if (Math.abs(slope) < 0.001) {
+        interpretation = 'Horizontal tangent (critical point)';
+      } else if (slope > 0) {
+        interpretation = `Increasing (slope = ${slope.toFixed(3)})`;
+      } else {
+        interpretation = `Decreasing (slope = ${slope.toFixed(3)})`;
+      }
+      slopeInterpretation.textContent = interpretation;
+    }
+
+    function updateSliderFromX(x) {
+      const domain = functions[currentFunction].domain;
+      const normalizedX = ((x - domain[0]) / (domain[1] - domain[0])) * 1256 - 628;
+      xSlider.value = Math.round(normalizedX);
+    }
+
+    function getXFromSlider() {
+      const domain = functions[currentFunction].domain;
+      const normalizedValue = (parseInt(xSlider.value) + 628) / 1256;
+      return domain[0] + normalizedValue * (domain[1] - domain[0]);
+    }
+
+    // Event listeners
+    functionSelect.addEventListener('change', function() {
+      currentFunction = this.value;
+      updateFunctionInfo();
+      const domain = functions[currentFunction].domain;
+      currentX = domain[0];
+      updateSliderFromX(currentX);
+      drawVisualization(currentX);
+    });
+
+    viewModeRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.checked) {
+          viewMode = this.value;
+          drawVisualization(currentX);
+        }
+      });
+    });
+
+    xSlider.addEventListener('input', function() {
+      currentX = getXFromSlider();
+      drawVisualization(currentX);
+    });
+
+    playPauseBtn.addEventListener('click', function() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        this.textContent = "⏸ Pause";
+        animate();
+      } else {
+        this.textContent = "▶ Play";
+        cancelAnimationFrame(animationFrame);
+      }
+    });
+
+    resetBtn.addEventListener('click', function() {
+      const domain = functions[currentFunction].domain;
+      currentX = domain[0];
+      updateSliderFromX(currentX);
+      drawVisualization(currentX);
+    });
+
+    function animate() {
+      if (!isPlaying) return;
+      
+      const domain = functions[currentFunction].domain;
+      const step = (domain[1] - domain[0]) / 300;
+      currentX += step;
+      
+      if (currentX > domain[1]) {
+        currentX = domain[0];
+      }
+      
+      updateSliderFromX(currentX);
+      drawVisualization(currentX);
+      
+      animationFrame = requestAnimationFrame(animate);
+    }
+
+    // Initialize
+    updateFunctionInfo();
+    drawVisualization(currentX);
+  </script>
+</body>
+</html>
+

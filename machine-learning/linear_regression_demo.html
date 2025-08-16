@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Hồi Quy Tuyến Tính - Đường Thẳng Best-Fit</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .canvas-container {
+            flex: 2;
+        }
+        canvas {
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            cursor: crosshair;
+            background-color: #fafafa;
+        }
+        .controls {
+            flex: 1;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .equation {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .stats {
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .stats div {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        .instructions {
+            background-color: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .formula-explanation {
+            background-color: #9b59b6;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .toggle-controls {
+            margin-bottom: 15px;
+        }
+        .toggle-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .toggle-controls label {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>Demo Hồi Quy Tuyến Tính</h1>
+        <p class="subtitle">Tìm đường thẳng best-fit y = mx + c qua các điểm dữ liệu</p>
+        
+        <div class="demo-container">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="500"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="instructions">
+                    <strong>Hướng dẫn:</strong><br>
+                    • Click trên canvas để thêm điểm<br>
+                    • Đường thẳng best-fit sẽ tự động cập nhật<br>
+                    • Cần ít nhất 2 điểm để tính đường thẳng
+                </div>
+                
+                <div class="equation" id="equation">
+                    y = mx + c
+                </div>
+                
+                <div class="stats" id="stats">
+                    <div>Số điểm: 0</div>
+                    <div>Hệ số góc (m): --</div>
+                    <div>Hệ số chặn (c): --</div>
+                    <div>R² (độ phù hợp): --</div>
+                    <div>Tổng sai số bình phương: --</div>
+                </div>
+                
+                <div class="toggle-controls">
+                    <input type="checkbox" id="showResiduals" checked>
+                    <label for="showResiduals">Hiển thị đường residuals</label>
+                </div>
+                
+                <div class="toggle-controls">
+                    <input type="checkbox" id="showGrid" checked>
+                    <label for="showGrid">Hiển thị lưới tọa độ</label>
+                </div>
+                
+                <button onclick="clearPoints()">Xóa tất cả điểm</button>
+                <button onclick="addRandomPoints()">Thêm điểm ngẫu nhiên</button>
+                
+                <div class="formula-explanation">
+                    <strong>Công thức Least Squares:</strong><br>
+                    m = (n∑xy - ∑x∑y) / (n∑x² - (∑x)²)<br>
+                    c = (∑y - m∑x) / n<br><br>
+                    <strong>Mục tiêu:</strong> Tối thiểu hóa tổng bình phương các khoảng cách dọc từ điểm đến đường thẳng
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+        let bestFitLine = null;
+        
+        // Thiết lập hệ tọa độ
+        const padding = 50;
+        const graphWidth = canvas.width - 2 * padding;
+        const graphHeight = canvas.height - 2 * padding;
+        const xMin = 0, xMax = 10;
+        const yMin = 0, yMax = 10;
+        
+        // Chuyển đổi tọa độ
+        function canvasToGraph(canvasX, canvasY) {
+            const x = ((canvasX - padding) / graphWidth) * (xMax - xMin) + xMin;
+            const y = (1 - (canvasY - padding) / graphHeight) * (yMax - yMin) + yMin;
+            return { x, y };
+        }
+        
+        function graphToCanvas(x, y) {
+            const canvasX = ((x - xMin) / (xMax - xMin)) * graphWidth + padding;
+            const canvasY = (1 - (y - yMin) / (yMax - yMin)) * graphHeight + padding;
+            return { x: canvasX, y: canvasY };
+        }
+        
+        // Vẽ lưới
+        function drawGrid() {
+            if (!document.getElementById('showGrid').checked) return;
+            
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Đường dọc
+            for (let i = 0; i <= 10; i++) {
+                const canvasPos = graphToCanvas(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(canvasPos.x, padding);
+                ctx.lineTo(canvasPos.x, canvas.height - padding);
+                ctx.stroke();
+            }
+            
+            // Đường ngang
+            for (let i = 0; i <= 10; i++) {
+                const canvasPos = graphToCanvas(0, i);
+                ctx.beginPath();
+                ctx.moveTo(padding, canvasPos.y);
+                ctx.lineTo(canvas.width - padding, canvasPos.y);
+                ctx.stroke();
+            }
+        }
+        
+        // Vẽ trục tọa độ
+        function drawAxes() {
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            
+            // Trục X
+            ctx.beginPath();
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Trục Y
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Nhãn trục
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Nhãn trục X
+            for (let i = 0; i <= 10; i += 2) {
+                const canvasPos = graphToCanvas(i, 0);
+                ctx.fillText(i.toString(), canvasPos.x, canvas.height - padding + 20);
+            }
+            
+            // Nhãn trục Y
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 10; i += 2) {
+                const canvasPos = graphToCanvas(0, i);
+                ctx.fillText(i.toString(), padding - 10, canvasPos.y + 5);
+            }
+        }
+        
+        // Vẽ điểm
+        function drawPoints() {
+            points.forEach((point, index) => {
+                const canvasPos = graphToCanvas(point.x, point.y);
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(canvasPos.x, canvasPos.y, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Viền điểm
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Số thứ tự điểm
+                ctx.fillStyle = 'white';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText((index + 1).toString(), canvasPos.x, canvasPos.y + 3);
+            });
+        }
+        
+        // Tính toán đường thẳng best-fit
+        function calculateBestFit() {
+            if (points.length < 2) {
+                bestFitLine = null;
+                return;
+            }
+            
+            const n = points.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+            
+            points.forEach(point => {
+                sumX += point.x;
+                sumY += point.y;
+                sumXY += point.x * point.y;
+                sumX2 += point.x * point.x;
+                sumY2 += point.y * point.y;
+            });
+            
+            // Tính hệ số góc m và hệ số chặn c
+            const denominator = n * sumX2 - sumX * sumX;
+            if (Math.abs(denominator) < 1e-10) {
+                bestFitLine = null;
+                return;
+            }
+            
+            const m = (n * sumXY - sumX * sumY) / denominator;
+            const c = (sumY - m * sumX) / n;
+            
+            // Tính R² (coefficient of determination)
+            const yMean = sumY / n;
+            let ssRes = 0, ssTot = 0;
+            
+            points.forEach(point => {
+                const yPred = m * point.x + c;
+                ssRes += (point.y - yPred) * (point.y - yPred);
+                ssTot += (point.y - yMean) * (point.y - yMean);
+            });
+            
+            const rSquared = ssTot === 0 ? 1 : 1 - (ssRes / ssTot);
+            
+            bestFitLine = { m, c, rSquared, ssRes };
+        }
+        
+        // Vẽ đường thẳng best-fit
+        function drawBestFitLine() {
+            if (!bestFitLine) return;
+            
+            const { m, c } = bestFitLine;
+            
+            // Tính điểm đầu và cuối của đường thẳng
+            const x1 = xMin;
+            const y1 = m * x1 + c;
+            const x2 = xMax;
+            const y2 = m * x2 + c;
+            
+            const canvasPos1 = graphToCanvas(x1, y1);
+            const canvasPos2 = graphToCanvas(x2, y2);
+            
+            ctx.strokeStyle = '#3498db';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(canvasPos1.x, canvasPos1.y);
+            ctx.lineTo(canvasPos2.x, canvasPos2.y);
+            ctx.stroke();
+        }
+        
+        // Vẽ đường residuals
+        function drawResiduals() {
+            if (!bestFitLine || !document.getElementById('showResiduals').checked) return;
+            
+            const { m, c } = bestFitLine;
+            
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            points.forEach(point => {
+                const yPred = m * point.x + c;
+                const canvasPoint = graphToCanvas(point.x, point.y);
+                const canvasPred = graphToCanvas(point.x, yPred);
+                
+                ctx.beginPath();
+                ctx.moveTo(canvasPoint.x, canvasPoint.y);
+                ctx.lineTo(canvasPred.x, canvasPred.y);
+                ctx.stroke();
+            });
+            
+            ctx.setLineDash([]);
+        }
+        
+        // Cập nhật thông tin hiển thị
+        function updateDisplay() {
+            calculateBestFit();
+            
+            // Cập nhật phương trình
+            const equationElement = document.getElementById('equation');
+            if (bestFitLine) {
+                const { m, c } = bestFitLine;
+                const mStr = m.toFixed(3);
+                const cStr = c >= 0 ? `+ ${c.toFixed(3)}` : `- ${Math.abs(c).toFixed(3)}`;
+                equationElement.textContent = `y = ${mStr}x ${cStr}`;
+            } else {
+                equationElement.textContent = 'y = mx + c';
+            }
+            
+            // Cập nhật thống kê
+            const statsElement = document.getElementById('stats');
+            if (bestFitLine) {
+                const { m, c, rSquared, ssRes } = bestFitLine;
+                statsElement.innerHTML = `
+                    <div>Số điểm: ${points.length}</div>
+                    <div>Hệ số góc (m): ${m.toFixed(4)}</div>
+                    <div>Hệ số chặn (c): ${c.toFixed(4)}</div>
+                    <div>R² (độ phù hợp): ${rSquared.toFixed(4)}</div>
+                    <div>Tổng sai số bình phương: ${ssRes.toFixed(4)}</div>
+                `;
+            } else {
+                statsElement.innerHTML = `
+                    <div>Số điểm: ${points.length}</div>
+                    <div>Hệ số góc (m): --</div>
+                    <div>Hệ số chặn (c): --</div>
+                    <div>R² (độ phù hợp): --</div>
+                    <div>Tổng sai số bình phương: --</div>
+                `;
+            }
+        }
+        
+        // Vẽ lại canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawAxes();
+            drawBestFitLine();
+            drawResiduals();
+            drawPoints();
+        }
+        
+        // Xử lý sự kiện click
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const canvasX = e.clientX - rect.left;
+            const canvasY = e.clientY - rect.top;
+            
+            const graphPos = canvasToGraph(canvasX, canvasY);
+            
+            // Kiểm tra xem điểm có trong phạm vi hợp lệ không
+            if (graphPos.x >= xMin && graphPos.x <= xMax && 
+                graphPos.y >= yMin && graphPos.y <= yMax) {
+                points.push(graphPos);
+                updateDisplay();
+                draw();
+            }
+        });
+        
+        // Các hàm điều khiển
+        function clearPoints() {
+            points = [];
+            bestFitLine = null;
+            updateDisplay();
+            draw();
+        }
+        
+        function addRandomPoints() {
+            for (let i = 0; i < 5; i++) {
+                const x = Math.random() * 8 + 1;
+                const y = Math.random() * 8 + 1;
+                points.push({ x, y });
+            }
+            updateDisplay();
+            draw();
+        }
+        
+        // Xử lý sự kiện checkbox
+        document.getElementById('showResiduals').addEventListener('change', draw);
+        document.getElementById('showGrid').addEventListener('change', draw);
+        
+        // Khởi tạo
+        updateDisplay();
+        draw();
+    </script>
+</body>
+</html> 

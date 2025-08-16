@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Liên Tục & Khả Vi - Giải Tích Thực</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            color: #ffffff;
+            line-height: 1.8;
+            font-size: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
+            font-size: 3.2em;
+            margin-bottom: 40px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        
+        .theory-section {
+            background: rgba(255, 215, 0, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+        
+        select, input[type="number"], input[type="range"], button {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+            padding: 10px 15px;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+        
+        .canvas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+            display: block;
+        }
+        
+        .definition-box {
+            background: rgba(33, 150, 243, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+            margin: 15px 0;
+        }
+        
+        .theorem-box {
+            background: rgba(156, 39, 176, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #9C27B0;
+            margin: 15px 0;
+        }
+        
+        .example-box {
+            background: rgba(76, 175, 80, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            margin: 15px 0;
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            text-align: center;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .epsilon-delta {
+            background: rgba(255, 193, 7, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FFC107;
+            margin: 10px 0;
+        }
+        
+        .function-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .concept-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .concept-card h4 {
+            margin-top: 0;
+            color: #4CAF50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            font-size: 1.6em;
+            font-weight: 800;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Tính Liên Tục & Khả Vi - Giải Tích Thực</h1>
+        
+        <div class="theory-section">
+            <h2>🔍 Nền Tảng Toán Học</h2>
+            <p><strong>Tính Liên Tục:</strong> Hàm f liên tục tại x = c nếu giá trị hàm bằng giới hạn khi x tiến tới c.</p>
+            <p><strong>Tính Khả Vi:</strong> Hàm f khả vi tại x = c nếu giới hạn của thương số hiệu tồn tại.</p>
+            <p><strong>Mối Quan Hệ Chính:</strong> Khả vi kéo theo liên tục, nhưng liên tục không kéo theo khả vi.</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>Lựa Chọn Hàm</h3>
+                <label>Loại Hàm:</label>
+                <select id="functionType">
+                    <option value="continuous">f(x) = x² (Liên tục & Khả vi)</option>
+                    <option value="abs">f(x) = |x| (Liên tục, không khả vi tại 0)</option>
+                    <option value="step">f(x) = floor(x) (Không liên tục cũng không khả vi)</option>
+                    <option value="sin">f(x) = sin(1/x) (Hành vi dao động)</option>
+                    <option value="piecewise">Hàm từng khúc</option>
+                    <option value="removable">Gian đoạn loại được</option>
+                    <option value="jump">Gian đoạn nhảy</option>
+                    <option value="infinite">Gian đoạn vô hạn</option>
+                </select>
+                <div id="functionInfo" class="function-info"></div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Phân Tích ε-δ</h3>
+                <label>Điểm Quan Tâm (c):</label>
+                <input type="number" id="pointC" value="0" step="0.1" min="-5" max="5">
+                <br>
+                <label>Epsilon (ε):</label>
+                <input type="range" id="epsilon" min="0.1" max="2" step="0.1" value="0.5">
+                <span id="epsilonValue">0.5</span>
+                <br>
+                <label>Delta (δ):</label>
+                <input type="range" id="delta" min="0.1" max="2" step="0.1" value="0.5">
+                <span id="deltaValue">0.5</span>
+                <br>
+                <button onclick="findOptimalDelta()">Tìm δ Tối Ưu</button>
+                <div id="epsilonDeltaInfo" class="epsilon-delta"></div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Thương Số Hiệu</h3>
+                <label>Điểm (x):</label>
+                <input type="number" id="diffPoint" value="1" step="0.1" min="-3" max="3">
+                <br>
+                <label>Bước nhảy (h):</label>
+                <input type="range" id="stepSize" min="0.01" max="1" step="0.01" value="0.5">
+                <span id="stepValue">0.5</span>
+                <br>
+                <button onclick="animateLimitProcess()">Mô phỏng h → 0</button>
+                <div id="differenceQuotientInfo" class="function-info"></div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <div>
+                <h3 style="text-align: center;">Đồ Thị Hàm</h3>
+                <canvas id="functionCanvas" width="500" height="400"></canvas>
+            </div>
+            <div>
+                <h3 style="text-align: center;">Minh Họa ε-δ</h3>
+                <canvas id="epsilonDeltaCanvas" width="500" height="400"></canvas>
+            </div>
+            <div>
+                <h3 style="text-align: center;">Thương Số Hiệu</h3>
+                <canvas id="differenceCanvas" width="500" height="400"></canvas>
+            </div>
+            <div>
+                <h3 style="text-align: center;">Phân Tích Tính Liên Tục</h3>
+                <canvas id="continuityCanvas" width="500" height="400"></canvas>
+            </div>
+        </div>
+        
+        <div class="concept-grid">
+            <div class="concept-card">
+                <h4>📐 Định Nghĩa Tính Liên Tục</h4>
+                <div class="definition-box">
+                    <strong>Định nghĩa:</strong> f liên tục tại x = c nếu:
+                    <ol>
+                        <li>f(c) được xác định</li>
+                        <li>lim(x→c) f(x) tồn tại</li>
+                        <li>lim(x→c) f(x) = f(c)</li>
+                    </ol>
+                </div>
+                <div class="formula-box">
+                    Định nghĩa ε-δ:<br>
+                    ∀ε > 0, ∃δ > 0 : |x - c| < δ ⟹ |f(x) - f(c)| < ε
+                </div>
+                <div class="example-box">
+                    <strong>Các Loại Gian Đoạn:</strong><br>
+                    • Loại được: lim tồn tại nhưng ≠ f(c)<br>
+                    • Nhảy: Giới hạn trái và phải tồn tại nhưng khác nhau<br>
+                    • Vô hạn: Hàm tiến tới ±∞
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h4>🎯 Tính Khả Vi</h4>
+                <div class="definition-box">
+                    <strong>Định nghĩa:</strong> f khả vi tại x = c nếu:
+                    <div class="formula-box">
+                        f'(c) = lim(h→0) [f(c+h) - f(c)]/h
+                    </div>
+                    tồn tại (và hữu hạn).
+                </div>
+                <div class="theorem-box">
+                    <strong>Định Lý Cơ Bản:</strong> Nếu f khả vi tại c, thì f liên tục tại c.
+                </div>
+                <div class="example-box">
+                    <strong>Phản ví dụ:</strong> f(x) = |x| liên tục tại 0 nhưng không khả vi (góc nhọn).
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h4>🔍 Các Định Lý Quan Trọng</h4>
+                <div class="theorem-box">
+                    <strong>Định lý Giá trị Trung gian:</strong> Nếu f liên tục trên [a,b] và k nằm giữa f(a) và f(b), thì ∃c ∈ (a,b) : f(c) = k.
+                </div>
+                <div class="theorem-box">
+                    <strong>Định lý Giá trị Cực trị:</strong> Nếu f liên tục trên [a,b], thì f đạt giá trị lớn nhất và nhỏ nhất.
+                </div>
+                <div class="theorem-box">
+                    <strong>Định lý Giá trị Trung bình:</strong> Nếu f liên tục trên [a,b] và khả vi trên (a,b), thì ∃c ∈ (a,b) : f'(c) = [f(b)-f(a)]/(b-a).
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h4>⚡ Uniform Continuity</h4>
+                <div class="definition-box">
+                    <strong>Definition:</strong> f is uniformly continuous on S if:
+                    <div class="formula-box">
+                        ∀ε > 0, ∃δ > 0 : ∀x,y ∈ S, |x-y| < δ ⟹ |f(x)-f(y)| < ε
+                    </div>
+                </div>
+                <div class="theorem-box">
+                    <strong>Heine-Cantor Theorem:</strong> If f is continuous on a compact set K, then f is uniformly continuous on K.
+                </div>
+                <div class="example-box">
+                    <strong>Example:</strong> f(x) = x² is continuous on ℝ but not uniformly continuous on ℝ.
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h4>📊 Higher Order Differentiability</h4>
+                <div class="definition-box">
+                    <strong>C^k Functions:</strong> Functions with k continuous derivatives.
+                    <ul>
+                        <li>C^0: Continuous functions</li>
+                        <li>C^1: Continuously differentiable</li>
+                        <li>C^∞: Infinitely differentiable (smooth)</li>
+                        <li>C^ω: Real analytic functions</li>
+                    </ul>
+                </div>
+                <div class="example-box">
+                    <strong>Examples:</strong><br>
+                    • e^x ∈ C^∞<br>
+                    • |x|³ ∈ C^1 but not C^2<br>
+                    • Weierstrass function: continuous but nowhere differentiable
+                </div>
+            </div>
+            
+            <div class="concept-card">
+                <h4>🎲 Applications</h4>
+                <div class="example-box">
+                    <strong>Physics:</strong><br>
+                    • Position continuity ensures no teleportation<br>
+                    • Velocity differentiability gives acceleration<br>
+                    • Smooth functions model physical systems
+                </div>
+                <div class="example-box">
+                    <strong>Optimization:</strong><br>
+                    • Critical points where f'(x) = 0<br>
+                    • Second derivative test for extrema<br>
+                    • Lagrange multipliers for constrained optimization
+                </div>
+                <div class="example-box">
+                    <strong>Numerical Analysis:</strong><br>
+                    • Continuity ensures convergence of approximations<br>
+                    • Differentiability enables Newton's method<br>
+                    • Smoothness improves interpolation accuracy
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFunction = 'continuous';
+        let pointC = 0;
+        let epsilon = 0.5;
+        let delta = 0.5;
+        let diffPoint = 1;
+        let stepSize = 0.5;
+        let animationRunning = false;
+        
+        // Function definitions
+        const functions = {
+            continuous: {
+                f: (x) => x * x,
+                name: 'f(x) = x²',
+                description: 'Continuous and differentiable everywhere',
+                derivative: (x) => 2 * x,
+                continuousAt: () => true,
+                differentiableAt: () => true
+            },
+            abs: {
+                f: (x) => Math.abs(x),
+                name: 'f(x) = |x|',
+                description: 'Continuous everywhere, not differentiable at x = 0',
+                derivative: (x) => x > 0 ? 1 : x < 0 ? -1 : undefined,
+                continuousAt: () => true,
+                differentiableAt: (x) => x !== 0
+            },
+            step: {
+                f: (x) => Math.floor(x),
+                name: 'f(x) = floor(x)',
+                description: 'Discontinuous at integers, not differentiable',
+                derivative: (x) => x % 1 !== 0 ? 0 : undefined,
+                continuousAt: (x) => x % 1 !== 0,
+                differentiableAt: (x) => x % 1 !== 0
+            },
+            sin: {
+                f: (x) => x !== 0 ? Math.sin(1/x) : 0,
+                name: 'f(x) = sin(1/x) for x≠0, 0 for x=0',
+                description: 'Oscillatory behavior near x = 0',
+                derivative: (x) => x !== 0 ? -Math.cos(1/x)/(x*x) : undefined,
+                continuousAt: (x) => x !== 0,
+                differentiableAt: (x) => x !== 0
+            },
+            piecewise: {
+                f: (x) => x < 0 ? x*x : x >= 0 ? 2*x : 0,
+                name: 'f(x) = {x² if x<0; 2x if x≥0}',
+                description: 'Piecewise function with corner at x = 0',
+                derivative: (x) => x < 0 ? 2*x : x > 0 ? 2 : undefined,
+                continuousAt: (x) => true,
+                differentiableAt: (x) => x !== 0
+            },
+            removable: {
+                f: (x) => x !== 1 ? (x*x - 1)/(x - 1) : 1.5,
+                name: 'f(x) = (x²-1)/(x-1) for x≠1, 1.5 for x=1',
+                description: 'Removable discontinuity at x = 1',
+                derivative: (x) => x !== 1 ? 2 : undefined,
+                continuousAt: (x) => x !== 1,
+                differentiableAt: (x) => x !== 1
+            },
+            jump: {
+                f: (x) => x < 0 ? -1 : x > 0 ? 1 : 0,
+                name: 'f(x) = sign(x)',
+                description: 'Jump discontinuity at x = 0',
+                derivative: (x) => x !== 0 ? 0 : undefined,
+                continuousAt: (x) => x !== 0,
+                differentiableAt: (x) => x !== 0
+            },
+            infinite: {
+                f: (x) => x !== 0 ? 1/x : NaN,
+                name: 'f(x) = 1/x',
+                description: 'Infinite discontinuity at x = 0',
+                derivative: (x) => x !== 0 ? -1/(x*x) : undefined,
+                continuousAt: (x) => x !== 0,
+                differentiableAt: (x) => x !== 0
+            }
+        };
+        
+        function updateFunction() {
+            currentFunction = document.getElementById('functionType').value;
+            const func = functions[currentFunction];
+            
+            document.getElementById('functionInfo').innerHTML = `
+                <strong>${func.name}</strong><br>
+                ${func.description}
+            `;
+            
+            drawAll();
+        }
+        
+        function updateEpsilonDelta() {
+            pointC = parseFloat(document.getElementById('pointC').value);
+            epsilon = parseFloat(document.getElementById('epsilon').value);
+            delta = parseFloat(document.getElementById('delta').value);
+            
+            document.getElementById('epsilonValue').textContent = epsilon.toFixed(1);
+            document.getElementById('deltaValue').textContent = delta.toFixed(1);
+            
+            const func = functions[currentFunction];
+            const isContinuous = func.continuousAt(pointC);
+            const fc = func.f(pointC);
+            
+            let info = `At x = ${pointC}:<br>`;
+            info += `f(${pointC}) = ${isNaN(fc) ? 'undefined' : fc.toFixed(3)}<br>`;
+            info += `Function is ${isContinuous ? 'continuous' : 'discontinuous'} at this point<br>`;
+            
+            if (isContinuous && !isNaN(fc)) {
+                info += `For ε = ${epsilon}, we need δ such that:<br>`;
+                info += `|x - ${pointC}| < δ ⟹ |f(x) - ${fc.toFixed(3)}| < ${epsilon}`;
+            }
+            
+            document.getElementById('epsilonDeltaInfo').innerHTML = info;
+            
+            drawAll();
+        }
+        
+        function updateDifferenceQuotient() {
+            diffPoint = parseFloat(document.getElementById('diffPoint').value);
+            stepSize = parseFloat(document.getElementById('stepSize').value);
+            
+            document.getElementById('stepValue').textContent = stepSize.toFixed(2);
+            
+            const func = functions[currentFunction];
+            const fx = func.f(diffPoint);
+            const fxh = func.f(diffPoint + stepSize);
+            const diffQuotient = (fxh - fx) / stepSize;
+            const derivative = func.derivative ? func.derivative(diffPoint) : undefined;
+            
+            let info = `At x = ${diffPoint}, h = ${stepSize}:<br>`;
+            info += `f(${diffPoint}) = ${fx.toFixed(3)}<br>`;
+            info += `f(${diffPoint} + ${stepSize}) = ${fxh.toFixed(3)}<br>`;
+            info += `Difference quotient = ${diffQuotient.toFixed(3)}<br>`;
+            
+            if (derivative !== undefined) {
+                info += `True derivative = ${derivative.toFixed(3)}<br>`;
+                info += `Error = ${Math.abs(diffQuotient - derivative).toFixed(3)}`;
+            } else {
+                info += `Derivative does not exist at this point`;
+            }
+            
+            document.getElementById('differenceQuotientInfo').innerHTML = info;
+            
+            drawAll();
+        }
+        
+        function findOptimalDelta() {
+            const func = functions[currentFunction];
+            const fc = func.f(pointC);
+            
+            if (!func.continuousAt(pointC) || isNaN(fc)) {
+                alert('Function is not continuous at this point!');
+                return;
+            }
+            
+            // Binary search for optimal delta
+            let optimalDelta = 0.01;
+            for (let d = 0.01; d <= 2; d += 0.01) {
+                let valid = true;
+                for (let x = pointC - d; x <= pointC + d; x += 0.01) {
+                    if (Math.abs(func.f(x) - fc) > epsilon) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    optimalDelta = d;
+                    break;
+                }
+            }
+            
+            document.getElementById('delta').value = optimalDelta;
+            delta = optimalDelta;
+            updateEpsilonDelta();
+        }
+        
+        async function animateLimitProcess() {
+            if (animationRunning) return;
+            animationRunning = true;
+            
+            const originalStep = stepSize;
+            const steps = [1, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001];
+            
+            for (let step of steps) {
+                stepSize = step;
+                document.getElementById('stepSize').value = step;
+                updateDifferenceQuotient();
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            animationRunning = false;
+        }
+        
+        function drawFunction() {
+            const canvas = document.getElementById('functionCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const func = functions[currentFunction];
+            
+            // Draw axes
+            drawAxes(ctx, width, height);
+            
+            // Draw function
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            let started = false;
+            for (let x = -5; x <= 5; x += 0.01) {
+                const y = func.f(x);
+                if (isFinite(y) && Math.abs(y) < 10) {
+                    const canvasX = (x + 5) / 10 * width;
+                    const canvasY = height - (y + 5) / 10 * height;
+                    
+                    if (!started) {
+                        ctx.moveTo(canvasX, canvasY);
+                        started = true;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                } else {
+                    started = false;
+                }
+            }
+            ctx.stroke();
+            
+            // Mark point of interest
+            const fc = func.f(pointC);
+            if (isFinite(fc)) {
+                const canvasX = (pointC + 5) / 10 * width;
+                const canvasY = height - (fc + 5) / 10 * height;
+                
+                ctx.fillStyle = func.continuousAt(pointC) ? '#4CAF50' : '#f44336';
+                ctx.beginPath();
+                ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        function drawEpsilonDelta() {
+            const canvas = document.getElementById('epsilonDeltaCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const func = functions[currentFunction];
+            const fc = func.f(pointC);
+            
+            if (!isFinite(fc)) return;
+            
+            // Draw axes
+            drawAxes(ctx, width, height);
+            
+            // Draw function
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            let started = false;
+            for (let x = -5; x <= 5; x += 0.01) {
+                const y = func.f(x);
+                if (isFinite(y) && Math.abs(y) < 10) {
+                    const canvasX = (x + 5) / 10 * width;
+                    const canvasY = height - (y + 5) / 10 * height;
+                    
+                    if (!started) {
+                        ctx.moveTo(canvasX, canvasY);
+                        started = true;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                } else {
+                    started = false;
+                }
+            }
+            ctx.stroke();
+            
+            // Draw epsilon band
+            const centerX = (pointC + 5) / 10 * width;
+            const centerY = height - (fc + 5) / 10 * height;
+            const epsilonHeight = epsilon / 10 * height;
+            
+            ctx.fillStyle = 'rgba(255, 193, 7, 0.3)';
+            ctx.fillRect(0, centerY - epsilonHeight, width, 2 * epsilonHeight);
+            
+            // Draw delta interval
+            const deltaWidth = delta / 10 * width;
+            ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+            ctx.fillRect(centerX - deltaWidth, 0, 2 * deltaWidth, height);
+            
+            // Draw center point
+            ctx.fillStyle = '#f44336';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function drawDifferenceQuotient() {
+            const canvas = document.getElementById('differenceCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const func = functions[currentFunction];
+            
+            // Draw axes
+            drawAxes(ctx, width, height);
+            
+            // Draw function
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            let started = false;
+            for (let x = -5; x <= 5; x += 0.01) {
+                const y = func.f(x);
+                if (isFinite(y) && Math.abs(y) < 10) {
+                    const canvasX = (x + 5) / 10 * width;
+                    const canvasY = height - (y + 5) / 10 * height;
+                    
+                    if (!started) {
+                        ctx.moveTo(canvasX, canvasY);
+                        started = true;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                } else {
+                    started = false;
+                }
+            }
+            ctx.stroke();
+            
+            // Draw secant line
+            const x1 = diffPoint;
+            const x2 = diffPoint + stepSize;
+            const y1 = func.f(x1);
+            const y2 = func.f(x2);
+            
+            if (isFinite(y1) && isFinite(y2)) {
+                const canvas1X = (x1 + 5) / 10 * width;
+                const canvas1Y = height - (y1 + 5) / 10 * height;
+                const canvas2X = (x2 + 5) / 10 * width;
+                const canvas2Y = height - (y2 + 5) / 10 * height;
+                
+                // Secant line
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(canvas1X, canvas1Y);
+                ctx.lineTo(canvas2X, canvas2Y);
+                ctx.stroke();
+                
+                // Points
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(canvas1X, canvas1Y, 4, 0, 2 * Math.PI);
+                ctx.arc(canvas2X, canvas2Y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Tangent line (if derivative exists)
+                const derivative = func.derivative ? func.derivative(x1) : undefined;
+                if (derivative !== undefined) {
+                    const tangentLength = 2;
+                    const tx1 = x1 - tangentLength;
+                    const ty1 = y1 - derivative * tangentLength;
+                    const tx2 = x1 + tangentLength;
+                    const ty2 = y1 + derivative * tangentLength;
+                    
+                    const tcanvas1X = (tx1 + 5) / 10 * width;
+                    const tcanvas1Y = height - (ty1 + 5) / 10 * height;
+                    const tcanvas2X = (tx2 + 5) / 10 * width;
+                    const tcanvas2Y = height - (ty2 + 5) / 10 * height;
+                    
+                    ctx.strokeStyle = '#4CAF50';
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(tcanvas1X, tcanvas1Y);
+                    ctx.lineTo(tcanvas2X, tcanvas2Y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+        }
+        
+        function drawContinuityAnalysis() {
+            const canvas = document.getElementById('continuityCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw classification of points
+            const testPoints = [-2, -1, 0, 1, 2];
+            const func = functions[currentFunction];
+            
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            testPoints.forEach((x, i) => {
+                const xPos = (i + 1) * width / (testPoints.length + 1);
+                const isCont = func.continuousAt(x);
+                const isDiff = func.differentiableAt(x);
+                const y = func.f(x);
+                
+                // Draw classification
+                ctx.fillStyle = isCont ? (isDiff ? '#4CAF50' : '#FF9800') : '#f44336';
+                ctx.fillRect(xPos - 30, 50, 60, 80);
+                
+                ctx.fillStyle = '#333';
+                ctx.fillText(`x = ${x}`, xPos, 40);
+                ctx.fillText(isFinite(y) ? `f(${x}) = ${y.toFixed(2)}` : 'undefined', xPos, 150);
+                
+                ctx.fillStyle = 'white';
+                ctx.fillText(isCont ? 'Continuous' : 'Discontinuous', xPos, 75);
+                ctx.fillText(isDiff ? 'Differentiable' : 'Not Diff.', xPos, 95);
+                ctx.fillText(`at x = ${x}`, xPos, 115);
+            });
+            
+            // Legend
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillRect(50, height - 100, 20, 20);
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Continuous & Differentiable', 80, height - 85);
+            
+            ctx.fillStyle = '#FF9800';
+            ctx.fillRect(50, height - 70, 20, 20);
+            ctx.fillText('Continuous, Not Differentiable', 80, height - 55);
+            
+            ctx.fillStyle = '#f44336';
+            ctx.fillRect(50, height - 40, 20, 20);
+            ctx.fillText('Discontinuous', 80, height - 25);
+        }
+        
+        function drawAxes(ctx, width, height) {
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            
+            // Grid
+            for (let i = 0; i <= 10; i++) {
+                const x = i * width / 10;
+                const y = i * height / 10;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Main axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // X-axis (y = 0)
+            const zeroY = height - (0 + 5) / 10 * height;
+            ctx.beginPath();
+            ctx.moveTo(0, zeroY);
+            ctx.lineTo(width, zeroY);
+            ctx.stroke();
+            
+            // Y-axis (x = 0)
+            const zeroX = (0 + 5) / 10 * width;
+            ctx.beginPath();
+            ctx.moveTo(zeroX, 0);
+            ctx.lineTo(zeroX, height);
+            ctx.stroke();
+        }
+        
+        function drawAll() {
+            drawFunction();
+            drawEpsilonDelta();
+            drawDifferenceQuotient();
+            drawContinuityAnalysis();
+        }
+        
+        // Event listeners
+        document.getElementById('functionType').addEventListener('change', updateFunction);
+        document.getElementById('pointC').addEventListener('input', updateEpsilonDelta);
+        document.getElementById('epsilon').addEventListener('input', updateEpsilonDelta);
+        document.getElementById('delta').addEventListener('input', updateEpsilonDelta);
+        document.getElementById('diffPoint').addEventListener('input', updateDifferenceQuotient);
+        document.getElementById('stepSize').addEventListener('input', updateDifferenceQuotient);
+        
+        // Initialize
+        updateFunction();
+        updateEpsilonDelta();
+        updateDifferenceQuotient();
+    </script>
+</body>
+</html>

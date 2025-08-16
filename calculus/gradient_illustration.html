@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient - GPS của Neural Networks Training</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .gradient-info {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .function-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Bài 2: Gradient - GPS của Deep Learning Training</h1>
+        
+        <div class="info">
+            <h2>🚀 Tại sao Gradient là linh hồn của AI?</h2>
+            <p><strong>Gradient = hướng tăng nhanh nhất của function!</strong> Mọi neural network đều học thông qua gradient descent - đi ngược hướng gradient để minimize loss function. Backpropagation chính là việc tính gradient qua chain rule!</p>
+            
+            <div style="background: rgba(255, 215, 0, 0.2); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h3>🧠 Deep Learning Reality:</h3>
+                <ul>
+                    <li><strong>🎯 Training GPT-3:</strong> 175 billion parameters được update qua gradients!</li>
+                    <li><strong>🖼️ Image Recognition:</strong> CNN học edge detectors qua gradient-based optimization</li>
+                    <li><strong>🗣️ Speech Recognition:</strong> RNNs học sequence patterns từ gradient signals</li>
+                    <li><strong>🎮 Game AI:</strong> AlphaGo sử dụng policy gradients để master Go</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>Chọn hàm số</h3>
+                <div class="function-selector">
+                    <button onclick="setFunction('quadratic')">f(x,y) = x² + y²</button>
+                    <button onclick="setFunction('linear')">f(x,y) = x + y</button>
+                    <button onclick="setFunction('product')">f(x,y) = xy</button>
+                    <button onclick="setFunction('rosenbrock')">Rosenbrock</button>
+                    <button onclick="setFunction('custom')">f(x,y) = ax² + by² + c</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Tham số hàm số</h3>
+                <label>a: <span id="param-a">1</span></label>
+                <input type="range" id="param-a-slider" min="0.1" max="3" value="1" step="0.1">
+                <label>b: <span id="param-b">1</span></label>
+                <input type="range" id="param-b-slider" min="0.1" max="3" value="1" step="0.1">
+                <label>c: <span id="param-c">0</span></label>
+                <input type="range" id="param-c-slider" min="-5" max="5" value="0" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <h3>Điểm quan sát</h3>
+                <label>X: <span id="point-x">2</span></label>
+                <input type="range" id="point-x-slider" min="-5" max="5" value="2" step="0.1">
+                <label>Y: <span id="point-y">1</span></label>
+                <input type="range" id="point-y-slider" min="-5" max="5" value="1" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <h3>Hiển thị</h3>
+                <label><input type="checkbox" id="show-level-curves" checked> Level Curves</label>
+                <label><input type="checkbox" id="show-gradient" checked> Gradient Vectors</label>
+                <label><input type="checkbox" id="show-point" checked> Điểm quan sát</label>
+                <label><input type="checkbox" id="show-perpendicular" checked> ⊥ Perpendicular Lines</label>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="gradientCanvas" width="600" height="400"></canvas>
+        </div>
+        
+        <div class="info">
+            <h3>📊 Thông tin Gradient</h3>
+            <div class="gradient-info" id="gradient-info">
+                Gradient tại điểm (2, 1): ∇f = [4, 2]<br>
+                Độ lớn gradient: |∇f| = 4.47<br>
+                Hướng tăng nhanh nhất: [0.89, 0.45]
+            </div>
+            
+            <h3>🧠 Gradient trong Deep Learning:</h3>
+            <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h4>🔴 Gradient Descent Algorithm:</h4>
+                <p><strong>θ = θ - α∇f(θ)</strong> (α = learning rate)</p>
+                <p>Neural networks update billions parameters using this simple rule!</p>
+                
+                <h4>🟢 Backpropagation = Chain Rule:</h4>
+                <p><strong>∂Loss/∂w₁ = (∂Loss/∂output) × (∂output/∂w₁)</strong></p>
+                <p>Gradient flows backward through network layers via chain rule</p>
+                
+                <h4>🔵 Gradient Problems & Solutions:</h4>
+                <ul>
+                    <li><strong>Vanishing Gradients:</strong> |∇f| → 0, training slows down (ReLU activation solves this)</li>
+                    <li><strong>Exploding Gradients:</strong> |∇f| → ∞, training unstable (Gradient clipping solves this)</li>
+                    <li><strong>Saddle Points:</strong> Gradient = 0 nhưng không phải minimum (Momentum helps escape)</li>
+                </ul>
+            </div>
+            
+            <h3>🎯 Real-world ML Applications:</h3>
+            <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h4>📈 Loss Function Optimization:</h4>
+                <ul>
+                    <li><strong>Linear Regression:</strong> MSE loss = ½Σ(y - ŷ)², gradient = -X^T(y - Xθ)</li>
+                    <li><strong>Logistic Regression:</strong> Cross-entropy loss, gradient qua sigmoid activation</li>
+                    <li><strong>Neural Networks:</strong> Complex loss landscapes với millions local minima</li>
+                </ul>
+                
+                <h4>🚀 Advanced Optimizers:</h4>
+                <ul>
+                    <li><strong>SGD + Momentum:</strong> Accelerated gradients, escape local minima</li>
+                    <li><strong>Adam:</strong> Adaptive learning rates, industry standard cho deep learning</li>
+                    <li><strong>RMSprop:</strong> Root Mean Square Propagation, good cho RNNs</li>
+                </ul>
+            </div>
+            
+            <h3>💼 Industry Success Stories:</h3>
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <ul>
+                    <li><strong>🎬 Netflix:</strong> Recommendation system trained với gradient descent → $15B revenue</li>
+                    <li><strong>🚗 Tesla:</strong> Autopilot neural networks = gradient-based computer vision</li>
+                    <li><strong>📱 Siri/Alexa:</strong> Speech recognition models trained qua gradient methods</li>
+                    <li><strong>🏥 Medical AI:</strong> Cancer detection models achieve 94% accuracy qua optimization</li>
+                </ul>
+            </div>
+            
+            <h3>🎯 Gradient & Level Curves - The Heart of Optimization!</h3>
+            <div style="background: rgba(255, 20, 147, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(255, 20, 147, 0.3);">
+                <h4>🔥 Critical Insight: Gradient ALWAYS perpendicular to Level Curves!</h4>
+                <p><strong>Tại sao?</strong> Level curve = f(x,y) = constant. Moving along level curve → function value không đổi → df = 0</p>
+                <p><strong>Mathematically:</strong> df = (∂f/∂x)dx + (∂f/∂y)dy = ∇f · [dx, dy] = 0</p>
+                <p><strong>Result:</strong> Gradient ⊥ tangent vector của level curve!</p>
+                
+                <h4>🧠 ML Interpretation - Why This Matters:</h4>
+                <ul>
+                    <li><strong>🎯 Gradient Descent:</strong> Gradient points away from level curves → fastest escape route!</li>
+                    <li><strong>⚡ Newton's Method:</strong> Uses curvature to predict where level curves bend</li>
+                    <li><strong>🔍 Constrained Optimization:</strong> Lagrange multipliers = gradients must align with constraint curves</li>
+                    <li><strong>🎪 Neural Networks:</strong> Loss function level curves = contours of same error</li>
+                </ul>
+                
+                <h4>🔬 Visual Proof in Action:</h4>
+                <p>Watch the visualization: Gradient arrows NEVER run parallel to level curves - they always cut through them at 90°!</p>
+                <p><strong>Engineering Reality:</strong> GPS navigation, robotic pathfinding, economic optimization - all use this principle!</p>
+            </div>
+            
+            <h3>🔬 Mathematical Foundation:</h3>
+            <div style="background: rgba(108, 117, 125, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <ul>
+                    <li><strong>Gradient ∇f:</strong> Vector của partial derivatives [∂f/∂x, ∂f/∂y, ∂f/∂z, ...]</li>
+                    <li><strong>Directional Derivative:</strong> D_u f = ∇f · u (rate of change theo direction u)</li>
+                    <li><strong>Steepest Ascent:</strong> Direction của maximum increase = ∇f/|∇f|</li>
+                    <li><strong>Level Sets:</strong> f(x,y) = c, gradient perpendicular to level curves</li>
+                    <li><strong>Critical Points:</strong> ∇f = 0, potential minima/maxima/saddle points</li>
+                    <li><strong>⊥ Perpendicularity:</strong> ∇f · tangent_vector = 0 (fundamental optimization principle)</li>
+                </ul>
+            </div>
+            
+            <h3>🔥 Gradient-Level Curve Applications in ML & Engineering:</h3>
+            <div style="background: rgba(255, 140, 0, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h4>🎯 Gradient Descent Navigation:</h4>
+                <ul>
+                    <li><strong>🧭 Why it works:</strong> Gradient ⊥ level curves → steepest path away from current loss level</li>
+                    <li><strong>🎪 Neural Networks:</strong> Each weight update moves perpendicular to current error contour</li>
+                    <li><strong>🏔️ Mountain Climbing Analogy:</strong> Always walk perpendicular to elevation lines for steepest ascent</li>
+                </ul>
+                
+                <h4>🚗 Real-world Examples:</h4>
+                <ul style="font-size: 13px;">
+                    <li><strong>GPS Navigation:</strong> Gradient of travel time function ⊥ isochrone lines (constant travel time)</li>
+                    <li><strong>Heat Transfer:</strong> Heat flow ⊥ isotherms (temperature level curves)</li>
+                    <li><strong>Economics:</strong> Price gradient ⊥ indifference curves (constant utility)</li>
+                    <li><strong>Computer Graphics:</strong> Normal mapping uses gradient ⊥ surface level curves</li>
+                </ul>
+                
+                <h4>⚡ Mathematical Proof:</h4>
+                <p style="font-family: monospace; background: rgba(0,0,0,0.2); padding: 10px;">
+                Level curve: f(x,y) = c<br>
+                Implicit differentiation: ∂f/∂x + (∂f/∂y)(dy/dx) = 0<br>
+                Slope of level curve: dy/dx = -(∂f/∂x)/(∂f/∂y)<br>
+                Gradient slope: (∂f/∂y)/(∂f/∂x)<br>
+                Product = -1 → Perpendicular! ✓
+                </p>
+            </div>
+            
+            <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <h3>⚡ Interactive Experiments - Test the Theory:</h3>
+                <ol>
+                    <li><strong>🔵 Quadratic Bowl:</strong> Perfect convex function, gradient always points to minimum. Notice green tangent lines!</li>
+                    <li><strong>⚪ Move observation point:</strong> Watch how gradient rotates but ALWAYS stays ⊥ to level curves</li>
+                    <li><strong>🎛️ Try different functions:</strong> Linear, product, custom - perpendicularity holds universally!</li>
+                    <li><strong>🔍 Zoom in close:</strong> Even at tiny scales, 90° relationship is mathematically exact</li>
+                    <li><strong>🎯 Challenge:</strong> Find ANY point where gradient isn't perpendicular (spoiler: impossible!)</li>
+                </ol>
+                
+                <div style="background: rgba(255, 255, 0, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>💡 Pro Tip:</strong> Toggle "⊥ Perpendicular Lines" to see the tangent direction to level curves. 
+                    Green dashed line = direction you can move without changing function value!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gradientCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentFunction = 'quadratic';
+        let params = { a: 1, b: 1, c: 0 };
+        let point = { x: 2, y: 1 };
+        let showLevelCurves = true;
+        let showGradient = true;
+        let showPoint = true;
+        let showPerpendicular = true;
+        
+        // Setup event listeners
+        document.getElementById('param-a-slider').addEventListener('input', updateParams);
+        document.getElementById('param-b-slider').addEventListener('input', updateParams);
+        document.getElementById('param-c-slider').addEventListener('input', updateParams);
+        document.getElementById('point-x-slider').addEventListener('input', updatePoint);
+        document.getElementById('point-y-slider').addEventListener('input', updatePoint);
+        document.getElementById('show-level-curves').addEventListener('change', updateDisplay);
+        document.getElementById('show-gradient').addEventListener('change', updateDisplay);
+        document.getElementById('show-point').addEventListener('change', updateDisplay);
+        document.getElementById('show-perpendicular').addEventListener('change', updateDisplay);
+        
+        function setFunction(func) {
+            currentFunction = func;
+            updateParams();
+        }
+        
+        function updateParams() {
+            const aSlider = document.getElementById('param-a-slider');
+            const bSlider = document.getElementById('param-b-slider');
+            const cSlider = document.getElementById('param-c-slider');
+            
+            params.a = parseFloat(aSlider.value);
+            params.b = parseFloat(bSlider.value);
+            params.c = parseFloat(cSlider.value);
+            
+            document.getElementById('param-a').textContent = params.a.toFixed(1);
+            document.getElementById('param-b').textContent = params.b.toFixed(1);
+            document.getElementById('param-c').textContent = params.c.toFixed(1);
+            
+            drawGradient();
+            updateInfo();
+        }
+        
+        function updatePoint() {
+            const xSlider = document.getElementById('point-x-slider');
+            const ySlider = document.getElementById('point-y-slider');
+            
+            point.x = parseFloat(xSlider.value);
+            point.y = parseFloat(ySlider.value);
+            
+            document.getElementById('point-x').textContent = point.x.toFixed(1);
+            document.getElementById('point-y').textContent = point.y.toFixed(1);
+            
+            drawGradient();
+            updateInfo();
+        }
+        
+        function updateDisplay() {
+            showLevelCurves = document.getElementById('show-level-curves').checked;
+            showGradient = document.getElementById('show-gradient').checked;
+            showPoint = document.getElementById('show-point').checked;
+            showPerpendicular = document.getElementById('show-perpendicular').checked;
+            drawGradient();
+        }
+        
+        function evaluateFunction(x, y) {
+            switch(currentFunction) {
+                case 'quadratic':
+                    return x * x + y * y;
+                case 'linear':
+                    return x + y;
+                case 'product':
+                    return x * y;
+                case 'rosenbrock':
+                    // Classic Rosenbrock function: (1-x)² + 100(y-x²)²
+                    return Math.pow(1 - x, 2) + 100 * Math.pow(y - x * x, 2);
+                case 'custom':
+                    return params.a * x * x + params.b * y * y + params.c;
+                default:
+                    return x * x + y * y;
+            }
+        }
+        
+        function evaluateGradient(x, y) {
+            switch(currentFunction) {
+                case 'quadratic':
+                    return { x: 2 * x, y: 2 * y };
+                case 'linear':
+                    return { x: 1, y: 1 };
+                case 'product':
+                    return { x: y, y: x };
+                case 'rosenbrock':
+                    // Gradient of Rosenbrock: ∇f = [2(x-1) + 400x(x²-y), 200(y-x²)]
+                    const gradX = 2 * (x - 1) + 400 * x * (x * x - y);
+                    const gradY = 200 * (y - x * x);
+                    return { x: gradX, y: gradY };
+                case 'custom':
+                    return { x: 2 * params.a * x, y: 2 * params.b * y };
+                default:
+                    return { x: 2 * x, y: 2 * y };
+            }
+        }
+        
+        function getFunctionString() {
+            switch(currentFunction) {
+                case 'quadratic':
+                    return 'f(x,y) = x² + y²';
+                case 'linear':
+                    return 'f(x,y) = x + y';
+                case 'product':
+                    return 'f(x,y) = xy';
+                case 'rosenbrock':
+                    return 'f(x,y) = (1-x)² + 100(y-x²)²';
+                case 'custom':
+                    return `f(x,y) = ${params.a.toFixed(1)}x² + ${params.b.toFixed(1)}y² + ${params.c.toFixed(1)}`;
+                default:
+                    return 'f(x,y) = x² + y²';
+            }
+        }
+        
+        function drawGradient() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 30;
+            
+            // Draw grid
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= canvas.width; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= canvas.height; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Draw level curves
+            if (showLevelCurves) {
+                ctx.strokeStyle = '#4ecdc4';
+                ctx.lineWidth = 1;
+                
+                const levels = currentFunction === 'rosenbrock' ? 
+                    [0.1, 0.5, 1, 2, 5, 10, 20, 50, 100] :
+                    [0.5, 1, 2, 3, 4, 5, 6, 8, 10];
+                for (let level of levels) {
+                    drawLevelCurve(level, centerX, centerY, scale);
+                }
+            }
+            
+            // Draw gradient vectors
+            if (showGradient) {
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                
+                for (let i = -4; i <= 4; i++) {
+                    for (let j = -3; j <= 3; j++) {
+                        const x = i;
+                        const y = j;
+                        const gradient = evaluateGradient(x, y);
+                        const magnitude = Math.sqrt(gradient.x * gradient.x + gradient.y * gradient.y);
+                        
+                        if (magnitude > 0.1) {
+                            const normalizedGradient = {
+                                x: gradient.x / magnitude * 15,
+                                y: gradient.y / magnitude * 15
+                            };
+                            
+                            const startX = centerX + x * scale;
+                            const startY = centerY - y * scale;
+                            const endX = startX + normalizedGradient.x;
+                            const endY = startY - normalizedGradient.y;
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(startX, startY);
+                            ctx.lineTo(endX, endY);
+                            ctx.stroke();
+                            
+                            // Arrow head
+                            const angle = Math.atan2(-normalizedGradient.y, normalizedGradient.x);
+                            const arrowLength = 5;
+                            ctx.beginPath();
+                            ctx.moveTo(endX, endY);
+                            ctx.lineTo(endX - arrowLength * Math.cos(angle - Math.PI/6), 
+                                      endY - arrowLength * Math.sin(angle - Math.PI/6));
+                            ctx.moveTo(endX, endY);
+                            ctx.lineTo(endX - arrowLength * Math.cos(angle + Math.PI/6), 
+                                      endY - arrowLength * Math.sin(angle + Math.PI/6));
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+            
+            // Draw observation point
+            if (showPoint) {
+                const pointX = centerX + point.x * scale;
+                const pointY = centerY - point.y * scale;
+                
+                ctx.fillStyle = '#45b7d1';
+                ctx.beginPath();
+                ctx.arc(pointX, pointY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#45b7d1';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(pointX, 0);
+                ctx.lineTo(pointX, canvas.height);
+                ctx.moveTo(0, pointY);
+                ctx.lineTo(canvas.width, pointY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw gradient at observation point
+                const gradient = evaluateGradient(point.x, point.y);
+                const magnitude = Math.sqrt(gradient.x * gradient.x + gradient.y * gradient.y);
+                
+                if (magnitude > 0.1) {
+                    const normalizedGradient = {
+                        x: gradient.x / magnitude * 25,
+                        y: gradient.y / magnitude * 25
+                    };
+                    
+                    const endX = pointX + normalizedGradient.x;
+                    const endY = pointY - normalizedGradient.y;
+                    
+                    ctx.strokeStyle = '#ff6b6b';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(pointX, pointY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
+                    
+                    // Arrow head
+                    const angle = Math.atan2(-normalizedGradient.y, normalizedGradient.x);
+                    const arrowLength = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(endX, endY);
+                    ctx.lineTo(endX - arrowLength * Math.cos(angle - Math.PI/6), 
+                              endY - arrowLength * Math.sin(angle - Math.PI/6));
+                    ctx.moveTo(endX, endY);
+                    ctx.lineTo(endX - arrowLength * Math.cos(angle + Math.PI/6), 
+                              endY - arrowLength * Math.sin(angle + Math.PI/6));
+                    ctx.stroke();
+                    
+                    // Draw perpendicular line to show relationship with level curve
+                    if (showPerpendicular) {
+                        ctx.strokeStyle = '#00ff00';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([3, 3]);
+                        
+                        // Perpendicular vector (rotate gradient by 90 degrees)
+                        const perpVector = {
+                            x: -normalizedGradient.y * 0.8,
+                            y: normalizedGradient.x * 0.8
+                        };
+                        
+                        const perpEndX1 = pointX + perpVector.x;
+                        const perpEndY1 = pointY - perpVector.y;
+                        const perpEndX2 = pointX - perpVector.x;
+                        const perpEndY2 = pointY + perpVector.y;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(perpEndX1, perpEndY1);
+                        ctx.lineTo(perpEndX2, perpEndY2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        
+                        // Add perpendicular symbol at intersection
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        const symbolSize = 8;
+                        ctx.beginPath();
+                        ctx.rect(pointX - symbolSize/2, pointY - symbolSize/2, symbolSize, symbolSize);
+                        ctx.stroke();
+                        
+                        // Add labels
+                        ctx.fillStyle = '#00ff00';
+                        ctx.font = '11px Arial';
+                        ctx.fillText('Tangent to level curve', perpEndX1 + 5, perpEndY1 - 5);
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.fillText('∇f (Gradient)', endX + 5, endY - 5);
+                    }
+                }
+            }
+            
+            // Labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('O', centerX - 15, centerY + 15);
+            if (showPoint) {
+                ctx.fillText(`(${point.x.toFixed(1)}, ${point.y.toFixed(1)})`, pointX + 10, pointY - 10);
+            }
+        }
+        
+        function drawLevelCurve(level, centerX, centerY, scale) {
+            if (currentFunction === 'rosenbrock') {
+                // Use contour tracing for complex functions like Rosenbrock
+                drawContour(level, centerX, centerY, scale);
+                return;
+            }
+            
+            const points = [];
+            
+            // Generate points for level curve
+            for (let angle = 0; angle <= 2 * Math.PI; angle += 0.1) {
+                let x, y;
+                
+                switch(currentFunction) {
+                    case 'quadratic':
+                        const radius = Math.sqrt(level);
+                        x = radius * Math.cos(angle);
+                        y = radius * Math.sin(angle);
+                        break;
+                    case 'linear':
+                        // For linear function, level curves are lines
+                        if (Math.abs(level) < 0.1) {
+                            x = 0;
+                            y = 0;
+                        } else {
+                            x = level * Math.cos(angle);
+                            y = level * Math.sin(angle);
+                        }
+                        break;
+                    case 'product':
+                        // For xy = level, we have hyperbolas
+                        if (Math.abs(level) < 0.1) {
+                            x = 0;
+                            y = 0;
+                        } else {
+                            x = Math.sqrt(Math.abs(level)) * Math.cos(angle);
+                            y = level / x;
+                        }
+                        break;
+                    case 'custom':
+                        const a = params.a;
+                        const b = params.b;
+                        const c = params.c;
+                        const adjustedLevel = level - c;
+                        
+                        if (adjustedLevel <= 0) continue;
+                        
+                        const radiusX = Math.sqrt(adjustedLevel / a);
+                        const radiusY = Math.sqrt(adjustedLevel / b);
+                        x = radiusX * Math.cos(angle);
+                        y = radiusY * Math.sin(angle);
+                        break;
+                    default:
+                        const r = Math.sqrt(level);
+                        x = r * Math.cos(angle);
+                        y = r * Math.sin(angle);
+                }
+                
+                if (Math.abs(x) <= 5 && Math.abs(y) <= 4) {
+                    points.push({
+                        x: centerX + x * scale,
+                        y: centerY - y * scale
+                    });
+                }
+            }
+            
+            if (points.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        function drawContour(level, centerX, centerY, scale) {
+            // Simple contour drawing using marching squares approach
+            const resolution = 50;
+            const range = 5;
+            
+            for (let i = 0; i < resolution - 1; i++) {
+                for (let j = 0; j < resolution - 1; j++) {
+                    const x0 = -range + (i / resolution) * 2 * range;
+                    const y0 = -range + (j / resolution) * 2 * range;
+                    const x1 = -range + ((i + 1) / resolution) * 2 * range;
+                    const y1 = -range + ((j + 1) / resolution) * 2 * range;
+                    
+                    const v00 = evaluateFunction(x0, y0);
+                    const v10 = evaluateFunction(x1, y0);
+                    const v01 = evaluateFunction(x0, y1);
+                    const v11 = evaluateFunction(x1, y1);
+                    
+                    // Check if contour level crosses this cell
+                    if ((v00 - level) * (v10 - level) < 0 || 
+                        (v10 - level) * (v11 - level) < 0 ||
+                        (v11 - level) * (v01 - level) < 0 ||
+                        (v01 - level) * (v00 - level) < 0) {
+                        
+                        // Draw a small segment (simplified approach)
+                        const midX = (x0 + x1) / 2;
+                        const midY = (y0 + y1) / 2;
+                        
+                        ctx.fillStyle = '#4ecdc4';
+                        ctx.fillRect(centerX + midX * scale - 1, centerY - midY * scale - 1, 2, 2);
+                    }
+                }
+            }
+        }
+        
+        function updateInfo() {
+            const gradient = evaluateGradient(point.x, point.y);
+            const magnitude = Math.sqrt(gradient.x * gradient.x + gradient.y * gradient.y);
+            const normalizedGradient = {
+                x: gradient.x / magnitude,
+                y: gradient.y / magnitude
+            };
+            
+            const functionValue = evaluateFunction(point.x, point.y);
+            
+            // Calculate perpendicular direction (tangent to level curve)
+            const perpDirection = magnitude > 0.1 ? {
+                x: -gradient.y / magnitude,
+                y: gradient.x / magnitude
+            } : { x: 0, y: 0 };
+            
+            let infoText = `Hàm số: ${getFunctionString()}<br>`;
+            infoText += `Điểm quan sát: (${point.x.toFixed(1)}, ${point.y.toFixed(1)})<br>`;
+            infoText += `Giá trị hàm số: f(${point.x.toFixed(1)}, ${point.y.toFixed(1)}) = ${functionValue.toFixed(2)}<br>`;
+            infoText += `Gradient tại điểm: ∇f = [${gradient.x.toFixed(2)}, ${gradient.y.toFixed(2)}]<br>`;
+            infoText += `Độ lớn gradient: |∇f| = ${magnitude.toFixed(2)}<br>`;
+            infoText += `Hướng tăng nhanh nhất: [${normalizedGradient.x.toFixed(2)}, ${normalizedGradient.y.toFixed(2)}]<br>`;
+            infoText += `<span style="color: #00ff00;">🔄 Tangent direction: [${perpDirection.x.toFixed(2)}, ${perpDirection.y.toFixed(2)}] (⊥ to gradient!)</span>`;
+            
+            document.getElementById('gradient-info').innerHTML = infoText;
+        }
+        
+        // Initial draw
+        drawGradient();
+        updateInfo();
+    </script>
+</body>
+</html> 

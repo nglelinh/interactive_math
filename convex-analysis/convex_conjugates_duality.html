@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convex Conjugates & Duality - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 450px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .function-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .conjugate-info {
+            background: rgba(255, 0, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            border-left: 3px solid #ff00ff;
+        }
+        
+        .duality-gap {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffff00;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 380px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .function-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .function-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .function-button:hover {
+            background: #555;
+        }
+        
+        .function-button.active {
+            background: #f39c12;
+            color: #000;
+        }
+        
+        .tangent-line {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #00ff00;
+        }
+        
+        .optimization-problem {
+            background: rgba(255, 165, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.3;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffa500;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>🔄 Convex Conjugates & Duality</strong><br/>
+                Interactive exploration of convex conjugate functions, Fenchel duality, and geometric interpretations.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Original Function f(x)</div>
+                    <div class="legend-item" style="color: #ff00ff;">🟣 Conjugate Function f*(y)</div>
+                    <div class="legend-item" style="color: #00ff00;">🟢 Tangent Line yx - f*(y)</div>
+                    <div class="legend-item" style="color: #ff6b6b;">🔴 Supporting Hyperplane</div>
+                    <div class="legend-item" style="color: #ffa500;">🟠 Epigraph</div>
+                    <div class="legend-item" style="color: #ffff00;">🟡 Dual Point</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Function Selection</h3>
+                <div class="function-selector">
+                    <button class="function-button active" onclick="selectFunction('quadratic')">Quadratic</button>
+                    <button class="function-button" onclick="selectFunction('absolute')">Absolute Value</button>
+                    <button class="function-button" onclick="selectFunction('exponential')">Exponential</button>
+                    <button class="function-button" onclick="selectFunction('logistic')">Log-Sum-Exp</button>
+                    <button class="function-button" onclick="selectFunction('norm')">Euclidean Norm</button>
+                    <button class="function-button" onclick="selectFunction('entropy')">Negative Entropy</button>
+                    <button class="function-button" onclick="selectFunction('hinge')">Hinge Loss</button>
+                    <button class="function-button" onclick="selectFunction('huber')">Huber Loss</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Function</h3>
+                <div id="function-info" class="function-info">
+                    <!-- Function information will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Conjugate Function</h3>
+                <div id="conjugate-info" class="conjugate-info">
+                    <!-- Conjugate function information will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Interactive Duality</h3>
+                <div class="slider-group">
+                    <label>Dual Variable y:</label>
+                    <input type="range" id="dualVariable" min="-3" max="3" step="0.1" value="1">
+                    <div class="slider-value" id="dualVariableValue">1.0</div>
+                </div>
+                <div id="tangent-line" class="tangent-line">
+                    <!-- Tangent line information will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Optimization Problem</h3>
+                <div id="optimization-problem" class="optimization-problem">
+                    <!-- Optimization problem will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Duality Gap Analysis</h3>
+                <div id="duality-gap" class="duality-gap">
+                    <!-- Duality gap analysis will be displayed here -->
+                </div>
+                <div class="slider-group">
+                    <label>Primal Variable x:</label>
+                    <input type="range" id="primalVariable" min="-3" max="3" step="0.1" value="0">
+                    <div class="slider-value" id="primalVariableValue">0.0</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-function" onclick="toggleVisualization('function')">
+                        Original Function
+                    </div>
+                    <div class="toggle-button active" id="toggle-conjugate" onclick="toggleVisualization('conjugate')">
+                        Conjugate Function
+                    </div>
+                    <div class="toggle-button active" id="toggle-tangent" onclick="toggleVisualization('tangent')">
+                        Tangent Line
+                    </div>
+                    <div class="toggle-button" id="toggle-epigraph" onclick="toggleVisualization('epigraph')">
+                        Epigraph
+                    </div>
+                    <div class="toggle-button" id="toggle-hyperplane" onclick="toggleVisualization('hyperplane')">
+                        Support Hyperplane
+                    </div>
+                    <div class="toggle-button active" id="toggle-dualpoint" onclick="toggleVisualization('dualpoint')">
+                        Dual Point
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Advanced Controls</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="animateDuality()">
+                        🎬 Animate Duality
+                    </div>
+                    <div class="toggle-button" onclick="resetView()">
+                        🔄 Reset View
+                    </div>
+                    <div class="toggle-button" onclick="showBiconjugate()">
+                        🔄🔄 Biconjugate
+                    </div>
+                    <div class="toggle-button" onclick="findSaddlePoint()">
+                        🎯 Saddle Point
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 60;
+        
+        // Current function and parameters
+        let currentFunction = 'quadratic';
+        let dualVariable = 1;
+        let primalVariable = 0;
+        let isAnimating = false;
+        let animationId = null;
+        
+        // Visualization options
+        let showOptions = {
+            function: true,
+            conjugate: true,
+            tangent: true,
+            epigraph: false,
+            hyperplane: false,
+            dualpoint: true
+        };
+        
+        // Function definitions with conjugates
+        const functions = {
+            quadratic: {
+                name: 'Quadratic Function',
+                formula: 'f(x) = ½x²',
+                func: (x) => 0.5 * x * x,
+                conjugate: (y) => 0.5 * y * y,
+                conjugateFormula: 'f*(y) = ½y²',
+                subdifferential: (x) => x,
+                domain: 'ℝ',
+                conjugateDomain: 'ℝ',
+                convex: true
+            },
+            absolute: {
+                name: 'Absolute Value',
+                formula: 'f(x) = |x|',
+                func: (x) => Math.abs(x),
+                conjugate: (y) => Math.abs(y) <= 1 ? 0 : Infinity,
+                conjugateFormula: 'f*(y) = δ(y ∈ [-1,1])',
+                subdifferential: (x) => x >= 0 ? 1 : -1,
+                domain: 'ℝ',
+                conjugateDomain: '[-1,1]',
+                convex: true
+            },
+            exponential: {
+                name: 'Exponential Function',
+                formula: 'f(x) = eˣ',
+                func: (x) => Math.exp(x),
+                conjugate: (y) => y <= 0 ? Infinity : y * Math.log(y) - y,
+                conjugateFormula: 'f*(y) = y log(y) - y, y > 0',
+                subdifferential: (x) => Math.exp(x),
+                domain: 'ℝ',
+                conjugateDomain: 'ℝ₊',
+                convex: true
+            },
+            logistic: {
+                name: 'Log-Sum-Exp',
+                formula: 'f(x) = log(1 + eˣ)',
+                func: (x) => Math.log(1 + Math.exp(x)),
+                conjugate: (y) => {
+                    if (y <= 0 || y >= 1) return Infinity;
+                    return y * Math.log(y) + (1-y) * Math.log(1-y);
+                },
+                conjugateFormula: 'f*(y) = y log(y) + (1-y)log(1-y), y ∈ (0,1)',
+                subdifferential: (x) => 1 / (1 + Math.exp(-x)),
+                domain: 'ℝ',
+                conjugateDomain: '(0,1)',
+                convex: true
+            },
+            norm: {
+                name: 'Euclidean Norm (1D)',
+                formula: 'f(x) = |x|',
+                func: (x) => Math.abs(x),
+                conjugate: (y) => Math.abs(y) <= 1 ? 0 : Infinity,
+                conjugateFormula: 'f*(y) = δ(|y| ≤ 1)',
+                subdifferential: (x) => x >= 0 ? 1 : -1,
+                domain: 'ℝ',
+                conjugateDomain: '[-1,1]',
+                convex: true
+            },
+            entropy: {
+                name: 'Negative Entropy',
+                formula: 'f(x) = x log(x) - x, x > 0',
+                func: (x) => x > 0 ? x * Math.log(x) - x : Infinity,
+                conjugate: (y) => Math.exp(y),
+                conjugateFormula: 'f*(y) = eʸ',
+                subdifferential: (x) => x > 0 ? Math.log(x) : NaN,
+                domain: 'ℝ₊',
+                conjugateDomain: 'ℝ',
+                convex: true
+            },
+            hinge: {
+                name: 'Hinge Loss',
+                formula: 'f(x) = max(0, 1-x)',
+                func: (x) => Math.max(0, 1 - x),
+                conjugate: (y) => {
+                    if (y < -1 || y > 0) return Infinity;
+                    return -y;
+                },
+                conjugateFormula: 'f*(y) = -y, y ∈ [-1,0]',
+                subdifferential: (x) => x < 1 ? -1 : 0,
+                domain: 'ℝ',
+                conjugateDomain: '[-1,0]',
+                convex: true
+            },
+            huber: {
+                name: 'Huber Loss',
+                formula: 'f(x) = ½x² if |x| ≤ 1, |x| - ½ otherwise',
+                func: (x) => Math.abs(x) <= 1 ? 0.5 * x * x : Math.abs(x) - 0.5,
+                conjugate: (y) => {
+                    const ay = Math.abs(y);
+                    if (ay <= 1) return 0.5 * y * y;
+                    return ay - 0.5;
+                },
+                conjugateFormula: 'f*(y) = ½y² if |y| ≤ 1, |y| - ½ otherwise',
+                subdifferential: (x) => Math.abs(x) <= 1 ? x : Math.sign(x),
+                domain: 'ℝ',
+                conjugateDomain: 'ℝ',
+                convex: true
+            }
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return (canvasX - centerX) / scale;
+        }
+        
+        function fromCanvasY(canvasY) {
+            return (centerY - canvasY) / scale;
+        }
+        
+        function selectFunction(funcName) {
+            currentFunction = funcName;
+            
+            // Update active button
+            document.querySelectorAll('.function-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateFunctionInfo();
+            updateConjugateInfo();
+            updateTangentLine();
+            updateOptimizationProblem();
+            updateDualityGap();
+            draw();
+        }
+        
+        function updateFunctionInfo() {
+            const func = functions[currentFunction];
+            document.getElementById('function-info').innerHTML = `
+                <strong>${func.name}</strong><br/>
+                Formula: ${func.formula}<br/>
+                Domain: ${func.domain}<br/>
+                Convex: ${func.convex ? 'Yes' : 'No'}
+            `;
+        }
+        
+        function updateConjugateInfo() {
+            const func = functions[currentFunction];
+            document.getElementById('conjugate-info').innerHTML = `
+                <strong>Conjugate Function f*(y)</strong><br/>
+                Formula: ${func.conjugateFormula}<br/>
+                Domain: ${func.conjugateDomain}<br/>
+                Definition: f*(y) = sup{xy - f(x) : x ∈ dom(f)}
+            `;
+        }
+        
+        function updateTangentLine() {
+            const func = functions[currentFunction];
+            const y = dualVariable;
+            const conjugateValue = func.conjugate(y);
+            
+            let html = `<strong>Tangent Line at y = ${y.toFixed(2)}</strong><br/>`;
+            html += `f*(${y.toFixed(2)}) = ${isFinite(conjugateValue) ? conjugateValue.toFixed(3) : '∞'}<br/>`;
+            html += `Tangent line: h(x) = ${y.toFixed(2)}x - ${isFinite(conjugateValue) ? conjugateValue.toFixed(3) : '∞'}<br/>`;
+            html += `This line supports f(x) from below`;
+            
+            document.getElementById('tangent-line').innerHTML = html;
+        }
+        
+        function updateOptimizationProblem() {
+            const func = functions[currentFunction];
+            const y = dualVariable;
+            
+            let html = '<strong>Fenchel Duality:</strong><br/><br/>';
+            html += 'Primal Problem:<br/>';
+            html += `minimize f(x)<br/><br/>`;
+            html += 'Dual Problem:<br/>';
+            html += `maximize ${y.toFixed(2)}x - f*(${y.toFixed(2)})<br/>`;
+            html += `= maximize ${y.toFixed(2)}x - ${isFinite(func.conjugate(y)) ? func.conjugate(y).toFixed(3) : '∞'}<br/><br/>`;
+            html += 'Strong Duality holds for convex f';
+            
+            document.getElementById('optimization-problem').innerHTML = html;
+        }
+        
+        function updateDualityGap() {
+            const func = functions[currentFunction];
+            const x = primalVariable;
+            const y = dualVariable;
+            
+            const primalValue = func.func(x);
+            const dualValue = y * x - func.conjugate(y);
+            const gap = primalValue - dualValue;
+            
+            let html = '<strong>Duality Gap Analysis:</strong><br/><br/>';
+            html += `Primal point: x = ${x.toFixed(2)}<br/>`;
+            html += `Dual point: y = ${y.toFixed(2)}<br/><br/>`;
+            html += `Primal value: f(${x.toFixed(2)}) = ${primalValue.toFixed(3)}<br/>`;
+            html += `Dual value: ${y.toFixed(2)}·${x.toFixed(2)} - f*(${y.toFixed(2)}) = ${isFinite(dualValue) ? dualValue.toFixed(3) : '-∞'}<br/><br/>`;
+            html += `Duality gap: ${isFinite(gap) ? gap.toFixed(3) : '∞'}<br/>`;
+            html += `${Math.abs(gap) < 0.01 ? 'Strong duality achieved!' : 'Gap > 0 (weak duality)'}`;
+            
+            document.getElementById('duality-gap').innerHTML = html;
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -10; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawFunction() {
+            if (!showOptions.function) return;
+            
+            const func = functions[currentFunction];
+            const step = 0.05;
+            
+            ctx.strokeStyle = '#0ff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            for (let x = -5; x <= 5; x += step) {
+                const y = func.func(x);
+                if (isFinite(y) && Math.abs(y) < 10) {
+                    if (firstPoint) {
+                        ctx.moveTo(toCanvasX(x), toCanvasY(y));
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(toCanvasX(x), toCanvasY(y));
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // Label
+            ctx.fillStyle = '#0ff';
+            ctx.font = '14px Arial';
+            ctx.fillText('f(x)', 20, 30);
+        }
+        
+        function drawConjugate() {
+            if (!showOptions.conjugate) return;
+            
+            const func = functions[currentFunction];
+            const step = 0.05;
+            
+            ctx.strokeStyle = '#ff00ff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            for (let y = -5; y <= 5; y += step) {
+                const value = func.conjugate(y);
+                if (isFinite(value) && Math.abs(value) < 10) {
+                    if (firstPoint) {
+                        ctx.moveTo(toCanvasX(y), toCanvasY(value));
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(toCanvasX(y), toCanvasY(value));
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // Label
+            ctx.fillStyle = '#ff00ff';
+            ctx.font = '14px Arial';
+            ctx.fillText('f*(y)', 20, 50);
+        }
+        
+        function drawTangentLine() {
+            if (!showOptions.tangent) return;
+            
+            const func = functions[currentFunction];
+            const y = dualVariable;
+            const conjugateValue = func.conjugate(y);
+            
+            if (!isFinite(conjugateValue)) return;
+            
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            // Draw tangent line: h(x) = yx - f*(y)
+            ctx.beginPath();
+            const x1 = -5;
+            const x2 = 5;
+            const y1 = y * x1 - conjugateValue;
+            const y2 = y * x2 - conjugateValue;
+            
+            if (isFinite(y1) && isFinite(y2)) {
+                ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+                ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+                ctx.stroke();
+            }
+            
+            ctx.setLineDash([]);
+            
+            // Label
+            ctx.fillStyle = '#00ff00';
+            ctx.font = '12px Arial';
+            ctx.fillText(`y=${y.toFixed(1)} tangent`, 20, 90);
+        }
+        
+        function drawEpigraph() {
+            if (!showOptions.epigraph) return;
+            
+            const func = functions[currentFunction];
+            const step = 0.1;
+            
+            ctx.fillStyle = 'rgba(255, 165, 0, 0.3)';
+            
+            for (let x = -5; x <= 5; x += step) {
+                const fx = func.func(x);
+                if (isFinite(fx) && fx < 8) {
+                    const canvasX = toCanvasX(x);
+                    const height_pixels = Math.max(0, toCanvasY(fx));
+                    ctx.fillRect(canvasX - 1, 0, 2, height_pixels);
+                }
+            }
+        }
+        
+        function drawSupportingHyperplane() {
+            if (!showOptions.hyperplane) return;
+            
+            const func = functions[currentFunction];
+            const y = dualVariable;
+            const conjugateValue = func.conjugate(y);
+            
+            if (!isFinite(conjugateValue)) return;
+            
+            // Find the point where the hyperplane supports the function
+            let bestX = 0;
+            let minDiff = Infinity;
+            
+            for (let x = -5; x <= 5; x += 0.1) {
+                const fx = func.func(x);
+                const hyperplaneValue = y * x - conjugateValue;
+                const diff = Math.abs(fx - hyperplaneValue);
+                
+                if (isFinite(fx) && isFinite(hyperplaneValue) && diff < minDiff) {
+                    minDiff = diff;
+                    bestX = x;
+                }
+            }
+            
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            
+            // Draw supporting hyperplane
+            ctx.beginPath();
+            const x1 = bestX - 2;
+            const x2 = bestX + 2;
+            const y1 = y * x1 - conjugateValue;
+            const y2 = y * x2 - conjugateValue;
+            
+            if (isFinite(y1) && isFinite(y2)) {
+                ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+                ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+                ctx.stroke();
+                
+                // Mark support point
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(toCanvasX(bestX), toCanvasY(func.func(bestX)), 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        function drawDualPoint() {
+            if (!showOptions.dualpoint) return;
+            
+            const func = functions[currentFunction];
+            const y = dualVariable;
+            const conjugateValue = func.conjugate(y);
+            
+            if (!isFinite(conjugateValue)) return;
+            
+            // Draw dual point on conjugate function
+            ctx.fillStyle = '#ffff00';
+            ctx.strokeStyle = '#ffff00';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(y), toCanvasY(conjugateValue), 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(toCanvasX(y), toCanvasY(conjugateValue), 10, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Label
+            ctx.fillStyle = '#ffff00';
+            ctx.font = '12px Arial';
+            ctx.fillText(`(${y.toFixed(1)}, ${conjugateValue.toFixed(2)})`, 
+                toCanvasX(y) + 12, 
+                toCanvasY(conjugateValue) - 8);
+        }
+        
+        function drawPrimalDualPoints() {
+            const func = functions[currentFunction];
+            const x = primalVariable;
+            const y = dualVariable;
+            
+            // Draw primal point
+            ctx.fillStyle = '#0ff';
+            ctx.beginPath();
+            ctx.arc(toCanvasX(x), toCanvasY(func.func(x)), 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw dual point
+            const conjugateValue = func.conjugate(y);
+            if (isFinite(conjugateValue)) {
+                ctx.fillStyle = '#ff00ff';
+                ctx.beginPath();
+                ctx.arc(toCanvasX(y), toCanvasY(conjugateValue), 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            drawEpigraph();
+            drawFunction();
+            drawConjugate();
+            drawTangentLine();
+            drawSupportingHyperplane();
+            drawDualPoint();
+            drawPrimalDualPoints();
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        function animateDuality() {
+            if (isAnimating) {
+                isAnimating = false;
+                if (animationId) cancelAnimationFrame(animationId);
+                return;
+            }
+            
+            isAnimating = true;
+            let animationTime = 0;
+            
+            function animate() {
+                if (!isAnimating) return;
+                
+                animationTime += 0.02;
+                dualVariable = 2 * Math.sin(animationTime);
+                
+                document.getElementById('dualVariable').value = dualVariable;
+                document.getElementById('dualVariableValue').textContent = dualVariable.toFixed(1);
+                
+                updateTangentLine();
+                updateOptimizationProblem();
+                updateDualityGap();
+                draw();
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function showBiconjugate() {
+            alert('For convex functions, f** = f (biconjugate equals original function). This is the Fenchel-Moreau theorem!');
+        }
+        
+        function findSaddlePoint() {
+            // Find where primal and dual values are closest (saddle point of Lagrangian)
+            let bestX = 0, bestY = 0, minGap = Infinity;
+            
+            for (let x = -3; x <= 3; x += 0.1) {
+                for (let y = -3; y <= 3; y += 0.1) {
+                    const func = functions[currentFunction];
+                    const primalVal = func.func(x);
+                    const dualVal = y * x - func.conjugate(y);
+                    
+                    if (isFinite(primalVal) && isFinite(dualVal)) {
+                        const gap = Math.abs(primalVal - dualVal);
+                        if (gap < minGap) {
+                            minGap = gap;
+                            bestX = x;
+                            bestY = y;
+                        }
+                    }
+                }
+            }
+            
+            primalVariable = bestX;
+            dualVariable = bestY;
+            
+            document.getElementById('primalVariable').value = bestX;
+            document.getElementById('dualVariable').value = bestY;
+            document.getElementById('primalVariableValue').textContent = bestX.toFixed(1);
+            document.getElementById('dualVariableValue').textContent = bestY.toFixed(1);
+            
+            updateTangentLine();
+            updateOptimizationProblem();
+            updateDualityGap();
+            draw();
+        }
+        
+        function resetView() {
+            isAnimating = false;
+            if (animationId) cancelAnimationFrame(animationId);
+            
+            dualVariable = 1;
+            primalVariable = 0;
+            
+            document.getElementById('dualVariable').value = 1;
+            document.getElementById('primalVariable').value = 0;
+            document.getElementById('dualVariableValue').textContent = '1.0';
+            document.getElementById('primalVariableValue').textContent = '0.0';
+            
+            updateTangentLine();
+            updateOptimizationProblem();
+            updateDualityGap();
+            draw();
+        }
+        
+        // Event listeners
+        document.getElementById('dualVariable').addEventListener('input', function() {
+            dualVariable = parseFloat(this.value);
+            document.getElementById('dualVariableValue').textContent = dualVariable.toFixed(1);
+            updateTangentLine();
+            updateOptimizationProblem();
+            updateDualityGap();
+            draw();
+        });
+        
+        document.getElementById('primalVariable').addEventListener('input', function() {
+            primalVariable = parseFloat(this.value);
+            document.getElementById('primalVariableValue').textContent = primalVariable.toFixed(1);
+            updateDualityGap();
+            draw();
+        });
+        
+        // Initialize
+        selectFunction('quadratic');
+        draw();
+    </script>
+</body>
+</html>

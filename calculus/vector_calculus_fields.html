@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Calculus Fields - Interactive Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        canvas {
+            background: #000;
+            border: 1px solid #444;
+        }
+        
+        .controls {
+            width: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-section h3 {
+            margin: 0 0 15px 0;
+            color: #0ff;
+            font-size: 16px;
+        }
+        
+        .field-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .field-button {
+            padding: 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        
+        .field-button:hover {
+            background: #555;
+        }
+        
+        .field-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .field-info {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        
+        .property-display {
+            background: rgba(255, 255, 0, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            border-left: 3px solid #ffff00;
+        }
+        
+        .toggle-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-button {
+            padding: 8px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .toggle-button.active {
+            background: #0ff;
+            color: #000;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 350px;
+            z-index: 10;
+        }
+        
+        .legend {
+            font-size: 11px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .legend-item {
+            margin: 3px 0;
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #aaa;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+        
+        .slider-value {
+            font-size: 12px;
+            color: #0ff;
+            text-align: right;
+            margin-top: 2px;
+        }
+        
+        .point-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div class="info-panel">
+                <strong>🌊 Vector Calculus Fields</strong><br/>
+                Interactive exploration of vector fields, gradient fields, and field properties.
+                <div class="legend">
+                    <div class="legend-item" style="color: #0ff;">🔵 Vector Field</div>
+                    <div class="legend-item" style="color: #f39c12;">🟠 Gradient Field</div>
+                    <div class="legend-item" style="color: #e74c3c;">🔴 Critical Points</div>
+                    <div class="legend-item" style="color: #2ecc71;">🟢 Flow Lines</div>
+                    <div class="legend-item" style="color: #9b59b6;">🟣 Level Curves</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>Vector Field Selection</h3>
+                <div class="field-selector">
+                    <button class="field-button active" onclick="selectField('gradient')">Gradient Field</button>
+                    <button class="field-button" onclick="selectField('circulation')">Circulation</button>
+                    <button class="field-button" onclick="selectField('radial')">Radial Field</button>
+                    <button class="field-button" onclick="selectField('dipole')">Dipole Field</button>
+                    <button class="field-button" onclick="selectField('vortex')">Vortex Field</button>
+                    <button class="field-button" onclick="selectField('saddle')">Saddle Field</button>
+                    <button class="field-button" onclick="selectField('linear')">Linear Field</button>
+                    <button class="field-button" onclick="selectField('custom')">Custom Field</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Current Field</h3>
+                <div id="field-info" class="field-info">
+                    <!-- Field information will be displayed here -->
+                </div>
+                <div id="property-display" class="property-display">
+                    <!-- Field properties will be displayed here -->
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Visualization Options</h3>
+                <div class="toggle-section">
+                    <div class="toggle-button active" id="toggle-vectors" onclick="toggleVisualization('vectors')">
+                        Vector Arrows
+                    </div>
+                    <div class="toggle-button" id="toggle-streamlines" onclick="toggleVisualization('streamlines')">
+                        Streamlines
+                    </div>
+                    <div class="toggle-button active" id="toggle-grid" onclick="toggleVisualization('grid')">
+                        Grid Lines
+                    </div>
+                    <div class="toggle-button" id="toggle-potential" onclick="toggleVisualization('potential')">
+                        Potential Field
+                    </div>
+                    <div class="toggle-button" id="toggle-divergence" onclick="toggleVisualization('divergence')">
+                        Divergence
+                    </div>
+                    <div class="toggle-button" id="toggle-curl" onclick="toggleVisualization('curl')">
+                        Curl
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Field Parameters</h3>
+                <div class="slider-group">
+                    <label>Vector Scale:</label>
+                    <input type="range" id="vectorScale" min="0.1" max="3" step="0.1" value="1">
+                    <div class="slider-value" id="vectorScaleValue">1.0</div>
+                </div>
+                <div class="slider-group">
+                    <label>Field Density:</label>
+                    <input type="range" id="fieldDensity" min="10" max="40" step="2" value="20">
+                    <div class="slider-value" id="fieldDensityValue">20</div>
+                </div>
+                <div class="slider-group">
+                    <label>Animation Speed:</label>
+                    <input type="range" id="animSpeed" min="0" max="2" step="0.1" value="0">
+                    <div class="slider-value" id="animSpeedValue">0.0 (Static)</div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Point Analysis</h3>
+                <div class="point-info" id="point-info">
+                    Click on canvas to analyze field properties at specific points.
+                </div>
+                <div class="toggle-section">
+                    <div class="toggle-button" onclick="clearAnalysis()">
+                        Clear Analysis
+                    </div>
+                    <div class="toggle-button" onclick="resetView()">
+                        Reset View
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 80;
+        
+        // Current field and parameters
+        let currentField = 'gradient';
+        let vectorScale = 1;
+        let fieldDensity = 20;
+        let animationSpeed = 0;
+        let animationTime = 0;
+        let animationId = null;
+        
+        // Analysis points
+        let analysisPoints = [];
+        
+        // Visualization options
+        let showOptions = {
+            vectors: true,
+            streamlines: false,
+            grid: true,
+            potential: false,
+            divergence: false,
+            curl: false
+        };
+        
+        // Vector field definitions
+        const vectorFields = {
+            gradient: {
+                name: 'Gradient Field',
+                description: 'F = ∇f where f(x,y) = x² + y²',
+                func: (x, y, t) => ({ 
+                    x: 2 * x, 
+                    y: 2 * y 
+                }),
+                potential: (x, y) => x * x + y * y,
+                conservative: true,
+                divergence: (x, y) => 4,
+                curl: (x, y) => 0
+            },
+            circulation: {
+                name: 'Circulation Field',
+                description: 'F = (-y, x) - circular flow',
+                func: (x, y, t) => ({ 
+                    x: -y, 
+                    y: x 
+                }),
+                potential: null,
+                conservative: false,
+                divergence: (x, y) => 0,
+                curl: (x, y) => 2
+            },
+            radial: {
+                name: 'Radial Field',
+                description: 'F = (x, y) - outward flow',
+                func: (x, y, t) => ({ 
+                    x: x, 
+                    y: y 
+                }),
+                potential: (x, y) => 0.5 * (x * x + y * y),
+                conservative: true,
+                divergence: (x, y) => 2,
+                curl: (x, y) => 0
+            },
+            dipole: {
+                name: 'Dipole Field',
+                description: 'F = (2xy, x² - y²)',
+                func: (x, y, t) => ({ 
+                    x: 2 * x * y, 
+                    y: x * x - y * y 
+                }),
+                potential: (x, y) => x * x * y - (y * y * y) / 3,
+                conservative: true,
+                divergence: (x, y) => 2 * y - 2 * y,
+                curl: (x, y) => 2 * x - 2 * x
+            },
+            vortex: {
+                name: 'Vortex Field',
+                description: 'F = (-y/(x²+y²), x/(x²+y²))',
+                func: (x, y, t) => {
+                    const r2 = x * x + y * y;
+                    if (r2 < 0.01) return { x: 0, y: 0 };
+                    return { 
+                        x: -y / r2, 
+                        y: x / r2 
+                    };
+                },
+                potential: null,
+                conservative: false,
+                divergence: (x, y) => 0,
+                curl: (x, y) => {
+                    const r2 = x * x + y * y;
+                    return r2 > 0.01 ? 2 / r2 : 0;
+                }
+            },
+            saddle: {
+                name: 'Saddle Field',
+                description: 'F = (x, -y) - hyperbolic flow',
+                func: (x, y, t) => ({ 
+                    x: x, 
+                    y: -y 
+                }),
+                potential: (x, y) => 0.5 * (x * x - y * y),
+                conservative: true,
+                divergence: (x, y) => 0,
+                curl: (x, y) => 0
+            },
+            linear: {
+                name: 'Linear Field',
+                description: 'F = (ax + by, cx + dy)',
+                func: (x, y, t) => ({ 
+                    x: 0.5 * x + 0.3 * y, 
+                    y: -0.3 * x + 0.5 * y 
+                }),
+                potential: null,
+                conservative: false,
+                divergence: (x, y) => 1,
+                curl: (x, y) => -0.6
+            },
+            custom: {
+                name: 'Custom Field',
+                description: 'F = (sin(x)cos(y), -cos(x)sin(y))',
+                func: (x, y, t) => ({ 
+                    x: Math.sin(x) * Math.cos(y), 
+                    y: -Math.cos(x) * Math.sin(y) 
+                }),
+                potential: (x, y) => Math.sin(x) * Math.sin(y),
+                conservative: true,
+                divergence: (x, y) => 0,
+                curl: (x, y) => 0
+            }
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function fromCanvasX(canvasX) {
+            return (canvasX - centerX) / scale;
+        }
+        
+        function fromCanvasY(canvasY) {
+            return (centerY - canvasY) / scale;
+        }
+        
+        function getFieldVector(x, y) {
+            const field = vectorFields[currentField];
+            return field.func(x, y, animationTime);
+        }
+        
+        function drawGrid() {
+            if (!showOptions.grid) return;
+            
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -10; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawVectorField() {
+            if (!showOptions.vectors) return;
+            
+            const step = 10 / fieldDensity * 2;
+            
+            for (let x = -4; x <= 4; x += step) {
+                for (let y = -3; y <= 3; y += step) {
+                    const vec = getFieldVector(x, y);
+                    const magnitude = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+                    
+                    if (magnitude > 0.01) {
+                        // Normalize and scale
+                        const scale_factor = Math.min(1, vectorScale * 0.3 / magnitude);
+                        const scaled_x = vec.x * scale_factor;
+                        const scaled_y = vec.y * scale_factor;
+                        
+                        // Color based on magnitude
+                        const intensity = Math.min(1, magnitude / 2);
+                        const red = Math.floor(255 * intensity);
+                        const blue = Math.floor(255 * (1 - intensity));
+                        
+                        drawArrow(
+                            { x: x, y: y },
+                            { x: x + scaled_x, y: y + scaled_y },
+                            `rgb(${red}, 100, ${blue})`
+                        );
+                    }
+                }
+            }
+        }
+        
+        function drawStreamlines() {
+            if (!showOptions.streamlines) return;
+            
+            const startPoints = [
+                [-3, -2], [-1, -2], [1, -2], [3, -2],
+                [-3, 0], [-1, 0], [1, 0], [3, 0],
+                [-3, 2], [-1, 2], [1, 2], [3, 2]
+            ];
+            
+            ctx.strokeStyle = '#2ecc71';
+            ctx.lineWidth = 2;
+            
+            startPoints.forEach(start => {
+                drawStreamline(start[0], start[1]);
+            });
+        }
+        
+        function drawStreamline(startX, startY) {
+            const points = [];
+            let x = startX;
+            let y = startY;
+            const dt = 0.05;
+            const maxSteps = 200;
+            
+            for (let i = 0; i < maxSteps; i++) {
+                const vec = getFieldVector(x, y);
+                const magnitude = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+                
+                if (magnitude < 0.01 || Math.abs(x) > 5 || Math.abs(y) > 4) break;
+                
+                points.push({ x, y });
+                x += vec.x * dt / magnitude;
+                y += vec.y * dt / magnitude;
+            }
+            
+            if (points.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(points[0].x), toCanvasY(points[0].y));
+                
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(toCanvasX(points[i].x), toCanvasY(points[i].y));
+                }
+                
+                ctx.stroke();
+            }
+        }
+        
+        function drawPotentialField() {
+            if (!showOptions.potential) return;
+            
+            const field = vectorFields[currentField];
+            if (!field.potential) return;
+            
+            const step = 0.2;
+            
+            // Draw level curves of potential
+            ctx.strokeStyle = '#9b59b6';
+            ctx.lineWidth = 1;
+            
+            const levels = [-4, -2, -1, -0.5, 0, 0.5, 1, 2, 4];
+            
+            levels.forEach(level => {
+                drawLevelCurve(field.potential, level, step);
+            });
+        }
+        
+        function drawLevelCurve(potentialFunc, level, step) {
+            // Simple level curve drawing using marching squares approach
+            for (let x = -4; x < 4; x += step) {
+                for (let y = -3; y < 3; y += step) {
+                    const corners = [
+                        potentialFunc(x, y),
+                        potentialFunc(x + step, y),
+                        potentialFunc(x + step, y + step),
+                        potentialFunc(x, y + step)
+                    ];
+                    
+                    // Check if level curve passes through this cell
+                    let above = 0;
+                    let below = 0;
+                    
+                    corners.forEach(value => {
+                        if (value > level) above++;
+                        else below++;
+                    });
+                    
+                    if (above > 0 && below > 0) {
+                        // Draw a point to approximate the level curve
+                        ctx.fillStyle = '#9b59b6';
+                        ctx.fillRect(toCanvasX(x) - 1, toCanvasY(y) - 1, 2, 2);
+                    }
+                }
+            }
+        }
+        
+        function drawDivergence() {
+            if (!showOptions.divergence) return;
+            
+            const field = vectorFields[currentField];
+            const step = 0.3;
+            
+            for (let x = -4; x <= 4; x += step) {
+                for (let y = -3; y <= 3; y += step) {
+                    const div = field.divergence(x, y);
+                    const intensity = Math.abs(div) * 0.5;
+                    
+                    if (intensity > 0.1) {
+                        const alpha = Math.min(0.8, intensity);
+                        const color = div > 0 ? `rgba(255, 0, 0, ${alpha})` : `rgba(0, 0, 255, ${alpha})`;
+                        
+                        ctx.fillStyle = color;
+                        ctx.fillRect(toCanvasX(x) - 3, toCanvasY(y) - 3, 6, 6);
+                    }
+                }
+            }
+        }
+        
+        function drawCurl() {
+            if (!showOptions.curl) return;
+            
+            const field = vectorFields[currentField];
+            const step = 0.3;
+            
+            for (let x = -4; x <= 4; x += step) {
+                for (let y = -3; y <= 3; y += step) {
+                    const curl = field.curl(x, y);
+                    const intensity = Math.abs(curl) * 0.2;
+                    
+                    if (intensity > 0.1) {
+                        const alpha = Math.min(0.8, intensity);
+                        const color = curl > 0 ? `rgba(0, 255, 0, ${alpha})` : `rgba(255, 255, 0, ${alpha})`;
+                        
+                        ctx.fillStyle = color;
+                        ctx.fillRect(toCanvasX(x) - 3, toCanvasY(y) - 3, 6, 6);
+                    }
+                }
+            }
+        }
+        
+        function drawArrow(from, to, color, lineWidth = 1.5) {
+            const fromX = toCanvasX(from.x);
+            const fromY = toCanvasY(from.y);
+            const toX = toCanvasX(to.x);
+            const toY = toCanvasY(to.y);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            
+            // Arrow body
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const headLength = 6;
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle - Math.PI / 6),
+                toY - headLength * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle + Math.PI / 6),
+                toY - headLength * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+        }
+        
+        function drawAnalysisPoints() {
+            analysisPoints.forEach(point => {
+                const vec = getFieldVector(point.x, point.y);
+                
+                // Draw analysis point
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(toCanvasX(point.x), toCanvasY(point.y), 5, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw vector at point
+                if (vec.x !== 0 || vec.y !== 0) {
+                    const magnitude = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+                    const scale_factor = Math.min(1, vectorScale * 0.5 / magnitude);
+                    const scaled_x = vec.x * scale_factor;
+                    const scaled_y = vec.y * scale_factor;
+                    
+                    drawArrow(
+                        point,
+                        { x: point.x + scaled_x, y: point.y + scaled_y },
+                        '#e74c3c',
+                        3
+                    );
+                }
+            });
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            drawPotentialField();
+            drawDivergence();
+            drawCurl();
+            drawVectorField();
+            drawStreamlines();
+            drawAnalysisPoints();
+        }
+        
+        function selectField(fieldName) {
+            currentField = fieldName;
+            
+            // Update active button
+            document.querySelectorAll('.field-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateFieldInfo();
+            draw();
+        }
+        
+        function updateFieldInfo() {
+            const field = vectorFields[currentField];
+            const fieldInfo = document.getElementById('field-info');
+            const propertyDisplay = document.getElementById('property-display');
+            
+            fieldInfo.innerHTML = `
+                <strong>${field.name}</strong><br/>
+                ${field.description}
+            `;
+            
+            propertyDisplay.innerHTML = `
+                <strong>Field Properties:</strong><br/>
+                Conservative: ${field.conservative ? 'Yes' : 'No'}<br/>
+                Has Potential: ${field.potential ? 'Yes' : 'No'}<br/>
+                Divergence: ${typeof field.divergence === 'function' ? 'Variable' : 'Constant'}<br/>
+                Curl: ${typeof field.curl === 'function' ? 'Variable' : 'Constant'}
+            `;
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        function clearAnalysis() {
+            analysisPoints = [];
+            document.getElementById('point-info').textContent = 'Click on canvas to analyze field properties at specific points.';
+            draw();
+        }
+        
+        function resetView() {
+            clearAnalysis();
+            animationTime = 0;
+            draw();
+        }
+        
+        function animate() {
+            if (animationSpeed > 0) {
+                animationTime += 0.02 * animationSpeed;
+                draw();
+            }
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const canvasX = event.clientX - rect.left;
+            const canvasY = event.clientY - rect.top;
+            
+            const x = fromCanvasX(canvasX);
+            const y = fromCanvasY(canvasY);
+            
+            analysisPoints.push({ x, y });
+            
+            const field = vectorFields[currentField];
+            const vec = getFieldVector(x, y);
+            const magnitude = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+            const div = field.divergence(x, y);
+            const curl = field.curl(x, y);
+            
+            document.getElementById('point-info').innerHTML = `
+                <strong>Point (${x.toFixed(2)}, ${y.toFixed(2)})</strong><br/>
+                Vector: (${vec.x.toFixed(3)}, ${vec.y.toFixed(3)})<br/>
+                Magnitude: ${magnitude.toFixed(3)}<br/>
+                Divergence: ${div.toFixed(3)}<br/>
+                Curl: ${curl.toFixed(3)}<br/>
+                ${field.potential ? `Potential: ${field.potential(x, y).toFixed(3)}<br/>` : ''}
+            `;
+            
+            draw();
+        });
+        
+        document.getElementById('vectorScale').addEventListener('input', function() {
+            vectorScale = parseFloat(this.value);
+            document.getElementById('vectorScaleValue').textContent = vectorScale.toFixed(1);
+            draw();
+        });
+        
+        document.getElementById('fieldDensity').addEventListener('input', function() {
+            fieldDensity = parseInt(this.value);
+            document.getElementById('fieldDensityValue').textContent = fieldDensity;
+            draw();
+        });
+        
+        document.getElementById('animSpeed').addEventListener('input', function() {
+            animationSpeed = parseFloat(this.value);
+            const display = animationSpeed === 0 ? '0.0 (Static)' : animationSpeed.toFixed(1);
+            document.getElementById('animSpeedValue').textContent = display;
+        });
+        
+        // Initialize
+        updateFieldInfo();
+        draw();
+        animate();
+    </script>
+</body>
+</html>

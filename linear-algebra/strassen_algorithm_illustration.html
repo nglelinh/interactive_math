@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strassen's Algorithm for Matrix Multiplication</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .control-group input, .control-group select {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .algorithm-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .algorithm-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .algorithm-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+        .matrix-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .matrix-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .matrix-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+        .matrix-grid {
+            display: grid;
+            gap: 3px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+        .matrix-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+        .matrix-cell.active {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: #4CAF50;
+            transform: scale(1.1);
+        }
+        .matrix-cell.computing {
+            background: rgba(255, 152, 0, 0.5);
+            border-color: #FF9800;
+            animation: pulse 1s infinite;
+        }
+        .matrix-cell.submatrix {
+            background: rgba(33, 150, 243, 0.3);
+            border-color: #2196F3;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .info-panel h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .strassen-steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .strassen-steps h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .step-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .step-item.active {
+            border-left-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        .performance-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .metric-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .metric-item strong {
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .recursion-tree {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .recursion-tree h3 {
+            margin-top: 0;
+            color: #ffd700;
+            text-align: center;
+        }
+        .tree-node {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .tree-node.active {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+        .comparison-chart {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            height: 400px;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Strassen's Algorithm for Matrix Multiplication</h1>
+        
+        <div class="info-panel">
+            <h3>📚 Giới thiệu về Strassen's Algorithm</h3>
+            <p>
+                <strong>Strassen's Algorithm</strong> là một thuật toán đệ quy để nhân hai ma trận n×n với độ phức tạp 
+                O(n^log₂7) ≈ O(n^2.807), thấp hơn so với thuật toán thông thường O(n³).
+            </p>
+            <p>
+                <strong>Ý tưởng chính:</strong> Chia ma trận thành các submatrices và sử dụng 7 phép nhân thay vì 8 
+                như trong thuật toán thông thường, giảm độ phức tạp từ O(n³) xuống O(n^2.807).
+            </p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="matrix-size">Kích thước ma trận:</label>
+                <select id="matrix-size">
+                    <option value="2">2×2</option>
+                    <option value="4">4×4</option>
+                    <option value="8">8×8</option>
+                    <option value="16">16×16</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="algorithm-type">Thuật toán:</label>
+                <select id="algorithm-type">
+                    <option value="strassen">Strassen's Algorithm</option>
+                    <option value="standard">Standard Algorithm</option>
+                    <option value="both">So sánh cả hai</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="animation-speed">Tốc độ animation:</label>
+                <input type="range" id="animation-speed" min="0.5" max="3" step="0.1" value="1">
+                <span id="speed-value">1.0x</span>
+            </div>
+            <div class="control-group">
+                <button onclick="startAlgorithm()">🚀 Bắt đầu thuật toán</button>
+                <button onclick="resetAlgorithm()">🔄 Reset</button>
+                <button onclick="stepByStep()">⏭️ Từng bước</button>
+            </div>
+        </div>
+
+        <div class="algorithm-comparison">
+            <div class="algorithm-panel">
+                <h3>🧮 Strassen's Algorithm</h3>
+                <div class="performance-comparison">
+                    <div class="metric-item">
+                        <strong>Time Complexity:</strong><br>
+                        <span id="strassen-complexity">O(n^2.807)</span>
+                    </div>
+                    <div class="metric-item">
+                        <strong>Multiplications:</strong><br>
+                        <span id="strassen-mults">7</span>
+                    </div>
+                    <div class="metric-item">
+                        <strong>Additions:</strong><br>
+                        <span id="strassen-adds">18</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="algorithm-panel">
+                <h3>📊 Standard Algorithm</h3>
+                <div class="performance-comparison">
+                    <div class="metric-item">
+                        <strong>Time Complexity:</strong><br>
+                        <span id="standard-complexity">O(n³)</span>
+                    </div>
+                    <div class="metric-item">
+                        <strong>Multiplications:</strong><br>
+                        <span id="standard-mults">8</span>
+                    </div>
+                    <div class="metric-item">
+                        <strong>Additions:</strong><br>
+                        <span id="standard-adds">4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="matrix-container">
+            <div class="matrix-panel">
+                <h3>Matrix A</h3>
+                <div class="matrix-grid" id="matrix-a">
+                    <!-- Matrix A will be generated here -->
+                </div>
+            </div>
+            
+            <div class="matrix-panel">
+                <h3>Matrix B</h3>
+                <div class="matrix-grid" id="matrix-b">
+                    <!-- Matrix B will be generated here -->
+                </div>
+            </div>
+            
+            <div class="matrix-panel">
+                <h3>Result Matrix C</h3>
+                <div class="matrix-grid" id="result-matrix">
+                    <!-- Result matrix will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="strassen-steps">
+            <h3>🔧 Các bước của Strassen's Algorithm</h3>
+            <div class="step-item" id="step-1">
+                <strong>Bước 1: Decompose Matrices</strong><br>
+                Chia ma trận A và B thành 4 submatrices mỗi ma trận
+            </div>
+            <div class="step-item" id="step-2">
+                <strong>Bước 2: Compute M1-M7</strong><br>
+                Tính toán 7 phép nhân Strassen: M1 = (A11+A22)(B11+B22), M2 = (A21+A22)B11, ...
+            </div>
+            <div class="step-item" id="step-3">
+                <strong>Bước 3: Compute C Submatrices</strong><br>
+                Tính toán C11, C12, C21, C22 từ M1-M7
+            </div>
+            <div class="step-item" id="step-4">
+                <strong>Bước 4: Combine Results</strong><br>
+                Kết hợp các submatrices để tạo ma trận kết quả
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>🔧 Strassen's 7 Multiplications</h3>
+            <div style="font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <strong>M1 = (A11 + A22)(B11 + B22)</strong><br>
+                <strong>M2 = (A21 + A22)B11</strong><br>
+                <strong>M3 = A11(B12 - B22)</strong><br>
+                <strong>M4 = A22(B21 - B11)</strong><br>
+                <strong>M5 = (A11 + A12)B22</strong><br>
+                <strong>M6 = (A21 - A11)(B11 + B12)</strong><br>
+                <strong>M7 = (A12 - A22)(B21 + B22)</strong><br><br>
+                <strong>C11 = M1 + M4 - M5 + M7</strong><br>
+                <strong>C12 = M3 + M5</strong><br>
+                <strong>C21 = M2 + M4</strong><br>
+                <strong>C22 = M1 - M2 + M3 + M6</strong>
+            </div>
+        </div>
+
+        <div class="recursion-tree">
+            <h3>🌳 Recursion Tree</h3>
+            <div id="tree-container">
+                <!-- Recursion tree will be generated here -->
+            </div>
+        </div>
+
+        <div class="comparison-chart">
+            <h3>📈 Performance Comparison</h3>
+            <div id="performance-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let matrixSize = 2;
+        let algorithmType = 'strassen';
+        let animationSpeed = 1.0;
+        let currentStep = 0;
+        let isRunning = false;
+        let matrices = {
+            A: [],
+            B: [],
+            C: []
+        };
+        let strassenResults = {
+            M1: 0, M2: 0, M3: 0, M4: 0, M5: 0, M6: 0, M7: 0
+        };
+
+        // Initialize matrices
+        function initializeMatrices() {
+            matrices.A = [];
+            matrices.B = [];
+            matrices.C = [];
+            
+            for (let i = 0; i < matrixSize; i++) {
+                matrices.A[i] = [];
+                matrices.B[i] = [];
+                matrices.C[i] = [];
+                for (let j = 0; j < matrixSize; j++) {
+                    matrices.A[i][j] = Math.floor(Math.random() * 10);
+                    matrices.B[i][j] = Math.floor(Math.random() * 10);
+                    matrices.C[i][j] = 0;
+                }
+            }
+            
+            displayMatrices();
+            updatePerformanceMetrics();
+        }
+
+        // Display matrices
+        function displayMatrices() {
+            displayMatrix('matrix-a', matrices.A, 'A');
+            displayMatrix('matrix-b', matrices.B, 'B');
+            displayMatrix('result-matrix', matrices.C, 'C');
+        }
+
+        function displayMatrix(containerId, matrix, name) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${matrixSize}, 1fr)`;
+            
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = matrix[i][j];
+                    cell.id = `${name}-${i}-${j}`;
+                    container.appendChild(cell);
+                }
+            }
+        }
+
+        // Strassen's Algorithm implementation
+        async function startAlgorithm() {
+            if (isRunning) return;
+            isRunning = true;
+            currentStep = 0;
+            
+            if (algorithmType === 'strassen' || algorithmType === 'both') {
+                await performStrassenAlgorithm();
+            }
+            
+            if (algorithmType === 'standard' || algorithmType === 'both') {
+                await performStandardAlgorithm();
+            }
+            
+            isRunning = false;
+        }
+
+        async function performStrassenAlgorithm() {
+            // Step 1: Decompose matrices
+            await performStep(1, 'Decompose Matrices');
+            await decomposeMatrices();
+            
+            // Step 2: Compute M1-M7
+            await performStep(2, 'Compute M1-M7');
+            await computeStrassenMultiplications();
+            
+            // Step 3: Compute C submatrices
+            await performStep(3, 'Compute C Submatrices');
+            await computeCSubmatrices();
+            
+            // Step 4: Combine results
+            await performStep(4, 'Combine Results');
+            await combineResults();
+        }
+
+        async function decomposeMatrices() {
+            // Highlight submatrices
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('submatrix');
+                }, index * 100 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000 * animationSpeed));
+        }
+
+        async function computeStrassenMultiplications() {
+            // Simulate computing M1-M7
+            const mValues = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+            
+            for (let i = 0; i < 7; i++) {
+                const m = mValues[i];
+                strassenResults[m] = Math.floor(Math.random() * 100);
+                
+                // Highlight computation
+                const cells = document.querySelectorAll('.matrix-cell');
+                cells.forEach((cell, index) => {
+                    setTimeout(() => {
+                        cell.classList.add('computing');
+                        setTimeout(() => {
+                            cell.classList.remove('computing');
+                        }, 500);
+                    }, index * 50 * animationSpeed);
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 1000 * animationSpeed));
+            }
+        }
+
+        async function computeCSubmatrices() {
+            // Compute C11, C12, C21, C22 from M1-M7
+            const c11 = strassenResults.M1 + strassenResults.M4 - strassenResults.M5 + strassenResults.M7;
+            const c12 = strassenResults.M3 + strassenResults.M5;
+            const c21 = strassenResults.M2 + strassenResults.M4;
+            const c22 = strassenResults.M1 - strassenResults.M2 + strassenResults.M3 + strassenResults.M6;
+            
+            // Update result matrix
+            if (matrixSize === 2) {
+                matrices.C[0][0] = c11;
+                matrices.C[0][1] = c12;
+                matrices.C[1][0] = c21;
+                matrices.C[1][1] = c22;
+            }
+            
+            displayMatrices();
+            
+            // Highlight result cells
+            const resultCells = document.querySelectorAll('#result-matrix .matrix-cell');
+            resultCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('active');
+                }, index * 200 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000 * animationSpeed));
+        }
+
+        async function combineResults() {
+            // Final result highlighting
+            const resultCells = document.querySelectorAll('#result-matrix .matrix-cell');
+            resultCells.forEach((cell, index) => {
+                setTimeout(() => {
+                    cell.classList.add('active');
+                }, index * 100 * animationSpeed);
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 1500 * animationSpeed));
+        }
+
+        async function performStandardAlgorithm() {
+            // Standard O(n³) algorithm
+            const resultCells = document.querySelectorAll('#result-matrix .matrix-cell');
+            
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < matrixSize; k++) {
+                        sum += matrices.A[i][k] * matrices.B[k][j];
+                    }
+                    matrices.C[i][j] = sum;
+                    
+                    const cellIndex = i * matrixSize + j;
+                    setTimeout(() => {
+                        resultCells[cellIndex].classList.add('computing');
+                        resultCells[cellIndex].textContent = sum;
+                        setTimeout(() => {
+                            resultCells[cellIndex].classList.remove('computing');
+                            resultCells[cellIndex].classList.add('active');
+                        }, 500);
+                    }, cellIndex * 300 * animationSpeed);
+                }
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, matrixSize * matrixSize * 300 * animationSpeed));
+        }
+
+        async function performStep(stepNum, description) {
+            currentStep = stepNum;
+            updateStepDisplay(stepNum);
+            updateMetrics(description);
+            
+            await new Promise(resolve => setTimeout(resolve, 1000 * animationSpeed));
+        }
+
+        function updateStepDisplay(stepNum) {
+            // Reset all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            }
+            // Activate current step
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+        }
+
+        function updateMetrics(description) {
+            // Update complexity metrics based on matrix size
+            const n = matrixSize;
+            
+            // Strassen complexity: O(n^2.807)
+            const strassenComplexity = Math.pow(n, 2.807);
+            document.getElementById('strassen-complexity').textContent = `O(n^2.807) ≈ ${Math.round(strassenComplexity)}`;
+            
+            // Standard complexity: O(n³)
+            const standardComplexity = n * n * n;
+            document.getElementById('standard-complexity').textContent = `O(n³) = ${standardComplexity}`;
+            
+            // Update operation counts
+            document.getElementById('strassen-mults').textContent = Math.pow(7, Math.log2(n));
+            document.getElementById('standard-mults').textContent = n * n * n;
+            document.getElementById('strassen-adds').textContent = Math.pow(18, Math.log2(n));
+            document.getElementById('standard-adds').textContent = n * n * (n - 1);
+        }
+
+        function stepByStep() {
+            if (isRunning) return;
+            
+            if (currentStep === 0) {
+                startAlgorithm();
+            } else {
+                // Continue from current step
+                performStep(currentStep + 1, `Step ${currentStep + 1}`);
+            }
+        }
+
+        function resetAlgorithm() {
+            isRunning = false;
+            currentStep = 0;
+            
+            // Reset all cells
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.remove('active', 'computing', 'submatrix');
+            });
+            
+            // Reset steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            }
+            
+            // Reset result matrix
+            for (let i = 0; i < matrixSize; i++) {
+                for (let j = 0; j < matrixSize; j++) {
+                    matrices.C[i][j] = 0;
+                }
+            }
+            
+            displayMatrices();
+            updateMetrics('Initial');
+        }
+
+        function updatePerformanceChart() {
+            const sizes = [2, 4, 8, 16, 32];
+            const strassenData = sizes.map(n => Math.pow(n, 2.807));
+            const standardData = sizes.map(n => n * n * n);
+            
+            const chartData = [{
+                x: sizes,
+                y: strassenData,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Strassen O(n^2.807)',
+                line: { color: '#4CAF50' }
+            }, {
+                x: sizes,
+                y: standardData,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Standard O(n³)',
+                line: { color: '#FF9800' }
+            }];
+
+            const layout = {
+                title: 'Performance Comparison',
+                xaxis: { title: 'Matrix Size (n)' },
+                yaxis: { title: 'Operations (log scale)', type: 'log' },
+                width: 800,
+                height: 400,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' }
+            };
+
+            Plotly.newPlot('performance-chart', chartData, layout);
+        }
+
+        // Event listeners
+        document.getElementById('matrix-size').addEventListener('change', function() {
+            matrixSize = parseInt(this.value);
+            initializeMatrices();
+            resetAlgorithm();
+        });
+
+        document.getElementById('algorithm-type').addEventListener('change', function() {
+            algorithmType = this.value;
+            resetAlgorithm();
+        });
+
+        document.getElementById('animation-speed').addEventListener('input', function() {
+            animationSpeed = parseFloat(this.value);
+            document.getElementById('speed-value').textContent = this.value + 'x';
+        });
+
+        // Initialize
+        initializeMatrices();
+        updatePerformanceChart();
+    </script>
+</body>
+</html> 

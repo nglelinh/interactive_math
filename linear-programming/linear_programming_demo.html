@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Linear Programming - Tối Ưu Hóa Tuyến Tính</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .demo-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        .canvas-container {
+            flex: 2;
+        }
+        canvas {
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .controls {
+            flex: 1;
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .section h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .objective-function {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .constraint-input {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .constraint-input input {
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .constraint-input select {
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 2px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        button.primary {
+            background-color: #3498db;
+        }
+        button.primary:hover {
+            background-color: #2980b9;
+        }
+        button.success {
+            background-color: #27ae60;
+        }
+        button.success:hover {
+            background-color: #229954;
+        }
+        .solution {
+            background-color: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .solution div {
+            margin: 3px 0;
+            font-size: 14px;
+        }
+        .instructions {
+            background-color: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .constraint-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .constraint-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .constraint-item:last-child {
+            border-bottom: none;
+        }
+        .constraint-text {
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .toggle-controls {
+            margin-bottom: 10px;
+        }
+        .toggle-controls input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .toggle-controls label {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .objective-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .objective-inputs input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .objective-inputs select {
+            padding: 5px;
+            border: 1px solid #bdc3c7;
+            border-radius: 3px;
+        }
+    </style>
+
+
+
+
+
+</head>
+<body>
+    <div class="container">
+        <h1>Demo Linear Programming</h1>
+        <p class="subtitle">Tối ưu hóa hàm mục tiêu tuyến tính với các ràng buộc tuyến tính</p>
+        
+        <div class="demo-container">
+            <div class="canvas-container">
+                <canvas id="canvas" width="700" height="600"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="instructions">
+                    <strong>Hướng dẫn:</strong><br>
+                    1. Thiết lập hàm mục tiêu<br>
+                    2. Thêm các ràng buộc<br>
+                    3. Nhấn "Giải bài toán" để tìm nghiệm tối ưu<br>
+                    4. Vùng khả thi được tô màu xám
+                </div>
+                
+                <div class="section">
+                    <h3>Hàm Mục Tiêu</h3>
+                    <div class="objective-inputs">
+                        <select id="objectiveType">
+                            <option value="max">Maximize</option>
+                            <option value="min">Minimize</option>
+                        </select>
+                        <span>z =</span>
+                        <input type="number" id="objCoefX" value="3" step="0.1">
+                        <span>x +</span>
+                        <input type="number" id="objCoefY" value="2" step="0.1">
+                        <span>y</span>
+                    </div>
+                    <div class="objective-function" id="objectiveDisplay">
+                        Maximize z = 3x + 2y
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Thêm Ràng Buộc</h3>
+                    <div class="constraint-input">
+                        <input type="number" id="coefX" value="1" step="0.1" placeholder="a">
+                        <span>x +</span>
+                        <input type="number" id="coefY" value="1" step="0.1" placeholder="b">
+                        <span>y</span>
+                        <select id="inequality">
+                            <option value="<=">≤</option>
+                            <option value=">=">≥</option>
+                            <option value="=">=</option>
+                        </select>
+                        <input type="number" id="rhs" value="6" step="0.1" placeholder="c">
+                    </div>
+                    <button class="primary" onclick="addConstraint()">Thêm Ràng Buộc</button>
+                </div>
+                
+                <div class="section">
+                    <h3>Danh Sách Ràng Buộc</h3>
+                    <div class="constraint-list" id="constraintList">
+                        <div class="constraint-item">
+                            <span class="constraint-text">x ≥ 0 (mặc định)</span>
+                        </div>
+                        <div class="constraint-item">
+                            <span class="constraint-text">y ≥ 0 (mặc định)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="toggle-controls">
+                    <input type="checkbox" id="showGrid" checked>
+                    <label for="showGrid">Hiển thị lưới</label>
+                </div>
+                
+                <div class="toggle-controls">
+                    <input type="checkbox" id="showObjectiveLines" checked>
+                    <label for="showObjectiveLines">Hiển thị đường mục tiêu</label>
+                </div>
+                
+                <button class="success" onclick="solve()">Giải Bài Toán</button>
+                <button onclick="clearConstraints()">Xóa Ràng Buộc</button>
+                <button onclick="loadExample()">Ví Dụ Mẫu</button>
+                
+                <div class="solution" id="solution" style="display: none;">
+                    <h3 style="margin-top: 0;">Nghiệm Tối Ưu:</h3>
+                    <div id="solutionText"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let constraints = [];
+        let objectiveCoefX = 3, objectiveCoefY = 2;
+        let objectiveType = 'max';
+        let solution = null;
+        
+        // Thiết lập hệ tọa độ
+        const padding = 50;
+        const graphWidth = canvas.width - 2 * padding;
+        const graphHeight = canvas.height - 2 * padding;
+        const xMin = 0, xMax = 10;
+        const yMin = 0, yMax = 10;
+        
+        // Chuyển đổi tọa độ
+        function graphToCanvas(x, y) {
+            const canvasX = ((x - xMin) / (xMax - xMin)) * graphWidth + padding;
+            const canvasY = (1 - (y - yMin) / (yMax - yMin)) * graphHeight + padding;
+            return { x: canvasX, y: canvasY };
+        }
+        
+        // Vẽ lưới
+        function drawGrid() {
+            if (!document.getElementById('showGrid').checked) return;
+            
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 10; i++) {
+                const canvasPos = graphToCanvas(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(canvasPos.x, padding);
+                ctx.lineTo(canvasPos.x, canvas.height - padding);
+                ctx.stroke();
+                
+                const canvasPosY = graphToCanvas(0, i);
+                ctx.beginPath();
+                ctx.moveTo(padding, canvasPosY.y);
+                ctx.lineTo(canvas.width - padding, canvasPosY.y);
+                ctx.stroke();
+            }
+        }
+        
+        // Vẽ trục tọa độ
+        function drawAxes() {
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            
+            // Trục X
+            ctx.beginPath();
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Trục Y
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, canvas.height - padding);
+            ctx.stroke();
+            
+            // Nhãn trục
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            for (let i = 0; i <= 10; i += 2) {
+                const canvasPos = graphToCanvas(i, 0);
+                ctx.fillText(i.toString(), canvasPos.x, canvas.height - padding + 20);
+            }
+            
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 10; i += 2) {
+                const canvasPos = graphToCanvas(0, i);
+                ctx.fillText(i.toString(), padding - 10, canvasPos.y + 5);
+            }
+            
+            // Nhãn trục
+            ctx.textAlign = 'center';
+            ctx.font = '14px Arial';
+            ctx.fillText('x', canvas.width - 20, canvas.height - padding + 35);
+            ctx.save();
+            ctx.translate(15, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('y', 0, 0);
+            ctx.restore();
+        }
+        
+        // Vẽ đường ràng buộc
+        function drawConstraints() {
+            constraints.forEach((constraint, index) => {
+                const { a, b, c, type } = constraint;
+                
+                // Màu sắc cho mỗi ràng buộc
+                const colors = ['#e74c3c', '#3498db', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+                ctx.strokeStyle = colors[index % colors.length];
+                ctx.lineWidth = 2;
+                
+                // Vẽ đường thẳng ax + by = c
+                if (Math.abs(b) > 1e-10) {
+                    // Đường thẳng không dọc
+                    const y1 = (c - a * xMin) / b;
+                    const y2 = (c - a * xMax) / b;
+                    
+                    const canvasPos1 = graphToCanvas(xMin, y1);
+                    const canvasPos2 = graphToCanvas(xMax, y2);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(canvasPos1.x, canvasPos1.y);
+                    ctx.lineTo(canvasPos2.x, canvasPos2.y);
+                    ctx.stroke();
+                } else if (Math.abs(a) > 1e-10) {
+                    // Đường thẳng dọc
+                    const x = c / a;
+                    const canvasPos1 = graphToCanvas(x, yMin);
+                    const canvasPos2 = graphToCanvas(x, yMax);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(canvasPos1.x, canvasPos1.y);
+                    ctx.lineTo(canvasPos2.x, canvasPos2.y);
+                    ctx.stroke();
+                }
+                
+                // Nhãn ràng buộc
+                ctx.fillStyle = colors[index % colors.length];
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                const labelY = padding + 15 * (index + 1);
+                ctx.fillText(`${a}x + ${b}y ${type} ${c}`, padding + 10, labelY);
+            });
+        }
+        
+        // Kiểm tra điểm có thỏa mãn ràng buộc không
+        function satisfiesConstraint(x, y, constraint) {
+            const { a, b, c, type } = constraint;
+            const value = a * x + b * y;
+            
+            switch (type) {
+                case '<=': return value <= c + 1e-10;
+                case '>=': return value >= c - 1e-10;
+                case '=': return Math.abs(value - c) <= 1e-10;
+                default: return true;
+            }
+        }
+        
+        // Kiểm tra điểm có trong vùng khả thi không
+        function isInFeasibleRegion(x, y) {
+            if (x < 0 || y < 0) return false; // Ràng buộc không âm
+            
+            for (let constraint of constraints) {
+                if (!satisfiesConstraint(x, y, constraint)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        // Vẽ vùng khả thi
+        function drawFeasibleRegion() {
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            for (let canvasX = padding; canvasX < canvas.width - padding; canvasX += 2) {
+                for (let canvasY = padding; canvasY < canvas.height - padding; canvasY += 2) {
+                    const x = ((canvasX - padding) / graphWidth) * (xMax - xMin) + xMin;
+                    const y = (1 - (canvasY - padding) / graphHeight) * (yMax - yMin) + yMin;
+                    
+                    if (isInFeasibleRegion(x, y)) {
+                        for (let dx = 0; dx < 2; dx++) {
+                            for (let dy = 0; dy < 2; dy++) {
+                                const pixelX = canvasX + dx;
+                                const pixelY = canvasY + dy;
+                                if (pixelX < canvas.width && pixelY < canvas.height) {
+                                    const index = (pixelY * canvas.width + pixelX) * 4;
+                                    data[index] = 200;     // R
+                                    data[index + 1] = 200; // G
+                                    data[index + 2] = 200; // B
+                                    data[index + 3] = 100; // A (transparency)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        // Vẽ đường mục tiêu
+        function drawObjectiveLines() {
+            if (!document.getElementById('showObjectiveLines').checked) return;
+            
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            // Vẽ một số đường đồng mức
+            for (let z = 0; z <= 30; z += 5) {
+                if (Math.abs(objectiveCoefY) > 1e-10) {
+                    const y1 = (z - objectiveCoefX * xMin) / objectiveCoefY;
+                    const y2 = (z - objectiveCoefX * xMax) / objectiveCoefY;
+                    
+                    const canvasPos1 = graphToCanvas(xMin, y1);
+                    const canvasPos2 = graphToCanvas(xMax, y2);
+                    
+                    if (y1 >= yMin && y1 <= yMax && y2 >= yMin && y2 <= yMax) {
+                        ctx.beginPath();
+                        ctx.moveTo(canvasPos1.x, canvasPos1.y);
+                        ctx.lineTo(canvasPos2.x, canvasPos2.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            ctx.setLineDash([]);
+        }
+        
+        // Vẽ điểm tối ưu
+        function drawOptimalPoint() {
+            if (!solution) return;
+            
+            const canvasPos = graphToCanvas(solution.x, solution.y);
+            
+            // Vẽ điểm
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(canvasPos.x, canvasPos.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Viền điểm
+            ctx.strokeStyle = '#c0392b';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Nhãn điểm
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`(${solution.x.toFixed(2)}, ${solution.y.toFixed(2)})`, 
+                        canvasPos.x + 10, canvasPos.y - 10);
+        }
+        
+        // Tìm các điểm giao của ràng buộc
+        function findIntersectionPoints() {
+            const points = [];
+            
+            // Thêm gốc tọa độ
+            points.push({ x: 0, y: 0 });
+            
+            // Giao với trục
+            constraints.forEach(constraint => {
+                const { a, b, c } = constraint;
+                
+                // Giao với trục x (y = 0)
+                if (Math.abs(a) > 1e-10) {
+                    const x = c / a;
+                    if (x >= 0 && x <= xMax) {
+                        points.push({ x: x, y: 0 });
+                    }
+                }
+                
+                // Giao với trục y (x = 0)
+                if (Math.abs(b) > 1e-10) {
+                    const y = c / b;
+                    if (y >= 0 && y <= yMax) {
+                        points.push({ x: 0, y: y });
+                    }
+                }
+            });
+            
+            // Giao giữa các ràng buộc
+            for (let i = 0; i < constraints.length; i++) {
+                for (let j = i + 1; j < constraints.length; j++) {
+                    const c1 = constraints[i];
+                    const c2 = constraints[j];
+                    
+                    const det = c1.a * c2.b - c1.b * c2.a;
+                    if (Math.abs(det) > 1e-10) {
+                        const x = (c1.c * c2.b - c1.b * c2.c) / det;
+                        const y = (c1.a * c2.c - c1.c * c2.a) / det;
+                        
+                        if (x >= 0 && y >= 0 && x <= xMax && y <= yMax) {
+                            points.push({ x, y });
+                        }
+                    }
+                }
+            }
+            
+            // Lọc các điểm trong vùng khả thi
+            return points.filter(point => isInFeasibleRegion(point.x, point.y));
+        }
+        
+        // Giải bài toán Linear Programming
+        function solveProblem() {
+            const feasiblePoints = findIntersectionPoints();
+            
+            if (feasiblePoints.length === 0) {
+                return null;
+            }
+            
+            let optimalPoint = feasiblePoints[0];
+            let optimalValue = objectiveCoefX * optimalPoint.x + objectiveCoefY * optimalPoint.y;
+            
+            feasiblePoints.forEach(point => {
+                const value = objectiveCoefX * point.x + objectiveCoefY * point.y;
+                
+                if ((objectiveType === 'max' && value > optimalValue) ||
+                    (objectiveType === 'min' && value < optimalValue)) {
+                    optimalValue = value;
+                    optimalPoint = point;
+                }
+            });
+            
+            return {
+                x: optimalPoint.x,
+                y: optimalPoint.y,
+                value: optimalValue
+            };
+        }
+        
+        // Vẽ lại canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
+            drawFeasibleRegion();
+            drawAxes();
+            drawConstraints();
+            drawObjectiveLines();
+            drawOptimalPoint();
+        }
+        
+        // Thêm ràng buộc
+        function addConstraint() {
+            const a = parseFloat(document.getElementById('coefX').value) || 0;
+            const b = parseFloat(document.getElementById('coefY').value) || 0;
+            const c = parseFloat(document.getElementById('rhs').value) || 0;
+            const type = document.getElementById('inequality').value;
+            
+            if (Math.abs(a) < 1e-10 && Math.abs(b) < 1e-10) {
+                alert('Ít nhất một hệ số phải khác 0!');
+                return;
+            }
+            
+            constraints.push({ a, b, c, type });
+            updateConstraintList();
+            draw();
+        }
+        
+        // Cập nhật danh sách ràng buộc
+        function updateConstraintList() {
+            const list = document.getElementById('constraintList');
+            list.innerHTML = `
+                <div class="constraint-item">
+                    <span class="constraint-text">x ≥ 0 (mặc định)</span>
+                </div>
+                <div class="constraint-item">
+                    <span class="constraint-text">y ≥ 0 (mặc định)</span>
+                </div>
+            `;
+            
+            constraints.forEach((constraint, index) => {
+                const item = document.createElement('div');
+                item.className = 'constraint-item';
+                item.innerHTML = `
+                    <span class="constraint-text">${constraint.a}x + ${constraint.b}y ${constraint.type} ${constraint.c}</span>
+                    <button onclick="removeConstraint(${index})" style="padding: 2px 6px; font-size: 12px;">Xóa</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        // Xóa ràng buộc
+        function removeConstraint(index) {
+            constraints.splice(index, 1);
+            updateConstraintList();
+            draw();
+        }
+        
+        // Xóa tất cả ràng buộc
+        function clearConstraints() {
+            constraints = [];
+            solution = null;
+            updateConstraintList();
+            document.getElementById('solution').style.display = 'none';
+            draw();
+        }
+        
+        // Cập nhật hàm mục tiêu
+        function updateObjective() {
+            objectiveCoefX = parseFloat(document.getElementById('objCoefX').value) || 0;
+            objectiveCoefY = parseFloat(document.getElementById('objCoefY').value) || 0;
+            objectiveType = document.getElementById('objectiveType').value;
+            
+            const typeText = objectiveType === 'max' ? 'Maximize' : 'Minimize';
+            document.getElementById('objectiveDisplay').textContent = 
+                `${typeText} z = ${objectiveCoefX}x + ${objectiveCoefY}y`;
+            
+            if (solution) {
+                solve(); // Tính lại nghiệm
+            }
+            draw();
+        }
+        
+        // Giải bài toán
+        function solve() {
+            solution = solveProblem();
+            
+            if (solution) {
+                document.getElementById('solution').style.display = 'block';
+                document.getElementById('solutionText').innerHTML = `
+                    <div>x* = ${solution.x.toFixed(4)}</div>
+                    <div>y* = ${solution.y.toFixed(4)}</div>
+                    <div>z* = ${solution.value.toFixed(4)}</div>
+                `;
+            } else {
+                document.getElementById('solution').style.display = 'block';
+                document.getElementById('solutionText').innerHTML = 'Không có nghiệm khả thi!';
+            }
+            
+            draw();
+        }
+        
+        // Tải ví dụ mẫu
+        function loadExample() {
+            clearConstraints();
+            
+            // Ví dụ: Maximize 3x + 2y
+            // Subject to: x + y <= 6, 2x + y <= 8, x >= 0, y >= 0
+            constraints = [
+                { a: 1, b: 1, c: 6, type: '<=' },
+                { a: 2, b: 1, c: 8, type: '<=' }
+            ];
+            
+            document.getElementById('objCoefX').value = 3;
+            document.getElementById('objCoefY').value = 2;
+            document.getElementById('objectiveType').value = 'max';
+            
+            updateObjective();
+            updateConstraintList();
+            draw();
+        }
+        
+        // Xử lý sự kiện
+        document.getElementById('objCoefX').addEventListener('change', updateObjective);
+        document.getElementById('objCoefY').addEventListener('change', updateObjective);
+        document.getElementById('objectiveType').addEventListener('change', updateObjective);
+        document.getElementById('showGrid').addEventListener('change', draw);
+        document.getElementById('showObjectiveLines').addEventListener('change', draw);
+        
+        // Khởi tạo
+        updateObjective();
+        updateConstraintList();
+        loadExample();
+        draw();
+    </script>
+</body>
+</html> 

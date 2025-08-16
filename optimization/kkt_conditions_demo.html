@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KKT Conditions Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 400px;
+      font-size: 13px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 300px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #FF5722;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #E64A19;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #FF9800;
+      font-weight: bold;
+    }
+    .kkt-condition {
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .satisfied {
+      background: rgba(76, 175, 80, 0.2);
+      border-left: 4px solid #4CAF50;
+    }
+    .violated {
+      background: rgba(244, 67, 54, 0.2);
+      border-left: 4px solid #f44336;
+    }
+    .constraint-info {
+      color: #FFC107;
+      font-size: 12px;
+      margin: 5px 0;
+    }
+    .lagrangian {
+      color: #9C27B0;
+      font-size: 12px;
+    }
+    .optimal-point {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #666;
+      padding: 4px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+    }
+    .active {
+      background: rgba(255, 152, 0, 0.3);
+    }
+    .inactive {
+      background: rgba(96, 125, 139, 0.2);
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>KKT Conditions Demo</h3>
+    <div><strong>Problem:</strong> <span id="problemType">Minimize f(x,y) subject to g(x,y) ≤ 0</span></div>
+    <div>Current: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>f(x,y): <span id="currentValue" class="value-display">0.00</span></div>
+    <div>Feasible: <span id="feasible" class="value-display">Yes</span></div>
+    <div>KKT Point: <span id="kktPoint" class="optimal-point">No</span></div>
+    <br>
+    
+    <div><strong>KKT Conditions:</strong></div>
+    <div id="kktConditions">
+      <div class="kkt-condition" id="stationarity">
+        <strong>1. Stationarity:</strong><br>
+        ∇f + λ∇g = 0
+      </div>
+      <div class="kkt-condition" id="primalFeasibility">
+        <strong>2. Primal Feasibility:</strong><br>
+        g(x) ≤ 0
+      </div>
+      <div class="kkt-condition" id="dualFeasibility">
+        <strong>3. Dual Feasibility:</strong><br>
+        λ ≥ 0
+      </div>
+      <div class="kkt-condition" id="complementarySlackness">
+        <strong>4. Complementary Slackness:</strong><br>
+        λg(x) = 0
+      </div>
+    </div>
+    
+    <div class="lagrangian">
+      <strong>Lagrangian:</strong><br>
+      L(x,y,λ) = f(x,y) + λg(x,y)<br>
+      Current λ: <span id="currentLambda">0.00</span>
+    </div>
+    
+    <div><strong>Constraint Analysis:</strong></div>
+    <table>
+      <tr><th>Constraint</th><th>Value</th><th>Status</th><th>Multiplier</th></tr>
+      <tbody id="constraintTable">
+      </tbody>
+    </table>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Problem Type:</label>
+      <select id="problemSelect">
+        <option value="circle">Circle Constraint</option>
+        <option value="linear">Linear Constraint</option>
+        <option value="quadratic">Quadratic Constraint</option>
+        <option value="multiconstraint">Multiple Constraints</option>
+        <option value="equality">Equality Constraint</option>
+        <option value="portfolio">Portfolio Optimization</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Objective Function Scale:</label>
+      <input type="range" id="objScale" min="0.1" max="3" step="0.1" value="1">
+      <span id="objScaleValue">1.0</span>
+    </div>
+
+    <div class="control-group">
+      <label>Constraint Tightness:</label>
+      <input type="range" id="constraintTightness" min="0.5" max="3" step="0.1" value="1">
+      <span id="constraintTightnessValue">1.0</span>
+    </div>
+
+    <div class="control-group">
+      <label>Current Point:</label>
+      <div>
+        X: <input type="number" id="pointX" value="0.5" step="0.1" min="-3" max="3">
+        Y: <input type="number" id="pointY" value="0.5" step="0.1" min="-3" max="3">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="findKKTBtn">Find KKT Point</button>
+      <button id="gradientBtn">Gradient Step</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="projectedGradientBtn">Projected Gradient</button>
+      <button id="lagrangianBtn">Lagrangian Method</button>
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showConstraints" checked> Show Constraints
+      <input type="checkbox" id="showGradients" checked> Show Gradients
+      <input type="checkbox" id="showFeasible" checked> Show Feasible Region
+    </div>
+
+    <div class="control-group">
+      <label>Visualization:</label>
+      <input type="checkbox" id="showContours" checked> Show Contours
+      <input type="checkbox" id="showKKTPoint" checked> Show KKT Point
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(5, 5, 5);
+    controls.update();
+
+    // Problem parameters
+    let currentX = 0.5, currentY = 0.5;
+    let objScale = 1.0;
+    let constraintTightness = 1.0;
+    let currentProblem = 'circle';
+    let multipliers = [];
+    let kktPoint = null;
+
+    // Problem definitions
+    const problems = {
+      circle: {
+        objective: (x, y) => objScale * (x*x + y*y),
+        objGradient: (x, y) => [2*objScale*x, 2*objScale*y],
+        constraints: [
+          {
+            g: (x, y) => x*x + y*y - constraintTightness,
+            gradient: (x, y) => [2*x, 2*y],
+            type: 'inequality',
+            name: 'x² + y² ≤ c'
+          }
+        ],
+        kktSolution: () => {
+          const r = Math.sqrt(constraintTightness);
+          return {x: 0, y: 0, lambda: [0]};
+        },
+        name: 'Circle Constraint'
+      },
+      linear: {
+        objective: (x, y) => objScale * (x*x + y*y),
+        objGradient: (x, y) => [2*objScale*x, 2*objScale*y],
+        constraints: [
+          {
+            g: (x, y) => x + y - constraintTightness,
+            gradient: (x, y) => [1, 1],
+            type: 'inequality',
+            name: 'x + y ≤ c'
+          }
+        ],
+        kktSolution: () => {
+          const c = constraintTightness;
+          return {x: c/2, y: c/2, lambda: [objScale]};
+        },
+        name: 'Linear Constraint'
+      },
+      quadratic: {
+        objective: (x, y) => objScale * ((x-1)*(x-1) + (y-1)*(y-1)),
+        objGradient: (x, y) => [2*objScale*(x-1), 2*objScale*(y-1)],
+        constraints: [
+          {
+            g: (x, y) => x*x + y*y - constraintTightness,
+            gradient: (x, y) => [2*x, 2*y],
+            type: 'inequality',
+            name: 'x² + y² ≤ c'
+          }
+        ],
+        kktSolution: () => {
+          const r = Math.sqrt(constraintTightness);
+          const factor = r / Math.sqrt(2);
+          return {x: factor, y: factor, lambda: [objScale * (1 - r/Math.sqrt(2))]};
+        },
+        name: 'Quadratic Constraint'
+      },
+      multiconstraint: {
+        objective: (x, y) => objScale * (x*x + y*y),
+        objGradient: (x, y) => [2*objScale*x, 2*objScale*y],
+        constraints: [
+          {
+            g: (x, y) => x*x + y*y - constraintTightness,
+            gradient: (x, y) => [2*x, 2*y],
+            type: 'inequality',
+            name: 'x² + y² ≤ c'
+          },
+          {
+            g: (x, y) => x + y - constraintTightness * 0.8,
+            gradient: (x, y) => [1, 1],
+            type: 'inequality',
+            name: 'x + y ≤ 0.8c'
+          }
+        ],
+        kktSolution: () => {
+          return {x: 0, y: 0, lambda: [0, 0]};
+        },
+        name: 'Multiple Constraints'
+      },
+      equality: {
+        objective: (x, y) => objScale * (x*x + y*y),
+        objGradient: (x, y) => [2*objScale*x, 2*objScale*y],
+        constraints: [
+          {
+            g: (x, y) => x + y - constraintTightness,
+            gradient: (x, y) => [1, 1],
+            type: 'equality',
+            name: 'x + y = c'
+          }
+        ],
+        kktSolution: () => {
+          const c = constraintTightness;
+          return {x: c/2, y: c/2, lambda: [objScale]};
+        },
+        name: 'Equality Constraint'
+      },
+      portfolio: {
+        objective: (x, y) => objScale * (0.5*x*x + 0.3*y*y + 0.2*x*y),
+        objGradient: (x, y) => [objScale*(x + 0.2*y), objScale*(0.6*y + 0.2*x)],
+        constraints: [
+          {
+            g: (x, y) => x + y - constraintTightness,
+            gradient: (x, y) => [1, 1],
+            type: 'equality',
+            name: 'x + y = 1 (budget)'
+          }
+        ],
+        kktSolution: () => {
+          return {x: 0.6, y: 0.4, lambda: [0.2*objScale]};
+        },
+        name: 'Portfolio Optimization'
+      }
+    };
+
+    // Check KKT conditions
+    function checkKKTConditions() {
+      const problem = problems[currentProblem];
+      const [fx, fy] = problem.objGradient(currentX, currentY);
+      
+      multipliers = [];
+      const results = {
+        stationarity: false,
+        primalFeasibility: true,
+        dualFeasibility: true,
+        complementarySlackness: true
+      };
+
+      // Compute multipliers (simplified)
+      let gradLagrangian = [fx, fy];
+      
+      // Check which constraints are active
+      const activeConstraints = [];
+      problem.constraints.forEach((constraint, i) => {
+        const gval = constraint.g(currentX, currentY);
+        if (constraint.type === 'equality' || Math.abs(gval) < 1e-6) {
+          activeConstraints.push(i);
+        }
+        
+        // Primal feasibility
+        if (constraint.type === 'inequality' && gval > 1e-6) {
+          results.primalFeasibility = false;
+        }
+        
+        multipliers.push(0);
+      });
+
+      // Solve for multipliers using active constraints
+      if (activeConstraints.length > 0) {
+        // Simple case: one active constraint
+        if (activeConstraints.length === 1) {
+          const i = activeConstraints[0];
+          const [gx, gy] = problem.constraints[i].gradient(currentX, currentY);
+          const dotProduct = gx*gx + gy*gy;
+          if (dotProduct > 1e-10) {
+            const lambda = -(fx*gx + fy*gy) / dotProduct;
+            multipliers[i] = lambda;
+            
+            // Check dual feasibility
+            if (problem.constraints[i].type === 'inequality' && lambda < -1e-6) {
+              results.dualFeasibility = false;
+            }
+          }
+        }
+      }
+
+      // Check stationarity
+      let stationarityError = Math.sqrt(fx*fx + fy*fy);
+      problem.constraints.forEach((constraint, i) => {
+        const [gx, gy] = constraint.gradient(currentX, currentY);
+        stationarityError = Math.sqrt(
+          (fx + multipliers[i] * gx) * (fx + multipliers[i] * gx) +
+          (fy + multipliers[i] * gy) * (fy + multipliers[i] * gy)
+        );
+      });
+      
+      if (stationarityError < 1e-3) {
+        results.stationarity = true;
+      }
+
+      // Check complementary slackness
+      problem.constraints.forEach((constraint, i) => {
+        if (constraint.type === 'inequality') {
+          const gval = constraint.g(currentX, currentY);
+          if (Math.abs(multipliers[i] * gval) > 1e-6) {
+            results.complementarySlackness = false;
+          }
+        }
+      });
+
+      return results;
+    }
+
+    // Create objective surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const problem = problems[currentProblem];
+      const range = 3;
+      const steps = 50;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = problem.objective(x, y) * 0.1;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0xFF5722,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.6
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Constraint surfaces
+    let constraintSurfaces = [];
+    function createConstraintSurfaces() {
+      constraintSurfaces.forEach(s => scene.remove(s));
+      constraintSurfaces = [];
+      
+      if (!document.getElementById('showConstraints').checked) return;
+      
+      const problem = problems[currentProblem];
+      problem.constraints.forEach((constraint, i) => {
+        const range = 3;
+        const steps = 30;
+        const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+        const pos = geo.attributes.position;
+
+        for (let j = 0; j < pos.count; j++) {
+          const x = pos.getX(j);
+          const y = pos.getY(j);
+          const z = Math.max(0, constraint.g(x, y) * 0.1);
+          pos.setZ(j, z);
+        }
+        geo.computeVertexNormals();
+
+        const color = constraint.type === 'equality' ? 0x9C27B0 : 0xFFC107;
+        const mat = new THREE.MeshLambertMaterial({
+          color: color,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.4
+        });
+
+        const constraintSurface = new THREE.Mesh(geo, mat);
+        scene.add(constraintSurface);
+        constraintSurfaces.push(constraintSurface);
+      });
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // KKT point marker
+    const kktPointGeo = new THREE.SphereGeometry(0.1, 16, 16);
+    const kktPointMat = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
+    const kktPointMarker = new THREE.Mesh(kktPointGeo, kktPointMat);
+    scene.add(kktPointMarker);
+
+    // Gradient arrows
+    const objGradientArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0xff0000,
+      1,
+      0.5
+    );
+    scene.add(objGradientArrow);
+
+    const constraintGradientArrows = [];
+
+    // Update display
+    function updateDisplay() {
+      const problem = problems[currentProblem];
+      const objVal = problem.objective(currentX, currentY);
+      const kktResults = checkKKTConditions();
+      
+      // Update basic info
+      document.getElementById('problemType').textContent = problem.name;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = objVal.toFixed(3);
+      document.getElementById('currentLambda').textContent = multipliers.map(l => l.toFixed(3)).join(', ');
+      
+      // Check feasibility
+      let feasible = true;
+      problem.constraints.forEach(constraint => {
+        if (constraint.type === 'inequality' && constraint.g(currentX, currentY) > 1e-6) {
+          feasible = false;
+        }
+      });
+      document.getElementById('feasible').textContent = feasible ? 'Yes' : 'No';
+      document.getElementById('feasible').style.color = feasible ? '#4CAF50' : '#f44336';
+      
+      // Check if KKT point
+      const isKKT = kktResults.stationarity && kktResults.primalFeasibility && 
+                   kktResults.dualFeasibility && kktResults.complementarySlackness;
+      document.getElementById('kktPoint').textContent = isKKT ? 'Yes' : 'No';
+      document.getElementById('kktPoint').style.color = isKKT ? '#4CAF50' : '#f44336';
+      
+      // Update KKT condition displays
+      document.getElementById('stationarity').className = 
+        'kkt-condition ' + (kktResults.stationarity ? 'satisfied' : 'violated');
+      document.getElementById('primalFeasibility').className = 
+        'kkt-condition ' + (kktResults.primalFeasibility ? 'satisfied' : 'violated');
+      document.getElementById('dualFeasibility').className = 
+        'kkt-condition ' + (kktResults.dualFeasibility ? 'satisfied' : 'violated');
+      document.getElementById('complementarySlackness').className = 
+        'kkt-condition ' + (kktResults.complementarySlackness ? 'satisfied' : 'violated');
+      
+      // Update constraint table
+      const table = document.getElementById('constraintTable');
+      table.innerHTML = '';
+      problem.constraints.forEach((constraint, i) => {
+        const row = table.insertRow();
+        const gval = constraint.g(currentX, currentY);
+        const isActive = constraint.type === 'equality' || Math.abs(gval) < 1e-6;
+        
+        row.insertCell(0).textContent = constraint.name;
+        row.insertCell(1).textContent = gval.toFixed(3);
+        row.insertCell(2).textContent = isActive ? 'Active' : 'Inactive';
+        row.insertCell(3).textContent = multipliers[i].toFixed(3);
+        
+        row.className = isActive ? 'active' : 'inactive';
+      });
+      
+      // Update 3D visualization
+      const scaledZ = objVal * 0.1;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update gradient arrow
+      if (document.getElementById('showGradients').checked) {
+        const [fx, fy] = problem.objGradient(currentX, currentY);
+        const gradMagnitude = Math.sqrt(fx*fx + fy*fy);
+        if (gradMagnitude > 0) {
+          const normalizedGrad = new THREE.Vector3(fx, fy, 0).normalize();
+          objGradientArrow.setDirection(normalizedGrad);
+          objGradientArrow.position.set(currentX, currentY, scaledZ);
+          objGradientArrow.setLength(Math.min(gradMagnitude * 0.5, 2));
+          objGradientArrow.visible = true;
+        } else {
+          objGradientArrow.visible = false;
+        }
+      } else {
+        objGradientArrow.visible = false;
+      }
+      
+      // Show KKT point if found
+      if (kktPoint && document.getElementById('showKKTPoint').checked) {
+        const kktZ = problem.objective(kktPoint.x, kktPoint.y) * 0.1;
+        kktPointMarker.position.set(kktPoint.x, kktPoint.y, kktZ);
+        kktPointMarker.visible = true;
+      } else {
+        kktPointMarker.visible = false;
+      }
+    }
+
+    // Find KKT point (simplified)
+    function findKKTPoint() {
+      const problem = problems[currentProblem];
+      kktPoint = problem.kktSolution();
+      updateDisplay();
+    }
+
+    // Gradient step
+    function gradientStep() {
+      const problem = problems[currentProblem];
+      const [fx, fy] = problem.objGradient(currentX, currentY);
+      const stepSize = 0.1;
+      
+      currentX -= stepSize * fx;
+      currentY -= stepSize * fy;
+      
+      // Simple bounds
+      currentX = Math.max(-3, Math.min(3, currentX));
+      currentY = Math.max(-3, Math.min(3, currentY));
+      
+      document.getElementById('pointX').value = currentX.toFixed(3);
+      document.getElementById('pointY').value = currentY.toFixed(3);
+      
+      updateDisplay();
+    }
+
+    // Projected gradient step
+    function projectedGradientStep() {
+      gradientStep();
+      
+      // Project onto constraints (simplified)
+      const problem = problems[currentProblem];
+      problem.constraints.forEach(constraint => {
+        if (constraint.type === 'inequality') {
+          const gval = constraint.g(currentX, currentY);
+          if (gval > 0) {
+            // Project onto constraint boundary
+            const [gx, gy] = constraint.gradient(currentX, currentY);
+            const norm = Math.sqrt(gx*gx + gy*gy);
+            if (norm > 0) {
+              const projFactor = gval / (norm * norm);
+              currentX -= projFactor * gx;
+              currentY -= projFactor * gy;
+            }
+          }
+        }
+      });
+      
+      document.getElementById('pointX').value = currentX.toFixed(3);
+      document.getElementById('pointY').value = currentY.toFixed(3);
+      
+      updateDisplay();
+    }
+
+    // Reset
+    function reset() {
+      currentX = 0.5;
+      currentY = 0.5;
+      document.getElementById('pointX').value = currentX;
+      document.getElementById('pointY').value = currentY;
+      updateDisplay();
+    }
+
+    // Event listeners
+    document.getElementById('problemSelect').addEventListener('change', (e) => {
+      currentProblem = e.target.value;
+      createSurface();
+      createConstraintSurfaces();
+      reset();
+    });
+
+    document.getElementById('objScale').addEventListener('input', (e) => {
+      objScale = parseFloat(e.target.value);
+      document.getElementById('objScaleValue').textContent = objScale.toFixed(1);
+      createSurface();
+      updateDisplay();
+    });
+
+    document.getElementById('constraintTightness').addEventListener('input', (e) => {
+      constraintTightness = parseFloat(e.target.value);
+      document.getElementById('constraintTightnessValue').textContent = constraintTightness.toFixed(1);
+      createSurface();
+      createConstraintSurfaces();
+      updateDisplay();
+    });
+
+    document.getElementById('pointX').addEventListener('change', (e) => {
+      currentX = parseFloat(e.target.value);
+      updateDisplay();
+    });
+
+    document.getElementById('pointY').addEventListener('change', (e) => {
+      currentY = parseFloat(e.target.value);
+      updateDisplay();
+    });
+
+    document.getElementById('findKKTBtn').addEventListener('click', findKKTPoint);
+    document.getElementById('gradientBtn').addEventListener('click', gradientStep);
+    document.getElementById('projectedGradientBtn').addEventListener('click', projectedGradientStep);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('showConstraints').addEventListener('change', () => {
+      createConstraintSurfaces();
+      updateDisplay();
+    });
+
+    document.getElementById('showGradients').addEventListener('change', updateDisplay);
+    document.getElementById('showKKTPoint').addEventListener('change', updateDisplay);
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        document.getElementById('pointX').value = currentX.toFixed(3);
+        document.getElementById('pointY').value = currentY.toFixed(3);
+        updateDisplay();
+      }
+    });
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    createConstraintSurfaces();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>

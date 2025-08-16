@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Newton's Method Interactive Demo</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 380px;
+      font-size: 13px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-family: sans-serif;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      min-width: 250px;
+    }
+    .control-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    input[type="number"] {
+      width: 60px;
+      padding: 2px;
+      margin: 0 5px;
+    }
+    button {
+      background: #3F51B5;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #303F9F;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #f44336;
+    }
+    .reset-btn:hover {
+      background: #da190b;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+    }
+    .value-display {
+      color: #3F51B5;
+      font-weight: bold;
+    }
+    .hessian-info {
+      background: rgba(63, 81, 181, 0.2);
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .newton-step {
+      color: #00BCD4;
+      font-size: 12px;
+      margin: 5px 0;
+    }
+    .convergence-info {
+      color: #8BC34A;
+      font-size: 12px;
+    }
+    .warning {
+      color: #FF9800;
+      font-size: 12px;
+      background: rgba(255, 152, 0, 0.1);
+      padding: 5px;
+      border-radius: 3px;
+      margin: 5px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 11px;
+    }
+    th, td {
+      border: 1px solid #666;
+      padding: 3px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+    }
+    .matrix {
+      font-family: monospace;
+      font-size: 11px;
+    }
+  </style>
+
+
+
+
+
+</head>
+<body>
+  <div id="info">
+    <h3>Newton's Method Optimization</h3>
+    <div>Function: <span id="functionName">f(x,y) = x² + y²</span></div>
+    <div>Current: (<span id="currentX">0.00</span>, <span id="currentY">0.00</span>)</div>
+    <div>f(x,y): <span id="currentValue" class="value-display">0.00</span></div>
+    <div>‖∇f‖: <span id="gradNorm" class="value-display">0.00</span></div>
+    <div>Iteration: <span id="iteration">0</span></div>
+    <div>Step Size: <span id="stepSize">1.00</span></div>
+    <div class="newton-step">Newton Direction: (<span id="newtonDx">0.00</span>, <span id="newtonDy">0.00</span>)</div>
+    <div class="convergence-info">Convergence Rate: <span id="convergenceRate">N/A</span></div>
+    <br>
+    
+    <div class="hessian-info">
+      <strong>Hessian Matrix:</strong><br>
+      <div class="matrix">
+        [<span id="h11">0.00</span> <span id="h12">0.00</span>]<br>
+        [<span id="h21">0.00</span> <span id="h22">0.00</span>]
+      </div>
+      <div>det(H): <span id="hessianDet">0.00</span></div>
+      <div>Condition #: <span id="conditionNumber">0.00</span></div>
+    </div>
+    
+    <div><strong>Newton's Method:</strong></div>
+    <div>x⁺ = x - H⁻¹∇f</div>
+    <div>• H = Hessian matrix (second derivatives)</div>
+    <div>• Quadratic convergence near minimum</div>
+    <div>• Requires positive definite Hessian</div>
+    <div>• Blue arrow: Newton direction</div>
+    <div>• Green arrow: Gradient direction</div>
+    
+    <div id="warningDiv" class="warning" style="display: none;">
+      <span id="warningText"></span>
+    </div>
+  </div>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Function:</label>
+      <select id="functionSelect">
+        <option value="quadratic">Quadratic Bowl</option>
+        <option value="rosenbrock">Rosenbrock Function</option>
+        <option value="himmelblau">Himmelblau's Function</option>
+        <option value="beale">Beale Function</option>
+        <option value="saddle">Saddle Point</option>
+        <option value="elliptic">Elliptic Paraboloid</option>
+        <option value="banana">Banana Function</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label>Damping Factor:</label>
+      <input type="range" id="dampingFactor" min="0.1" max="1" step="0.1" value="1">
+      <span id="dampingValue">1.0</span>
+    </div>
+
+    <div class="control-group">
+      <label>Animation Speed:</label>
+      <input type="range" id="animSpeed" min="500" max="3000" step="250" value="1000">
+      <span id="animSpeedValue">1000ms</span>
+    </div>
+
+    <div class="control-group">
+      <label>Starting Point:</label>
+      <div>
+        X: <input type="number" id="startX" value="2" step="0.1" min="-5" max="5">
+        Y: <input type="number" id="startY" value="1.5" step="0.1" min="-5" max="5">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button id="startBtn">Start Newton's Method</button>
+      <button id="stopBtn" disabled>Stop</button>
+      <button id="resetBtn" class="reset-btn">Reset</button>
+    </div>
+
+    <div class="control-group">
+      <button id="stepBtn">Single Step</button>
+      <button id="gradientBtn">Gradient Step</button>
+    </div>
+
+    <div class="control-group">
+      <input type="checkbox" id="showPath" checked> Show Path
+      <input type="checkbox" id="showHessian" checked> Show Hessian Ellipse
+      <input type="checkbox" id="showNewtonDir" checked> Show Newton Direction
+    </div>
+
+    <div class="control-group">
+      <label>Convergence Tolerance:</label>
+      <input type="range" id="tolerance" min="0.001" max="0.1" step="0.001" value="0.01">
+      <span id="toleranceValue">0.01</span>
+    </div>
+
+    <div class="control-group">
+      <table>
+        <tr><th>Step</th><th>f(x)</th><th>‖∇f‖</th><th>‖Δx‖</th></tr>
+        <tbody id="convergenceTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.126.1/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(6, 6, 6);
+    controls.update();
+
+    // Newton's method parameters
+    let currentX = 2, currentY = 1.5;
+    let dampingFactor = 1.0;
+    let animationSpeed = 1000;
+    let tolerance = 0.01;
+    let isRunning = false;
+    let iteration = 0;
+    let currentFunction = 'quadratic';
+    let pathPoints = [];
+    let animationId = null;
+    let convergenceHistory = [];
+
+    // Function definitions with second derivatives
+    const functions = {
+      quadratic: {
+        f: (x, y) => x*x + y*y,
+        gradient: (x, y) => [2*x, 2*y],
+        hessian: (x, y) => [[2, 0], [0, 2]],
+        name: 'x² + y²',
+        range: 4,
+        scale: 0.5
+      },
+      rosenbrock: {
+        f: (x, y) => (1-x)*(1-x) + 100*(y-x*x)*(y-x*x),
+        gradient: (x, y) => [
+          -2*(1-x) + 400*x*(x*x-y),
+          200*(y-x*x)
+        ],
+        hessian: (x, y) => [
+          [2 + 1200*x*x - 400*y, -400*x],
+          [-400*x, 200]
+        ],
+        name: 'Rosenbrock function',
+        range: 3,
+        scale: 0.01
+      },
+      himmelblau: {
+        f: (x, y) => (x*x + y - 11)*(x*x + y - 11) + (x + y*y - 7)*(x + y*y - 7),
+        gradient: (x, y) => [
+          2*(x*x + y - 11)*2*x + 2*(x + y*y - 7),
+          2*(x*x + y - 11) + 2*(x + y*y - 7)*2*y
+        ],
+        hessian: (x, y) => [
+          [12*x*x + 4*y - 42, 4*x + 4*y],
+          [4*x + 4*y, 2 + 12*y*y + 4*x - 26]
+        ],
+        name: "Himmelblau's function",
+        range: 5,
+        scale: 0.01
+      },
+      beale: {
+        f: (x, y) => {
+          const a = 1.5 - x + x*y;
+          const b = 2.25 - x + x*y*y;
+          const c = 2.625 - x + x*y*y*y;
+          return a*a + b*b + c*c;
+        },
+        gradient: (x, y) => [
+          2*(1.5 - x + x*y)*(-1 + y) + 2*(2.25 - x + x*y*y)*(-1 + y*y) + 2*(2.625 - x + x*y*y*y)*(-1 + y*y*y),
+          2*(1.5 - x + x*y)*x + 2*(2.25 - x + x*y*y)*2*x*y + 2*(2.625 - x + x*y*y*y)*3*x*y*y
+        ],
+        hessian: (x, y) => [
+          [2*(y-1)*(y-1) + 2*(y*y-1)*(y*y-1) + 2*(y*y*y-1)*(y*y*y-1), 
+           2*(1.5-x+x*y) + 2*(2.25-x+x*y*y)*2*y + 2*(2.625-x+x*y*y*y)*3*y*y + 2*(-1+y)*x + 2*(-1+y*y)*2*x*y + 2*(-1+y*y*y)*3*x*y*y],
+          [2*(1.5-x+x*y) + 2*(2.25-x+x*y*y)*2*y + 2*(2.625-x+x*y*y*y)*3*y*y + 2*(-1+y)*x + 2*(-1+y*y)*2*x*y + 2*(-1+y*y*y)*3*x*y*y,
+           2*x*x + 2*(2.25-x+x*y*y)*2*x + 2*(2.625-x+x*y*y*y)*6*x*y + 2*x*x*2 + 2*x*x*6*y]
+        ],
+        name: 'Beale function',
+        range: 3,
+        scale: 0.01
+      },
+      saddle: {
+        f: (x, y) => x*x - y*y,
+        gradient: (x, y) => [2*x, -2*y],
+        hessian: (x, y) => [[2, 0], [0, -2]],
+        name: 'Saddle Point (x² - y²)',
+        range: 3,
+        scale: 0.5
+      },
+      elliptic: {
+        f: (x, y) => 2*x*x + y*y + x*y,
+        gradient: (x, y) => [4*x + y, 2*y + x],
+        hessian: (x, y) => [[4, 1], [1, 2]],
+        name: 'Elliptic Paraboloid',
+        range: 3,
+        scale: 0.3
+      },
+      banana: {
+        f: (x, y) => 100*(y - x*x)*(y - x*x) + (1 - x)*(1 - x),
+        gradient: (x, y) => [
+          -400*x*(y - x*x) - 2*(1 - x),
+          200*(y - x*x)
+        ],
+        hessian: (x, y) => [
+          [1200*x*x - 400*y + 2, -400*x],
+          [-400*x, 200]
+        ],
+        name: 'Banana Function',
+        range: 3,
+        scale: 0.01
+      }
+    };
+
+    // Matrix operations
+    function matrixInverse2x2(mat) {
+      const [[a, b], [c, d]] = mat;
+      const det = a * d - b * c;
+      if (Math.abs(det) < 1e-12) return null;
+      return [[d/det, -b/det], [-c/det, a/det]];
+    }
+
+    function matrixVectorMultiply(mat, vec) {
+      const [[a, b], [c, d]] = mat;
+      const [x, y] = vec;
+      return [a*x + b*y, c*x + d*y];
+    }
+
+    function matrixDeterminant2x2(mat) {
+      const [[a, b], [c, d]] = mat;
+      return a * d - b * c;
+    }
+
+    function matrixConditionNumber(mat) {
+      const [[a, b], [c, d]] = mat;
+      const trace = a + d;
+      const det = a * d - b * c;
+      const discriminant = trace * trace - 4 * det;
+      if (discriminant < 0) return Infinity;
+      const lambda1 = (trace + Math.sqrt(discriminant)) / 2;
+      const lambda2 = (trace - Math.sqrt(discriminant)) / 2;
+      return Math.abs(lambda1 / lambda2);
+    }
+
+    // Create surface
+    let surface;
+    function createSurface() {
+      if (surface) scene.remove(surface);
+      
+      const func = functions[currentFunction];
+      const range = func.range;
+      const steps = 50;
+      const geo = new THREE.PlaneGeometry(range * 2, range * 2, steps, steps);
+      const pos = geo.attributes.position;
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        const z = func.f(x, y) * func.scale;
+        pos.setZ(i, z);
+      }
+      geo.computeVertexNormals();
+
+      const mat = new THREE.MeshLambertMaterial({
+        color: 0x3F51B5,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.7
+      });
+
+      surface = new THREE.Mesh(geo, mat);
+      scene.add(surface);
+    }
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const light = new THREE.DirectionalLight(0xffffff, 0.8);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Current position marker
+    const pointGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const currentPoint = new THREE.Mesh(pointGeo, pointMat);
+    scene.add(currentPoint);
+
+    // Newton direction arrow
+    const newtonArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0x00BCD4,
+      1,
+      0.5
+    );
+    scene.add(newtonArrowHelper);
+
+    // Gradient arrow
+    const gradientArrowHelper = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 0, 1), 
+      new THREE.Vector3(), 
+      1, 
+      0x4CAF50,
+      1,
+      0.5
+    );
+    scene.add(gradientArrowHelper);
+
+    // Hessian ellipse
+    let hessianEllipse;
+    function createHessianEllipse() {
+      if (hessianEllipse) scene.remove(hessianEllipse);
+      
+      if (!document.getElementById('showHessian').checked) return;
+      
+      const func = functions[currentFunction];
+      const H = func.hessian(currentX, currentY);
+      const det = matrixDeterminant2x2(H);
+      
+      if (det <= 0) return; // Not positive definite
+      
+      // Create ellipse based on Hessian eigenvalues
+      const trace = H[0][0] + H[1][1];
+      const discriminant = trace * trace - 4 * det;
+      if (discriminant < 0) return;
+      
+      const lambda1 = (trace + Math.sqrt(discriminant)) / 2;
+      const lambda2 = (trace - Math.sqrt(discriminant)) / 2;
+      
+      const geo = new THREE.RingGeometry(0, Math.sqrt(2/Math.max(lambda1, lambda2)), 32);
+      const mat = new THREE.MeshBasicMaterial({ 
+        color: 0x00BCD4, 
+        transparent: true, 
+        opacity: 0.3,
+        side: THREE.DoubleSide
+      });
+      
+      hessianEllipse = new THREE.Mesh(geo, mat);
+      hessianEllipse.position.set(currentX, currentY, 0);
+      scene.add(hessianEllipse);
+    }
+
+    // Path visualization
+    let pathLine;
+    function updatePath() {
+      if (pathLine) scene.remove(pathLine);
+      
+      if (pathPoints.length < 2 || !document.getElementById('showPath').checked) return;
+      
+      const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+      const material = new THREE.LineBasicMaterial({ color: 0x3F51B5, linewidth: 3 });
+      pathLine = new THREE.Line(geometry, material);
+      scene.add(pathLine);
+    }
+
+    // Update display
+    function updateDisplay() {
+      const func = functions[currentFunction];
+      const fval = func.f(currentX, currentY);
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const H = func.hessian(currentX, currentY);
+      const gradNorm = Math.sqrt(gx*gx + gy*gy);
+      
+      // Newton direction
+      const Hinv = matrixInverse2x2(H);
+      let newtonDx = 0, newtonDy = 0;
+      if (Hinv) {
+        [newtonDx, newtonDy] = matrixVectorMultiply(Hinv, [-gx, -gy]);
+      }
+      
+      document.getElementById('functionName').textContent = `f(x,y) = ${func.name}`;
+      document.getElementById('currentX').textContent = currentX.toFixed(3);
+      document.getElementById('currentY').textContent = currentY.toFixed(3);
+      document.getElementById('currentValue').textContent = fval.toFixed(3);
+      document.getElementById('gradNorm').textContent = gradNorm.toFixed(3);
+      document.getElementById('iteration').textContent = iteration;
+      document.getElementById('stepSize').textContent = dampingFactor.toFixed(2);
+      document.getElementById('newtonDx').textContent = newtonDx.toFixed(3);
+      document.getElementById('newtonDy').textContent = newtonDy.toFixed(3);
+      
+      // Hessian info
+      document.getElementById('h11').textContent = H[0][0].toFixed(3);
+      document.getElementById('h12').textContent = H[0][1].toFixed(3);
+      document.getElementById('h21').textContent = H[1][0].toFixed(3);
+      document.getElementById('h22').textContent = H[1][1].toFixed(3);
+      
+      const det = matrixDeterminant2x2(H);
+      const condNum = matrixConditionNumber(H);
+      document.getElementById('hessianDet').textContent = det.toFixed(3);
+      document.getElementById('conditionNumber').textContent = condNum.toFixed(1);
+      
+      // Convergence rate
+      if (convergenceHistory.length > 1) {
+        const current = convergenceHistory[convergenceHistory.length - 1];
+        const previous = convergenceHistory[convergenceHistory.length - 2];
+        const rate = current.gradNorm / (previous.gradNorm * previous.gradNorm);
+        document.getElementById('convergenceRate').textContent = rate.toFixed(3);
+      }
+      
+      // Warnings
+      const warningDiv = document.getElementById('warningDiv');
+      const warningText = document.getElementById('warningText');
+      
+      if (det <= 0) {
+        warningDiv.style.display = 'block';
+        warningText.textContent = 'Warning: Hessian is not positive definite!';
+      } else if (condNum > 1000) {
+        warningDiv.style.display = 'block';
+        warningText.textContent = 'Warning: Hessian is ill-conditioned!';
+      } else {
+        warningDiv.style.display = 'none';
+      }
+      
+      // Update 3D visualization
+      const scaledZ = fval * func.scale;
+      currentPoint.position.set(currentX, currentY, scaledZ);
+      
+      // Update arrows
+      if (document.getElementById('showNewtonDir').checked && Hinv) {
+        const newtonMagnitude = Math.sqrt(newtonDx*newtonDx + newtonDy*newtonDy);
+        if (newtonMagnitude > 0) {
+          const normalizedNewton = new THREE.Vector3(newtonDx, newtonDy, 0).normalize();
+          newtonArrowHelper.setDirection(normalizedNewton);
+          newtonArrowHelper.position.set(currentX, currentY, scaledZ);
+          newtonArrowHelper.setLength(Math.min(newtonMagnitude * 0.5, 2));
+          newtonArrowHelper.visible = true;
+        } else {
+          newtonArrowHelper.visible = false;
+        }
+      } else {
+        newtonArrowHelper.visible = false;
+      }
+      
+      // Gradient arrow
+      if (gradNorm > 0) {
+        const normalizedGrad = new THREE.Vector3(-gx, -gy, 0).normalize();
+        gradientArrowHelper.setDirection(normalizedGrad);
+        gradientArrowHelper.position.set(currentX, currentY, scaledZ);
+        gradientArrowHelper.setLength(Math.min(gradNorm * 0.3, 1.5));
+        gradientArrowHelper.visible = true;
+      } else {
+        gradientArrowHelper.visible = false;
+      }
+      
+      createHessianEllipse();
+    }
+
+    // Newton step
+    function newtonStep() {
+      const func = functions[currentFunction];
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const H = func.hessian(currentX, currentY);
+      const gradNorm = Math.sqrt(gx*gx + gy*gy);
+      
+      // Store current state
+      const currentState = {
+        x: currentX,
+        y: currentY,
+        fval: func.f(currentX, currentY),
+        gradNorm: gradNorm
+      };
+      
+      // Add current point to path
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      // Compute Newton direction
+      const Hinv = matrixInverse2x2(H);
+      if (!Hinv) {
+        stopNewton();
+        return;
+      }
+      
+      const [dx, dy] = matrixVectorMultiply(Hinv, [-gx, -gy]);
+      const stepNorm = Math.sqrt(dx*dx + dy*dy);
+      
+      // Update position with damping
+      currentX += dampingFactor * dx;
+      currentY += dampingFactor * dy;
+      
+      // Clamp to bounds
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      iteration++;
+      
+      // Update convergence history
+      convergenceHistory.push({
+        ...currentState,
+        stepNorm: stepNorm
+      });
+      
+      // Update convergence table
+      updateConvergenceTable();
+      
+      updateDisplay();
+      updatePath();
+      
+      // Check convergence
+      if (gradNorm < tolerance) {
+        stopNewton();
+      }
+    }
+
+    // Update convergence table
+    function updateConvergenceTable() {
+      const table = document.getElementById('convergenceTable');
+      const maxRows = 10;
+      
+      // Clear old rows
+      table.innerHTML = '';
+      
+      // Add recent history
+      const startIndex = Math.max(0, convergenceHistory.length - maxRows);
+      for (let i = startIndex; i < convergenceHistory.length; i++) {
+        const row = table.insertRow();
+        const state = convergenceHistory[i];
+        
+        row.insertCell(0).textContent = i;
+        row.insertCell(1).textContent = state.fval.toFixed(4);
+        row.insertCell(2).textContent = state.gradNorm.toFixed(4);
+        row.insertCell(3).textContent = state.stepNorm ? state.stepNorm.toFixed(4) : 'N/A';
+      }
+    }
+
+    // Gradient step (for comparison)
+    function gradientStep() {
+      const func = functions[currentFunction];
+      const [gx, gy] = func.gradient(currentX, currentY);
+      const stepSize = 0.1;
+      
+      // Add current point to path
+      const z = func.f(currentX, currentY) * func.scale;
+      pathPoints.push(new THREE.Vector3(currentX, currentY, z));
+      
+      currentX -= stepSize * gx;
+      currentY -= stepSize * gy;
+      
+      // Clamp to bounds
+      const range = func.range;
+      currentX = Math.max(-range, Math.min(range, currentX));
+      currentY = Math.max(-range, Math.min(range, currentY));
+      
+      iteration++;
+      updateDisplay();
+      updatePath();
+    }
+
+    // Animation loop
+    function animate() {
+      if (isRunning) {
+        newtonStep();
+        animationId = setTimeout(animate, animationSpeed);
+      }
+    }
+
+    // Start Newton's method
+    function startNewton() {
+      isRunning = true;
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      animate();
+    }
+
+    // Stop Newton's method
+    function stopNewton() {
+      isRunning = false;
+      if (animationId) {
+        clearTimeout(animationId);
+        animationId = null;
+      }
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+    }
+
+    // Reset
+    function reset() {
+      stopNewton();
+      currentX = parseFloat(document.getElementById('startX').value);
+      currentY = parseFloat(document.getElementById('startY').value);
+      iteration = 0;
+      pathPoints = [];
+      convergenceHistory = [];
+      updateDisplay();
+      updatePath();
+      updateConvergenceTable();
+    }
+
+    // Mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    window.addEventListener('pointerdown', (event) => {
+      if (isRunning) return;
+      
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(surface);
+      
+      if (intersects.length > 0) {
+        const point = intersects[0].point;
+        currentX = point.x;
+        currentY = point.y;
+        iteration = 0;
+        pathPoints = [];
+        convergenceHistory = [];
+        updateDisplay();
+        updatePath();
+        updateConvergenceTable();
+      }
+    });
+
+    // Event listeners
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      currentFunction = e.target.value;
+      createSurface();
+      reset();
+    });
+
+    document.getElementById('dampingFactor').addEventListener('input', (e) => {
+      dampingFactor = parseFloat(e.target.value);
+      document.getElementById('dampingValue').textContent = dampingFactor.toFixed(1);
+    });
+
+    document.getElementById('tolerance').addEventListener('input', (e) => {
+      tolerance = parseFloat(e.target.value);
+      document.getElementById('toleranceValue').textContent = tolerance.toFixed(3);
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animationSpeed = parseInt(e.target.value);
+      document.getElementById('animSpeedValue').textContent = animationSpeed + 'ms';
+    });
+
+    document.getElementById('startBtn').addEventListener('click', startNewton);
+    document.getElementById('stopBtn').addEventListener('click', stopNewton);
+    document.getElementById('resetBtn').addEventListener('click', reset);
+
+    document.getElementById('stepBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        newtonStep();
+      }
+    });
+
+    document.getElementById('gradientBtn').addEventListener('click', () => {
+      if (!isRunning) {
+        gradientStep();
+      }
+    });
+
+    document.getElementById('showPath').addEventListener('change', updatePath);
+    document.getElementById('showHessian').addEventListener('change', createHessianEllipse);
+    document.getElementById('showNewtonDir').addEventListener('change', updateDisplay);
+
+    document.getElementById('startX').addEventListener('change', reset);
+    document.getElementById('startY').addEventListener('change', reset);
+
+    // Main render loop
+    function render() {
+      requestAnimationFrame(render);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize
+    createSurface();
+    updateDisplay();
+    render();
+  </script>
+</body>
+</html>
