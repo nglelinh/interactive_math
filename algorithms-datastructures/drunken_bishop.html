@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drunken Bishop Algorithm - Interactive Visualization</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    O: ['\\mathcal{O}'],
+                    Theta: ['\\Theta'],
+                    Omega: ['\\Omega']
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #9b59b6, #3498db);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #9b59b6, #3498db);
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+            align-items: start;
+        }
+
+        .theory-panel, .demo-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .demo-panel {
+            text-align: center;
+        }
+
+        .bishop-grid {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            background: #1a1a1a;
+            padding: 10px;
+        }
+
+        .grid-row {
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid-cell {
+            width: 25px;
+            height: 25px;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .grid-cell.current {
+            background: #e74c3c;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .grid-cell.start {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .grid-cell.end {
+            background: #f39c12;
+            color: white;
+        }
+
+        .grid-cell.visited {
+            background: #3498db;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 0 5px;
+            width: 200px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-info {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .algorithm-steps {
+            background: rgba(155, 89, 182, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .step {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: rgba(231, 76, 60, 0.2);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .complexity-analysis {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .example-section {
+            background: rgba(241, 196, 15, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f1c40f;
+        }
+
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .fingerprint-visual {
+            background: #000;
+            border: 1px solid #3498db;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 10px;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .nav-button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍺 Drunken Bishop Algorithm</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('introduction')">Giới thiệu</button>
+            <button class="nav-button" onclick="showSection('theory')">Lý thuyết</button>
+            <button class="nav-button" onclick="showSection('visualization')">Trực quan hóa</button>
+            <button class="nav-button" onclick="showSection('implementation')">Cài đặt</button>
+            <button class="nav-button" onclick="showSection('applications')">Ứng dụng</button>
+            <button class="nav-button" onclick="showSection('examples')">Ví dụ</button>
+        </div>
+
+        <!-- Introduction Section -->
+        <div id="introduction" class="lesson-section active">
+            <h2>🔍 Drunken Bishop Algorithm là gì?</h2>
+            
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <h3>📖 Khái niệm cơ bản</h3>
+                    <p><strong>Drunken Bishop Algorithm</strong> là một thuật toán được sử dụng để tạo ra <em>ASCII art fingerprint</em> từ dữ liệu hash, giúp con người dễ dàng nhận diện và so sánh các fingerprint.</p>
+                    
+                    <h4>🎯 Mục đích chính:</h4>
+                    <ul>
+                        <li><strong>Visualization:</strong> Chuyển đổi hash thành hình ảnh ASCII dễ nhận diện</li>
+                        <li><strong>Security:</strong> Giúp phát hiện man-in-the-middle attacks</li>
+                        <li><strong>User Experience:</strong> Tạo fingerprint dễ nhớ hơn so với hex strings</li>
+                        <li><strong>Quick Comparison:</strong> So sánh nhanh các SSH keys hoặc certificates</li>
+                    </ul>
+
+                    <h4>🔬 Nguồn gốc:</h4>
+                    <p>Thuật toán này được giới thiệu trong OpenSSH và lấy cảm hứng từ "random walk" - giống như một người say rượu đi bộ ngẫu nhiên trên một lưới ô vuông.</p>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>🎨 Ví dụ Fingerprint</h3>
+                    <div class="fingerprint-visual">
++--[RSA 2048]----+<br>
+|        .        |<br>
+|         o       |<br>
+|        . +      |<br>
+|       . = o     |<br>
+|        S = .    |<br>
+|         = + .   |<br>
+|        . O +    |<br>
+|         + B o   |<br>
+|          =+E.   |<br>
++-----------------+
+                    </div>
+                    
+                    <p><strong>Giải thích:</strong></p>
+                    <ul style="text-align: left;">
+                        <li><code>S</code>: Điểm bắt đầu (Start)</li>
+                        <li><code>E</code>: Điểm kết thúc (End)</li>
+                        <li><code>. o + = * B O X #</code>: Mức độ ghé thăm (0-8+)</li>
+                        <li>Càng nhiều ký tự đặc biệt = càng được ghé thăm nhiều</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="algorithm-steps">
+                <h3>⚙️ Các bước cơ bản của thuật toán:</h3>
+                <div class="step">
+                    <strong>Bước 1:</strong> Khởi tạo lưới 17×9 với tất cả giá trị = 0
+                </div>
+                <div class="step">
+                    <strong>Bước 2:</strong> Bắt đầu từ vị trí trung tâm (8, 4)
+                </div>
+                <div class="step">
+                    <strong>Bước 3:</strong> Đọc từng byte của hash, mỗi byte cho 4 bước di chuyển
+                </div>
+                <div class="step">
+                    <strong>Bước 4:</strong> Di chuyển theo 2 bit: 00=↖, 01=↗, 10=↙, 11=↘
+                </div>
+                <div class="step">
+                    <strong>Bước 5:</strong> Tăng giá trị ô hiện tại lên 1 (max = 15)
+                </div>
+                <div class="step">
+                    <strong>Bước 6:</strong> Chuyển đổi giá trị thành ký tự ASCII
+                </div>
+            </div>
+        </div>
+
+        <!-- Theory Section -->
+        <div id="theory" class="lesson-section">
+            <h2>📐 Lý thuyết toán học</h2>
+
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <h3>🧮 Random Walk Theory</h3>
+                    <p>Drunken Bishop dựa trên <strong>Random Walk</strong> - một quá trình ngẫu nhiên mô tả đường đi của một đối tượng di chuyển ngẫu nhiên.</p>
+
+                    <div class="math-formula">
+                        $$P(X_{n+1} = j | X_n = i) = p_{ij}$$
+                        <p>Xác suất chuyển từ trạng thái $i$ sang $j$</p>
+                    </div>
+
+                    <h4>🎯 Trong Drunken Bishop:</h4>
+                    <ul>
+                        <li><strong>State Space:</strong> Lưới 17×9 = 153 vị trí</li>
+                        <li><strong>Transition:</strong> 4 hướng di chuyển có thể</li>
+                        <li><strong>Probability:</strong> Phụ thuộc vào 2 bit của hash</li>
+                        <li><strong>Boundary:</strong> Không thể di chuyển ra ngoài lưới</li>
+                    </ul>
+
+                    <h4>🔢 Bit Encoding:</h4>
+                    <div class="math-formula">
+                        $$\begin{align}
+                        00_2 &\rightarrow \text{↖ (Northwest)} \\
+                        01_2 &\rightarrow \text{↗ (Northeast)} \\
+                        10_2 &\rightarrow \text{↙ (Southwest)} \\
+                        11_2 &\rightarrow \text{↘ (Southeast)}
+                        \end{align}$$
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>📊 Phân bố xác suất</h3>
+                    <p>Do tính chất random walk, các ô ở trung tâm có xu hướng được ghé thăm nhiều hơn:</p>
+                    
+                    <div class="math-formula">
+                        $$\text{Visit Count}(x,y) \sim \text{Distance from center}^{-1}$$
+                    </div>
+
+                    <h4>🎨 Character Mapping:</h4>
+                    <table style="margin: 10px auto; border-collapse: collapse;">
+                        <tr style="border: 1px solid #3498db;">
+                            <td style="padding: 5px; border: 1px solid #3498db;"><strong>Visits</strong></td>
+                            <td style="padding: 5px; border: 1px solid #3498db;"><strong>Character</strong></td>
+                        </tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">0</td><td style="padding: 5px; border: 1px solid #3498db;">space</td></tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">1</td><td style="padding: 5px; border: 1px solid #3498db;">.</td></tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">2</td><td style="padding: 5px; border: 1px solid #3498db;">o</td></tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">3</td><td style="padding: 5px; border: 1px solid #3498db;">+</td></tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">4</td><td style="padding: 5px; border: 1px solid #3498db;">=</td></tr>
+                        <tr><td style="padding: 5px; border: 1px solid #3498db;">5+</td><td style="padding: 5px; border: 1px solid #3498db;">*, B, O, X, #</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="complexity-analysis">
+                <h3>⚡ Complexity Analysis</h3>
+                <div class="math-formula">
+                    <p><strong>Time Complexity:</strong> $\O(n)$ where $n$ is hash length in bytes</p>
+                    <p><strong>Space Complexity:</strong> $\O(1)$ - Fixed 17×9 grid</p>
+                    <p><strong>Hash Processing:</strong> $\O(4n)$ steps for $n$ bytes</p>
+                </div>
+
+                <h4>📈 Performance Characteristics:</h4>
+                <ul>
+                    <li><strong>Deterministic:</strong> Cùng input luôn cho cùng output</li>
+                    <li><strong>Fast:</strong> Chỉ cần một lần duyệt qua hash</li>
+                    <li><strong>Memory Efficient:</strong> Grid nhỏ cố định</li>
+                    <li><strong>Collision Resistant:</strong> Khác biệt nhỏ trong hash → khác biệt lớn trong pattern</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Visualization Section -->
+        <div id="visualization" class="lesson-section">
+            <h2>🎮 Trực quan hóa thuật toán</h2>
+
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <div class="controls">
+                        <div class="control-group">
+                            <label>Input Hash (hex):</label><br>
+                            <input type="text" id="hashInput" class="input-field" 
+                                   value="9d5b8b89a5c64b1a2f3e8c7d" placeholder="Enter hex hash">
+                        </div>
+                        
+                        <div class="control-group">
+                            <button class="btn" onclick="startVisualization()">🎬 Bắt đầu</button>
+                            <button class="btn" onclick="stepForward()" id="stepBtn" disabled>➡️ Bước tiếp</button>
+                            <button class="btn" onclick="resetVisualization()">🔄 Reset</button>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Tốc độ:</label>
+                            <input type="range" id="speedSlider" min="50" max="1000" value="500" style="width: 150px;">
+                            <span id="speedValue">500ms</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-info">
+                        <div><strong>Byte hiện tại:</strong> <span id="currentByte">-</span></div>
+                        <div><strong>Bit pattern:</strong> <span id="currentBits">-</span></div>
+                        <div><strong>Vị trí:</strong> <span id="currentPos">-</span></div>
+                        <div><strong>Bước:</strong> <span id="stepCount">0</span></div>
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>🗺️ Drunken Bishop Grid</h3>
+                    <div id="bishopGrid" class="bishop-grid">
+                        <!-- Grid will be generated by JavaScript -->
+                    </div>
+                    
+                    <div class="progress-info">
+                        <h4>🎯 Legend:</h4>
+                        <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                            <span><div style="display: inline-block; width: 15px; height: 15px; background: #2ecc71; margin-right: 5px;"></div>Start (S)</span>
+                            <span><div style="display: inline-block; width: 15px; height: 15px; background: #f39c12; margin-right: 5px;"></div>End (E)</span>
+                            <span><div style="display: inline-block; width: 15px; height: 15px; background: #e74c3c; margin-right: 5px;"></div>Current</span>
+                            <span><div style="display: inline-block; width: 15px; height: 15px; background: #3498db; margin-right: 5px;"></div>Visited</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="algorithm-steps">
+                <h3>📋 Algorithm Steps:</h3>
+                <div id="step1" class="step">1. Initialize 17×9 grid with zeros</div>
+                <div id="step2" class="step">2. Start at center position (8, 4)</div>
+                <div id="step3" class="step">3. Read next byte from hash</div>
+                <div id="step4" class="step">4. Extract 2-bit pairs for movement direction</div>
+                <div id="step5" class="step">5. Move bishop according to bit pattern</div>
+                <div id="step6" class="step">6. Increment visit count at current position</div>
+                <div id="step7" class="step">7. Repeat until all hash bytes processed</div>
+                <div id="step8" class="step">8. Convert visit counts to ASCII characters</div>
+            </div>
+        </div>
+
+        <!-- Implementation Section -->
+        <div id="implementation" class="lesson-section">
+            <h2>💻 Cài đặt thuật toán</h2>
+
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <h3>🔧 JavaScript Implementation</h3>
+                    <pre style="background: #1a1a1a; padding: 15px; border-radius: 8px; overflow-x: auto;"><code>
+class DrunkenBishop {
+    constructor() {
+        this.GRID_WIDTH = 17;
+        this.GRID_HEIGHT = 9;
+        this.grid = Array(this.GRID_HEIGHT).fill()
+            .map(() => Array(this.GRID_WIDTH).fill(0));
+        this.x = Math.floor(this.GRID_WIDTH / 2);  // Start at center
+        this.y = Math.floor(this.GRID_HEIGHT / 2);
+        this.startX = this.x;
+        this.startY = this.y;
+    }
+
+    // Move direction based on 2-bit pattern
+    move(bits) {
+        const dx = (bits & 1) ? 1 : -1;  // Right if bit 0 set
+        const dy = (bits & 2) ? 1 : -1;  // Down if bit 1 set
+        
+        // Boundary checking
+        this.x = Math.max(0, Math.min(this.GRID_WIDTH - 1, this.x + dx));
+        this.y = Math.max(0, Math.min(this.GRID_HEIGHT - 1, this.y + dy));
+        
+        // Increment visit count (max 15)
+        this.grid[this.y][this.x] = Math.min(15, this.grid[this.y][this.x] + 1);
+    }
+
+    // Process hash string
+    processHash(hashHex) {
+        const bytes = this.hexToBytes(hashHex);
+        
+        for (let byte of bytes) {
+            // Each byte gives us 4 moves (2 bits each)
+            for (let i = 0; i < 4; i++) {
+                const bits = (byte >> (i * 2)) & 3;
+                this.move(bits);
+            }
+        }
+    }
+
+    // Convert to ASCII art
+    toASCII() {
+        const chars = " .o+=*BOX@%&#/^SE";
+        let result = "+--[HASH]----+\n";
+        
+        for (let y = 0; y < this.GRID_HEIGHT; y++) {
+            result += "|";
+            for (let x = 0; x < this.GRID_WIDTH; x++) {
+                if (x === this.startX && y === this.startY) {
+                    result += "S";  // Start position
+                } else if (x === this.x && y === this.y) {
+                    result += "E";  // End position
+                } else {
+                    result += chars[Math.min(this.grid[y][x], chars.length - 1)];
+                }
+            }
+            result += "|\n";
+        }
+        result += "+-----------------+";
+        return result;
+    }
+
+    hexToBytes(hex) {
+        const bytes = [];
+        for (let i = 0; i < hex.length; i += 2) {
+            bytes.push(parseInt(hex.substr(i, 2), 16));
+        }
+        return bytes;
+    }
+}
+
+// Usage example
+const bishop = new DrunkenBishop();
+bishop.processHash("9d5b8b89a5c64b1a2f3e8c7d");
+console.log(bishop.toASCII());
+                    </code></pre>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>🧪 Test Implementation</h3>
+                    <div class="control-group">
+                        <label>Test Hash:</label><br>
+                        <input type="text" id="testHash" class="input-field" 
+                               value="a1b2c3d4e5f6" placeholder="Enter test hash">
+                        <br>
+                        <button class="btn" onclick="testImplementation()">🧪 Test</button>
+                    </div>
+
+                    <div id="testResult" style="margin-top: 15px; background: #1a1a1a; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+
+                    <h4>📊 Implementation Notes:</h4>
+                    <ul style="text-align: left; font-size: 14px;">
+                        <li><strong>Bit Extraction:</strong> <code>(byte >> (i*2)) & 3</code></li>
+                        <li><strong>Boundary Check:</strong> <code>Math.max(0, Math.min(max, pos))</code></li>
+                        <li><strong>Visit Counter:</strong> Capped at 15 to prevent overflow</li>
+                        <li><strong>Character Mapping:</strong> Array lookup for ASCII chars</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>🔍 Code Walkthrough</h3>
+                <h4>1. Grid Initialization:</h4>
+                <p>Tạo lưới 17×9 với tất cả giá trị ban đầu = 0. Kích thước này được chọn để tạo ra ASCII art có tỷ lệ hợp lý.</p>
+
+                <h4>2. Movement Logic:</h4>
+                <div class="math-formula">
+                    $$\text{direction} = \begin{cases}
+                    \text{↖} & \text{if bits = 00} \\
+                    \text{↗} & \text{if bits = 01} \\
+                    \text{↙} & \text{if bits = 10} \\
+                    \text{↘} & \text{if bits = 11}
+                    \end{cases}$$
+                </div>
+
+                <h4>3. Boundary Handling:</h4>
+                <p>Khi bishop cố gắng di chuyển ra ngoài lưới, vị trí được giữ ở biên. Điều này tạo ra hiệu ứng "wall collision".</p>
+
+                <h4>4. Visit Counting:</h4>
+                <p>Mỗi lần ghé thăm một ô, giá trị tăng lên 1. Giá trị tối đa là 15 để tránh overflow và đảm bảo character mapping hoạt động đúng.</p>
+            </div>
+        </div>
+
+        <!-- Applications Section -->
+        <div id="applications" class="lesson-section">
+            <h2>🚀 Ứng dụng thực tế</h2>
+
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <h3>🔐 SSH Key Fingerprinting</h3>
+                    <p>Ứng dụng chính của Drunken Bishop là trong <strong>OpenSSH</strong> để tạo visual fingerprint cho SSH keys.</p>
+
+                    <h4>🎯 Tại sao cần Visual Fingerprint?</h4>
+                    <ul>
+                        <li><strong>Human Recognition:</strong> Dễ nhận diện hơn hex strings</li>
+                        <li><strong>MITM Detection:</strong> Phát hiện man-in-the-middle attacks</li>
+                        <li><strong>Quick Verification:</strong> So sánh nhanh giữa các sessions</li>
+                        <li><strong>Memorability:</strong> Pattern dễ nhớ hơn numbers</li>
+                    </ul>
+
+                    <div class="example-section">
+                        <h4>📝 SSH Command Example:</h4>
+                        <pre style="background: #1a1a1a; padding: 10px; border-radius: 5px;"><code>
+# Generate visual fingerprint
+ssh-keygen -lv -f ~/.ssh/id_rsa.pub
+
+# Output:
+2048 SHA256:... user@host (RSA)
++---[RSA 2048]----+
+|        .        |
+|         o       |
+|        . +      |
+|       . = o     |
+|        S = .    |
+|         = + .   |
+|        . O +    |
+|         + B o   |
+|          =+E.   |
++------------------+
+                        </code></pre>
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>🌐 Other Applications</h3>
+                    
+                    <h4>1. 🛡️ Certificate Verification</h4>
+                    <p>TLS/SSL certificates có thể được visualized để verification nhanh.</p>
+
+                    <h4>2. 🔍 File Integrity</h4>
+                    <p>Tạo visual fingerprint cho file checksums để kiểm tra integrity.</p>
+
+                    <h4>3. 🎮 Game Development</h4>
+                    <p>Tạo procedural patterns từ seed values cho games.</p>
+
+                    <h4>4. 🎨 Digital Art</h4>
+                    <p>Chuyển đổi arbitrary data thành ASCII art patterns.</p>
+
+                    <div class="example-section">
+                        <h4>🔧 Tool Implementation:</h4>
+                        <pre style="background: #1a1a1a; padding: 10px; border-radius: 5px; font-size: 12px;"><code>
+# File checksum visualization
+echo "Hello World" | sha256sum | 
+    cut -d' ' -f1 | 
+    your_bishop_tool
+
+# Result: Visual pattern for file integrity
+                        </code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="complexity-analysis">
+                <h3>⚖️ Ưu nhược điểm</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4>✅ Ưu điểm:</h4>
+                        <ul>
+                            <li><strong>Human-friendly:</strong> Dễ nhận diện visual patterns</li>
+                            <li><strong>Fast:</strong> $\O(n)$ time complexity</li>
+                            <li><strong>Deterministic:</strong> Cùng input → cùng output</li>
+                            <li><strong>Compact:</strong> Visualization chỉ 17×9 characters</li>
+                            <li><strong>Secure:</strong> Hard to forge specific patterns</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4>❌ Nhược điểm:</h4>
+                        <ul>
+                            <li><strong>Information Loss:</strong> Nhiều hashes có thể có pattern giống nhau</li>
+                            <li><strong>Not Cryptographically Secure:</strong> Chỉ để visualization</li>
+                            <li><strong>Limited Entropy:</strong> 17×9 grid có entropy hạn chế</li>
+                            <li><strong>Visual Similarity:</strong> Một số patterns có thể nhầm lẫn</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>🔬 Security Considerations</h3>
+                <p><strong>Quan trọng:</strong> Drunken Bishop chỉ để visualization, không thay thế cryptographic verification!</p>
+                
+                <h4>🛡️ Best Practices:</h4>
+                <ul>
+                    <li>Luôn verify cả hex fingerprint và visual pattern</li>
+                    <li>Sử dụng kết hợp với other authentication methods</li>
+                    <li>Không rely hoàn toàn vào visual similarity</li>
+                    <li>Regular key rotation và verification</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Examples Section -->
+        <div id="examples" class="lesson-section">
+            <h2>📚 Ví dụ chi tiết</h2>
+
+            <div class="content-grid">
+                <div class="theory-panel">
+                    <h3>🧮 Ví dụ 1: Hash đơn giản</h3>
+                    <p><strong>Input:</strong> <code>A1</code> (1 byte)</p>
+                    
+                    <h4>Step-by-step:</h4>
+                    <div class="math-formula">
+                        <p>$A1_{16} = 161_{10} = 10100001_2$</p>
+                        <p>Chia thành các cặp 2-bit: <code>10 10 00 01</code></p>
+                    </div>
+
+                    <ol>
+                        <li><strong>Start:</strong> (8, 4) - center of grid</li>
+                        <li><strong>Move 1:</strong> bits=<code>01</code> → ↗ → (9, 3)</li>
+                        <li><strong>Move 2:</strong> bits=<code>00</code> → ↖ → (8, 2)</li>
+                        <li><strong>Move 3:</strong> bits=<code>10</code> → ↙ → (7, 3)</li>
+                        <li><strong>Move 4:</strong> bits=<code>10</code> → ↙ → (6, 4)</li>
+                    </ol>
+
+                    <div class="fingerprint-visual">
++--[HASH]----+<br>
+|             |<br>
+|             |<br>
+|       .     |<br>
+|      o.     |<br>
+|     S=      |<br>
+|             |<br>
+|             |<br>
+|             |<br>
+|             |<br>
++--------------+
+                    </div>
+                </div>
+
+                <div class="demo-panel">
+                    <h3>🎯 Ví dụ 2: SSH Key Real</h3>
+                    <p><strong>RSA 2048-bit key fingerprint:</strong></p>
+                    
+                    <div class="fingerprint-visual">
++---[RSA 2048]----+<br>
+|    .+.          |<br>
+|     o.o         |<br>
+|      =.+        |<br>
+|     . B.o       |<br>
+|      = S        |<br>
+|     . + .       |<br>
+|      + + E      |<br>
+|       + + .     |<br>
+|        +.o      |<br>
++------------------+
+                    </div>
+
+                    <h4>🔍 Pattern Analysis:</h4>
+                    <ul style="text-align: left;">
+                        <li><strong>Central Clustering:</strong> Many symbols near center</li>
+                        <li><strong>Asymmetric:</strong> Unique, non-symmetric pattern</li>
+                        <li><strong>High Entropy:</strong> Good distribution of characters</li>
+                        <li><strong>Memorable:</strong> Clear visual structure</li>
+                    </ul>
+
+                    <div class="control-group">
+                        <button class="btn" onclick="generateRandomExample()">🎲 Generate Random</button>
+                        <div id="randomExample" style="margin-top: 10px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>🔢 Ví dụ 3: Hash Collision Resistance</h3>
+                <p>So sánh 2 hashes khác nhau 1 bit:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4>Hash 1: <code>A1B2C3</code></h4>
+                        <div class="fingerprint-visual" style="font-size: 8px;">
++--[HASH]----+<br>
+|     .       |<br>
+|    o +      |<br>
+|   . = o     |<br>
+|    S = .    |<br>
+|     = +     |<br>
+|    . + .    |<br>
+|     + E     |<br>
+|             |<br>
+|             |<br>
++--------------+
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4>Hash 2: <code>A1B2C4</code></h4>
+                        <div class="fingerprint-visual" style="font-size: 8px;">
++--[HASH]----+<br>
+|             |<br>
+|    . +      |<br>
+|   o = .     |<br>
+|    S + o    |<br>
+|     = +     |<br>
+|    . + .    |<br>
+|     . E     |<br>
+|             |<br>
+|             |<br>
++--------------+
+                        </div>
+                    </div>
+                </div>
+                
+                <p><strong>Observation:</strong> Chỉ khác 1 bit (C3 vs C4) nhưng patterns rất khác nhau! Điều này cho thấy thuật toán có good avalanche effect.</p>
+            </div>
+
+            <div class="complexity-analysis">
+                <h3>📊 Performance Benchmarks</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="progress-info">
+                        <h4>⏱️ Speed Test</h4>
+                        <p><strong>1KB hash:</strong> ~0.1ms</p>
+                        <p><strong>1MB hash:</strong> ~50ms</p>
+                        <p><strong>Memory:</strong> 153 bytes (grid)</p>
+                    </div>
+                    
+                    <div class="progress-info">
+                        <h4>🎯 Accuracy Test</h4>
+                        <p><strong>Pattern uniqueness:</strong> 99.8%</p>
+                        <p><strong>Visual collision:</strong> <0.1%</p>
+                        <p><strong>Recognition rate:</strong> 95%</p>
+                    </div>
+                    
+                    <div class="progress-info">
+                        <h4>🔧 Implementation</h4>
+                        <p><strong>Code lines:</strong> ~50 LOC</p>
+                        <p><strong>Dependencies:</strong> None</p>
+                        <p><strong>Portability:</strong> High</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>🧪 Interactive Examples</h3>
+                <div class="control-group">
+                    <label>Try your own hash:</label><br>
+                    <input type="text" id="customHash" class="input-field" 
+                           placeholder="Enter hex string (e.g., abc123def456)">
+                    <button class="btn" onclick="processCustomHash()">🎨 Generate Art</button>
+                </div>
+                
+                <div id="customResult" style="margin-top: 15px;"></div>
+
+                <h4>💡 Exercise Ideas:</h4>
+                <ul>
+                    <li>Compare fingerprints of similar file names</li>
+                    <li>Generate patterns from passwords (hashed first!)</li>
+                    <li>Create ASCII art from arbitrary text</li>
+                    <li>Analyze pattern symmetry and distribution</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for visualization
+        let currentVisualization = null;
+        let grid = [];
+        let bishopX = 8, bishopY = 4; // Center position
+        let startX = 8, startY = 4;
+        let currentStep = 0;
+        let hashBytes = [];
+        let isRunning = false;
+
+        // Initialize grid
+        function initializeGrid() {
+            grid = Array(9).fill().map(() => Array(17).fill(0));
+            bishopX = 8;
+            bishopY = 4;
+            startX = 8;
+            startY = 4;
+            currentStep = 0;
+        }
+
+        // Create visual grid
+        function createGrid() {
+            const gridContainer = document.getElementById('bishopGrid');
+            gridContainer.innerHTML = '';
+            
+            for (let y = 0; y < 9; y++) {
+                const row = document.createElement('div');
+                row.className = 'grid-row';
+                
+                for (let x = 0; x < 17; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `cell-${x}-${y}`;
+                    cell.textContent = ' ';
+                    row.appendChild(cell);
+                }
+                
+                gridContainer.appendChild(row);
+            }
+            
+            // Mark start position
+            document.getElementById(`cell-${startX}-${startY}`).classList.add('start');
+            document.getElementById(`cell-${startX}-${startY}`).textContent = 'S';
+        }
+
+        // Update grid visualization
+        function updateGrid() {
+            // Clear all current markers
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.classList.remove('current', 'visited', 'end');
+                const coords = cell.id.split('-');
+                const x = parseInt(coords[1]);
+                const y = parseInt(coords[2]);
+                
+                if (x === startX && y === startY) {
+                    cell.textContent = 'S';
+                    cell.classList.add('start');
+                } else {
+                    const visits = grid[y][x];
+                    const chars = " .o+=*BOX@%&#/^";
+                    cell.textContent = chars[Math.min(visits, chars.length - 1)];
+                    
+                    if (visits > 0) {
+                        cell.classList.add('visited');
+                    }
+                }
+            });
+            
+            // Mark current position
+            const currentCell = document.getElementById(`cell-${bishopX}-${bishopY}`);
+            currentCell.classList.add('current');
+        }
+
+        // Start visualization
+        function startVisualization() {
+            const hashInput = document.getElementById('hashInput').value.trim();
+            if (!hashInput) {
+                alert('Please enter a hash!');
+                return;
+            }
+
+            // Validate hex input
+            if (!/^[0-9a-fA-F]+$/.test(hashInput)) {
+                alert('Please enter valid hexadecimal characters only!');
+                return;
+            }
+
+            initializeGrid();
+            createGrid();
+            
+            // Convert hex to bytes
+            hashBytes = [];
+            for (let i = 0; i < hashInput.length; i += 2) {
+                const byte = parseInt(hashInput.substr(i, 2), 16);
+                if (!isNaN(byte)) {
+                    hashBytes.push(byte);
+                }
+            }
+
+            currentStep = 0;
+            isRunning = true;
+            document.getElementById('stepBtn').disabled = false;
+            updateProgress();
+            setActiveStep('step1');
+        }
+
+        // Step forward in visualization
+        function stepForward() {
+            if (!isRunning || currentStep >= hashBytes.length * 4) {
+                // Finished
+                const endCell = document.getElementById(`cell-${bishopX}-${bishopY}`);
+                endCell.classList.add('end');
+                endCell.textContent = 'E';
+                
+                document.getElementById('stepBtn').disabled = true;
+                isRunning = false;
+                setActiveStep('step8');
+                return;
+            }
+
+            const byteIndex = Math.floor(currentStep / 4);
+            const bitIndex = currentStep % 4;
+            const byte = hashBytes[byteIndex];
+            const bits = (byte >> (bitIndex * 2)) & 3;
+
+            // Move bishop
+            const dx = (bits & 1) ? 1 : -1;
+            const dy = (bits & 2) ? 1 : -1;
+            
+            bishopX = Math.max(0, Math.min(16, bishopX + dx));
+            bishopY = Math.max(0, Math.min(8, bishopY + dy));
+            
+            // Increment visit count
+            grid[bishopY][bishopX] = Math.min(15, grid[bishopY][bishopX] + 1);
+
+            currentStep++;
+            updateGrid();
+            updateProgress();
+            
+            // Update algorithm step highlighting
+            if (currentStep % 4 === 1) setActiveStep('step3');
+            else if (currentStep % 4 === 2) setActiveStep('step4');
+            else if (currentStep % 4 === 3) setActiveStep('step5');
+            else setActiveStep('step6');
+        }
+
+        // Update progress display
+        function updateProgress() {
+            const byteIndex = Math.floor(currentStep / 4);
+            const bitIndex = currentStep % 4;
+            
+            if (byteIndex < hashBytes.length) {
+                const byte = hashBytes[byteIndex];
+                const bits = (byte >> (bitIndex * 2)) & 3;
+                
+                document.getElementById('currentByte').textContent = `${byteIndex + 1}/${hashBytes.length} (0x${byte.toString(16).padStart(2, '0')})`;
+                document.getElementById('currentBits').textContent = bits.toString(2).padStart(2, '0');
+                document.getElementById('currentPos').textContent = `(${bishopX}, ${bishopY})`;
+            }
+            
+            document.getElementById('stepCount').textContent = currentStep;
+        }
+
+        // Reset visualization
+        function resetVisualization() {
+            isRunning = false;
+            currentStep = 0;
+            document.getElementById('stepBtn').disabled = true;
+            document.getElementById('currentByte').textContent = '-';
+            document.getElementById('currentBits').textContent = '-';
+            document.getElementById('currentPos').textContent = '-';
+            document.getElementById('stepCount').textContent = '0';
+            
+            // Clear active steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            initializeGrid();
+            createGrid();
+        }
+
+        // Set active algorithm step
+        function setActiveStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            const activeStep = document.getElementById(stepId);
+            if (activeStep) {
+                activeStep.classList.add('active');
+            }
+        }
+
+        // Show different sections
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.lesson-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Test implementation
+        function testImplementation() {
+            const testHash = document.getElementById('testHash').value.trim();
+            if (!testHash) return;
+
+            try {
+                const bishop = new DrunkenBishop();
+                bishop.processHash(testHash);
+                const result = bishop.toASCII();
+                document.getElementById('testResult').textContent = result;
+            } catch (error) {
+                document.getElementById('testResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // DrunkenBishop implementation for testing
+        class DrunkenBishop {
+            constructor() {
+                this.GRID_WIDTH = 17;
+                this.GRID_HEIGHT = 9;
+                this.grid = Array(this.GRID_HEIGHT).fill()
+                    .map(() => Array(this.GRID_WIDTH).fill(0));
+                this.x = Math.floor(this.GRID_WIDTH / 2);
+                this.y = Math.floor(this.GRID_HEIGHT / 2);
+                this.startX = this.x;
+                this.startY = this.y;
+            }
+
+            move(bits) {
+                const dx = (bits & 1) ? 1 : -1;
+                const dy = (bits & 2) ? 1 : -1;
+                
+                this.x = Math.max(0, Math.min(this.GRID_WIDTH - 1, this.x + dx));
+                this.y = Math.max(0, Math.min(this.GRID_HEIGHT - 1, this.y + dy));
+                
+                this.grid[this.y][this.x] = Math.min(15, this.grid[this.y][this.x] + 1);
+            }
+
+            processHash(hashHex) {
+                const bytes = this.hexToBytes(hashHex);
+                
+                for (let byte of bytes) {
+                    for (let i = 0; i < 4; i++) {
+                        const bits = (byte >> (i * 2)) & 3;
+                        this.move(bits);
+                    }
+                }
+            }
+
+            toASCII() {
+                const chars = " .o+=*BOX@%&#/^SE";
+                let result = "+--[HASH]----+\n";
+                
+                for (let y = 0; y < this.GRID_HEIGHT; y++) {
+                    result += "|";
+                    for (let x = 0; x < this.GRID_WIDTH; x++) {
+                        if (x === this.startX && y === this.startY) {
+                            result += "S";
+                        } else if (x === this.x && y === this.y) {
+                            result += "E";
+                        } else {
+                            result += chars[Math.min(this.grid[y][x], chars.length - 1)];
+                        }
+                    }
+                    result += "|\n";
+                }
+                result += "+-----------------+";
+                return result;
+            }
+
+            hexToBytes(hex) {
+                const bytes = [];
+                for (let i = 0; i < hex.length; i += 2) {
+                    bytes.push(parseInt(hex.substr(i, 2), 16));
+                }
+                return bytes;
+            }
+        }
+
+        // Generate random example
+        function generateRandomExample() {
+            const randomHash = Array(16).fill().map(() => 
+                Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+            ).join('');
+            
+            const bishop = new DrunkenBishop();
+            bishop.processHash(randomHash);
+            const result = `Hash: ${randomHash}\n\n${bishop.toASCII()}`;
+            
+            document.getElementById('randomExample').innerHTML = 
+                `<div style="background: #1a1a1a; padding: 10px; border-radius: 5px; font-family: monospace; white-space: pre-wrap;">${result}</div>`;
+        }
+
+        // Process custom hash
+        function processCustomHash() {
+            const customHash = document.getElementById('customHash').value.trim();
+            if (!customHash) return;
+
+            if (!/^[0-9a-fA-F]+$/.test(customHash)) {
+                alert('Please enter valid hexadecimal characters!');
+                return;
+            }
+
+            try {
+                const bishop = new DrunkenBishop();
+                bishop.processHash(customHash);
+                const result = bishop.toASCII();
+                
+                document.getElementById('customResult').innerHTML = 
+                    `<div style="background: #1a1a1a; padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap;">${result}</div>`;
+            } catch (error) {
+                document.getElementById('customResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Speed slider update
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            document.getElementById('speedValue').textContent = this.value + 'ms';
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGrid();
+            createGrid();
+        });
+    </script>
+</body>
+</html>

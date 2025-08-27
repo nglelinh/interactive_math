@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loss Function Landscapes - 3D Interactive Visualization</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
     <style>
         body {
             margin: 0;
@@ -330,19 +332,9 @@
     </div>
 
     <!-- Use ES6 modules with import maps -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
-            }
-        }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
+    <!-- Three.js via CDN -->
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.158.0/examples/js/controls/OrbitControls.js"></script>    <script>
         // Scene setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -354,7 +346,7 @@
         renderer.setClearColor(0x111111);
         container.appendChild(renderer.domElement);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
         camera.position.set(8, 8, 8);
         controls.target.set(0, 0, 0);
         controls.update();
@@ -882,7 +874,7 @@
 
         function updateOptimizationStats(convergenceData, path) {
             const func = lossFunctions[currentLossFunction];
-            const finalPoint = path[path.length - 1];
+            const finalPoint = path && path.length > 0 ? path[path.length - 1] : [0, 0];
             const finalLoss = func.func(finalPoint[0], finalPoint[1]);
             const globalMin = func.globalMin;
             const distanceToGlobal = Math.sqrt(

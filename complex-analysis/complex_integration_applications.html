@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Analysis in Engineering - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .application-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .application-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .application-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .plot-container {
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        .icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .feature-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Complex Analysis Applications in Engineering</h1>
+        
+        <div class="math-explanation">
+            <h2>🎯 Engineering Applications Overview</h2>
+            <p><strong>Complex Analysis in Engineering:</strong> Complex numbers and functions provide powerful tools for solving real-world engineering problems across multiple disciplines.</p>
+            
+            <div class="formula-box">
+                <strong>Key Engineering Applications:</strong><br>
+                • <strong>AC Circuit Analysis:</strong> Impedance Z = R + jωL + 1/(jωC)<br>
+                • <strong>Signal Processing:</strong> Fourier Transform F(ω) = ∫f(t)e^(-jωt)dt<br>
+                • <strong>Control Systems:</strong> Transfer Function H(s) in s-domain<br>
+                • <strong>Fluid Dynamics:</strong> Complex potential Φ(z) = φ + iψ
+            </div>
+        </div>
+        
+        <div class="application-grid">
+            <div class="application-card">
+                <div class="icon">⚡</div>
+                <h3>Electrical Engineering</h3>
+                <p><strong>AC Circuit Analysis:</strong> Complex impedance simplifies AC circuit calculations using phasors and complex exponentials.</p>
+                <ul>
+                    <li>Impedance calculations</li>
+                    <li>Power analysis</li>
+                    <li>Frequency response</li>
+                    <li>Filter design</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <div class="icon">📡</div>
+                <h3>Signal Processing</h3>
+                <p><strong>Fourier Analysis:</strong> Complex exponentials form the foundation of modern signal processing and communication systems.</p>
+                <ul>
+                    <li>Digital filters</li>
+                    <li>Spectral analysis</li>
+                    <li>Communication systems</li>
+                    <li>Image processing</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <div class="icon">🎮</div>
+                <h3>Control Systems</h3>
+                <p><strong>Transfer Functions:</strong> Complex analysis enables stability analysis and controller design in feedback systems.</p>
+                <ul>
+                    <li>Root locus method</li>
+                    <li>Frequency domain design</li>
+                    <li>Stability margins</li>
+                    <li>Robust control</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <div class="icon">🌊</div>
+                <h3>Fluid Dynamics</h3>
+                <p><strong>Complex Potential:</strong> Conformal mapping and complex functions solve 2D fluid flow problems elegantly.</p>
+                <ul>
+                    <li>Potential flow theory</li>
+                    <li>Airfoil design</li>
+                    <li>Flow visualization</li>
+                    <li>Hydraulic engineering</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <div class="icon">🔬</div>
+                <h3>Quantum Mechanics</h3>
+                <p><strong>Wave Functions:</strong> Complex analysis is fundamental to quantum mechanics and modern physics applications.</p>
+                <ul>
+                    <li>Schrödinger equation</li>
+                    <li>Probability amplitudes</li>
+                    <li>Quantum states</li>
+                    <li>Interference phenomena</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <div class="icon">🏗️</div>
+                <h3>Structural Engineering</h3>
+                <p><strong>Complex Stress Analysis:</strong> 2D elasticity problems solved using complex variable methods.</p>
+                <ul>
+                    <li>Stress concentration</li>
+                    <li>Crack propagation</li>
+                    <li>Elastic solutions</li>
+                    <li>Fracture mechanics</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('electrical')">Electrical Circuits</button>
+            <button class="tab" onclick="showTab('signals')">Signal Processing</button>
+            <button class="tab" onclick="showTab('control')">Control Systems</button>
+            <button class="tab" onclick="showTab('fluids')">Fluid Dynamics</button>
+        </div>
+        
+        <div id="electrical" class="tab-content active">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>⚡ AC Circuit Analysis</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Circuit Type:</label>
+                        <select id="circuitType">
+                            <option value="rlc_series">RLC Series Circuit</option>
+                            <option value="rlc_parallel">RLC Parallel Circuit</option>
+                            <option value="filter_lowpass">Low-pass Filter</option>
+                            <option value="filter_highpass">High-pass Filter</option>
+                            <option value="resonant">Resonant Circuit</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Resistance R (Ω): <span id="resistanceValue">100</span></label>
+                        <input type="range" id="resistance" min="10" max="1000" step="10" value="100">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Inductance L (mH): <span id="inductanceValue">10</span></label>
+                        <input type="range" id="inductance" min="1" max="100" step="1" value="10">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Capacitance C (μF): <span id="capacitanceValue">1</span></label>
+                        <input type="range" id="capacitance" min="0.1" max="10" step="0.1" value="1">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Frequency (Hz): <span id="frequencyValue">1000</span></label>
+                        <input type="range" id="frequency" min="10" max="10000" step="10" value="1000">
+                    </div>
+                    
+                    <button onclick="calculateImpedance()">🧮 Calculate Impedance</button>
+                    <button onclick="plotFrequencyResponse()">📊 Frequency Response</button>
+                    
+                    <div class="value-display" id="impedanceResult">
+                        <strong>Complex Impedance:</strong><br>
+                        Z = 100 + 62.8j Ω<br>
+                        |Z| = 118.3 Ω<br>
+                        ∠Z = 32.1°
+                    </div>
+                    
+                    <div class="value-display" id="powerAnalysis">
+                        <strong>Power Analysis:</strong><br>
+                        P = 84.6 W (Real)<br>
+                        Q = 53.1 VAR (Reactive)<br>
+                        S = 100 VA (Apparent)
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="electricalPlot" class="plot-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="signals" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>📡 Signal Processing</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Signal Type:</label>
+                        <select id="signalType">
+                            <option value="sinusoid">Sinusoidal Signal</option>
+                            <option value="chirp">Chirp Signal</option>
+                            <option value="pulse">Pulse Signal</option>
+                            <option value="noise">Noisy Signal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Filter Type:</label>
+                        <select id="filterType">
+                            <option value="none">No Filter</option>
+                            <option value="lowpass">Low-pass Filter</option>
+                            <option value="highpass">High-pass Filter</option>
+                            <option value="bandpass">Band-pass Filter</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="processSignal()">🎵 Process Signal</button>
+                    <button onclick="showSpectrum()">📊 Show Spectrum</button>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="signalPlot" class="plot-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="control" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🎮 Control Systems</h3>
+                    
+                    <div class="parameter-control">
+                        <label>System Type:</label>
+                        <select id="systemType">
+                            <option value="first_order">First-order System</option>
+                            <option value="second_order">Second-order System</option>
+                            <option value="pid_control">PID Controlled System</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="plotRootLocus()">📍 Root Locus</button>
+                    <button onclick="plotBode()">📊 Bode Plot</button>
+                    <button onclick="analyzeStability()">⚖️ Stability Analysis</button>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="controlPlot" class="plot-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="fluids" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🌊 Fluid Dynamics</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Flow Type:</label>
+                        <select id="flowType">
+                            <option value="uniform">Uniform Flow</option>
+                            <option value="source">Source Flow</option>
+                            <option value="vortex">Vortex Flow</option>
+                            <option value="cylinder">Flow around Cylinder</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="plotStreamlines()">🌊 Plot Streamlines</button>
+                    <button onclick="plotVelocityField()">➡️ Velocity Field</button>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="fluidPlot" class="plot-container"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🛠️ Engineering Problem Solving with Complex Analysis</h2>
+            
+            <div class="grid-container">
+                <div class="feature-box">
+                    <h4>⚡ Phasor Analysis</h4>
+                    <p>Convert sinusoidal functions to complex exponentials for easier manipulation</p>
+                </div>
+                <div class="feature-box">
+                    <h4>🔄 Transform Methods</h4>
+                    <p>Laplace and Fourier transforms convert differential equations to algebra</p>
+                </div>
+                <div class="feature-box">
+                    <h4>📐 Conformal Mapping</h4>
+                    <p>Transform complex geometries to simple shapes for analytical solutions</p>
+                </div>
+                <div class="feature-box">
+                    <h4>🎯 Residue Calculus</h4>
+                    <p>Evaluate complex integrals arising in inverse transforms and Green's functions</p>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <strong>Common Engineering Transforms:</strong><br>
+                • <strong>Laplace:</strong> $\mathcal{L}\{f(t)\} = \int_0^{\infty} f(t)e^{-st}dt$<br>
+                • <strong>Fourier:</strong> $\mathcal{F}\{f(t)\} = \int_{-\infty}^{\infty} f(t)e^{-j\omega t}dt$<br>
+                • <strong>Z-Transform:</strong> $\mathcal{Z}\{f[n]\} = \sum_{n=0}^{\infty} f[n]z^{-n}$<br>
+                • <strong>Transfer Function:</strong> $H(s) = \frac{Y(s)}{X(s)}$ (Laplace domain)
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>💡 Key Benefits of Complex Analysis in Engineering</h2>
+            <ul>
+                <li><strong>Simplification:</strong> Convert differential equations to algebraic equations</li>
+                <li><strong>Visualization:</strong> Geometric interpretation of mathematical operations</li>
+                <li><strong>Unification:</strong> Single framework for many different engineering problems</li>
+                <li><strong>Efficiency:</strong> Powerful mathematical tools for complex calculations</li>
+                <li><strong>Insight:</strong> Physical understanding through mathematical structure</li>
+                <li><strong>Design:</strong> Systematic approaches to engineering design problems</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentTab = 'electrical';
+        
+        // Tab switching
+        function showTab(tabName) {
+            try {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show the selected tab content
+                const targetContent = document.getElementById(tabName);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+                
+                // Add active class to the corresponding tab button by matching onclick attribute
+                document.querySelectorAll('.tab').forEach(tab => {
+                    const onclick = tab.getAttribute('onclick');
+                    if (onclick && onclick.includes(`'${tabName}'`)) {
+                        tab.classList.add('active');
+                    }
+                });
+                
+                currentTab = tabName;
+                
+                // Call appropriate function for the new tab
+                if (tabName === 'electrical') {
+                    calculateImpedance();
+                } else if (tabName === 'signals') {
+                    processSignal();
+                } else if (tabName === 'control') {
+                    plotRootLocus();
+                } else if (tabName === 'fluids') {
+                    plotStreamlines();
+                }
+            } catch (error) {
+                console.error('Error switching tabs:', error);
+            }
+        }
+        
+        function calculateImpedance() {
+            const R = parseFloat(document.getElementById('resistance').value);
+            const L = parseFloat(document.getElementById('inductance').value) / 1000; // Convert mH to H
+            const C = parseFloat(document.getElementById('capacitance').value) / 1000000; // Convert μF to F
+            const f = parseFloat(document.getElementById('frequency').value);
+            const omega = 2 * Math.PI * f;
+            
+            // Calculate impedances
+            const XL = omega * L; // Inductive reactance
+            const XC = 1 / (omega * C); // Capacitive reactance
+            
+            // Complex impedance for series RLC
+            const Z_real = R;
+            const Z_imag = XL - XC;
+            const Z_magnitude = Math.sqrt(Z_real * Z_real + Z_imag * Z_imag);
+            const Z_phase = Math.atan2(Z_imag, Z_real) * 180 / Math.PI;
+            
+            // Update displays
+            document.getElementById('impedanceResult').innerHTML = `
+                <strong>Complex Impedance:</strong><br>
+                Z = ${Z_real.toFixed(1)} + ${Z_imag.toFixed(1)}j Ω<br>
+                |Z| = ${Z_magnitude.toFixed(1)} Ω<br>
+                ∠Z = ${Z_phase.toFixed(1)}°
+            `;
+            
+            // Power analysis (assuming 1V RMS)
+            const V_rms = 1;
+            const I_rms = V_rms / Z_magnitude;
+            const P = I_rms * I_rms * R; // Real power
+            const Q = I_rms * I_rms * Z_imag; // Reactive power
+            const S = V_rms * I_rms; // Apparent power
+            
+            document.getElementById('powerAnalysis').innerHTML = `
+                <strong>Power Analysis (1V RMS):</strong><br>
+                P = ${P.toFixed(3)} W (Real)<br>
+                Q = ${Q.toFixed(3)} VAR (Reactive)<br>
+                S = ${S.toFixed(3)} VA (Apparent)
+            `;
+            
+            plotImpedanceDiagram(Z_real, Z_imag);
+        }
+        
+        function plotImpedanceDiagram(real, imag) {
+            const trace = {
+                x: [0, real],
+                y: [0, imag],
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: 'Impedance Vector',
+                line: {color: '#4fc3f7', width: 3},
+                marker: {size: 10, color: '#4fc3f7'}
+            };
+            
+            // Add component indicators
+            const traces = [trace];
+            
+            // Resistance component (horizontal)
+            traces.push({
+                x: [0, real],
+                y: [0, 0],
+                mode: 'lines',
+                type: 'scatter',
+                name: 'Resistance',
+                line: {color: '#81c784', width: 2}
+            });
+            
+            // Reactance component (vertical)
+            traces.push({
+                x: [real, real],
+                y: [0, imag],
+                mode: 'lines',
+                type: 'scatter',
+                name: 'Reactance',
+                line: {color: '#ff8a65', width: 2}
+            });
+            
+            const layout = {
+                title: 'Complex Impedance Diagram',
+                xaxis: {title: 'Resistance (Ω)', gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Reactance (Ω)', gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('electricalPlot', traces, layout, {responsive: true});
+        }
+        
+        function plotFrequencyResponse() {
+            const R = parseFloat(document.getElementById('resistance').value);
+            const L = parseFloat(document.getElementById('inductance').value) / 1000;
+            const C = parseFloat(document.getElementById('capacitance').value) / 1000000;
+            
+            const frequencies = [];
+            const magnitudes = [];
+            const phases = [];
+            
+            for (let f = 10; f <= 10000; f *= 1.1) {
+                const omega = 2 * Math.PI * f;
+                const XL = omega * L;
+                const XC = 1 / (omega * C);
+                
+                const Z_real = R;
+                const Z_imag = XL - XC;
+                const Z_magnitude = Math.sqrt(Z_real * Z_real + Z_imag * Z_imag);
+                const Z_phase = Math.atan2(Z_imag, Z_real) * 180 / Math.PI;
+                
+                frequencies.push(f);
+                magnitudes.push(20 * Math.log10(Z_magnitude)); // dB
+                phases.push(Z_phase);
+            }
+            
+            const traces = [
+                {
+                    x: frequencies,
+                    y: magnitudes,
+                    mode: 'lines',
+                    type: 'scatter',
+                    name: 'Magnitude (dB)',
+                    line: {color: '#4fc3f7', width: 2}
+                }
+            ];
+            
+            const layout = {
+                title: 'Frequency Response',
+                xaxis: {title: 'Frequency (Hz)', type: 'log', gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Magnitude (dB)', gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'}
+            };
+            
+            Plotly.newPlot('electricalPlot', traces, layout, {responsive: true});
+        }
+        
+        function processSignal() {
+            alert('Signal Processing: Would show time domain signal and its frequency spectrum');
+        }
+        
+        function showSpectrum() {
+            alert('Spectrum Analysis: Would display FFT of the signal');
+        }
+        
+        function plotRootLocus() {
+            alert('Root Locus: Would show pole movements as gain varies');
+        }
+        
+        function plotBode() {
+            alert('Bode Plot: Would show magnitude and phase vs frequency');
+        }
+        
+        function analyzeStability() {
+            alert('Stability Analysis: Would check pole locations and margins');
+        }
+        
+        function plotStreamlines() {
+            alert('Streamlines: Would show fluid flow patterns using complex potential');
+        }
+        
+        function plotVelocityField() {
+            alert('Velocity Field: Would show velocity vectors from complex velocity');
+        }
+        
+        // Event listeners
+        document.getElementById('resistance').addEventListener('input', function() {
+            document.getElementById('resistanceValue').textContent = this.value;
+            calculateImpedance();
+        });
+        
+        document.getElementById('inductance').addEventListener('input', function() {
+            document.getElementById('inductanceValue').textContent = this.value;
+            calculateImpedance();
+        });
+        
+        document.getElementById('capacitance').addEventListener('input', function() {
+            document.getElementById('capacitanceValue').textContent = this.value;
+            calculateImpedance();
+        });
+        
+        document.getElementById('frequency').addEventListener('input', function() {
+            document.getElementById('frequencyValue').textContent = this.value;
+            calculateImpedance();
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                // Initialize the first tab properly
+                showTab('electrical');
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

@@ -2,9 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Continuity and Uniform Continuity Interactive Demo</title>
+  <title>Continuity and Uniform Continuity: Interactive Mathematical Foundation</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
   <style>
-    body { margin: 0; overflow: hidden; background: #222; font-family: Arial, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: #ffffff;
+      text-align: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      font-size: 18px;
+      line-height: 1.8;
+      margin: 0;
+      overflow-x: auto;
+    }
+    
     #container {
       display: flex;
       height: 100vh;
@@ -147,49 +171,211 @@
       font-size: 14px;
       font-family: Arial, sans-serif;
     }
+    
+    .formula-box {
+      background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+      padding: 25px 35px;
+      border-radius: 15px;
+      font-family: 'KaTeX_Main', 'Times New Roman', serif;
+      font-size: 20px;
+      line-height: 1.8;
+      text-align: center;
+      margin: 25px 0;
+      border: 2px solid rgba(100, 200, 255, 0.4);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+
+    .formula-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d4ff, #7c4dff, #ff6b6b, #4ecdc4);
+      opacity: 0.8;
+    }
+
+    .formula-box .main-formula {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .formula-box .sub-formula {
+      font-size: 16px;
+      color: #b8e6ff;
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .formula-box .formula-label {
+      font-size: 14px;
+      color: #ffeb3b;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .inline-formula {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: 'Times New Roman', serif;
+      font-size: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-block;
+      margin: 0 2px;
+      color: #e8f4fd;
+    }
   </style>
-
-
-
-
-
 </head>
 <body>
-  <div id="container">
+  <h1 style="font-size: 3.2em; font-weight: 900; text-shadow: 4px 4px 8px rgba(0,0,0,0.8); margin-bottom: 40px; letter-spacing: 1px;">📐 Continuity & Uniform Continuity</h1>
+
+  <!-- ===========================================
+       THEORY SECTION
+       =========================================== -->
+  <div style="background: linear-gradient(145deg, rgba(25, 25, 60, 0.9), rgba(15, 15, 40, 0.7)); padding: 30px; border-radius: 15px; margin: 30px auto; max-width: 1200px; text-align: left; border: 2px solid rgba(100, 200, 255, 0.4);">
+    <h2 style="color: #00d4ff; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">📖 LÝ THUYẾT</h2>
+    
+    <div class="math-section" style="background: rgba(255, 215, 0, 0.15); padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #FFD700;">
+      <h3 style="color: #FFD700; margin-top: 0;">📚 Mathematical Foundation</h3>
+      
+      <div class="definition-box" style="background: linear-gradient(145deg, #e3f2fd, #bbdefb); color: #333; padding: 20px; border-radius: 10px; margin: 15px 0; border: 1px solid #2196f3;">
+        <h4>Fundamental Concepts</h4>
+        <p><strong>Continuity</strong> captures the intuitive notion that small changes in input produce small changes in output. It's a <em>local</em> property - we examine behavior near each individual point.</p>
+        <p><strong>Uniform Continuity</strong> strengthens this: the same δ works for the same ε everywhere on the domain. It's a <em>global</em> property of the entire function.</p>
+        
+        <h4>🎯 Key Insight</h4>
+        <p>The difference lies in <em>quantifier order</em>:</p>
+        <ul>
+          <li><strong>Continuity:</strong> For each point, then for each ε, find a δ</li>
+          <li><strong>Uniform Continuity:</strong> For each ε, find one δ that works everywhere</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="definition-section continuity">
+      <h4>Continuity at a Point</h4>
+      <div>A function $f$ is <strong>continuous</strong> at $x_0$ if:</div>
+      <div class="formula-container">
+        <div class="formula-title">Definition of Continuity</div>
+        <div class="math-environment">
+          $$\forall \varepsilon > 0, \exists \delta > 0 \text{ such that}$$
+          $$|x - x_0| < \delta \Rightarrow |f(x) - f(x_0)| < \varepsilon$$
+        </div>
+        <div class="formula-description">$\delta$ can depend on both $\varepsilon$ and $x_0$</div>
+      </div>
+    </div>
+
+    <div class="definition-section uniform-continuity">
+      <h4>Uniform Continuity</h4>
+      <div>A function $f$ is <strong>uniformly continuous</strong> if:</div>
+      <div class="formula-container">
+        <div class="formula-title">Definition of Uniform Continuity</div>
+        <div class="math-environment">
+          $$\forall \varepsilon > 0, \exists \delta > 0 \text{ such that } \forall x,y:$$
+          $$|x - y| < \delta \Rightarrow |f(x) - f(y)| < \varepsilon$$
+        </div>
+        <div class="formula-description">$\delta$ depends only on $\varepsilon$, not on the point</div>
+      </div>
+    </div>
+    
+    <div class="theorem-section" style="background: linear-gradient(145deg, #f3e5f5, #e1bee7); color: #333; padding: 20px; border-radius: 10px; margin: 15px 0; border: 1px solid #9c27b0;">
+      <h3>🎓 Fundamental Theorems</h3>
+      
+      <div class="example-box" style="background: linear-gradient(145deg, #e8f5e8, #c8e6c9); padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #4caf50;">
+        <h4>Theorem 1: Relationship Between Continuities</h4>
+        <p><strong>Uniform Continuity ⟹ Continuity</strong></p>
+        <p><strong>Proof:</strong> If $f$ is uniformly continuous, then for any $x_0$ and any $\varepsilon > 0$, there exists $\delta > 0$ such that for all $x,y$ with $|x-y| < \delta$, we have $|f(x) - f(y)| < \varepsilon$. Taking $y = x_0$ gives continuity at $x_0$. Since $x_0$ was arbitrary, $f$ is continuous everywhere. □</p>
+      </div>
+      
+      <div class="example-box" style="background: linear-gradient(145deg, #e8f5e8, #c8e6c9); padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #4caf50;">
+        <h4>Theorem 2: Heine-Cantor Theorem</h4>
+        <p><strong>Continuous on Compact Set ⟹ Uniformly Continuous</strong></p>
+        <p><strong>Statement:</strong> If $f: K \to \mathbb{R}$ is continuous and $K$ is compact, then $f$ is uniformly continuous on $K$.</p>
+      </div>
+      
+      <div class="example-box" style="background: linear-gradient(145deg, #e8f5e8, #c8e6c9); padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #4caf50;">
+        <h4>Theorem 3: Lipschitz Continuity</h4>
+        <p><strong>Lipschitz Continuous ⟹ Uniformly Continuous</strong></p>
+        <p><strong>Definition:</strong> $f$ is Lipschitz continuous if $\exists L > 0$ such that $|f(x) - f(y)| \leq L|x - y|$ for all $x,y$.</p>
+        <p><strong>Proof:</strong> Given $\varepsilon > 0$, choose $\delta = \varepsilon/L$. Then $|x - y| < \delta \Rightarrow |f(x) - f(y)| \leq L|x - y| < L \cdot \frac{\varepsilon}{L} = \varepsilon$. □</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; margin-top: 20px;">
+      <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #4caf50;">
+        <h4 style="color: #28a745;">✅ Uniformly Continuous Functions</h4>
+        <p><strong>1. Linear Functions:</strong> $f(x) = ax + b$</p>
+        <p>$|f(x) - f(y)| = |a||x - y|$, so choose $\delta = \varepsilon/|a|$ (if $a \neq 0$)</p>
+        
+        <p><strong>2. Sine and Cosine:</strong> $f(x) = \sin(x)$ or $\cos(x)$</p>
+        <p>$|\sin(x) - \sin(y)| \leq |x - y|$ by mean value theorem, so $\delta = \varepsilon$</p>
+        
+        <p><strong>3. Square Root:</strong> $f(x) = \sqrt{x}$ on $[0,\infty)$</p>
+        <p>Choose $\delta = \varepsilon^2$ for $\varepsilon \leq 1$</p>
+      </div>
+      
+      <div style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #f44336;">
+        <h4 style="color: #dc3545;">❌ Not Uniformly Continuous</h4>
+        <p><strong>1. Quadratic Function:</strong> $f(x) = x^2$ on $\mathbb{R}$</p>
+        <p>Take $x_n = n$, $y_n = n + 1/n$. Then $|x_n - y_n| = 1/n \to 0$</p>
+        <p>But $|f(x_n) - f(y_n)| = 2 + 1/n^2 \to 2 \not\to 0$</p>
+        
+        <p><strong>2. Reciprocal Function:</strong> $f(x) = 1/x$ on $(0,1]$</p>
+        <p>Take $x_n = 1/n$, $y_n = 1/(n+1)$</p>
+        <p>But $|f(x_n) - f(y_n)| = 1 \not\to 0$</p>
+        
+        <p><strong>3. Exponential Function:</strong> $f(x) = e^x$ on $\mathbb{R}$</p>
+        <p>$f'(x) = e^x$ is unbounded, so not uniformly continuous</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================
+       INTERACTIVE ILLUSTRATION SECTION
+       =========================================== -->
+  <div id="container" style="background: linear-gradient(145deg, rgba(15, 40, 15, 0.9), rgba(25, 60, 25, 0.7)); border-radius: 15px; margin: 30px auto; max-width: 1400px; border: 2px solid rgba(76, 175, 80, 0.4); height: 600px;">
     <div id="canvas-container">
       <svg id="canvas"></svg>
     </div>
     
     <div id="info">
-      <h3>Continuity vs Uniform Continuity</h3>
+      <h2 style="color: #4caf50; font-size: 1.8em; margin-bottom: 20px; text-align: center;">🎮 MINH HỌA TƯƠNG TÁC</h2>
       
-      <div class="definition-section continuity">
-        <h4>Continuity at a Point</h4>
-        <div>A function <span class="math-notation">f</span> is <strong>continuous</strong> at <span class="math-notation">x₀</span> if:</div>
-        <div class="epsilon-delta">∀ε > 0, ∃δ > 0 such that<br>|x - x₀| < δ ⟹ |f(x) - f(x₀)| < ε</div>
-        <div><em>δ can depend on both ε and x₀</em></div>
-      </div>
-
-      <div class="definition-section uniform-continuity">
-        <h4>Uniform Continuity</h4>
-        <div>A function <span class="math-notation">f</span> is <strong>uniformly continuous</strong> if:</div>
-        <div class="epsilon-delta">∀ε > 0, ∃δ > 0 such that ∀x,y:<br>|x - y| < δ ⟹ |f(x) - f(y)| < ε</div>
-        <div><em>δ depends only on ε, not on the point</em></div>
+      <div style="text-align: center; margin-bottom: 20px; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px;">
+        <p style="font-size: 16px; color: #81c784; margin: 0;">Khám phá trực quan các khái niệm liên tục và liên tục đều thông qua biểu diễn đồ thị động và tương tác epsilon-delta</p>
       </div>
 
       <div class="control-group">
         <label>Function:</label>
         <select id="functionSelect">
-          <option value="linear">Linear: f(x) = x</option>
-          <option value="quadratic">Quadratic: f(x) = x²</option>
-          <option value="cubic">Cubic: f(x) = x³</option>
-          <option value="sqrt">Square Root: f(x) = √x</option>
-          <option value="reciprocal">Reciprocal: f(x) = 1/x</option>
-          <option value="exp">Exponential: f(x) = eˣ</option>
-          <option value="sin">Sine: f(x) = sin(x)</option>
-          <option value="tan">Tangent: f(x) = tan(x)</option>
-          <option value="abs">Absolute: f(x) = |x|</option>
-          <option value="step">Step Function</option>
+          <optgroup label="📈 Uniformly Continuous">
+            <option value="linear">Linear: f(x) = x</option>
+            <option value="sin">Sine: f(x) = sin(x)</option>
+            <option value="abs">Absolute Value: f(x) = |x|</option>
+            <option value="sqrt">Square Root: f(x) = √x</option>
+            <option value="logistic">Logistic: f(x) = 1/(1+e^(-x))</option>
+            <option value="rational">Rational: f(x) = x/(1+x²)</option>
+          </optgroup>
+          <optgroup label="📉 Not Uniformly Continuous">
+            <option value="quadratic">Quadratic: f(x) = x²</option>
+            <option value="cubic">Cubic: f(x) = x³</option>
+            <option value="exp">Exponential: f(x) = e^x</option>
+            <option value="reciprocal">Reciprocal: f(x) = 1/x</option>
+            <option value="tan">Tangent: f(x) = tan(x)</option>
+          </optgroup>
+          <optgroup label="🚫 Discontinuous">
+            <option value="step">Step Function</option>
+          </optgroup>
         </select>
       </div>
 
@@ -212,8 +398,14 @@
       </div>
 
       <div class="control-group">
-        <button id="findDeltaBtn">Find Required δ</button>
-        <button id="testUniformBtn">Test Uniform Continuity</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <button id="findDeltaBtn" style="background: #2196F3;">🎯 Find Required δ</button>
+          <button id="testUniformBtn" style="background: #FF9800;">🧪 Test Uniform Continuity</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+          <button id="animateBtn" style="background: #9C27B0;">🎬 Animate ε-δ</button>
+          <button id="compareBtn" style="background: #4CAF50;">📊 Compare Functions</button>
+        </div>
       </div>
 
       <div class="point-info">
@@ -238,35 +430,24 @@
         <input type="checkbox" id="showGrid" checked> Show Grid
       </div>
 
-      <div class="theorem-section">
-        <h4>Key Theorems</h4>
-        <div><strong>1.</strong> Uniform continuity ⟹ Continuity</div>
-        <div><strong>2.</strong> Continuous on compact set ⟹ Uniformly continuous</div>
-        <div><strong>3.</strong> Lipschitz continuous ⟹ Uniformly continuous</div>
-        <div><strong>4.</strong> f'(x) bounded ⟹ Uniformly continuous</div>
-      </div>
-
-      <div class="definition-section">
-        <h4>Examples</h4>
-        <div><span class="continuous">Continuous everywhere:</span></div>
-        <div>• Polynomials, sin(x), cos(x), eˣ</div>
-        <br>
-        <div><span class="uniformly-continuous">Uniformly continuous:</span></div>
-        <div>• Linear functions, sin(x), cos(x)</div>
-        <div>• √x on [0,∞), x² on bounded intervals</div>
-        <br>
-        <div><span class="not-uniformly-continuous">Not uniformly continuous:</span></div>
-        <div>• x² on ℝ, 1/x on (0,1], eˣ on ℝ</div>
-      </div>
-
-      <div class="definition-section">
-        <h4>Interactive Instructions</h4>
-        <div>• Adjust ε to see the neighborhood around f(x₀)</div>
-        <div>• Adjust δ to see if the condition is satisfied</div>
-        <div>• Move the test point to explore different locations</div>
-        <div>• Green band: ε-neighborhood of f(x₀)</div>
-        <div>• Yellow interval: δ-neighborhood of x₀</div>
-        <div>• Red dot: Current test point</div>
+      <div style="background: rgba(156, 39, 176, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #9c27b0;">
+        <h4>🎮 Interactive Instructions</h4>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin: 15px 0;">
+          <div style="background: rgba(76, 175, 80, 0.1); padding: 10px; border-radius: 5px;">
+            <strong>🎯 Visualization Guide</strong>
+            <div>• <span style="color: #4CAF50;">Green band:</span> ε-neighborhood of f(x₀)</div>
+            <div>• <span style="color: #FFC107;">Yellow region:</span> δ-neighborhood of x₀</div>
+            <div>• <span style="color: #f44336;">Red dot:</span> Current test point</div>
+            <div>• <span style="color: #2196F3;">Blue curve:</span> Function graph</div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(156, 39, 176, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #9c27b0;">
+          <h4>🧪 Experimental Suggestions</h4>
+          <div><strong>1. Explore Quadratic Function:</strong> Try x² at different points. Notice how δ gets smaller as |x| increases.</div>
+          <div><strong>2. Test Reciprocal Function:</strong> Try 1/x near x=0. See how no finite δ works uniformly.</div>
+          <div><strong>3. Compare Linear vs Quadratic:</strong> Linear functions need the same δ everywhere; quadratic functions don't.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -317,6 +498,20 @@
         domain: 'ℝ \\ {0}',
         uniformlyContinuous: false,
         reason: 'Not uniformly continuous on (0,1]: as x → 0⁺, |f\'(x)| → ∞'
+      },
+      logistic: {
+        f: x => 1 / (1 + Math.exp(-x)),
+        name: 'f(x) = 1/(1+e^(-x))',
+        domain: 'ℝ',
+        uniformlyContinuous: true,
+        reason: 'Logistic function has bounded derivative: |f\'(x)| ≤ 1/4'
+      },
+      rational: {
+        f: x => x / (1 + x*x),
+        name: 'f(x) = x/(1+x²)',
+        domain: 'ℝ',
+        uniformlyContinuous: true,
+        reason: 'Bounded function with bounded derivative'
       },
       exp: {
         f: x => Math.exp(x),
@@ -398,8 +593,6 @@
     function drawGrid() {
       if (!document.getElementById('showGrid').checked) return;
       
-      const rect = container.getBoundingClientRect();
-      
       // Vertical grid lines
       for (let x = -3; x <= 3; x += 0.5) {
         const start = toSVG(x, -3);
@@ -473,21 +666,6 @@
       rect.setAttribute('height', height);
       rect.setAttribute('class', 'epsilon-band');
       svg.appendChild(rect);
-      
-      // Add epsilon labels
-      const upperLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      upperLabel.setAttribute('x', toSVG(2.5, 0).x);
-      upperLabel.setAttribute('y', toSVG(0, upperY).y);
-      upperLabel.setAttribute('class', 'function-label');
-      upperLabel.textContent = `f(x₀) + ε`;
-      svg.appendChild(upperLabel);
-      
-      const lowerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      lowerLabel.setAttribute('x', toSVG(2.5, 0).x);
-      lowerLabel.setAttribute('y', toSVG(0, lowerY).y);
-      lowerLabel.setAttribute('class', 'function-label');
-      lowerLabel.textContent = `f(x₀) - ε`;
-      svg.appendChild(lowerLabel);
     }
 
     // Draw delta interval
@@ -509,21 +687,6 @@
       rect.setAttribute('height', height);
       rect.setAttribute('class', 'delta-interval');
       svg.appendChild(rect);
-      
-      // Add delta labels
-      const leftLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      leftLabel.setAttribute('x', leftPoint.x);
-      leftLabel.setAttribute('y', toSVG(0, -2.7).y);
-      leftLabel.setAttribute('class', 'function-label');
-      leftLabel.textContent = `x₀ - δ`;
-      svg.appendChild(leftLabel);
-      
-      const rightLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      rightLabel.setAttribute('x', rightPoint.x - 40);
-      rightLabel.setAttribute('y', toSVG(0, -2.7).y);
-      rightLabel.setAttribute('class', 'function-label');
-      rightLabel.textContent = `x₀ + δ`;
-      svg.appendChild(rightLabel);
     }
 
     // Draw test point
@@ -541,14 +704,6 @@
       circle.setAttribute('r', 5);
       circle.setAttribute('class', 'test-point');
       svg.appendChild(circle);
-      
-      // Add coordinate label
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', point.x + 10);
-      label.setAttribute('y', point.y - 10);
-      label.setAttribute('class', 'function-label');
-      label.textContent = `(${testPoint.toFixed(1)}, ${f0.toFixed(2)})`;
-      svg.appendChild(label);
     }
 
     // Update display
@@ -604,16 +759,6 @@
           break;
         case 'quadratic':
           requiredDelta = epsilon / (2 * Math.abs(testPoint) + epsilon);
-          break;
-        case 'sqrt':
-          if (testPoint > 0) {
-            requiredDelta = epsilon * Math.sqrt(testPoint);
-          }
-          break;
-        case 'reciprocal':
-          if (testPoint !== 0) {
-            requiredDelta = epsilon * testPoint * testPoint;
-          }
           break;
         case 'sin':
           requiredDelta = epsilon; // Lipschitz with L=1
@@ -676,9 +821,72 @@
       }
       
       const statusText = isUniform ? 'PASSED: δ works for all points' : 
-                        `FAILED: Found points x₁=${problemPoint.x1.toFixed(2)}, x₂=${problemPoint.x2.toFixed(2)} where |f(x₁)-f(x₂)|=${Math.abs(problemPoint.f2-problemPoint.f1).toFixed(3)} > ε`;
+                        `FAILED: Found points where |f(x₁)-f(x₂)| > ε`;
       
       alert(statusText);
+    }
+
+    // Animation for epsilon-delta
+    let animationRunning = false;
+    function animateEpsilonDelta() {
+      if (animationRunning) {
+        animationRunning = false;
+        document.getElementById('animateBtn').textContent = '🎬 Animate ε-δ';
+        return;
+      }
+      
+      animationRunning = true;
+      document.getElementById('animateBtn').textContent = '⏹️ Stop Animation';
+      
+      let step = 0;
+      const maxSteps = 100;
+      
+      function animate() {
+        if (!animationRunning) return;
+        
+        const t = (Math.sin(step * 0.1) + 1) / 2;
+        epsilon = 0.1 + t * 1.5;
+        
+        document.getElementById('epsilon').value = epsilon;
+        document.getElementById('epsilonValue').textContent = epsilon.toFixed(1);
+        
+        calculateRequiredDelta();
+        const requiredDelta = parseFloat(document.getElementById('requiredDelta').textContent);
+        if (!isNaN(requiredDelta)) {
+          delta = Math.min(requiredDelta, 2);
+          document.getElementById('delta').value = delta;
+          document.getElementById('deltaValue').textContent = delta.toFixed(1);
+        }
+        
+        updateDisplay();
+        
+        step++;
+        if (step < maxSteps && animationRunning) {
+          setTimeout(animate, 100);
+        } else {
+          animationRunning = false;
+          document.getElementById('animateBtn').textContent = '🎬 Animate ε-δ';
+        }
+      }
+      
+      animate();
+    }
+
+    // Compare multiple functions
+    function compareFunctions() {
+      const testFunctions = ['linear', 'quadratic', 'sin', 'reciprocal'];
+      let comparison = "📊 Function Comparison (for ε = 0.5):\n\n";
+      
+      testFunctions.forEach(funcName => {
+        const func = functions[funcName];
+        if (func) {
+          comparison += `${func.name}:\n`;
+          comparison += `  Uniformly Continuous: ${func.uniformlyContinuous ? 'Yes' : 'No'}\n`;
+          comparison += `  Reason: ${func.reason}\n\n`;
+        }
+      });
+      
+      alert(comparison);
     }
 
     // Event listeners
@@ -707,6 +915,8 @@
 
     document.getElementById('findDeltaBtn').addEventListener('click', findDelta);
     document.getElementById('testUniformBtn').addEventListener('click', testUniformContinuity);
+    document.getElementById('animateBtn').addEventListener('click', animateEpsilonDelta);
+    document.getElementById('compareBtn').addEventListener('click', compareFunctions);
 
     document.getElementById('showEpsilonBand').addEventListener('change', updateDisplay);
     document.getElementById('showDeltaInterval').addEventListener('change', updateDisplay);
@@ -736,6 +946,15 @@
     // Initialize
     setupSVG();
     updateDisplay();
+    
+    // Initialize MathJax
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise().then(() => {
+          console.log('MathJax typesetting complete for continuity demo');
+        }).catch((err) => console.log('MathJax typeset failed: ' + err.message));
+      }
+    });
   </script>
 </body>
 </html>

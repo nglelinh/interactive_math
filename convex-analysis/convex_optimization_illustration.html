@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa Bài toán Tối ưu Lồi</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-config.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,6 +13,106 @@
             padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
         }
         
         .container {
@@ -180,8 +282,129 @@
 
 </head>
 <body>
-    <div class="container">
-        <h1>🔷 Minh họa Bài toán Tối ưu Lồi</h1>
+    <div class="main-container">
+        <div class="header">
+            <h1>Bài Toán Tối Ưu Lồi</h1>
+            <p>Khám phá tương tác về lý thuyết và ứng dụng của tối ưu hóa lồi</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Bài Toán Tối Ưu Lồi</h3>
+                    <p><strong>Định nghĩa:</strong> Một bài toán tối ưu được gọi là <em>lồi</em> nếu có dạng:</p>
+                    $$\begin{align}
+                    \min \quad & f(x) \\
+                    \text{s.t.} \quad & g_i(x) \leq 0, \quad i = 1,\ldots,m \\
+                    & Ax = b
+                    \end{align}$$
+                    trong đó $f, g_i$ là các hàm lồi và tập ràng buộc là tập lồi.
+                    
+                    <div class="concept-box">
+                        <h4>Tính chất quan trọng:</h4>
+                        <ul>
+                            <li><strong>Nghiệm địa phương là nghiệm toàn cục:</strong> Mọi cực tiểu địa phương đều là cực tiểu toàn cục</li>
+                            <li><strong>Tính chất First-Order:</strong> $x^*$ tối ưu ⟺ $\nabla f(x^*)^T(x - x^*) \geq 0, \forall x \in \mathcal{F}$</li>
+                            <li><strong>Hiệu quả thuật toán:</strong> Nhiều thuật toán hiệu quả với đảm bảo hội tụ</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>2. Hàm Lồi và Tính Chất</h3>
+                    <p><strong>Định nghĩa:</strong> Hàm $f: \mathbb{R}^n \to \mathbb{R}$ là lồi nếu:</p>
+                    $$f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda)f(y)$$
+                    với mọi $x, y \in \text{dom}(f)$ và $\lambda \in [0,1]$.
+                    
+                    <div class="concept-box">
+                        <h4>Tiêu chí kiểm tra tính lồi:</h4>
+                        <ul>
+                            <li><strong>First-order:</strong> $f$ khả vi và $f(y) \geq f(x) + \nabla f(x)^T(y-x)$</li>
+                            <li><strong>Second-order:</strong> $f$ khả vi hai lần và $\nabla^2 f(x) \succeq 0$</li>
+                            <li><strong>Jensen's inequality:</strong> $f(E[X]) \leq E[f(X)]$</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>3. Điều Kiện Tối Ưu KKT</h3>
+                    <p>Cho bài toán tối ưu lồi, tại nghiệm tối ưu $x^*$ tồn tại nhân tử Lagrange $\lambda^* \geq 0, \nu^*$:</p>
+                    $$\begin{align}
+                    \nabla f(x^*) + \sum_{i=1}^m \lambda_i^* \nabla g_i(x^*) + A^T\nu^* &= 0 \\
+                    g_i(x^*) &\leq 0, \quad i = 1,\ldots,m \\
+                    \lambda_i^* &\geq 0, \quad i = 1,\ldots,m \\
+                    \lambda_i^* g_i(x^*) &= 0, \quad i = 1,\ldots,m \\
+                    Ax^* &= b
+                    \end{align}$$
+                    
+                    <div class="concept-box">
+                        <h4>Ý nghĩa hình học:</h4>
+                        <ul>
+                            <li><strong>Stationarity:</strong> Gradient của hàm mục tiêu cân bằng với gradient các ràng buộc</li>
+                            <li><strong>Complementary slackness:</strong> Chỉ ràng buộc "active" mới có ảnh hưởng</li>
+                            <li><strong>Dual feasibility:</strong> Nhân tử Lagrange không âm</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>4. Thuật Toán Tối Ưu Lồi</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Gradient Descent:</h4>
+                        <p>$$x^{(k+1)} = x^{(k)} - \alpha_k \nabla f(x^{(k)})$$</p>
+                        <ul>
+                            <li><strong>Tốc độ hội tụ:</strong> $O(1/k)$ cho hàm lồi, $O(\rho^k)$ cho hàm lồi mạnh</li>
+                            <li><strong>Điều kiện:</strong> $\alpha_k$ thỏa mãn điều kiện Armijo</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Newton's Method:</h4>
+                        <p>$$x^{(k+1)} = x^{(k)} - [\nabla^2 f(x^{(k)})]^{-1} \nabla f(x^{(k)})$$</p>
+                        <ul>
+                            <li><strong>Tốc độ hội tụ:</strong> Quadratic convergence gần nghiệm</li>
+                            <li><strong>Chi phí:</strong> Cần tính toán và nghịch đảo Hessian</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>5. Duality trong Tối Ưu Lồi</h3>
+                    <p><strong>Hàm Lagrange:</strong></p>
+                    $$L(x, \lambda, \nu) = f(x) + \sum_{i=1}^m \lambda_i g_i(x) + \nu^T(Ax - b)$$
+                    
+                    <p><strong>Bài toán đối ngẫu:</strong></p>
+                    $$\max_{\lambda \geq 0, \nu} \min_x L(x, \lambda, \nu) = \max_{\lambda \geq 0, \nu} g(\lambda, \nu)$$
+                    
+                    <div class="concept-box">
+                        <h4>Strong Duality:</h4>
+                        <p>Với bài toán lồi và điều kiện Slater, ta có:</p>
+                        <ul>
+                            <li><strong>Duality gap = 0:</strong> $f(x^*) = g(\lambda^*, \nu^*)$</li>
+                            <li><strong>Saddle point property:</strong> $(x^*, \lambda^*, \nu^*)$ là điểm yên ngựa</li>
+                            <li><strong>Complementary slackness:</strong> $\lambda_i^* g_i(x^*) = 0$</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>📊 <strong>So sánh hàm:</strong> Chuyển đổi giữa hàm lồi và không lồi</li>
+                        <li>🎯 <strong>Điều chỉnh tham số:</strong> Thay đổi các tham số để quan sát tính lồi</li>
+                        <li>🔍 <strong>Phân tích gradient:</strong> Xem hướng gradient và điều kiện tối ưu</li>
+                        <li>⚙️ <strong>Thuật toán:</strong> Mô phỏng các thuật toán tối ưu khác nhau</li>
+                    </ul>
+                    
+                    <div class="container">
+                        <h1>🔷 Minh họa Bài toán Tối ưu Lồi</h1>
         
         <div class="controls">
             <div class="control-group">
@@ -280,6 +503,9 @@
                 • Linear Programming (LP): min cᵀx s.t. Ax ≤ b<br>
                 • Quadratic Programming (QP): min ½xᵀQx + cᵀx s.t. Ax ≤ b<br>
                 • Support Vector Machine (SVM): min ½||w||² s.t. yᵢ(wᵀxᵢ + b) ≥ 1
+            </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

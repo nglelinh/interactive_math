@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Series & Laurent Expansions - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .series-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        #plotContainer {
+            width: 100%;
+            height: 500px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>∞ Power Series & Laurent Expansions</h1>
+        
+        <div class="math-explanation">
+            <h2>📚 Mathematical Foundation</h2>
+            <div class="formula-box">
+                <strong>Taylor Series:</strong> $f(z) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(z-a)^n$ (valid inside radius of convergence)<br><br>
+                <strong>Laurent Series:</strong> $f(z) = \sum_{n=-\infty}^{\infty} a_n(z-z_0)^n$ (valid in annulus)<br><br>
+                <strong>Residue:</strong> $\text{Res}(f, z_0) = a_{-1}$ (coefficient of $(z-z_0)^{-1}$ term)
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('taylor')">Taylor Series</button>
+            <button class="tab" onclick="showTab('laurent')">Laurent Series</button>
+            <button class="tab" onclick="showTab('convergence')">Convergence</button>
+        </div>
+        
+        <div id="taylor" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🎯 Taylor Series Expansion</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Function:</label>
+                        <select id="taylorFunction">
+                            <option value="exp">e^z</option>
+                            <option value="sin">sin(z)</option>
+                            <option value="cos">cos(z)</option>
+                            <option value="1/(1-z)">1/(1-z)</option>
+                            <option value="log(1+z)">log(1+z)</option>
+                            <option value="sqrt(1+z)">√(1+z)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Expansion Point a: <span id="expansionPoint">0</span></label>
+                        <input type="range" id="centerPoint" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Number of Terms: <span id="numTermsValue">10</span></label>
+                        <input type="range" id="numTerms" min="3" max="20" step="1" value="10">
+                    </div>
+                    
+                    <button onclick="calculateTaylorSeries()">🧮 Calculate Series</button>
+                    <button onclick="animateConvergence()">🎬 Animate Convergence</button>
+                    
+                    <div class="value-display" id="taylorRadius">
+                        Radius of Convergence: R = ∞
+                    </div>
+                    
+                    <div class="series-display" id="taylorCoefficients">
+                        <strong>Series Coefficients:</strong><br>
+                        a₀ = 1<br>
+                        a₁ = 1<br>
+                        a₂ = 1/2<br>
+                        ...
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="taylorPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="laurent" class="tab-content" style="display: none;">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🌀 Laurent Series Expansion</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Function:</label>
+                        <select id="laurentFunction">
+                            <option value="1/z">1/z</option>
+                            <option value="1/z^2">1/z²</option>
+                            <option value="e^(1/z)">e^(1/z)</option>
+                            <option value="sin(1/z)">sin(1/z)</option>
+                            <option value="1/(z*(z-1))">1/(z(z-1))</option>
+                            <option value="z/(z^2-1)">z/(z²-1)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Singularity Point: <span id="singularityPoint">0</span></label>
+                        <input type="range" id="singularityLocation" min="-2" max="2" step="0.1" value="0">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Laurent Terms: <span id="laurentTermsValue">15</span></label>
+                        <input type="range" id="laurentTerms" min="5" max="25" step="1" value="15">
+                    </div>
+                    
+                    <button onclick="calculateLaurentSeries()">🔍 Calculate Laurent Series</button>
+                    <button onclick="identifyResidue()">🎯 Find Residue</button>
+                    
+                    <div class="value-display" id="residueValue">
+                        Residue = a₋₁ = 1
+                    </div>
+                    
+                    <div class="series-display" id="laurentCoefficients">
+                        <strong>Laurent Coefficients:</strong><br>
+                        a₋₁ = 1 (residue)<br>
+                        a₀ = 0<br>
+                        a₁ = 0<br>
+                        ...
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="laurentPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="convergence" class="tab-content" style="display: none;">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>📊 Convergence Analysis</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Test Function:</label>
+                        <select id="convergenceFunction">
+                            <option value="geometric">1/(1-z)</option>
+                            <option value="exponential">e^z</option>
+                            <option value="rational">1/(z²+1)</option>
+                            <option value="branch">√z</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Test Point Distance: <span id="testDistance">0.5</span></label>
+                        <input type="range" id="testRadius" min="0.1" max="3" step="0.1" value="0.5">
+                    </div>
+                    
+                    <button onclick="analyzeConvergence()">📈 Analyze Convergence</button>
+                    <button onclick="showRegionOfConvergence()">🗺️ Show Convergence Region</button>
+                    
+                    <div class="value-display" id="convergenceResult">
+                        Series converges for |z| < R
+                    </div>
+                    
+                    <div class="series-display" id="convergenceDetails">
+                        <strong>Convergence Tests:</strong><br>
+                        Ratio Test: ...<br>
+                        Root Test: ...<br>
+                        Radius: R = ...
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="convergencePlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🔬 Applications & Examples</h2>
+            <ul>
+                <li><strong>Residue Calculus:</strong> Laurent series coefficient a₋₁ gives residue for contour integration</li>
+                <li><strong>Singularity Classification:</strong> 
+                    - Removable: no negative powers
+                    - Pole of order n: highest negative power is n
+                    - Essential: infinitely many negative powers
+                </li>
+                <li><strong>Complex Analysis:</strong> Study behavior near singular points</li>
+                <li><strong>Physics Applications:</strong> Quantum field theory, scattering amplitudes</li>
+                <li><strong>Engineering:</strong> Control theory, signal processing, stability analysis</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentTab = 'taylor';
+        
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).style.display = 'block';
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            if (tabName === 'taylor') {
+                calculateTaylorSeries();
+            } else if (tabName === 'laurent') {
+                calculateLaurentSeries();
+            } else if (tabName === 'convergence') {
+                analyzeConvergence();
+            }
+        }
+        
+        function calculateTaylorSeries() {
+            const func = document.getElementById('taylorFunction').value;
+            const center = parseFloat(document.getElementById('centerPoint').value);
+            const numTerms = parseInt(document.getElementById('numTerms').value);
+            
+            const coefficients = getTaylorCoefficients(func, center, numTerms);
+            displayTaylorSeries(coefficients, center);
+            plotTaylorApproximation(func, coefficients, center, numTerms);
+        }
+        
+        function getTaylorCoefficients(func, center, numTerms) {
+            const coefficients = [];
+            
+            switch(func) {
+                case 'exp':
+                    for (let n = 0; n < numTerms; n++) {
+                        coefficients.push(1 / factorial(n));
+                    }
+                    break;
+                case 'sin':
+                    for (let n = 0; n < numTerms; n++) {
+                        if (n % 4 === 1) coefficients.push(1 / factorial(n));
+                        else if (n % 4 === 3) coefficients.push(-1 / factorial(n));
+                        else coefficients.push(0);
+                    }
+                    break;
+                case 'cos':
+                    for (let n = 0; n < numTerms; n++) {
+                        if (n % 4 === 0) coefficients.push(1 / factorial(n));
+                        else if (n % 4 === 2) coefficients.push(-1 / factorial(n));
+                        else coefficients.push(0);
+                    }
+                    break;
+                case '1/(1-z)':
+                    for (let n = 0; n < numTerms; n++) {
+                        coefficients.push(1);
+                    }
+                    break;
+                default:
+                    for (let n = 0; n < numTerms; n++) {
+                        coefficients.push(1 / factorial(n));
+                    }
+            }
+            
+            return coefficients;
+        }
+        
+        function factorial(n) {
+            if (n <= 1) return 1;
+            return n * factorial(n - 1);
+        }
+        
+        function displayTaylorSeries(coefficients, center) {
+            let seriesText = '<strong>Taylor Series:</strong><br>';
+            
+            coefficients.forEach((coeff, n) => {
+                if (Math.abs(coeff) > 1e-10) {
+                    const term = formatTerm(coeff, n, center);
+                    seriesText += term + '<br>';
+                }
+            });
+            
+            document.getElementById('taylorCoefficients').innerHTML = seriesText;
+            
+            // Update radius of convergence
+            const func = document.getElementById('taylorFunction').value;
+            let radius = 'R = ∞';
+            
+            if (func === '1/(1-z)') radius = 'R = 1';
+            else if (func === 'log(1+z)') radius = 'R = 1';
+            else if (func === 'sqrt(1+z)') radius = 'R = 1';
+            
+            document.getElementById('taylorRadius').innerHTML = `Radius of Convergence: ${radius}`;
+        }
+        
+        function formatTerm(coeff, n, center) {
+            let term = '';
+            
+            if (n === 0) {
+                term = `a₀ = ${coeff.toFixed(6)}`;
+            } else {
+                term = `a${n} = ${coeff.toFixed(6)}`;
+                if (center !== 0) {
+                    term += ` · (z - ${center})^${n}`;
+                } else {
+                    term += ` · z^${n}`;
+                }
+            }
+            
+            return term;
+        }
+        
+        function plotTaylorApproximation(func, coefficients, center, numTerms) {
+            const points = [];
+            const approximation = [];
+            const exact = [];
+            
+            for (let x = -3; x <= 3; x += 0.1) {
+                points.push(x);
+                
+                // Calculate Taylor approximation
+                let approxValue = 0;
+                for (let n = 0; n < numTerms; n++) {
+                    approxValue += coefficients[n] * Math.pow(x - center, n);
+                }
+                approximation.push(approxValue);
+                
+                // Calculate exact value
+                let exactValue = 0;
+                switch(func) {
+                    case 'exp':
+                        exactValue = Math.exp(x);
+                        break;
+                    case 'sin':
+                        exactValue = Math.sin(x);
+                        break;
+                    case 'cos':
+                        exactValue = Math.cos(x);
+                        break;
+                    case '1/(1-z)':
+                        exactValue = x !== 1 ? 1 / (1 - x) : NaN;
+                        break;
+                    default:
+                        exactValue = Math.exp(x);
+                }
+                exact.push(exactValue);
+            }
+            
+            const traces = [
+                {
+                    x: points,
+                    y: exact,
+                    mode: 'lines',
+                    name: 'Exact Function',
+                    line: {color: '#4fc3f7', width: 3}
+                },
+                {
+                    x: points,
+                    y: approximation,
+                    mode: 'lines',
+                    name: `Taylor (${numTerms} terms)`,
+                    line: {color: '#ff8a65', width: 2, dash: 'dash'}
+                }
+            ];
+            
+            const layout = {
+                title: 'Taylor Series Approximation',
+                xaxis: {title: 'x', gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'f(x)', gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'}
+            };
+            
+            Plotly.newPlot('taylorPlot', traces, layout, {responsive: true});
+        }
+        
+        function calculateLaurentSeries() {
+            alert('Laurent series calculation - would show expansion around singularities');
+        }
+        
+        function identifyResidue() {
+            alert('Residue identification - would highlight the a₋₁ coefficient');
+        }
+        
+        function analyzeConvergence() {
+            alert('Convergence analysis - would show ratio/root tests and convergence regions');
+        }
+        
+        function animateConvergence() {
+            alert('Animation - would show how series converges as more terms are added');
+        }
+        
+        function showRegionOfConvergence() {
+            alert('Convergence region visualization - would show disk/annulus of convergence');
+        }
+        
+        // Event listeners
+        document.getElementById('taylorFunction').addEventListener('change', calculateTaylorSeries);
+        document.getElementById('centerPoint').addEventListener('input', function() {
+            document.getElementById('expansionPoint').textContent = this.value;
+            calculateTaylorSeries();
+        });
+        document.getElementById('numTerms').addEventListener('input', function() {
+            document.getElementById('numTermsValue').textContent = this.value;
+            calculateTaylorSeries();
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                calculateTaylorSeries();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

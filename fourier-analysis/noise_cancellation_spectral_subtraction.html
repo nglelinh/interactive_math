@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khử Tiếng Ồn với Spectral Subtraction - Bài Học Tương Tác</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .theory-box {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #FFD700;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .control-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .control-row label {
+            min-width: 120px;
+            margin-right: 10px;
+            font-weight: 500;
+        }
+
+        .slider-container {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .value-display {
+            text-align: center;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-top: 5px;
+            min-width: 60px;
+        }
+
+        .canvas-container {
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        canvas {
+            border-radius: 8px;
+            display: block;
+        }
+
+        .algorithm-steps {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .step-number {
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 25px 35px;
+            border-radius: 15px;
+            font-family: 'Times New Roman', serif;
+            font-size: 20px;
+            line-height: 1.8;
+            text-align: center;
+            margin: 25px 0;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .formula-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #7c4dff, #ff6b6b, #4ecdc4);
+            opacity: 0.8;
+        }
+
+        .formula-box .main-formula {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .formula-box .sub-formula {
+            font-size: 16px;
+            color: #b8e6ff;
+            font-style: italic;
+            margin-top: 8px;
+        }
+
+        .formula-box .formula-label {
+            font-size: 14px;
+            color: #ffeb3b;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .inline-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            margin: 0 2px;
+            color: #e8f4fd;
+        }
+
+        .theorem-box {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .proof-box {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+            font-style: italic;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .key-concept {
+            background: rgba(255, 100, 100, 0.1);
+            border-left: 4px solid #ff6464;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-box {
+            background: rgba(100, 255, 100, 0.1);
+            border-left: 4px solid #64ff64;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .processing-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .process-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .process-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .process-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .audio-button {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audio-button:hover {
+            transform: scale(1.05);
+        }
+
+        .audio-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(100, 100, 100, 0.3) !important;
+        }
+
+        .audio-button:disabled:hover {
+            transform: none;
+        }
+
+        .results-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .lesson-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-button {
+                margin: 2px 0;
+            }
+            
+            .processing-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .audio-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Enhanced Typography and Layout */
+        h2 {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            font-family: 'Georgia', serif;
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h3 {
+            color: #2196F3;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 16px;
+            color: #e0e0e0;
+            font-size: 16px;
+            text-align: justify;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4CAF50, transparent);
+            margin: 40px 0;
+            border-radius: 1px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(3, 169, 244, 0.05));
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 193, 7, 0.05));
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #FF9800;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.1);
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.05));
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .math-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+
+        ul, ol {
+            line-height: 1.8;
+            color: #e0e0e0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .step-by-step {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .step-by-step li {
+            counter-increment: step-counter;
+            margin-bottom: 15px;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .step-by-step li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #4CAF50;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .algorithm-box {
+            background: linear-gradient(145deg, rgba(103, 58, 183, 0.1), rgba(156, 39, 176, 0.05));
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid rgba(103, 58, 183, 0.3);
+            box-shadow: 0 6px 20px rgba(103, 58, 183, 0.1);
+        }
+
+        .algorithm-title {
+            color: #9C27B0;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Khử Tiếng Ồn với Spectral Subtraction</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('interactive')">🎮 Tương Tác</button>
+            <button class="nav-button" onclick="showSection('theory')">📚 Lý Thuyết</button>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="lesson-section active">
+            <div class="theory-box">
+                <h2>🎯 Mô Phỏng Khử Tiếng Ồn Thực Tế</h2>
+                <p>Trải nghiệm thuật toán Spectral Subtraction - công nghệ được sử dụng trong tai nghe noise-cancelling, hệ thống âm thanh xe hơi, và video conferencing!</p>
+            </div>
+
+            <div class="main-layout">
+                <div class="visualization-area">
+                    <div class="canvas-container">
+                        <canvas id="originalCanvas" width="800" height="150"></canvas>
+                        <div style="text-align: center; color: #ff6b6b; font-weight: bold; margin-top: 10px;">
+                            Tín hiệu gốc (Original Signal)
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="noisyCanvas" width="800" height="150"></canvas>
+                        <div style="text-align: center; color: #ffd700; font-weight: bold; margin-top: 10px;">
+                            Tín hiệu có nhiễu (Noisy Signal)
+                        </div>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="denoisedCanvas" width="800" height="150"></canvas>
+                        <div style="text-align: center; color: #64ff64; font-weight: bold; margin-top: 10px;">
+                            Tín hiệu đã khử nhiễu (Denoised Signal)
+                        </div>
+                    </div>
+
+                    <div class="canvas-container">
+                        <canvas id="spectrumCanvas" width="800" height="200"></canvas>
+                        <div style="text-align: center; color: #00d4ff; font-weight: bold; margin-top: 10px;">
+                            Phổ tần số (Frequency Spectrum)
+                        </div>
+                    </div>
+
+                    <div class="audio-controls">
+                        <button class="audio-button" id="initAudioBtn" onclick="initializeAudio()" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); font-weight: bold;">
+                            🔊 Initialize Audio (Click First!)
+                        </button>
+                        <button class="audio-button" onclick="playSignal('original')" id="playOriginal" disabled>
+                            🎵 Nghe tín hiệu gốc
+                        </button>
+                        <button class="audio-button" onclick="playSignal('noisy')" id="playNoisy" disabled>
+                            🔊 Nghe có nhiễu
+                        </button>
+                        <button class="audio-button" onclick="playSignal('denoised')" id="playDenoised" disabled>
+                            ✨ Nghe đã khử nhiễu
+                        </button>
+                    </div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="control-section">
+                        <h3>🎛️ Tín Hiệu Gốc</h3>
+                        <div class="control-row">
+                            <label>Tần số chính:</label>
+                            <div class="slider-container">
+                                <input type="range" id="signalFreq" min="100" max="1000" step="50" value="400" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="signalFreqValue">400 Hz</div>
+                        </div>
+                        <div class="control-row">
+                            <label>Biên độ:</label>
+                            <div class="slider-container">
+                                <input type="range" id="signalAmp" min="0.1" max="1" step="0.1" value="0.8" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="signalAmpValue">0.8</div>
+                        </div>
+                        <div class="control-row">
+                            <label>Loại tín hiệu:</label>
+                            <select id="signalType" onchange="updateParameters()" style="flex: 1; padding: 8px; border-radius: 5px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                                <option value="sine">Sóng Sin</option>
+                                <option value="speech">Giả lập giọng nói</option>
+                                <option value="music">Âm nhạc</option>
+                                <option value="chirp">Chirp Signal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>🔊 Nhiễu (Noise)</h3>
+                        <div class="control-row">
+                            <label>Mức nhiễu:</label>
+                            <div class="slider-container">
+                                <input type="range" id="noiseLevel" min="0" max="1" step="0.05" value="0.3" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="noiseLevelValue">0.30</div>
+                        </div>
+                        <div class="control-row">
+                            <label>Loại nhiễu:</label>
+                            <select id="noiseType" onchange="updateParameters()" style="flex: 1; padding: 8px; border-radius: 5px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                                <option value="white">White Noise</option>
+                                <option value="pink">Pink Noise</option>
+                                <option value="brown">Brown Noise</option>
+                                <option value="tone">Tonal Noise</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>Tần số nhiễu:</label>
+                            <div class="slider-container">
+                                <input type="range" id="noiseFreq" min="50" max="2000" step="50" value="1000" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="noiseFreqValue">1000 Hz</div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>⚙️ Spectral Subtraction</h3>
+                        <div class="control-row">
+                            <label>Alpha (α):</label>
+                            <div class="slider-container">
+                                <input type="range" id="alpha" min="1" max="4" step="0.1" value="2" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="alphaValue">2.0</div>
+                        </div>
+                        <div class="control-row">
+                            <label>Beta (β):</label>
+                            <div class="slider-container">
+                                <input type="range" id="beta" min="0" max="1" step="0.05" value="0.1" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="betaValue">0.10</div>
+                        </div>
+                        <div class="control-row">
+                            <label>Smoothing:</label>
+                            <div class="slider-container">
+                                <input type="range" id="smoothing" min="0" max="0.5" step="0.05" value="0.2" oninput="updateParameters()">
+                            </div>
+                            <div class="value-display" id="smoothingValue">0.20</div>
+                        </div>
+                    </div>
+
+                    <div class="processing-buttons">
+                        <button class="process-button" onclick="generateSignals()">🔄 Tạo tín hiệu mới</button>
+                        <button class="process-button" onclick="applySpectralSubtraction()">✨ Áp dụng khử nhiễu</button>
+                        <button class="process-button" onclick="showStepByStep()">👆 Từng bước</button>
+                        <button class="process-button" onclick="resetDemo()">🔄 Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <h3>📊 Kết Quả Đánh Giá</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                    <div class="metric-card">
+                        <div class="metric-value" id="snrImprovement">+12.5</div>
+                        <div class="metric-label">SNR Improvement (dB)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="noiseReduction">85%</div>
+                        <div class="metric-label">Noise Reduction</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="signalQuality">92%</div>
+                        <div class="metric-label">Signal Quality</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="processingTime">23</div>
+                        <div class="metric-label">Processing Time (ms)</div>
+                    </div>
+                </div>
+
+                <div class="algorithm-steps">
+                    <h4>🔄 Các Bước Thuật Toán</h4>
+                    <div id="algorithmProgress">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <strong>FFT:</strong> Chuyển tín hiệu sang miền tần số
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <strong>Ước lượng nhiễu:</strong> Tính toán phổ nhiễu từ đoạn im lặng
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <strong>Spectral Subtraction:</strong> |Y(ω)| = |X(ω)| - α|N(ω)|
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <strong>Ràng buộc:</strong> Đảm bảo |Y(ω)| ≥ β|X(ω)|
+                        </div>
+                        <div class="step">
+                            <span class="step-number">5</span>
+                            <strong>IFFT:</strong> Chuyển về miền thời gian
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THEORY SECTION -->
+        <div id="theory" class="lesson-section">
+            <div class="theory-box">
+                <h2>📚 Lý Thuyết Spectral Subtraction</h2>
+                <p>Hiểu sâu về thuật toán khử nhiễu trong miền tần số - nền tảng của công nghệ noise cancellation hiện đại!</p>
+            </div>
+
+            <!-- Giới thiệu -->
+            <div class="algorithm-steps">
+                <h3>🎯 Giới Thiệu</h3>
+                <div class="key-concept">
+                    <h4>💡 Ý tưởng cốt lõi</h4>
+                    <p><strong>Spectral Subtraction</strong> là phương pháp khử nhiễu bằng cách trừ phổ tần số của nhiễu khỏi phổ tần số của tín hiệu có nhiễu.</p>
+                    <p>🎧 <strong>Ứng dụng:</strong> Tai nghe noise-cancelling, hệ thống âm thanh xe hơi, video conferencing, hearing aids</p>
+                </div>
+            </div>
+
+            <!-- Mô hình toán học -->
+            <div class="algorithm-steps">
+                <h3>🧮 Mô Hình Toán Học</h3>
+                
+                <div class="formula-box">
+                    <div class="formula-label">Mô Hình Tín Hiệu Cơ Bản</div>
+                    <div class="main-formula">$$x(n) = s(n) + d(n)$$</div>
+                    <div class="sub-formula">
+                        <strong>Định nghĩa các thành phần:</strong><br>
+                        • <strong>x(n):</strong> Tín hiệu có nhiễu<br>
+                        • <strong>s(n):</strong> Tín hiệu gốc (speech)<br>
+                        • <strong>d(n):</strong> Nhiễu (noise)
+                    </div>
+                </div>
+
+                <div class="formula-box">
+                    <div class="formula-label">Biểu Diễn Miền Tần Số</div>
+                    <div class="main-formula">$$X(\omega) = S(\omega) + D(\omega)$$</div>
+                    <div class="sub-formula">$$|X(\omega)|^2 = |S(\omega)|^2 + |D(\omega)|^2 + 2\text{Re}[S(\omega)D^*(\omega)]$$</div>
+                </div>
+
+                <div class="key-concept">
+                    <h4>🔑 Giả định quan trọng</h4>
+                    <p>Giả sử tín hiệu và nhiễu <strong>không tương quan</strong> (uncorrelated):</p>
+                    <p>$$E[S(\omega)D^*(\omega)] = 0$$</p>
+                    <p>Khi đó: $$E[|X(\omega)|^2] = E[|S(\omega)|^2] + E[|D(\omega)|^2]$$</p>
+                </div>
+            </div>
+
+            <!-- Thuật toán cơ bản -->
+            <div class="algorithm-steps">
+                <h3>⚙️ Thuật Toán Cơ Bản</h3>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <h4>Ước lượng phổ nhiễu</h4>
+                    <p>Từ đoạn im lặng hoặc khoảng không có tín hiệu:</p>
+                    <div class="formula-box">
+                        $$\hat{|D(\omega)|^2} = \frac{1}{K} \sum_{k=1}^{K} |X_k(\omega)|^2$$
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <h4>Spectral Subtraction</h4>
+                    <div class="formula-box">
+                        <div class="formula-label">Công Thức Spectral Subtraction Cốt Lõi</div>
+                        <div class="main-formula">$$|\hat{S}(\omega)|^2 = |X(\omega)|^2 - \alpha |\hat{D}(\omega)|^2$$</div>
+                        <div class="sub-formula">α: hệ số over-subtraction (thường α > 1)</div>
+                    </div>
+                    <p>Trong đó <strong>α ≥ 1</strong> là hệ số over-subtraction</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <h4>Ràng buộc (Spectral Floor)</h4>
+                    <div class="formula-box">
+                        $$|\hat{S}(\omega)|^2 = \max(|\hat{S}(\omega)|^2, \beta |X(\omega)|^2)$$
+                    </div>
+                    <p>Với <strong>0 < β < 1</strong> để tránh musical noise</p>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <h4>Tái tạo tín hiệu</h4>
+                    <div class="formula-box">
+                        $$\hat{S}(\omega) = |\hat{S}(\omega)| \cdot e^{j\angle X(\omega)}$$
+                    </div>
+                    <p>Sử dụng phase của tín hiệu gốc</p>
+                </div>
+            </div>
+
+            <!-- Cải tiến thuật toán -->
+            <div class="algorithm-steps">
+                <h3>🚀 Các Cải Tiến</h3>
+                
+                <div class="step">
+                    <h4>1. Multi-band Spectral Subtraction</h4>
+                    <p>Áp dụng các hệ số α khác nhau cho từng dải tần:</p>
+                    <div class="formula-box">
+                        $$|\hat{S}(\omega)|^2 = |X(\omega)|^2 - \alpha(\omega) |\hat{D}(\omega)|^2$$
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h4>2. Non-linear Spectral Subtraction</h4>
+                    <div class="formula-box">
+                        $$|\hat{S}(\omega)|^2 = |X(\omega)|^2 - \alpha \left(\frac{|\hat{D}(\omega)|^2}{|X(\omega)|^2}\right)^{\gamma} |X(\omega)|^2$$
+                    </div>
+                    <p>Với <strong>γ > 0</strong> cho phép điều chỉnh phi tuyến</p>
+                </div>
+
+                <div class="step">
+                    <h4>3. Adaptive Noise Estimation</h4>
+                    <p>Cập nhật liên tục ước lượng nhiễu:</p>
+                    <div class="formula-box">
+                        $$\hat{|D|^2}(k+1) = \lambda \hat{|D|^2}(k) + (1-\lambda)|X(k)|^2$$
+                    </div>
+                    <p>Khi phát hiện không có tín hiệu</p>
+                </div>
+
+                <div class="step">
+                    <h4>4. Smoothing trong miền tần số</h4>
+                    <div class="formula-box">
+                        $$G(\omega, k) = \mu G(\omega, k-1) + (1-\mu) G_{raw}(\omega, k)$$
+                    </div>
+                    <p>Giảm musical noise bằng cách làm mượt gain function</p>
+                </div>
+            </div>
+
+            <!-- Ưu nhược điểm -->
+            <div class="algorithm-steps">
+                <h3>⚖️ Ưu và Nhược Điểm</h3>
+                
+                <div class="example-box">
+                    <h4>✅ Ưu điểm</h4>
+                    <ul>
+                        <li><strong>Đơn giản:</strong> Dễ hiểu và cài đặt</li>
+                        <li><strong>Tính toán nhanh:</strong> Phù hợp real-time</li>
+                        <li><strong>Hiệu quả với stationary noise:</strong> Tốt với nhiễu ổn định</li>
+                        <li><strong>Không cần training:</strong> Không cần dữ liệu huấn luyện</li>
+                    </ul>
+                </div>
+
+                <div class="key-concept">
+                    <h4>❌ Nhược điểm</h4>
+                    <ul>
+                        <li><strong>Musical Noise:</strong> Tạo ra tiếng ồn kim loại</li>
+                        <li><strong>Speech Distortion:</strong> Làm méo tín hiệu gốc</li>
+                        <li><strong>Giả định mạnh:</strong> Cần nhiễu và tín hiệu không tương quan</li>
+                        <li><strong>Non-stationary noise:</strong> Kém hiệu quả với nhiễu thay đổi</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ứng dụng thực tế -->
+            <div class="algorithm-steps">
+                <h3>🌍 Ứng Dụng Thực Tế</h3>
+                
+                <div class="step">
+                    <h4>🎧 Consumer Electronics</h4>
+                    <p>• <strong>Noise-cancelling headphones:</strong> Sony, Bose, Apple AirPods Pro</p>
+                    <p>• <strong>Smartphone:</strong> Khử nhiễu cuộc gọi</p>
+                    <p>• <strong>Smart speakers:</strong> Echo cancellation</p>
+                </div>
+
+                <div class="step">
+                    <h4>🚗 Automotive</h4>
+                    <p>• <strong>Hands-free calling:</strong> Khử tiếng ồn động cơ</p>
+                    <p>• <strong>Voice commands:</strong> Cải thiện nhận dạng giọng nói</p>
+                    <p>• <strong>Entertainment systems:</strong> Nâng cao chất lượng âm thanh</p>
+                </div>
+
+                <div class="step">
+                    <h4>🏥 Medical Applications</h4>
+                    <p>• <strong>Hearing aids:</strong> Khử nhiễu môi trường</p>
+                    <p>• <strong>Medical imaging:</strong> Khử nhiễu tín hiệu sinh học</p>
+                    <p>• <strong>Telemedicine:</strong> Cải thiện chất lượng âm thanh</p>
+                </div>
+
+                <div class="step">
+                    <h4>💼 Professional Audio</h4>
+                    <p>• <strong>Broadcasting:</strong> Khử nhiễu live stream</p>
+                    <p>• <strong>Conference systems:</strong> Skype, Zoom, Teams</p>
+                    <p>• <strong>Audio restoration:</strong> Phục hồi recording cũ</p>
+                </div>
+            </div>
+
+            <!-- So sánh với các phương pháp khác -->
+            <div class="algorithm-steps">
+                <h3>🔄 So Sánh với Các Phương Pháp Khác</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div class="step">
+                        <h4>Spectral Subtraction</h4>
+                        <p>✅ Đơn giản, nhanh</p>
+                        <p>❌ Musical noise</p>
+                        <p>💰 Chi phí thấp</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Wiener Filter</h4>
+                        <p>✅ Tối ưu MMSE</p>
+                        <p>❌ Cần biết SNR</p>
+                        <p>💰 Chi phí trung bình</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Deep Learning</h4>
+                        <p>✅ Hiệu quả cao</p>
+                        <p>❌ Cần training</p>
+                        <p>💰 Chi phí cao</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Adaptive Filter</h4>
+                        <p>✅ Thích ứng tốt</p>
+                        <p>❌ Phức tạp</p>
+                        <p>💰 Chi phí trung bình</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let sampleRate = 8000;
+        let duration = 1.0; // seconds
+        let numSamples = sampleRate * duration;
+        
+        let originalSignal = [];
+        let noisySignal = [];
+        let denoisedSignal = [];
+        let noiseSpectrum = [];
+        
+        let isPlaying = false;
+        let audioContext;
+
+        // Parameters
+        let params = {
+            signalFreq: 400,
+            signalAmp: 0.8,
+            signalType: 'sine',
+            noiseLevel: 0.3,
+            noiseType: 'white',
+            noiseFreq: 1000,
+            alpha: 2.0,
+            beta: 0.1,
+            smoothing: 0.2
+        };
+
+        // Initialize
+        function init() {
+            generateSignals(); // This will set up everything and call applySpectralSubtraction at the end
+            updateParameters(); // This will just update the UI displays
+        }
+
+        // Initialize audio system (requires user interaction)
+        async function initializeAudio() {
+            try {
+                setupAudioContext();
+                
+                // Wait for context to be ready
+                if (audioContext.state !== 'running') {
+                    await audioContext.resume();
+                }
+                
+                console.log('AudioContext state:', audioContext.state);
+                console.log('Sample rate:', audioContext.sampleRate);
+                
+                // Test audio by playing a short beep
+                const testDuration = 0.2; // 200ms
+                const testBuffer = audioContext.createBuffer(1, audioContext.sampleRate * testDuration, audioContext.sampleRate);
+                const channelData = testBuffer.getChannelData(0);
+                
+                // Generate a short sine wave
+                for (let i = 0; i < channelData.length; i++) {
+                    channelData[i] = Math.sin(2 * Math.PI * 440 * i / audioContext.sampleRate) * 0.2;
+                }
+                
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                source.buffer = testBuffer;
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                gainNode.gain.value = 0.5;
+                source.start();
+                
+                // Enable audio buttons
+                document.getElementById('playOriginal').disabled = false;
+                document.getElementById('playNoisy').disabled = false;
+                document.getElementById('playDenoised').disabled = false;
+                
+                // Update init button
+                const initBtn = document.getElementById('initAudioBtn');
+                initBtn.textContent = '✅ Audio Ready!';
+                initBtn.style.background = 'linear-gradient(45deg, #4CAF50, #45a049)';
+                setTimeout(() => {
+                    initBtn.style.display = 'none';
+                }, 2000);
+                
+                console.log('Audio initialized successfully');
+                alert('Audio initialized! You can now play the signals.');
+                
+            } catch (error) {
+                console.error('Error initializing audio:', error);
+                alert('Failed to initialize audio: ' + error.message + '\n\nPlease ensure your browser supports Web Audio API.');
+            }
+        }
+
+        // Setup Web Audio API
+        function setupAudioContext() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Resume audio context if suspended (required by browsers)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            } catch (error) {
+                console.error('Error setting up audio context:', error);
+                alert('Audio not supported in this browser. Please try a different browser.');
+            }
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.lesson-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Update parameters from controls
+        function updateParameters() {
+            params.signalFreq = parseFloat(document.getElementById('signalFreq').value);
+            params.signalAmp = parseFloat(document.getElementById('signalAmp').value);
+            params.signalType = document.getElementById('signalType').value;
+            params.noiseLevel = parseFloat(document.getElementById('noiseLevel').value);
+            params.noiseType = document.getElementById('noiseType').value;
+            params.noiseFreq = parseFloat(document.getElementById('noiseFreq').value);
+            params.alpha = parseFloat(document.getElementById('alpha').value);
+            params.beta = parseFloat(document.getElementById('beta').value);
+            params.smoothing = parseFloat(document.getElementById('smoothing').value);
+
+            // Update displays
+            document.getElementById('signalFreqValue').textContent = params.signalFreq + ' Hz';
+            document.getElementById('signalAmpValue').textContent = params.signalAmp.toFixed(1);
+            document.getElementById('noiseLevelValue').textContent = params.noiseLevel.toFixed(2);
+            document.getElementById('noiseFreqValue').textContent = params.noiseFreq + ' Hz';
+            document.getElementById('alphaValue').textContent = params.alpha.toFixed(1);
+            document.getElementById('betaValue').textContent = params.beta.toFixed(2);
+            document.getElementById('smoothingValue').textContent = params.smoothing.toFixed(2);
+
+            // Only regenerate signals if we're not in initial setup
+            if (originalSignal.length > 0) {
+                generateSignals();
+            }
+        }
+
+        // Generate signals
+        function generateSignals() {
+            originalSignal = [];
+            noisySignal = [];
+            
+            // Generate original signal
+            for (let n = 0; n < numSamples; n++) {
+                const t = n / sampleRate;
+                let sample = 0;
+                
+                switch (params.signalType) {
+                    case 'sine':
+                        sample = params.signalAmp * Math.sin(2 * Math.PI * params.signalFreq * t);
+                        break;
+                    case 'speech':
+                        // Simulate speech with multiple harmonics
+                        sample = params.signalAmp * (
+                            Math.sin(2 * Math.PI * params.signalFreq * t) +
+                            0.5 * Math.sin(2 * Math.PI * params.signalFreq * 2 * t) +
+                            0.3 * Math.sin(2 * Math.PI * params.signalFreq * 3 * t)
+                        ) * (0.5 + 0.5 * Math.sin(2 * Math.PI * 5 * t)); // Modulation
+                        break;
+                    case 'music':
+                        // Simulate music with chord
+                        sample = params.signalAmp * (
+                            Math.sin(2 * Math.PI * params.signalFreq * t) +
+                            0.8 * Math.sin(2 * Math.PI * params.signalFreq * 1.25 * t) +
+                            0.6 * Math.sin(2 * Math.PI * params.signalFreq * 1.5 * t)
+                        ) / 3;
+                        break;
+                    case 'chirp':
+                        const f_end = params.signalFreq * 2;
+                        const freq_inst = params.signalFreq + (f_end - params.signalFreq) * t / duration;
+                        sample = params.signalAmp * Math.sin(2 * Math.PI * freq_inst * t);
+                        break;
+                }
+                
+                originalSignal.push(sample);
+            }
+            
+            // Generate noise
+            const noise = generateNoise(params.noiseType, params.noiseLevel, params.noiseFreq);
+            
+            // Add noise to original signal
+            for (let n = 0; n < numSamples; n++) {
+                noisySignal[n] = originalSignal[n] + noise[n];
+            }
+            
+            // Estimate noise spectrum (use first 10% as noise-only segment)
+            const noiseOnlySegment = noise.slice(0, Math.floor(numSamples * 0.1));
+            noiseSpectrum = computeSpectrum(noiseOnlySegment);
+            
+            drawSignals();
+            applySpectralSubtraction(); // Apply denoising after signals are generated
+        }
+
+        // Generate different types of noise
+        function generateNoise(type, level, freq) {
+            const noise = [];
+            
+            for (let n = 0; n < numSamples; n++) {
+                const t = n / sampleRate;
+                let sample = 0;
+                
+                switch (type) {
+                    case 'white':
+                        sample = level * (2 * Math.random() - 1);
+                        break;
+                    case 'pink':
+                        // Simplified pink noise (1/f)
+                        sample = level * (2 * Math.random() - 1) * Math.sqrt(1 / (1 + freq * t));
+                        break;
+                    case 'brown':
+                        // Simplified brown noise (1/f^2)
+                        sample = level * (2 * Math.random() - 1) * (1 / (1 + freq * t * t));
+                        break;
+                    case 'tone':
+                        // Tonal noise
+                        sample = level * Math.sin(2 * Math.PI * freq * t) + 
+                                level * 0.3 * (2 * Math.random() - 1);
+                        break;
+                }
+                
+                noise.push(sample);
+            }
+            
+            return noise;
+        }
+
+        // Apply spectral subtraction
+        function applySpectralSubtraction() {
+            // Safety check: ensure signals and noise spectrum are ready
+            if (noisySignal.length === 0 || noiseSpectrum.length === 0) {
+                console.log('Signals not ready, skipping spectral subtraction');
+                return;
+            }
+            
+            const startTime = performance.now();
+            
+            // 1. FFT of noisy signal
+            const noisySpectrum = computeSpectrum(noisySignal);
+            
+            // 2. Spectral subtraction
+            const denoisedSpectrum = [];
+            for (let k = 0; k < noisySpectrum.length; k++) {
+                const noisyMag = Math.sqrt(noisySpectrum[k].real * noisySpectrum[k].real + 
+                                          noisySpectrum[k].imag * noisySpectrum[k].imag);
+                
+                // Safety check for noise spectrum access
+                const noiseMag = (k < noiseSpectrum.length) ? 
+                    Math.sqrt(noiseSpectrum[k].real * noiseSpectrum[k].real + 
+                             noiseSpectrum[k].imag * noiseSpectrum[k].imag) : 0;
+                
+                // Spectral subtraction
+                let cleanMag = Math.sqrt(Math.max(
+                    noisyMag * noisyMag - params.alpha * noiseMag * noiseMag,
+                    params.beta * noisyMag * noisyMag
+                ));
+                
+                // Apply smoothing
+                if (k > 0) {
+                    const prevMag = Math.sqrt(denoisedSpectrum[k-1].real * denoisedSpectrum[k-1].real + 
+                                             denoisedSpectrum[k-1].imag * denoisedSpectrum[k-1].imag);
+                    cleanMag = params.smoothing * prevMag + (1 - params.smoothing) * cleanMag;
+                }
+                
+                // Preserve phase
+                const phase = Math.atan2(noisySpectrum[k].imag, noisySpectrum[k].real);
+                denoisedSpectrum.push({
+                    real: cleanMag * Math.cos(phase),
+                    imag: cleanMag * Math.sin(phase)
+                });
+            }
+            
+            // 3. IFFT to get denoised signal
+            denoisedSignal = computeIFFT(denoisedSpectrum);
+            
+            const endTime = performance.now();
+            
+            // Update metrics
+            updateMetrics(endTime - startTime);
+            
+            // Redraw
+            drawSignals();
+            drawSpectrum();
+        }
+
+        // Simple FFT implementation (for educational purposes)
+        function computeSpectrum(signal) {
+            if (!signal || signal.length === 0) {
+                console.warn('Empty signal provided to computeSpectrum');
+                return [];
+            }
+            
+            const N = signal.length;
+            const spectrum = [];
+            
+            for (let k = 0; k < N; k++) {
+                let real = 0;
+                let imag = 0;
+                
+                for (let n = 0; n < N; n++) {
+                    const angle = -2 * Math.PI * k * n / N;
+                    real += signal[n] * Math.cos(angle);
+                    imag += signal[n] * Math.sin(angle);
+                }
+                
+                spectrum.push({ real: real, imag: imag });
+            }
+            
+            return spectrum;
+        }
+
+        // Simple IFFT implementation
+        function computeIFFT(spectrum) {
+            const N = spectrum.length;
+            const signal = [];
+            
+            for (let n = 0; n < N; n++) {
+                let real = 0;
+                
+                for (let k = 0; k < N; k++) {
+                    const angle = 2 * Math.PI * k * n / N;
+                    real += spectrum[k].real * Math.cos(angle) - spectrum[k].imag * Math.sin(angle);
+                }
+                
+                signal.push(real / N);
+            }
+            
+            return signal;
+        }
+
+        // Draw signals
+        function drawSignals() {
+            drawSignal('originalCanvas', originalSignal, '#ff6b6b');
+            drawSignal('noisyCanvas', noisySignal, '#ffd700');
+            drawSignal('denoisedCanvas', denoisedSignal, '#64ff64');
+        }
+
+        // Draw individual signal
+        function drawSignal(canvasId, signal, color) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * width;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 4; i++) {
+                const y = (i / 4) * height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Draw signal
+            if (signal.length === 0) return;
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const maxVal = Math.max(...signal.map(Math.abs));
+            const scale = maxVal > 0 ? (height * 0.4) / maxVal : 1;
+            
+            for (let i = 0; i < signal.length; i++) {
+                const x = (i / signal.length) * width;
+                const y = height / 2 - signal[i] * scale;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Draw center line
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+        }
+
+        // Draw spectrum
+        function drawSpectrum() {
+            const canvas = document.getElementById('spectrumCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            
+            if (noisySignal.length === 0) return;
+            
+            // Compute spectra
+            const noisySpec = computeSpectrum(noisySignal);
+            const denoisedSpec = computeSpectrum(denoisedSignal);
+            
+            // Only plot first half (positive frequencies)
+            const halfLength = Math.floor(noisySpec.length / 2);
+            
+            // Draw noisy spectrum
+            drawSpectrumLine(ctx, noisySpec.slice(0, halfLength), width, height, '#ffd700', 0.5);
+            
+            // Draw denoised spectrum
+            drawSpectrumLine(ctx, denoisedSpec.slice(0, halfLength), width, height, '#64ff64', 1.0);
+            
+            // Draw frequency axis
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 4; i++) {
+                const freq = (i / 4) * (sampleRate / 2);
+                const x = (i / 4) * width;
+                ctx.fillText(freq.toFixed(0) + ' Hz', x, height - 5);
+            }
+        }
+
+        // Draw spectrum line
+        function drawSpectrumLine(ctx, spectrum, width, height, color, alpha) {
+            ctx.strokeStyle = color;
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            // Find max magnitude for scaling
+            const magnitudes = spectrum.map(s => Math.sqrt(s.real * s.real + s.imag * s.imag));
+            const maxMag = Math.max(...magnitudes);
+            
+            for (let i = 0; i < spectrum.length; i++) {
+                const mag = magnitudes[i];
+                const x = (i / spectrum.length) * width;
+                const y = height - (mag / maxMag) * (height * 0.8);
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+        }
+
+        // Update metrics
+        function updateMetrics(processingTime) {
+            // Calculate SNR improvement
+            const originalPower = calculatePower(originalSignal);
+            const noisePower = calculatePower(noisySignal) - originalPower;
+            const denoisedPower = calculatePower(denoisedSignal);
+            const residualNoise = Math.abs(denoisedPower - originalPower);
+            
+            const snrBefore = 10 * Math.log10(originalPower / noisePower);
+            const snrAfter = 10 * Math.log10(originalPower / residualNoise);
+            const snrImprovement = snrAfter - snrBefore;
+            
+            // Calculate noise reduction percentage
+            const noiseReduction = Math.max(0, Math.min(100, (1 - residualNoise / noisePower) * 100));
+            
+            // Calculate signal quality (correlation with original)
+            const signalQuality = calculateCorrelation(originalSignal, denoisedSignal) * 100;
+            
+            // Update displays
+            document.getElementById('snrImprovement').textContent = (snrImprovement > 0 ? '+' : '') + snrImprovement.toFixed(1);
+            document.getElementById('noiseReduction').textContent = noiseReduction.toFixed(0) + '%';
+            document.getElementById('signalQuality').textContent = signalQuality.toFixed(0) + '%';
+            document.getElementById('processingTime').textContent = processingTime.toFixed(0);
+        }
+
+        // Calculate signal power
+        function calculatePower(signal) {
+            return signal.reduce((sum, sample) => sum + sample * sample, 0) / signal.length;
+        }
+
+        // Calculate correlation
+        function calculateCorrelation(sig1, sig2) {
+            if (sig1.length !== sig2.length) return 0;
+            
+            const mean1 = sig1.reduce((sum, x) => sum + x, 0) / sig1.length;
+            const mean2 = sig2.reduce((sum, x) => sum + x, 0) / sig2.length;
+            
+            let numerator = 0;
+            let denom1 = 0;
+            let denom2 = 0;
+            
+            for (let i = 0; i < sig1.length; i++) {
+                const diff1 = sig1[i] - mean1;
+                const diff2 = sig2[i] - mean2;
+                numerator += diff1 * diff2;
+                denom1 += diff1 * diff1;
+                denom2 += diff2 * diff2;
+            }
+            
+            const denominator = Math.sqrt(denom1 * denom2);
+            return denominator > 0 ? numerator / denominator : 0;
+        }
+
+        // Play signal using Web Audio API
+        async function playSignal(type) {
+            if (isPlaying) {
+                console.log('Audio already playing, please wait...');
+                return;
+            }
+            
+            try {
+                setupAudioContext();
+                
+                // Ensure audio context is running
+                if (audioContext.state !== 'running') {
+                    await audioContext.resume();
+                }
+                
+                let signal;
+                switch (type) {
+                    case 'original':
+                        signal = originalSignal;
+                        break;
+                    case 'noisy':
+                        signal = noisySignal;
+                        break;
+                    case 'denoised':
+                        signal = denoisedSignal;
+                        break;
+                    default:
+                        console.error('Invalid signal type:', type);
+                        return;
+                }
+                
+                if (!signal || signal.length === 0) {
+                    console.error('No signal data available');
+                    alert('No signal data available. Please generate signals first.');
+                    return;
+                }
+                
+                isPlaying = true;
+                
+                // Ensure we have enough samples for audible sound (minimum 0.5 seconds)
+                const minSamples = Math.floor(sampleRate * 0.5);
+                let playbackSignal = signal;
+                
+                if (signal.length < minSamples) {
+                    // Repeat signal to make it longer and more audible
+                    playbackSignal = [];
+                    const repeats = Math.ceil(minSamples / signal.length);
+                    for (let r = 0; r < repeats; r++) {
+                        playbackSignal = playbackSignal.concat(signal);
+                    }
+                    playbackSignal = playbackSignal.slice(0, minSamples);
+                }
+                
+                // Create audio buffer
+                const buffer = audioContext.createBuffer(1, playbackSignal.length, sampleRate);
+                const channelData = buffer.getChannelData(0);
+                
+                // Find signal range for normalization
+                let maxAbs = 0;
+                for (let i = 0; i < playbackSignal.length; i++) {
+                    maxAbs = Math.max(maxAbs, Math.abs(playbackSignal[i]));
+                }
+                
+                // Copy signal data with normalization and volume control
+                const volume = 0.3; // Safe volume level
+                const normalizeGain = maxAbs > 0 ? 1 / maxAbs : 1;
+                
+                for (let i = 0; i < playbackSignal.length; i++) {
+                    // Normalize and scale the signal
+                    let sample = playbackSignal[i] * normalizeGain * volume;
+                    // Clamp to prevent clipping
+                    sample = Math.max(-1, Math.min(1, sample));
+                    channelData[i] = sample;
+                }
+                
+                // Create and configure source
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = buffer;
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Set gain with fade in/out to prevent clicks
+                gainNode.gain.value = 0;
+                gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + 0.01);
+                gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + playbackSignal.length / sampleRate - 0.01);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + playbackSignal.length / sampleRate);
+                
+                source.onended = () => {
+                    isPlaying = false;
+                    console.log(`Finished playing ${type} signal`);
+                };
+                
+                // Start playback
+                source.start(0);
+                
+                const duration = playbackSignal.length / sampleRate;
+                console.log(`Playing ${type} signal - Duration: ${duration.toFixed(2)}s, Samples: ${playbackSignal.length}, Max amplitude: ${maxAbs.toFixed(3)}`);
+                
+            } catch (error) {
+                console.error('Error playing audio:', error);
+                isPlaying = false;
+                alert('Error playing audio: ' + error.message + '\n\nPlease check your browser audio settings and ensure volume is up.');
+            }
+        }
+
+        // Show step by step demonstration
+        function showStepByStep() {
+            // This would show an animated demonstration of the algorithm steps
+            alert('Step-by-step demonstration: \n\n1. FFT của tín hiệu có nhiễu\n2. Ước lượng phổ nhiễu\n3. Áp dụng spectral subtraction\n4. Áp dụng spectral floor\n5. IFFT để tái tạo tín hiệu');
+        }
+
+        // Reset demo
+        function resetDemo() {
+            // Reset to default parameters
+            document.getElementById('signalFreq').value = 400;
+            document.getElementById('signalAmp').value = 0.8;
+            document.getElementById('signalType').value = 'sine';
+            document.getElementById('noiseLevel').value = 0.3;
+            document.getElementById('noiseType').value = 'white';
+            document.getElementById('noiseFreq').value = 1000;
+            document.getElementById('alpha').value = 2;
+            document.getElementById('beta').value = 0.1;
+            document.getElementById('smoothing').value = 0.2;
+            
+            updateParameters();
+        }
+
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

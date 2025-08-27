@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nonlinear Transformations - Interactive Mathematical Exploration</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 20px 20px;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin: 30px 0 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h3 {
+            color: #f093fb;
+            font-size: 1.5em;
+            margin: 25px 0 15px;
+        }
+        
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .visualization-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .canvas-wrapper {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        canvas {
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+            background: #000;
+            max-width: 100%;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 8px 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .parameter-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+            color: #f093fb;
+            margin-top: 5px;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .transformation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .transformation-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .transformation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+        
+        .example-box {
+            background: rgba(240, 147, 251, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f093fb;
+        }
+        
+        .theorem-box {
+            background: rgba(245, 87, 108, 0.1);
+            border: 2px solid #f5576c;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .theorem-box::before {
+            content: "🎯";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 1.2em;
+        }
+        
+        .comparison-table {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+        
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .highlight {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('overview')">🎯 Overview</button>
+            <button class="nav-tab" onclick="showSection('theory')">📚 Theory</button>
+            <button class="nav-tab" onclick="showSection('types')">🔄 Types</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 Interactive</button>
+            <button class="nav-tab" onclick="showSection('applications')">🚀 Applications</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>🌊 Nonlinear Transformations</h1>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="overview" class="section active">
+            <div class="theory-section">
+                <h2>🎯 Introduction to Nonlinear Transformations</h2>
+                <p><strong>Nonlinear transformations</strong> are mathematical functions that don't preserve the linear structure of vector spaces. Unlike linear transformations, they can bend, twist, and deform geometric shapes in complex ways.</p>
+                
+                <div class="formula-box">
+                    <h3>Linear vs Nonlinear</h3>
+                    <p><strong>Linear:</strong> $T(ax + by) = aT(x) + bT(y)$</p>
+                    <p><strong>Nonlinear:</strong> $T(ax + by) \neq aT(x) + bT(y)$</p>
+                </div>
+
+                <div class="transformation-grid">
+                    <div class="transformation-card">
+                        <h3>🎨 Visual Properties</h3>
+                        <ul>
+                            <li><strong>Non-preservation:</strong> Straight lines → Curves</li>
+                            <li><strong>Variable scaling:</strong> Different magnification factors</li>
+                            <li><strong>Complex deformation:</strong> Twisting and bending</li>
+                            <li><strong>Local behavior:</strong> Properties vary by region</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🔬 Mathematical Features</h3>
+                        <ul>
+                            <li><strong>Jacobian Matrix:</strong> Local linear approximation</li>
+                            <li><strong>Determinant:</strong> Local area scaling factor</li>
+                            <li><strong>Critical Points:</strong> Where Jacobian is singular</li>
+                            <li><strong>Bifurcations:</strong> Qualitative changes</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🌍 Real-World Examples</h3>
+                        <ul>
+                            <li><strong>Computer Graphics:</strong> 3D rendering, morphing</li>
+                            <li><strong>Physics:</strong> General relativity, fluid dynamics</li>
+                            <li><strong>Biology:</strong> Growth models, population dynamics</li>
+                            <li><strong>Economics:</strong> Market transformations, utility functions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THEORY SECTION -->
+        <div id="theory" class="section">
+            <div class="theory-section">
+                <h2>📚 Mathematical Foundation</h2>
+
+                <div class="theorem-box">
+                    <h3>🎯 Definition</h3>
+                    <p>A <strong>nonlinear transformation</strong> $T: \mathbb{R}^n \to \mathbb{R}^m$ is a function that does not satisfy the linearity condition:</p>
+                    <div class="formula-box">
+                        $$T(\alpha \mathbf{u} + \beta \mathbf{v}) \neq \alpha T(\mathbf{u}) + \beta T(\mathbf{v})$$
+                    </div>
+                    <p>for some vectors $\mathbf{u}, \mathbf{v}$ and scalars $\alpha, \beta$.</p>
+                </div>
+
+                <div class="theory-section">
+                    <h3>🧮 Jacobian Matrix</h3>
+                    <p>For a transformation $T: \mathbb{R}^n \to \mathbb{R}^m$ with components $T = (f_1, f_2, ..., f_m)$:</p>
+                    
+                    <div class="formula-box">
+                        $$J_T(\mathbf{x}) = \begin{bmatrix}
+                        \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_n} \\
+                        \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_n} \\
+                        \vdots & \vdots & \ddots & \vdots \\
+                        \frac{\partial f_m}{\partial x_1} & \frac{\partial f_m}{\partial x_2} & \cdots & \frac{\partial f_m}{\partial x_n}
+                        \end{bmatrix}$$
+                    </div>
+
+                    <div class="example-box">
+                        <h4>📊 Geometric Interpretation</h4>
+                        <ul>
+                            <li><strong>Linear Approximation:</strong> $T(\mathbf{x} + \mathbf{h}) \approx T(\mathbf{x}) + J_T(\mathbf{x})\mathbf{h}$</li>
+                            <li><strong>Local Scaling:</strong> $|\det(J_T(\mathbf{x}))|$ = local area scaling factor</li>
+                            <li><strong>Orientation:</strong> $\det(J_T(\mathbf{x})) < 0$ indicates orientation reversal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="theory-section">
+                    <h3>🎲 Inverse Function Theorem</h3>
+                    <p>If $T: \mathbb{R}^n \to \mathbb{R}^n$ is continuously differentiable and $\det(J_T(\mathbf{a})) \neq 0$, then $T$ is locally invertible near $\mathbf{a}$.</p>
+                    
+                    <div class="formula-box">
+                        $$J_{T^{-1}}(T(\mathbf{a})) = [J_T(\mathbf{a})]^{-1}$$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPES SECTION -->
+        <div id="types" class="section">
+            <div class="theory-section">
+                <h2>🔄 Common Types of Nonlinear Transformations</h2>
+
+                <div class="transformation-grid">
+                    <div class="transformation-card">
+                        <h3>🌀 Polar/Cylindrical</h3>
+                        <div class="formula-box">
+                            $$\begin{cases}
+                            x = r\cos\theta \\
+                            y = r\sin\theta
+                            \end{cases}$$
+                        </div>
+                        <p><strong>Properties:</strong> Converts rectangular grids to radial patterns</p>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🎯 Spherical</h3>
+                        <div class="formula-box">
+                            $$\begin{cases}
+                            x = \rho\sin\phi\cos\theta \\
+                            y = \rho\sin\phi\sin\theta \\
+                            z = \rho\cos\phi
+                            \end{cases}$$
+                        </div>
+                        <p><strong>Properties:</strong> Maps 3D rectangular coordinates to spherical</p>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🌊 Exponential</h3>
+                        <div class="formula-box">
+                            $$T(x, y) = (e^x\cos y, e^x\sin y)$$
+                        </div>
+                        <p><strong>Properties:</strong> Maps vertical lines to rays, horizontal lines to circles</p>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🔥 Logarithmic</h3>
+                        <div class="formula-box">
+                            $$T(x, y) = (\ln\sqrt{x^2 + y^2}, \arctan(y/x))$$
+                        </div>
+                        <p><strong>Properties:</strong> Inverse of exponential, maps circles to horizontal lines</p>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🎨 Power Functions</h3>
+                        <div class="formula-box">
+                            $$T(x, y) = (x^n, y^n)$$
+                        </div>
+                        <p><strong>Properties:</strong> Creates scaling effects, preserves axes</p>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🌪️ Möbius Transform</h3>
+                        <div class="formula-box">
+                            $$T(z) = \frac{az + b}{cz + d}$$
+                        </div>
+                        <p><strong>Properties:</strong> Conformal mapping, preserves angles</p>
+                    </div>
+                </div>
+
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transformation</th>
+                                <th>Preserves Lines</th>
+                                <th>Preserves Angles</th>
+                                <th>Area Scaling</th>
+                                <th>Common Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Polar</td>
+                                <td>No</td>
+                                <td>At origin</td>
+                                <td>Variable</td>
+                                <td>Physics, Engineering</td>
+                            </tr>
+                            <tr>
+                                <td>Exponential</td>
+                                <td>No</td>
+                                <td>Yes</td>
+                                <td>$e^{2x}$</td>
+                                <td>Complex Analysis</td>
+                            </tr>
+                            <tr>
+                                <td>Power</td>
+                                <td>Only axes</td>
+                                <td>No</td>
+                                <td>$n^2|xy|^{n-1}$</td>
+                                <td>Data Transformation</td>
+                            </tr>
+                            <tr>
+                                <td>Möbius</td>
+                                <td>No (circles)</td>
+                                <td>Yes</td>
+                                <td>$|cz+d|^{-4}$</td>
+                                <td>Conformal Mapping</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="section">
+            <div class="theory-section">
+                <h2>🎮 Interactive Nonlinear Transformations</h2>
+                
+                <div class="controls">
+                    <div class="control-grid">
+                        <div class="control-group">
+                            <label>Transformation Type:</label>
+                            <select id="transformType" onchange="updateTransformation()">
+                                <option value="polar">Polar Coordinates</option>
+                                <option value="exponential">Exponential</option>
+                                <option value="power">Power Function</option>
+                                <option value="logarithmic">Logarithmic</option>
+                                <option value="inverse">Inversion</option>
+                                <option value="swirl">Swirl</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Parameter A:</label>
+                            <input type="range" id="paramA" min="-3" max="3" step="0.1" value="1" oninput="updateTransformation()">
+                            <div class="parameter-display" id="paramADisplay">A = 1.0</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Parameter B:</label>
+                            <input type="range" id="paramB" min="-3" max="3" step="0.1" value="1" oninput="updateTransformation()">
+                            <div class="parameter-display" id="paramBDisplay">B = 1.0</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Grid Density:</label>
+                            <input type="range" id="gridDensity" min="5" max="20" step="1" value="10" oninput="updateTransformation()">
+                            <div class="parameter-display" id="gridDensityDisplay">Density = 10</div>
+                        </div>
+
+                        <div class="control-group">
+                            <button onclick="animateTransformation()">🎬 Animate</button>
+                            <button onclick="resetTransformation()">🔄 Reset</button>
+                            <button onclick="showJacobian()">📊 Show Jacobian</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visualization-container">
+                    <div class="canvas-wrapper">
+                        <h3>Original Grid</h3>
+                        <canvas id="originalCanvas" width="400" height="400"></canvas>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <h3>Transformed Grid</h3>
+                        <canvas id="transformedCanvas" width="400" height="400"></canvas>
+                    </div>
+                </div>
+
+                <div id="jacobianInfo" class="theory-section" style="display: none;">
+                    <h3>📊 Jacobian Analysis</h3>
+                    <div id="jacobianMatrix" class="formula-box"></div>
+                    <div id="jacobianProperties"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APPLICATIONS SECTION -->
+        <div id="applications" class="section">
+            <div class="theory-section">
+                <h2>🚀 Applications of Nonlinear Transformations</h2>
+
+                <div class="transformation-grid">
+                    <div class="transformation-card">
+                        <h3>🎮 Computer Graphics</h3>
+                        <ul>
+                            <li><strong>3D Projection:</strong> World → Screen coordinates</li>
+                            <li><strong>Texture Mapping:</strong> UV coordinates → Surface</li>
+                            <li><strong>Morphing:</strong> Shape interpolation</li>
+                            <li><strong>Ray Tracing:</strong> Curved surface intersections</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🌍 Geographic Mapping</h3>
+                        <ul>
+                            <li><strong>Map Projections:</strong> Sphere → Plane</li>
+                            <li><strong>Mercator:</strong> Conformal cylindrical projection</li>
+                            <li><strong>Stereographic:</strong> Sphere → Plane (preserves angles)</li>
+                            <li><strong>GPS Coordinates:</strong> Ellipsoid → Flat map</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>⚛️ Physics & Engineering</h3>
+                        <ul>
+                            <li><strong>General Relativity:</strong> Spacetime curvature</li>
+                            <li><strong>Fluid Dynamics:</strong> Flow field transformations</li>
+                            <li><strong>Electromagnetic Fields:</strong> Field line mapping</li>
+                            <li><strong>Optical Systems:</strong> Lens distortions</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>📊 Data Science</h3>
+                        <ul>
+                            <li><strong>Feature Engineering:</strong> Nonlinear variable transforms</li>
+                            <li><strong>Dimensionality Reduction:</strong> t-SNE, UMAP</li>
+                            <li><strong>Kernel Methods:</strong> SVM feature mapping</li>
+                            <li><strong>Neural Networks:</strong> Activation functions</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🧠 Machine Learning</h3>
+                        <ul>
+                            <li><strong>Deep Learning:</strong> Layered nonlinear transforms</li>
+                            <li><strong>Autoencoders:</strong> Nonlinear compression</li>
+                            <li><strong>GANs:</strong> Generator/discriminator mappings</li>
+                            <li><strong>Manifold Learning:</strong> Nonlinear embedding</li>
+                        </ul>
+                    </div>
+
+                    <div class="transformation-card">
+                        <h3>🔬 Signal Processing</h3>
+                        <ul>
+                            <li><strong>Wavelet Transform:</strong> Time-frequency analysis</li>
+                            <li><strong>Nonlinear Filtering:</strong> Noise reduction</li>
+                            <li><strong>Image Processing:</strong> Geometric corrections</li>
+                            <li><strong>Audio Processing:</strong> Pitch shifting, effects</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>🎯 Case Study: Image Warping</h3>
+                    <p>Image warping applies nonlinear transformations to correct lens distortion or create artistic effects:</p>
+                    <div class="formula-box">
+                        <p><strong>Barrel Distortion Correction:</strong></p>
+                        $$r' = r(1 + k_1r^2 + k_2r^4 + k_3r^6)$$
+                        <p>Where $r$ is distance from center, $k_i$ are distortion coefficients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for visualization
+        let currentTransform = 'polar';
+        let paramA = 1.0;
+        let paramB = 1.0;
+        let gridDensity = 10;
+        let animationId = null;
+        let isAnimating = false;
+
+        // Initialize the visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTransformation();
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Update navigation
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateTransformation() {
+            // Update parameter displays
+            paramA = parseFloat(document.getElementById('paramA').value);
+            paramB = parseFloat(document.getElementById('paramB').value);
+            gridDensity = parseInt(document.getElementById('gridDensity').value);
+            currentTransform = document.getElementById('transformType').value;
+
+            document.getElementById('paramADisplay').textContent = `A = ${paramA.toFixed(1)}`;
+            document.getElementById('paramBDisplay').textContent = `B = ${paramB.toFixed(1)}`;
+            document.getElementById('gridDensityDisplay').textContent = `Density = ${gridDensity}`;
+
+            // Draw the transformations
+            drawOriginalGrid();
+            drawTransformedGrid();
+        }
+
+        function drawOriginalGrid() {
+            const canvas = document.getElementById('originalCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw grid
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 1;
+
+            const step = width / gridDensity;
+            
+            // Vertical lines
+            for (let i = 0; i <= gridDensity; i++) {
+                const x = i * step;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let i = 0; i <= gridDensity; i++) {
+                const y = i * step;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Draw coordinate system
+            ctx.strokeStyle = '#f093fb';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            ctx.stroke();
+        }
+
+        function drawTransformedGrid() {
+            const canvas = document.getElementById('transformedCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 1;
+
+            const step = 1.0 / gridDensity;
+            
+            // Transform and draw grid lines
+            for (let i = 0; i <= gridDensity; i++) {
+                // Vertical lines in parameter space
+                drawTransformedCurve(ctx, width, height, 
+                    t => [i * step - 0.5, t - 0.5], 
+                    -0.5, 0.5, 100);
+                
+                // Horizontal lines in parameter space
+                drawTransformedCurve(ctx, width, height, 
+                    t => [t - 0.5, i * step - 0.5], 
+                    -0.5, 0.5, 100);
+            }
+
+            // Draw transformed coordinate axes
+            ctx.strokeStyle = '#f093fb';
+            ctx.lineWidth = 2;
+            
+            // Transform X-axis
+            drawTransformedCurve(ctx, width, height, 
+                t => [t, 0], 
+                -0.5, 0.5, 100);
+            
+            // Transform Y-axis
+            drawTransformedCurve(ctx, width, height, 
+                t => [0, t], 
+                -0.5, 0.5, 100);
+        }
+
+        function drawTransformedCurve(ctx, width, height, paramFunc, tMin, tMax, steps) {
+            ctx.beginPath();
+            let firstPoint = true;
+
+            for (let i = 0; i <= steps; i++) {
+                const t = tMin + (tMax - tMin) * i / steps;
+                const [u, v] = paramFunc(t);
+                const [x, y] = applyTransformation(u, v);
+                
+                // Convert to canvas coordinates
+                const canvasX = (x + 1) * width / 2;
+                const canvasY = (1 - y) * height / 2;
+                
+                // Check if point is within canvas bounds
+                if (canvasX >= 0 && canvasX <= width && canvasY >= 0 && canvasY <= height) {
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+            }
+            ctx.stroke();
+        }
+
+        function applyTransformation(u, v) {
+            switch (currentTransform) {
+                case 'polar':
+                    const r = Math.sqrt(u*u + v*v) * paramA;
+                    const theta = Math.atan2(v, u) * paramB;
+                    return [r * Math.cos(theta), r * Math.sin(theta)];
+                
+                case 'exponential':
+                    return [Math.exp(u * paramA) * Math.cos(v * paramB), 
+                            Math.exp(u * paramA) * Math.sin(v * paramB)];
+                
+                case 'power':
+                    const power = paramA;
+                    const sign_u = Math.sign(u);
+                    const sign_v = Math.sign(v);
+                    return [sign_u * Math.pow(Math.abs(u), power) * paramB, 
+                            sign_v * Math.pow(Math.abs(v), power) * paramB];
+                
+                case 'logarithmic':
+                    const r_log = Math.sqrt(u*u + v*v);
+                    if (r_log > 0.01) {
+                        return [Math.log(r_log) * paramA, Math.atan2(v, u) * paramB];
+                    }
+                    return [0, 0];
+                
+                case 'inverse':
+                    const r_inv = u*u + v*v;
+                    if (r_inv > 0.01) {
+                        return [u * paramA / r_inv, v * paramB / r_inv];
+                    }
+                    return [0, 0];
+                
+                case 'swirl':
+                    const r_swirl = Math.sqrt(u*u + v*v);
+                    const angle = paramA * r_swirl;
+                    const cos_a = Math.cos(angle);
+                    const sin_a = Math.sin(angle);
+                    return [u * cos_a - v * sin_a, u * sin_a + v * cos_a];
+                
+                default:
+                    return [u, v];
+            }
+        }
+
+        function animateTransformation() {
+            if (isAnimating) {
+                stopAnimation();
+                return;
+            }
+
+            isAnimating = true;
+            document.querySelector('button[onclick="animateTransformation()"]').textContent = '⏹️ Stop';
+            
+            let time = 0;
+            const originalParamA = paramA;
+            const originalParamB = paramB;
+
+            function animate() {
+                time += 0.05;
+                
+                // Animate parameters
+                paramA = originalParamA + Math.sin(time) * 0.5;
+                paramB = originalParamB + Math.cos(time * 1.3) * 0.5;
+                
+                // Update sliders
+                document.getElementById('paramA').value = paramA;
+                document.getElementById('paramB').value = paramB;
+                
+                updateTransformation();
+                
+                if (isAnimating) {
+                    animationId = requestAnimationFrame(animate);
+                }
+            }
+            
+            animate();
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            document.querySelector('button[onclick="animateTransformation()"]').textContent = '🎬 Animate';
+        }
+
+        function resetTransformation() {
+            stopAnimation();
+            document.getElementById('paramA').value = 1;
+            document.getElementById('paramB').value = 1;
+            document.getElementById('gridDensity').value = 10;
+            document.getElementById('transformType').value = 'polar';
+            updateTransformation();
+        }
+
+        function showJacobian() {
+            const jacobianInfo = document.getElementById('jacobianInfo');
+            const jacobianMatrix = document.getElementById('jacobianMatrix');
+            const jacobianProperties = document.getElementById('jacobianProperties');
+            
+            jacobianInfo.style.display = jacobianInfo.style.display === 'none' ? 'block' : 'none';
+            
+            if (jacobianInfo.style.display === 'block') {
+                // Calculate and display Jacobian for current transformation
+                const [j11, j12, j21, j22] = calculateJacobian(0, 0); // At origin
+                const det = j11 * j22 - j12 * j21;
+                
+                jacobianMatrix.innerHTML = `
+                    <h4>Jacobian Matrix at Origin:</h4>
+                    $$J = \\begin{bmatrix} 
+                    ${j11.toFixed(3)} & ${j12.toFixed(3)} \\\\ 
+                    ${j21.toFixed(3)} & ${j22.toFixed(3)} 
+                    \\end{bmatrix}$$
+                `;
+                
+                jacobianProperties.innerHTML = `
+                    <h4>Properties:</h4>
+                    <ul>
+                        <li><strong>Determinant:</strong> ${det.toFixed(3)}</li>
+                        <li><strong>Area Scaling:</strong> ${Math.abs(det).toFixed(3)}</li>
+                        <li><strong>Orientation:</strong> ${det > 0 ? 'Preserved' : 'Reversed'}</li>
+                    </ul>
+                `;
+                
+                // Re-render MathJax
+                if (window.MathJax) {
+                    MathJax.typesetPromise([jacobianMatrix]);
+                }
+            }
+        }
+
+        function calculateJacobian(u, v) {
+            const h = 0.001;
+            
+            // Calculate partial derivatives numerically
+            const [x_pos_u, y_pos_u] = applyTransformation(u + h, v);
+            const [x_neg_u, y_neg_u] = applyTransformation(u - h, v);
+            const [x_pos_v, y_pos_v] = applyTransformation(u, v + h);
+            const [x_neg_v, y_neg_v] = applyTransformation(u, v - h);
+            
+            const j11 = (x_pos_u - x_neg_u) / (2 * h); // ∂x/∂u
+            const j12 = (x_pos_v - x_neg_v) / (2 * h); // ∂x/∂v
+            const j21 = (y_pos_u - y_neg_u) / (2 * h); // ∂y/∂u
+            const j22 = (y_pos_v - y_neg_v) / (2 * h); // ∂y/∂v
+            
+            return [j11, j12, j21, j22];
+        }
+    </script>
+</body>
+</html>

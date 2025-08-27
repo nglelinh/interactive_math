@@ -1,21 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convex Constraints & Feasible Regions - Interactive Visualization</title>
+    <title>Ràng Buộc Lồi và Miền Khả Thi - Minh Họa Tương Tác</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-config.js"></script>
     <style>
         body {
             margin: 0;
-            background: #111;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
         }
         
         .container {
             display: flex;
-            height: 100vh;
+            height: 70vh;
+            border-radius: 10px;
+            overflow: hidden;
         }
         
         .canvas-container {
@@ -24,29 +128,32 @@
         }
         
         canvas {
-            background: #000;
-            border: 1px solid #444;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
         }
         
         .controls {
             width: 420px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px;
-            border-left: 1px solid #444;
+            border-left: 2px solid #e0e0e0;
             overflow-y: auto;
         }
         
         .control-section {
             margin-bottom: 20px;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.05);
             border-radius: 8px;
+            border: 1px solid #e0e0e0;
         }
         
         .control-section h3 {
             margin: 0 0 15px 0;
-            color: #0ff;
+            color: #2c3e50;
             font-size: 16px;
+            font-weight: 600;
         }
         
         .constraint-list {
@@ -56,11 +163,11 @@
         }
         
         .constraint-item {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.05);
             padding: 10px;
             margin-bottom: 8px;
             border-radius: 5px;
-            border-left: 3px solid #0ff;
+            border-left: 3px solid #2196f3;
             font-family: 'Courier New', monospace;
             font-size: 12px;
             position: relative;
@@ -88,42 +195,47 @@
         
         .constraint-button {
             padding: 8px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #2196f3;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 11px;
             text-align: center;
-            transition: background 0.2s;
+            transition: all 0.3s;
+            font-weight: 600;
         }
         
         .constraint-button:hover {
-            background: #555;
+            background: #2196f3;
+            color: white;
+            transform: translateY(-2px);
         }
         
         .constraint-button.active {
-            background: #0ff;
-            color: #000;
+            background: #2196f3;
+            color: white;
         }
         
         .problem-info {
-            background: rgba(0, 255, 255, 0.1);
+            background: rgba(33, 150, 243, 0.1);
             padding: 12px;
             border-radius: 5px;
             font-family: 'Courier New', monospace;
             font-size: 12px;
             line-height: 1.4;
             margin-bottom: 15px;
+            border: 1px solid #2196f3;
         }
         
         .feasible-stats {
-            background: rgba(255, 255, 0, 0.1);
+            background: rgba(76, 175, 80, 0.1);
             padding: 12px;
             border-radius: 5px;
             font-size: 12px;
             margin-bottom: 15px;
-            border-left: 3px solid #ffff00;
+            border-left: 3px solid #4caf50;
+            border: 1px solid #4caf50;
         }
         
         .toggle-section {
@@ -135,30 +247,39 @@
         
         .toggle-button {
             padding: 8px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #2196f3;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
             text-align: center;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .toggle-button:hover {
+            background: #2196f3;
+            color: white;
         }
         
         .toggle-button.active {
-            background: #0ff;
-            color: #000;
+            background: #2196f3;
+            color: white;
         }
         
         .info-panel {
             position: absolute;
             top: 10px;
             left: 10px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
             padding: 12px;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 12px;
             max-width: 350px;
             z-index: 10;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
         }
         
         .legend {
@@ -179,7 +300,8 @@
             display: block;
             margin-bottom: 5px;
             font-size: 13px;
-            color: #aaa;
+            color: #666;
+            font-weight: 500;
         }
         
         .slider-group input[type="range"] {
@@ -188,9 +310,10 @@
         
         .slider-value {
             font-size: 12px;
-            color: #0ff;
+            color: #2196f3;
             text-align: right;
             margin-top: 2px;
+            font-weight: 600;
         }
         
         .constraint-inputs {
@@ -204,19 +327,24 @@
         .constraint-inputs input {
             width: 100%;
             padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #ddd;
             border-radius: 4px;
             text-align: center;
             font-size: 12px;
         }
         
+        .constraint-inputs input:focus {
+            border-color: #2196f3;
+            outline: none;
+        }
+        
         .constraint-inputs select {
             padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
         }
@@ -232,19 +360,24 @@
         .objective-inputs input {
             width: 100%;
             padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #ddd;
             border-radius: 4px;
             text-align: center;
             font-size: 12px;
         }
         
+        .objective-inputs input:focus {
+            border-color: #2196f3;
+            outline: none;
+        }
+        
         .objective-inputs select {
             padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
         }
@@ -258,17 +391,21 @@
         
         .preset-button {
             padding: 8px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #4caf50;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 11px;
             text-align: center;
+            transition: all 0.3s;
+            font-weight: 500;
         }
         
         .preset-button:hover {
-            background: #555;
+            background: #4caf50;
+            color: white;
+            transform: translateY(-2px);
         }
     </style>
 
@@ -278,41 +415,134 @@
 
 </head>
 <body>
-    <div class="container">
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
-            <div class="info-panel">
-                <strong>🎯 Convex Constraints & Feasible Regions</strong><br/>
-                Interactive exploration of constrained optimization and feasible region geometry.
-                <div class="legend">
-                    <div class="legend-item" style="color: #2ecc71;">🟢 Feasible Region</div>
-                    <div class="legend-item" style="color: #e74c3c;">🔴 Constraint Boundaries</div>
-                    <div class="legend-item" style="color: #f39c12;">🟠 Objective Function</div>
-                    <div class="legend-item" style="color: #9b59b6;">🟣 Optimal Point</div>
-                    <div class="legend-item" style="color: #3498db;">🔵 Gradient Direction</div>
-                    <div class="legend-item" style="color: #e67e22;">🟤 Vertices/Extreme Points</div>
+    <div class="main-container">
+        <div class="header">
+            <h1>Ràng Buộc Lồi và Miền Khả Thi</h1>
+            <p>Khám phá tương tác về tối ưu hóa có ràng buộc và hình học miền khả thi</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Ràng Buộc Lồi (Convex Constraints)</h3>
+                    <p><strong>Định nghĩa:</strong> Một ràng buộc được gọi là <em>lồi</em> nếu nó có dạng:</p>
+                    $$g(x) \leq 0$$
+                    trong đó $g: \mathbb{R}^n \to \mathbb{R}$ là một hàm lồi.
+                    
+                    <div class="concept-box">
+                        <h4>Các loại ràng buộc lồi phổ biến:</h4>
+                        <ul>
+                            <li><strong>Ràng buộc tuyến tính:</strong> $a^T x \leq b$</li>
+                            <li><strong>Ràng buộc bậc hai:</strong> $x^T Q x + p^T x + r \leq 0$ (với $Q \succeq 0$)</li>
+                            <li><strong>Ràng buộc chuẩn:</strong> $\|x\|_p \leq t$ (với $p \geq 1$)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>2. Miền Khả Thi (Feasible Region)</h3>
+                    <p><strong>Định nghĩa:</strong> Miền khả thi $\mathcal{F}$ là tập hợp tất cả các điểm thỏa mãn các ràng buộc:</p>
+                    $$\mathcal{F} = \{x \in \mathbb{R}^n : g_i(x) \leq 0, \; i = 1,\ldots,m\}$$
+                    
+                    <div class="concept-box">
+                        <h4>Tính chất quan trọng:</h4>
+                        <ul>
+                            <li><strong>Tập lồi:</strong> Giao của các tập lồi là tập lồi</li>
+                            <li><strong>Đóng:</strong> Miền khả thi thường là tập đóng</li>
+                            <li><strong>Đa diện:</strong> Với ràng buộc tuyến tính, miền khả thi là đa diện lồi</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>3. Bài Toán Tối Ưu Lồi với Ràng Buộc</h3>
+                    <p>Dạng tổng quát:</p>
+                    $$\begin{align}
+                    \min \quad & f(x) \\
+                    \text{s.t.} \quad & g_i(x) \leq 0, \quad i = 1,\ldots,m \\
+                    & h_j(x) = 0, \quad j = 1,\ldots,p
+                    \end{align}$$
+                    
+                    <div class="concept-box">
+                        <h4>Điều kiện KKT (Karush-Kuhn-Tucker):</h4>
+                        <p>Cho điểm tối ưu $x^*$, tồn tại $\lambda \geq 0, \mu$ sao cho:</p>
+                        <ul>
+                            <li>$\nabla f(x^*) + \sum\limits_{i=1}^m \lambda_i \nabla g_i(x^*) + \sum\limits_{j=1}^p \mu_j \nabla h_j(x^*) = 0$</li>
+                            <li>$g_i(x^*) \leq 0, \; \lambda_i \geq 0, \; \lambda_i g_i(x^*) = 0$</li>
+                            <li>$h_j(x^*) = 0$</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>4. Lập Trình Tuyến Tính</h3>
+                    <p>Trường hợp đặc biệt với hàm mục tiêu và ràng buộc đều tuyến tính:</p>
+                    $$\begin{align}
+                    \min \quad & c^T x \\
+                    \text{s.t.} \quad & Ax \leq b \\
+                    & x \geq 0
+                    \end{align}$$
+                    
+                    <div class="concept-box">
+                        <h4>Định lý cơ bản:</h4>
+                        <ul>
+                            <li><strong>Điểm cực trị:</strong> Nghiệm tối ưu nằm tại đỉnh của đa diện</li>
+                            <li><strong>Duality:</strong> Bài toán đối ngẫu cung cấp cận dưới</li>
+                            <li><strong>Simplex:</strong> Thuật toán di chuyển giữa các đỉnh liền kề</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>🎯 <strong>Thêm ràng buộc:</strong> Nhập hệ số a, b, c cho ràng buộc ax + by ≤/≥/= c</li>
+                        <li>📊 <strong>Thiết lập hàm mục tiêu:</strong> Chọn hệ số và loại tối ưu (min/max)</li>
+                        <li>🎲 <strong>Dùng mẫu có sẵn:</strong> Chọn các bài toán mẫu để khám phá</li>
+                        <li>👁️ <strong>Tùy chỉnh hiển thị:</strong> Bật/tắt các thành phần trực quan</li>
+                    </ul>
+                    
+                    <div class="container">
+                        <div class="canvas-container">
+                            <canvas id="canvas" width="800" height="600"></canvas>
+                            <div class="info-panel">
+                                <strong>🎯 Ràng Buộc Lồi & Miền Khả Thi</strong><br/>
+                                Khám phá tương tác về tối ưu hóa có ràng buộc và hình học miền khả thi.
+                                <div class="legend">
+                                    <div class="legend-item" style="color: #4caf50;">🟢 Miền Khả Thi</div>
+                                    <div class="legend-item" style="color: #f44336;">🔴 Đường Ràng Buộc</div>
+                                    <div class="legend-item" style="color: #ff9800;">🟠 Hàm Mục Tiêu</div>
+                                    <div class="legend-item" style="color: #9c27b0;">🟣 Điểm Tối Ưu</div>
+                                    <div class="legend-item" style="color: #2196f3;">🔵 Hướng Gradient</div>
+                                    <div class="legend-item" style="color: #ff5722;">🟤 Điểm Đỉnh</div>
+                                </div>
+                            </div>
+                        </div>
         
         <div class="controls">
             <div class="control-section">
-                <h3>Objective Function</h3>
+                <h3>Hàm Mục Tiêu</h3>
                 <div class="objective-inputs">
                     <input type="number" id="objA" step="0.1" value="1" placeholder="coeff x">
                     <input type="number" id="objB" step="0.1" value="1" placeholder="coeff y">
                     <select id="objType">
-                        <option value="minimize">Minimize</option>
-                        <option value="maximize">Maximize</option>
+                        <option value="minimize">Tối thiểu hóa</option>
+                        <option value="maximize">Tối đa hóa</option>
                     </select>
                 </div>
                 <div id="objective-display" class="problem-info">
-                    Minimize: f(x,y) = x + y
+                    Tối thiểu hóa: f(x,y) = x + y
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Add Constraint</h3>
+                <h3>Thêm Ràng Buộc</h3>
                 <div class="constraint-inputs">
                     <input type="number" id="constraintA" step="0.1" value="1" placeholder="a">
                     <input type="number" id="constraintB" step="0.1" value="0" placeholder="b">
@@ -324,75 +554,78 @@
                     <input type="number" id="constraintC" step="0.1" value="1" placeholder="c">
                 </div>
                 <div class="constraint-type">
-                    <button class="constraint-button" onclick="addConstraint()">Add Constraint</button>
-                    <button class="constraint-button" onclick="clearConstraints()">Clear All</button>
-                    <button class="constraint-button" onclick="solveOptimization()">🎯 Solve</button>
+                    <button class="constraint-button" onclick="addConstraint()">Thêm Ràng Buộc</button>
+                    <button class="constraint-button" onclick="clearConstraints()">Xóa Tất Cả</button>
+                    <button class="constraint-button" onclick="solveOptimization()">🎯 Giải</button>
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Preset Problems</h3>
+                <h3>Bài Toán Mẫu</h3>
                 <div class="preset-problems">
-                    <button class="preset-button" onclick="loadPreset('simple')">Simple LP</button>
-                    <button class="preset-button" onclick="loadPreset('bounded')">Bounded Region</button>
-                    <button class="preset-button" onclick="loadPreset('unbounded')">Unbounded</button>
-                    <button class="preset-button" onclick="loadPreset('infeasible')">Infeasible</button>
-                    <button class="preset-button" onclick="loadPreset('degenerate')">Degenerate</button>
-                    <button class="preset-button" onclick="loadPreset('polytope')">Complex Polytope</button>
+                    <button class="preset-button" onclick="loadPreset('simple')">LP Đơn Giản</button>
+                    <button class="preset-button" onclick="loadPreset('bounded')">Miền Bị Chặn</button>
+                    <button class="preset-button" onclick="loadPreset('unbounded')">Không Bị Chặn</button>
+                    <button class="preset-button" onclick="loadPreset('infeasible')">Vô Nghiệm</button>
+                    <button class="preset-button" onclick="loadPreset('degenerate')">Suy Biến</button>
+                    <button class="preset-button" onclick="loadPreset('polytope')">Đa Diện Phức Tạp</button>
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Current Constraints</h3>
+                <h3>Ràng Buộc Hiện Tại</h3>
                 <div id="constraint-list" class="constraint-list">
                     <!-- Constraints will be displayed here -->
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Visualization Options</h3>
+                <h3>Tùy Chọn Hiển Thị</h3>
                 <div class="toggle-section">
                     <div class="toggle-button active" id="toggle-feasible" onclick="toggleVisualization('feasible')">
-                        Feasible Region
+                        Miền Khả Thi
                     </div>
                     <div class="toggle-button active" id="toggle-constraints" onclick="toggleVisualization('constraints')">
-                        Constraint Lines
+                        Đường Ràng Buộc
                     </div>
                     <div class="toggle-button active" id="toggle-objective" onclick="toggleVisualization('objective')">
-                        Objective Lines
+                        Đường Mục Tiêu
                     </div>
                     <div class="toggle-button active" id="toggle-gradient" onclick="toggleVisualization('gradient')">
                         Gradient
                     </div>
                     <div class="toggle-button active" id="toggle-vertices" onclick="toggleVisualization('vertices')">
-                        Vertices
+                        Điểm Đỉnh
                     </div>
                     <div class="toggle-button active" id="toggle-optimal" onclick="toggleVisualization('optimal')">
-                        Optimal Point
+                        Điểm Tối Ưu
                     </div>
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Problem Analysis</h3>
+                <h3>Phân Tích Bài Toán</h3>
                 <div id="feasible-stats" class="feasible-stats">
                     <!-- Problem statistics will be displayed here -->
                 </div>
             </div>
             
             <div class="control-section">
-                <h3>Interactive Controls</h3>
+                <h3>Điều Khiển Tương Tác</h3>
                 <div class="slider-group">
-                    <label>Objective Level:</label>
+                    <label>Mức Hàm Mục Tiêu:</label>
                     <input type="range" id="objectiveLevel" min="-10" max="10" step="0.1" value="0">
                     <div class="slider-value" id="objectiveLevelValue">0.0</div>
                 </div>
                 <div class="toggle-section">
                     <div class="toggle-button" onclick="resetView()">
-                        🔄 Reset View
+                        🔄 Đặt Lại
                     </div>
                     <div class="toggle-button" onclick="randomProblem()">
-                        🎲 Random Problem
+                        🎲 Bài Toán Ngẫu Nhiên
+                    </div>
+                </div>
+            </div>
                     </div>
                 </div>
             </div>
@@ -451,7 +684,7 @@
             const c = parseFloat(document.getElementById('constraintC').value) || 0;
             
             if (Math.abs(a) < 1e-10 && Math.abs(b) < 1e-10) {
-                alert('Both coefficients cannot be zero');
+                alert('Cả hai hệ số không thể bằng 0');
                 return;
             }
             
@@ -496,8 +729,9 @@
             
             objective = { a, b, type };
             
+            const typeText = type === 'minimize' ? 'Tối thiểu hóa' : 'Tối đa hóa';
             document.getElementById('objective-display').innerHTML = 
-                `${type.charAt(0).toUpperCase() + type.slice(1)}: f(x,y) = ${a.toFixed(2)}x + ${b.toFixed(2)}y`;
+                `${typeText}: f(x,y) = ${a.toFixed(2)}x + ${b.toFixed(2)}y`;
             
             updateProblem();
         }
@@ -623,22 +857,22 @@
         function updateProblemStats() {
             const stats = document.getElementById('feasible-stats');
             
-            let status = 'Unknown';
+            let status = 'Chưa xác định';
             if (feasibleRegion.length === 0) {
-                status = 'Infeasible - No feasible points found';
+                status = 'Vô nghiệm - Không tìm thấy điểm khả thi';
             } else if (vertices.length === 0) {
-                status = 'Unbounded - No vertices found';
+                status = 'Không bị chặn - Không có điểm đỉnh';
             } else if (optimalPoint) {
-                status = 'Optimal solution found';
+                status = 'Đã tìm thấy nghiệm tối ưu';
             }
             
             stats.innerHTML = `
-                <strong>Problem Analysis:</strong><br/>
-                Status: ${status}<br/>
-                Feasible Points: ${feasibleRegion.length}<br/>
-                Vertices: ${vertices.length}<br/>
-                ${optimalPoint ? `Optimal Point: (${optimalPoint.x.toFixed(3)}, ${optimalPoint.y.toFixed(3)})<br/>` : ''}
-                ${optimalValue !== null ? `Optimal Value: ${optimalValue.toFixed(3)}` : ''}
+                <strong>Phân tích bài toán:</strong><br/>
+                Trạng thái: ${status}<br/>
+                Điểm khả thi: ${feasibleRegion.length}<br/>
+                Điểm đỉnh: ${vertices.length}<br/>
+                ${optimalPoint ? `Điểm tối ưu: (${optimalPoint.x.toFixed(3)}, ${optimalPoint.y.toFixed(3)})<br/>` : ''}
+                ${optimalValue !== null ? `Giá trị tối ưu: ${optimalValue.toFixed(3)}` : ''}
             `;
         }
         
@@ -847,7 +1081,7 @@
             ctx.fillStyle = '#9b59b6';
             ctx.font = '12px Arial';
             ctx.fillText(
-                `Optimal: (${optimalPoint.x.toFixed(2)}, ${optimalPoint.y.toFixed(2)})`,
+                `Tối ưu: (${optimalPoint.x.toFixed(2)}, ${optimalPoint.y.toFixed(2)})`,
                 toCanvasX(optimalPoint.x) + 15,
                 toCanvasY(optimalPoint.y) - 15
             );

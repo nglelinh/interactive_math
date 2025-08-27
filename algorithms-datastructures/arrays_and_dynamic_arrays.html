@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrays & Dynamic Arrays - Interactive Visualization</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    O: ['\\mathcal{O}'],
+                    Theta: ['\\Theta'],
+                    Omega: ['\\Omega']
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .introduction {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #FFD700;
+        }
+
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .array-element {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border: 2px solid #4ecdc4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .array-element.highlight {
+            background: linear-gradient(145deg, #ff6b6b, #ff8e53);
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .array-element.comparing {
+            background: linear-gradient(145deg, #4ecdc4, #44a08d);
+            animation: pulse 1s infinite;
+        }
+
+        .array-index {
+            position: absolute;
+            bottom: -25px;
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .complexity-box {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid #e74c3c;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .example-box {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid #2ecc71;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .operation-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        @media (max-width: 768px) {
+            .array-element {
+                width: 50px;
+                height: 50px;
+                font-size: 14px;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Arrays & Dynamic Arrays</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('overview')">🎯 Overview</button>
+            <button class="nav-button" onclick="showSection('static-arrays')">📏 Static Arrays</button>
+            <button class="nav-button" onclick="showSection('dynamic-arrays')">📈 Dynamic Arrays</button>
+            <button class="nav-button" onclick="showSection('operations')">⚙️ Operations</button>
+            <button class="nav-button" onclick="showSection('complexity')">⚡ Complexity</button>
+            <button class="nav-button" onclick="showSection('interactive')">🎮 Interactive</button>
+        </div>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="overview" class="lesson-section active">
+            <div class="introduction">
+                <h2>🎯 Arrays - The Foundation of Data Structures</h2>
+                <p><strong>Arrays</strong> are the most fundamental data structure - a collection of elements stored in contiguous memory locations, accessed by index.</p>
+                <p>🏆 <strong>Key Properties:</strong></p>
+                <ul>
+                    <li><strong>🎯 Random Access:</strong> O(1) access time to any element</li>
+                    <li><strong>📍 Index-based:</strong> Elements accessed via numerical indices</li>
+                    <li><strong>🗂️ Homogeneous:</strong> All elements of same data type</li>
+                    <li><strong>💾 Contiguous Memory:</strong> Elements stored next to each other</li>
+                </ul>
+            </div>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h3>🏗️ Real-world Applications</h3>
+                    <ul>
+                        <li><strong>📊 Data Processing:</strong> Storing and processing datasets</li>
+                        <li><strong>🎮 Game Development:</strong> Player inventories, game boards</li>
+                        <li><strong>🖼️ Image Processing:</strong> Pixel data representation</li>
+                        <li><strong>📈 Algorithms:</strong> Foundation for sorting, searching</li>
+                        <li><strong>💻 System Programming:</strong> Buffers, caches</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h3>🔄 Array vs Other Structures</h3>
+                    <ul>
+                        <li><strong>✅ Pros:</strong> Fast access, memory efficient, cache-friendly</li>
+                        <li><strong>❌ Cons:</strong> Fixed size (static), expensive insertions/deletions</li>
+                        <li><strong>🆚 vs Linked Lists:</strong> Better access time, worse insertion</li>
+                        <li><strong>🆚 vs Hash Tables:</strong> Ordered, predictable memory layout</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="visualization-area">
+                <h3>📊 Array Visualization</h3>
+                <div class="array-container" id="demoArray">
+                    <div class="array-element">10<div class="array-index">0</div></div>
+                    <div class="array-element">25<div class="array-index">1</div></div>
+                    <div class="array-element">7<div class="array-index">2</div></div>
+                    <div class="array-element">42<div class="array-index">3</div></div>
+                    <div class="array-element">13<div class="array-index">4</div></div>
+                </div>
+                <p style="text-align: center; color: #95a5a6;">
+                    Memory Address: 0x1000, 0x1004, 0x1008, 0x100C, 0x1010<br>
+                    Each element takes 4 bytes (int), stored contiguously
+                </p>
+            </div>
+        </div>
+
+        <!-- STATIC ARRAYS SECTION -->
+        <div id="static-arrays" class="lesson-section">
+            <div class="theory-section">
+                <h2>📏 Static Arrays</h2>
+                <p><strong>Static Arrays</strong> have fixed size determined at compile time. Size cannot change during runtime.</p>
+
+                <div class="code-block">
+// C++ Static Array Declaration
+int arr[5] = {10, 25, 7, 42, 13};
+
+// Memory layout:
+// [10][25][7][42][13]
+//  ↑   ↑   ↑   ↑   ↑
+// 0x1000 0x1004 0x1008 0x100C 0x1010
+                </div>
+
+                <div class="example-box">
+                    <h3>🔍 Memory Calculation</h3>
+                    <p>For array <code>arr[i]</code>, memory address is:</p>
+                    <div style="text-align: center; font-size: 1.2em; margin: 15px 0;">
+                        <strong>Address = base_address + (i × element_size)</strong>
+                    </div>
+                    <p>Example: arr[3] = 0x1000 + (3 × 4) = 0x100C</p>
+                </div>
+
+                <h3>⚙️ Basic Operations</h3>
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>📖 Access/Read</h4>
+                        <p><strong>Time:</strong> $\O(1)$ - Constant</p>
+                        <p><strong>Why:</strong> Direct calculation using index</p>
+                        <div class="code-block">value = arr[index];</div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>✏️ Update/Write</h4>
+                        <p><strong>Time:</strong> $\O(1)$ - Constant</p>
+                        <p><strong>Why:</strong> Direct access to memory location</p>
+                        <div class="code-block">arr[index] = new_value;</div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🔍 Search</h4>
+                        <p><strong>Time:</strong> $\O(n)$ - Linear</p>
+                        <p><strong>Why:</strong> Must check each element</p>
+                        <div class="code-block">
+for(int i = 0; i < n; i++) {
+    if(arr[i] == target) return i;
+}
+                        </div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>➕ Insert/Delete</h4>
+                        <p><strong>Time:</strong> $\O(n)$ - Linear</p>
+                        <p><strong>Why:</strong> Need to shift elements</p>
+                        <p><strong>Note:</strong> Size is fixed!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DYNAMIC ARRAYS SECTION -->
+        <div id="dynamic-arrays" class="lesson-section">
+            <div class="theory-section">
+                <h2>📈 Dynamic Arrays</h2>
+                <p><strong>Dynamic Arrays</strong> can grow and shrink during runtime. Examples: C++ vector, Java ArrayList, Python list.</p>
+
+                <div class="example-box">
+                    <h3>🔄 Resizing Strategy</h3>
+                    <p>When array is full and needs to grow:</p>
+                    <ol>
+                        <li><strong>🆕 Allocate:</strong> New array with 2× capacity</li>
+                        <li><strong>📋 Copy:</strong> All elements to new array</li>
+                        <li><strong>🗑️ Delete:</strong> Old array</li>
+                        <li><strong>🔗 Update:</strong> Pointer to new array</li>
+                    </ol>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>➕ Append (push_back)</h4>
+                        <p><strong>Amortized:</strong> $\O(1)$</p>
+                        <p><strong>Worst case:</strong> $\O(n)$ (when resizing)</p>
+                        <p><strong>Average:</strong> Constant due to doubling strategy</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>➖ Pop (remove last)</h4>
+                        <p><strong>Time:</strong> $\O(1)$</p>
+                        <p><strong>Space:</strong> May trigger shrinking</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🔄 Insert at position</h4>
+                        <p><strong>Time:</strong> $\O(n)$</p>
+                        <p><strong>Why:</strong> Shift elements + possible resize</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🗑️ Delete at position</h4>
+                        <p><strong>Time:</strong> $\O(n)$</p>
+                        <p><strong>Why:</strong> Shift elements left</p>
+                    </div>
+                </div>
+
+                <div class="code-block">
+// C++ Dynamic Array (vector)
+std::vector&lt;int&gt; vec;
+vec.push_back(10);     // O(1) amortized
+vec.push_back(25);     // O(1) amortized
+vec.insert(1, 15);     // O(n) - insert at position 1
+vec.erase(0);          // O(n) - remove at position 0
+                </div>
+            </div>
+        </div>
+
+        <!-- OPERATIONS SECTION -->
+        <div id="operations" class="lesson-section">
+            <div class="visualization-area">
+                <h3>⚙️ Interactive Array Operations</h3>
+                
+                <div class="array-container" id="interactiveArray">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Add Element:</label>
+                        <input type="number" id="newElement" placeholder="Enter value">
+                        <button onclick="addElement()">➕ Add to End</button>
+                        <button onclick="addAtPosition()">🔄 Add at Position</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Position (for insert/delete):</label>
+                        <input type="number" id="position" placeholder="Index" min="0">
+                        <button onclick="removeElement()">🗑️ Remove</button>
+                        <button onclick="updateElement()">✏️ Update</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Search/Access:</label>
+                        <input type="number" id="searchValue" placeholder="Value to find">
+                        <button onclick="searchElement()">🔍 Search</button>
+                        <button onclick="accessElement()">📖 Access by Index</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Array Operations:</label>
+                        <button onclick="clearArray()">🧹 Clear All</button>
+                        <button onclick="generateRandom()">🎲 Random Array</button>
+                        <button onclick="sortArray()">📊 Sort</button>
+                        <button onclick="reverseArray()">🔄 Reverse</button>
+                    </div>
+                </div>
+
+                <div class="operation-log" id="operationLog">
+                    <strong>Operation Log:</strong><br>
+                    Ready for operations...
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPLEXITY SECTION -->
+        <div id="complexity" class="lesson-section">
+            <div class="theory-section">
+                <h2>⚡ Time & Space Complexity Analysis</h2>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h3>📊 Time Complexity Summary</h3>
+                        <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+                            <tr style="background: rgba(255,255,255,0.1);">
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Operation</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Static Array</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Dynamic Array</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Access</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(1)</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(1)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Search</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Insert End</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">N/A</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(1)*</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Insert Middle</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Delete</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">O(n)</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 0.9em; color: #95a5a6;">*Amortized complexity</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h3>💾 Space Complexity</h3>
+                        <ul>
+                            <li><strong>Static Array:</strong> O(n) - exactly n elements</li>
+                            <li><strong>Dynamic Array:</strong> O(n) - typically 1.5n to 2n capacity</li>
+                            <li><strong>Memory Overhead:</strong> Dynamic arrays have extra metadata</li>
+                            <li><strong>Cache Performance:</strong> Both excellent due to contiguous memory</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>🎯 Amortized Analysis Example</h3>
+                    <p>Dynamic array growth with doubling strategy:</p>
+                    <div class="code-block">
+Insertions: 1, 2, 3, 4, 5, 6, 7, 8, 9...
+Capacities: 1, 2, 4, 4, 8, 8, 8, 8, 16...
+Copies:     0, 1, 2, 0, 4, 0, 0, 0, 8...
+
+Total copies for n insertions ≤ 2n
+Therefore: Amortized O(1) per insertion
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="lesson-section">
+            <div class="visualization-area">
+                <h3>🎮 Advanced Array Algorithms</h3>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Algorithm Selection:</label>
+                        <button onclick="demonstrateBinarySearch()">🔍 Binary Search</button>
+                        <button onclick="demonstrateKadane()">📊 Maximum Subarray</button>
+                        <button onclick="demonstrateTwoPointers()">👆 Two Pointers</button>
+                        <button onclick="demonstrateSlidingWindow()">🪟 Sliding Window</button>
+                    </div>
+                </div>
+
+                <div class="array-container" id="algorithmArray">
+                    <!-- Algorithm visualization will appear here -->
+                </div>
+
+                <div class="operation-log" id="algorithmLog">
+                    <strong>Algorithm Demonstration:</strong><br>
+                    Select an algorithm to see it in action...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global array for interactive operations
+        let interactiveArr = [10, 25, 7, 42, 13, 88, 31];
+        let currentStep = 0;
+        let animationSpeed = 1000;
+
+        // Show/hide sections
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.lesson-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.nav-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Initialize interactive array if needed
+            if (sectionId === 'operations') {
+                renderInteractiveArray();
+            }
+        }
+
+        // Render interactive array
+        function renderInteractiveArray() {
+            const container = document.getElementById('interactiveArray');
+            container.innerHTML = '';
+            
+            interactiveArr.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.innerHTML = `${value}<div class="array-index">${index}</div>`;
+                element.onclick = () => highlightElement(index);
+                container.appendChild(element);
+            });
+        }
+
+        // Add element to end
+        function addElement() {
+            const input = document.getElementById('newElement');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number');
+                return;
+            }
+            
+            interactiveArr.push(value);
+            renderInteractiveArray();
+            logOperation(`➕ Added ${value} to end. Array size: ${interactiveArr.length}`);
+            input.value = '';
+        }
+
+        // Add element at specific position
+        function addAtPosition() {
+            const valueInput = document.getElementById('newElement');
+            const posInput = document.getElementById('position');
+            const value = parseInt(valueInput.value);
+            const pos = parseInt(posInput.value);
+            
+            if (isNaN(value) || isNaN(pos)) {
+                logOperation('❌ Please enter valid numbers');
+                return;
+            }
+            
+            if (pos < 0 || pos > interactiveArr.length) {
+                logOperation(`❌ Position must be between 0 and ${interactiveArr.length}`);
+                return;
+            }
+            
+            interactiveArr.splice(pos, 0, value);
+            renderInteractiveArray();
+            logOperation(`🔄 Inserted ${value} at position ${pos}. Elements shifted right.`);
+            valueInput.value = '';
+            posInput.value = '';
+        }
+
+        // Remove element
+        function removeElement() {
+            const posInput = document.getElementById('position');
+            const pos = parseInt(posInput.value);
+            
+            if (isNaN(pos) || pos < 0 || pos >= interactiveArr.length) {
+                logOperation(`❌ Invalid position. Must be between 0 and ${interactiveArr.length - 1}`);
+                return;
+            }
+            
+            const removed = interactiveArr.splice(pos, 1)[0];
+            renderInteractiveArray();
+            logOperation(`🗑️ Removed ${removed} from position ${pos}. Elements shifted left.`);
+            posInput.value = '';
+        }
+
+        // Update element
+        function updateElement() {
+            const valueInput = document.getElementById('newElement');
+            const posInput = document.getElementById('position');
+            const value = parseInt(valueInput.value);
+            const pos = parseInt(posInput.value);
+            
+            if (isNaN(value) || isNaN(pos)) {
+                logOperation('❌ Please enter valid numbers');
+                return;
+            }
+            
+            if (pos < 0 || pos >= interactiveArr.length) {
+                logOperation(`❌ Position must be between 0 and ${interactiveArr.length - 1}`);
+                return;
+            }
+            
+            const oldValue = interactiveArr[pos];
+            interactiveArr[pos] = value;
+            renderInteractiveArray();
+            logOperation(`✏️ Updated position ${pos}: ${oldValue} → ${value}`);
+            valueInput.value = '';
+            posInput.value = '';
+        }
+
+        // Search element
+        function searchElement() {
+            const searchInput = document.getElementById('searchValue');
+            const value = parseInt(searchInput.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number to search');
+                return;
+            }
+            
+            let found = false;
+            interactiveArr.forEach((element, index) => {
+                if (element === value) {
+                    highlightElement(index);
+                    logOperation(`🔍 Found ${value} at position ${index}`);
+                    found = true;
+                }
+            });
+            
+            if (!found) {
+                logOperation(`🔍 ${value} not found in array`);
+            }
+            
+            searchInput.value = '';
+        }
+
+        // Access element by index
+        function accessElement() {
+            const posInput = document.getElementById('position');
+            const pos = parseInt(posInput.value);
+            
+            if (isNaN(pos) || pos < 0 || pos >= interactiveArr.length) {
+                logOperation(`❌ Invalid position. Must be between 0 and ${interactiveArr.length - 1}`);
+                return;
+            }
+            
+            highlightElement(pos);
+            logOperation(`📖 arr[${pos}] = ${interactiveArr[pos]}`);
+            posInput.value = '';
+        }
+
+        // Highlight element
+        function highlightElement(index) {
+            const elements = document.querySelectorAll('#interactiveArray .array-element');
+            elements.forEach(el => el.classList.remove('highlight'));
+            elements[index].classList.add('highlight');
+            
+            setTimeout(() => {
+                elements[index].classList.remove('highlight');
+            }, 2000);
+        }
+
+        // Clear array
+        function clearArray() {
+            interactiveArr = [];
+            renderInteractiveArray();
+            logOperation('🧹 Array cleared');
+        }
+
+        // Generate random array
+        function generateRandom() {
+            interactiveArr = [];
+            const size = Math.floor(Math.random() * 8) + 3; // 3-10 elements
+            
+            for (let i = 0; i < size; i++) {
+                interactiveArr.push(Math.floor(Math.random() * 100) + 1);
+            }
+            
+            renderInteractiveArray();
+            logOperation(`🎲 Generated random array with ${size} elements`);
+        }
+
+        // Sort array
+        function sortArray() {
+            interactiveArr.sort((a, b) => a - b);
+            renderInteractiveArray();
+            logOperation('📊 Array sorted in ascending order');
+        }
+
+        // Reverse array
+        function reverseArray() {
+            interactiveArr.reverse();
+            renderInteractiveArray();
+            logOperation('🔄 Array reversed');
+        }
+
+        // Log operation
+        function logOperation(message) {
+            const log = document.getElementById('operationLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Algorithm demonstrations
+        function demonstrateBinarySearch() {
+            // First sort the array
+            interactiveArr.sort((a, b) => a - b);
+            renderAlgorithmArray();
+            
+            const target = interactiveArr[Math.floor(Math.random() * interactiveArr.length)];
+            logAlgorithm(`🔍 Binary Search for ${target} in sorted array`);
+            
+            let left = 0;
+            let right = interactiveArr.length - 1;
+            let step = 1;
+            
+            const searchStep = () => {
+                if (left <= right) {
+                    const mid = Math.floor((left + right) / 2);
+                    highlightAlgorithmElements([left, mid, right], ['comparing', 'highlight', 'comparing']);
+                    
+                    logAlgorithm(`Step ${step}: Check middle element arr[${mid}] = ${interactiveArr[mid]}`);
+                    
+                    if (interactiveArr[mid] === target) {
+                        logAlgorithm(`✅ Found ${target} at position ${mid}!`);
+                        return;
+                    } else if (interactiveArr[mid] < target) {
+                        left = mid + 1;
+                        logAlgorithm(`${interactiveArr[mid]} < ${target}, search right half`);
+                    } else {
+                        right = mid - 1;
+                        logAlgorithm(`${interactiveArr[mid]} > ${target}, search left half`);
+                    }
+                    
+                    step++;
+                    setTimeout(searchStep, 1500);
+                }
+            };
+            
+            searchStep();
+        }
+
+        function demonstrateKadane() {
+            // Generate array with positive and negative numbers
+            interactiveArr = [-2, 1, -3, 4, -1, 2, 1, -5, 4];
+            renderAlgorithmArray();
+            
+            logAlgorithm('📊 Kadane\'s Algorithm - Maximum Subarray Sum');
+            
+            let maxSoFar = interactiveArr[0];
+            let maxEndingHere = interactiveArr[0];
+            let start = 0, end = 0, tempStart = 0;
+            
+            highlightAlgorithmElements([0], ['highlight']);
+            logAlgorithm(`Initial: maxSoFar = ${maxSoFar}, maxEndingHere = ${maxEndingHere}`);
+            
+            let i = 1;
+            const kadaneStep = () => {
+                if (i < interactiveArr.length) {
+                    highlightAlgorithmElements([i], ['highlight']);
+                    
+                    if (maxEndingHere < 0) {
+                        maxEndingHere = interactiveArr[i];
+                        tempStart = i;
+                        logAlgorithm(`Step ${i}: Reset subarray, maxEndingHere = ${maxEndingHere}`);
+                    } else {
+                        maxEndingHere += interactiveArr[i];
+                        logAlgorithm(`Step ${i}: Extend subarray, maxEndingHere = ${maxEndingHere}`);
+                    }
+                    
+                    if (maxEndingHere > maxSoFar) {
+                        maxSoFar = maxEndingHere;
+                        start = tempStart;
+                        end = i;
+                        logAlgorithm(`New maximum found: ${maxSoFar} from index ${start} to ${end}`);
+                    }
+                    
+                    i++;
+                    setTimeout(kadaneStep, 1500);
+                } else {
+                    highlightAlgorithmElements(Array.from({length: end - start + 1}, (_, k) => start + k), 
+                                             Array(end - start + 1).fill('highlight'));
+                    logAlgorithm(`✅ Maximum subarray sum: ${maxSoFar} (indices ${start} to ${end})`);
+                }
+            };
+            
+            setTimeout(kadaneStep, 1000);
+        }
+
+        // Helper functions for algorithm visualization
+        function renderAlgorithmArray() {
+            const container = document.getElementById('algorithmArray');
+            container.innerHTML = '';
+            
+            interactiveArr.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.innerHTML = `${value}<div class="array-index">${index}</div>`;
+                container.appendChild(element);
+            });
+        }
+
+        function highlightAlgorithmElements(indices, classes) {
+            const elements = document.querySelectorAll('#algorithmArray .array-element');
+            elements.forEach(el => {
+                el.classList.remove('highlight', 'comparing');
+            });
+            
+            indices.forEach((index, i) => {
+                if (elements[index]) {
+                    elements[index].classList.add(classes[i] || 'highlight');
+                }
+            });
+        }
+
+        function logAlgorithm(message) {
+            const log = document.getElementById('algorithmLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderInteractiveArray();
+        });
+    </script>
+</body>
+</html>

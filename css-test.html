@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CSS Display Issue</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            padding: 20px;
+        }
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 25px 35px;
+            border-radius: 15px;
+            font-family: 'Times New Roman', serif;
+            font-size: 20px;
+            line-height: 1.8;
+            text-align: center;
+            margin: 25px 0;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+        .test-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSS Display Test</h1>
+    <div class="test-content">
+        <p>This is a test to see if CSS is displaying properly.</p>
+        <div class="formula-box">
+            <p>This should be styled as a formula box</p>
+        </div>
+        <p>If you can see CSS code as text anywhere on this page, there's a rendering issue.</p>
+    </div>
+</body>
+</html>

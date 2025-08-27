@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Hamiltonian Mechanics - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f1419 0%, #1a202c 50%, #2d3748 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        h2 {
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h3 {
+            color: #87ceeb;
+            margin-top: 30px;
+        }
+        
+        .intro {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            color: #e2e8f0;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #87ceeb;
+        }
+        
+        .formula-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .interactive-section {
+            background: rgba(135, 206, 235, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid #87ceeb;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            color: #e2e8f0;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        input[type="range"] {
+            width: 150px;
+            height: 8px;
+            background: #4a5568;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #1a202c;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        canvas {
+            border: 2px solid #87ceeb;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            margin: 10px 0;
+            display: block;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .math-derivation {
+            background: rgba(128, 90, 213, 0.1);
+            border-left: 4px solid #805ad5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .key-insight {
+            background: rgba(255, 107, 107, 0.1);
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .applications {
+            background: rgba(72, 187, 120, 0.1);
+            border-left: 4px solid #48bb78;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .phase-space-point {
+            fill: #ffd700;
+            stroke: #ffed4e;
+            stroke-width: 2;
+        }
+        
+        .trajectory {
+            fill: none;
+            stroke: #87ceeb;
+            stroke-width: 2;
+        }
+        
+        .axis {
+            stroke: #e2e8f0;
+            stroke-width: 1;
+        }
+        
+        .axis-label {
+            fill: #e2e8f0;
+            font-size: 14px;
+            text-anchor: middle;
+        }
+        
+        .grid-line {
+            stroke: #4a5568;
+            stroke-width: 0.5;
+            stroke-dasharray: 3,3;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Hamiltonian Mechanics</h1>
+        
+        <div class="intro">
+            <p><strong>Phase Space Formulation of Classical Mechanics</strong></p>
+            <p>Hamiltonian mechanics provides an elegant reformulation of classical mechanics using phase space coordinates. It forms the foundation for statistical mechanics, quantum mechanics, and modern physics.</p>
+        </div>
+
+        <h2>📚 Mathematical Foundation</h2>
+        
+        <div class="concept-box">
+            <h3>From Lagrangian to Hamiltonian</h3>
+            <p>The Hamiltonian formulation transforms the Lagrangian approach from configuration space to phase space, where positions and momenta are treated as independent coordinates.</p>
+            
+            <div class="math-derivation">
+                <h4>Legendre Transformation</h4>
+                <p>Starting with the Lagrangian $L(q, \dot{q}, t)$, we define the canonical momentum:</p>
+                <div class="formula-box">
+                    $$p_i = \frac{\partial L}{\partial \dot{q}_i}$$
+                </div>
+                <p>The Hamiltonian is then obtained via Legendre transformation:</p>
+                <div class="formula-box">
+                    $$H(q, p, t) = \sum_i p_i \dot{q}_i - L(q, \dot{q}, t)$$
+                </div>
+                <p>For conservative systems where $L = T - V$ and kinetic energy is quadratic in velocities:</p>
+                <div class="formula-box">
+                    $$H = T + V = \text{Total Energy}$$
+                </div>
+            </div>
+        </div>
+
+        <div class="concept-box">
+            <h3>Hamilton's Canonical Equations</h3>
+            <p>The equations of motion in Hamiltonian mechanics are a system of first-order differential equations:</p>
+            
+            <div class="formula-box">
+                $$\frac{dq_i}{dt} = \frac{\partial H}{\partial p_i} \quad \text{and} \quad \frac{dp_i}{dt} = -\frac{\partial H}{\partial q_i}$$
+            </div>
+            
+            <div class="key-insight">
+                <h4>🔍 Key Insight: Symplectic Structure</h4>
+                <p>Hamilton's equations preserve the symplectic structure of phase space, which is fundamental to the conservation of phase space volume (Liouville's theorem) and the geometric nature of classical mechanics.</p>
+            </div>
+        </div>
+
+        <h2>🎯 Interactive Demonstrations</h2>
+
+        <div class="interactive-section">
+            <h3>Simple Harmonic Oscillator in Phase Space</h3>
+            <p>Explore how a mass-spring system evolves in phase space. The Hamiltonian is $H = \frac{p^2}{2m} + \frac{1}{2}kq^2$.</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="mass">Mass (m): <span id="massValue">1.0</span></label>
+                    <input type="range" id="mass" min="0.5" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label for="spring">Spring Constant (k): <span id="springValue">1.0</span></label>
+                    <input type="range" id="spring" min="0.1" max="5.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label for="energy">Energy Level: <span id="energyValue">1.0</span></label>
+                    <input type="range" id="energy" min="0.1" max="3.0" step="0.1" value="1.0">
+                </div>
+                <button onclick="startOscillatorAnimation()">Start Animation</button>
+                <button onclick="stopAnimation()">Stop</button>
+                <button onclick="resetOscillator()">Reset</button>
+            </div>
+            
+            <div class="grid-container">
+                <div>
+                    <h4>Phase Space Trajectory</h4>
+                    <canvas id="phaseCanvas" width="400" height="400"></canvas>
+                    <p style="text-align: center; font-size: 0.9em;">Position (q) vs Momentum (p)</p>
+                </div>
+                <div>
+                    <h4>Time Evolution</h4>
+                    <canvas id="timeCanvas" width="400" height="400"></canvas>
+                    <p style="text-align: center; font-size: 0.9em;">Position and Momentum vs Time</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-section">
+            <h3>Pendulum Phase Portrait</h3>
+            <p>Visualize the rich phase space structure of a nonlinear pendulum. The Hamiltonian is $H = \frac{p^2}{2ml^2} - mgl\cos\theta$.</p>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="pendulumLength">Length (l): <span id="lengthValue">1.0</span> m</label>
+                    <input type="range" id="pendulumLength" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label for="pendulumMass">Mass (m): <span id="pendulumMassValue">1.0</span> kg</label>
+                    <input type="range" id="pendulumMass" min="0.5" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="control-group">
+                    <label for="gravity">Gravity (g): <span id="gravityValue">9.81</span> m/s²</label>
+                    <input type="range" id="gravity" min="5.0" max="15.0" step="0.1" value="9.81">
+                </div>
+                <button onclick="drawPhasePortrait()">Draw Phase Portrait</button>
+                <button onclick="startPendulumTrajectory()">Start Trajectory</button>
+            </div>
+            
+            <div class="grid-container">
+                <div>
+                    <h4>Phase Portrait</h4>
+                    <canvas id="pendulumPhaseCanvas" width="400" height="400"></canvas>
+                    <p style="text-align: center; font-size: 0.9em;">Angle (θ) vs Angular Momentum (p)</p>
+                </div>
+                <div>
+                    <h4>Pendulum Animation</h4>
+                    <canvas id="pendulumCanvas" width="400" height="400"></canvas>
+                    <p style="text-align: center; font-size: 0.9em;">Physical pendulum motion</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-section">
+            <h3>Poisson Brackets Calculator</h3>
+            <p>Explore the fundamental Poisson bracket relationships that capture the symplectic structure of phase space.</p>
+            
+            <div class="concept-box">
+                <h4>Poisson Bracket Definition</h4>
+                <p>For two functions $f(q,p)$ and $g(q,p)$ on phase space:</p>
+                <div class="formula-box">
+                    $$\{f, g\} = \sum_i \left( \frac{\partial f}{\partial q_i} \frac{\partial g}{\partial p_i} - \frac{\partial f}{\partial p_i} \frac{\partial g}{\partial q_i} \right)$$
+                </div>
+                
+                <h4>Fundamental Poisson Brackets</h4>
+                <div class="formula-box">
+                    $$\{q_i, p_j\} = \delta_{ij}, \quad \{q_i, q_j\} = 0, \quad \{p_i, p_j\} = 0$$
+                </div>
+                
+                <h4>Time Evolution</h4>
+                <p>Any dynamical variable $A(q,p,t)$ evolves according to:</p>
+                <div class="formula-box">
+                    $$\frac{dA}{dt} = \{A, H\} + \frac{\partial A}{\partial t}$$
+                </div>
+            </div>
+        </div>
+
+        <h2>🌟 Advanced Concepts</h2>
+
+        <div class="concept-box">
+            <h3>Canonical Transformations</h3>
+            <p>Transformations $(q,p) \rightarrow (Q,P)$ that preserve the canonical form of Hamilton's equations.</p>
+            
+            <div class="math-derivation">
+                <h4>Generating Functions</h4>
+                <p>Canonical transformations can be generated by functions that ensure the preservation of the symplectic structure:</p>
+                <div class="formula-box">
+                    $$p_i dq_i - H dt = P_i dQ_i - K dt + dF$$
+                </div>
+                <p>Where $F$ is a generating function and $K$ is the new Hamiltonian.</p>
+                
+                <h4>Types of Generating Functions</h4>
+                <ul>
+                    <li><strong>Type 1:</strong> $F_1(q, Q, t)$ → $p_i = \frac{\partial F_1}{\partial q_i}$, $P_i = -\frac{\partial F_1}{\partial Q_i}$</li>
+                    <li><strong>Type 2:</strong> $F_2(q, P, t)$ → $p_i = \frac{\partial F_2}{\partial q_i}$, $Q_i = \frac{\partial F_2}{\partial P_i}$</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="concept-box">
+            <h3>Liouville's Theorem</h3>
+            <p>The phase space volume is conserved under Hamiltonian evolution.</p>
+            
+            <div class="formula-box">
+                $$\frac{d}{dt} \int_{V(t)} dq dp = 0$$
+            </div>
+            
+            <div class="key-insight">
+                <h4>🔍 Physical Interpretation</h4>
+                <p>This theorem is fundamental to statistical mechanics and implies that information is conserved in classical systems - the "butterfly effect" where small changes in initial conditions lead to vastly different outcomes.</p>
+            </div>
+        </div>
+
+        <div class="concept-box">
+            <h3>Action-Angle Variables</h3>
+            <p>For integrable systems, canonical coordinates can be chosen where the Hamiltonian depends only on the action variables.</p>
+            
+            <div class="math-derivation">
+                <h4>Action Variables</h4>
+                <p>For a periodic motion with period $T$:</p>
+                <div class="formula-box">
+                    $$J = \oint p \, dq$$
+                </div>
+                
+                <h4>Angle Variables</h4>
+                <p>The conjugate angle variable $\theta$ evolves linearly in time:</p>
+                <div class="formula-box">
+                    $$\dot{\theta} = \frac{\partial H}{\partial J} = \omega(J)$$
+                </div>
+            </div>
+        </div>
+
+        <h2>🚀 Applications</h2>
+
+        <div class="applications">
+            <h3>Modern Physics Connections</h3>
+            <ul>
+                <li><strong>Quantum Mechanics:</strong> Canonical quantization replaces Poisson brackets with commutators: $\{A,B\} \rightarrow \frac{1}{i\hbar}[\hat{A},\hat{B}]$</li>
+                <li><strong>Statistical Mechanics:</strong> Phase space volume elements provide the foundation for ensemble theory</li>
+                <li><strong>Chaos Theory:</strong> Sensitive dependence on initial conditions emerges from Hamiltonian dynamics</li>
+                <li><strong>General Relativity:</strong> Symplectic geometry extends to infinite-dimensional systems</li>
+                <li><strong>Optics:</strong> Ray optics can be formulated using Hamiltonian mechanics with appropriate coordinates</li>
+            </ul>
+        </div>
+
+        <div class="applications">
+            <h3>Computational Methods</h3>
+            <ul>
+                <li><strong>Symplectic Integrators:</strong> Numerical methods that preserve the symplectic structure</li>
+                <li><strong>Molecular Dynamics:</strong> Simulating many-body systems using Hamiltonian evolution</li>
+                <li><strong>Accelerator Physics:</strong> Particle beam dynamics in electromagnetic fields</li>
+                <li><strong>Celestial Mechanics:</strong> Long-term stability analysis of planetary systems</li>
+            </ul>
+        </div>
+
+        <div class="key-insight">
+            <h3>🎯 Key Takeaways</h3>
+            <ul>
+                <li>Hamiltonian mechanics reformulates classical mechanics in phase space using canonical coordinates</li>
+                <li>The symplectic structure provides deep geometric insights into the nature of classical dynamics</li>
+                <li>Phase space conservation laws (Liouville's theorem) connect to information theory and chaos</li>
+                <li>Canonical transformations allow for problem simplification and solution techniques</li>
+                <li>The formalism serves as the foundation for quantum mechanics and statistical mechanics</li>
+                <li>Poisson brackets encode the algebraic structure that becomes commutators in quantum theory</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for animations
+        let animationId;
+        let time = 0;
+        let dt = 0.05;
+        
+        // Oscillator parameters
+        let mass = 1.0;
+        let springConstant = 1.0;
+        let energy = 1.0;
+        let q = 1.0; // position
+        let p = 0.0; // momentum
+        
+        // Pendulum parameters
+        let pendulumLength = 1.0;
+        let pendulumMass = 1.0;
+        let gravity = 9.81;
+        let theta = Math.PI / 4; // angle
+        let pTheta = 0.0; // angular momentum
+        
+        // Phase space data storage
+        let phaseTrajectory = [];
+        let timeData = [];
+        
+        // Update display values
+        function updateDisplayValues() {
+            document.getElementById('massValue').textContent = parseFloat(document.getElementById('mass').value).toFixed(1);
+            document.getElementById('springValue').textContent = parseFloat(document.getElementById('spring').value).toFixed(1);
+            document.getElementById('energyValue').textContent = parseFloat(document.getElementById('energy').value).toFixed(1);
+            document.getElementById('lengthValue').textContent = parseFloat(document.getElementById('pendulumLength').value).toFixed(1);
+            document.getElementById('pendulumMassValue').textContent = parseFloat(document.getElementById('pendulumMass').value).toFixed(1);
+            document.getElementById('gravityValue').textContent = parseFloat(document.getElementById('gravity').value).toFixed(2);
+        }
+        
+        // Event listeners for sliders
+        document.getElementById('mass').addEventListener('input', updateDisplayValues);
+        document.getElementById('spring').addEventListener('input', updateDisplayValues);
+        document.getElementById('energy').addEventListener('input', updateDisplayValues);
+        document.getElementById('pendulumLength').addEventListener('input', updateDisplayValues);
+        document.getElementById('pendulumMass').addEventListener('input', updateDisplayValues);
+        document.getElementById('gravity').addEventListener('input', updateDisplayValues);
+        
+        // Simple Harmonic Oscillator functions
+        function resetOscillator() {
+            mass = parseFloat(document.getElementById('mass').value);
+            springConstant = parseFloat(document.getElementById('spring').value);
+            energy = parseFloat(document.getElementById('energy').value);
+            
+            // Set initial conditions for given energy
+            q = Math.sqrt(2 * energy / springConstant);
+            p = 0.0;
+            time = 0;
+            
+            phaseTrajectory = [];
+            timeData = [];
+            
+            drawPhaseSpace();
+            drawTimeEvolution();
+        }
+        
+        function hamiltonianOscillator(q, p) {
+            return (p * p) / (2 * mass) + 0.5 * springConstant * q * q;
+        }
+        
+        function stepOscillator() {
+            // Hamilton's equations: dq/dt = ∂H/∂p, dp/dt = -∂H/∂q
+            const dqdt = p / mass;
+            const dpdt = -springConstant * q;
+            
+            // Simple Euler integration (could use better integrator)
+            q += dqdt * dt;
+            p += dpdt * dt;
+            time += dt;
+            
+            // Store trajectory data
+            phaseTrajectory.push({q: q, p: p});
+            timeData.push({t: time, q: q, p: p});
+            
+            // Limit trajectory length
+            if (phaseTrajectory.length > 1000) {
+                phaseTrajectory.shift();
+                timeData.shift();
+            }
+        }
+        
+        function drawPhaseSpace() {
+            const canvas = document.getElementById('phaseCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 80;
+            
+            // Draw grid
+            ctx.strokeStyle = '#4a5568';
+            ctx.lineWidth = 0.5;
+            for (let i = -3; i <= 3; i++) {
+                if (i !== 0) {
+                    // Vertical lines (constant q)
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + i * scale, 0);
+                    ctx.lineTo(centerX + i * scale, canvas.height);
+                    ctx.stroke();
+                    
+                    // Horizontal lines (constant p)
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY + i * scale);
+                    ctx.lineTo(canvas.width, centerY + i * scale);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Draw energy ellipse
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const a = Math.sqrt(2 * energy / springConstant) * scale; // semi-major axis in q
+            const b = Math.sqrt(2 * energy * mass) * scale; // semi-major axis in p
+            ctx.ellipse(centerX, centerY, a, b, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Draw trajectory
+            if (phaseTrajectory.length > 1) {
+                ctx.strokeStyle = '#87ceeb';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX + phaseTrajectory[0].q * scale, centerY - phaseTrajectory[0].p * scale);
+                for (let i = 1; i < phaseTrajectory.length; i++) {
+                    ctx.lineTo(centerX + phaseTrajectory[i].q * scale, centerY - phaseTrajectory[i].p * scale);
+                }
+                ctx.stroke();
+            }
+            
+            // Draw current point
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(centerX + q * scale, centerY - p * scale, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Labels
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '14px Arial';
+            ctx.fillText('q', canvas.width - 20, centerY - 10);
+            ctx.fillText('p', centerX + 10, 20);
+            
+            // Energy display
+            const currentEnergy = hamiltonianOscillator(q, p);
+            ctx.fillText(`H = ${currentEnergy.toFixed(3)}`, 10, 25);
+        }
+        
+        function drawTimeEvolution() {
+            const canvas = document.getElementById('timeCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (timeData.length < 2) return;
+            
+            const centerY = canvas.height / 2;
+            const scaleX = canvas.width / 20; // 20 time units across canvas
+            const scaleY = 60;
+            
+            // Draw grid
+            ctx.strokeStyle = '#4a5568';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 20; i += 5) {
+                ctx.beginPath();
+                ctx.moveTo(i * scaleX / 5 * canvas.width / 20, 0);
+                ctx.lineTo(i * scaleX / 5 * canvas.width / 20, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Draw time axis
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.stroke();
+            
+            // Draw position curve
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const startIndex = Math.max(0, timeData.length - 400);
+            ctx.moveTo(0, centerY - timeData[startIndex].q * scaleY);
+            for (let i = startIndex + 1; i < timeData.length; i++) {
+                const x = ((i - startIndex) / (timeData.length - startIndex)) * canvas.width;
+                ctx.lineTo(x, centerY - timeData[i].q * scaleY);
+            }
+            ctx.stroke();
+            
+            // Draw momentum curve
+            ctx.strokeStyle = '#87ceeb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY - timeData[startIndex].p * scaleY);
+            for (let i = startIndex + 1; i < timeData.length; i++) {
+                const x = ((i - startIndex) / (timeData.length - startIndex)) * canvas.width;
+                ctx.lineTo(x, centerY - timeData[i].p * scaleY);
+            }
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '14px Arial';
+            ctx.fillText('t', canvas.width - 20, centerY + 20);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText('q(t)', 10, 25);
+            ctx.fillStyle = '#87ceeb';
+            ctx.fillText('p(t)', 60, 25);
+        }
+        
+        function startOscillatorAnimation() {
+            stopAnimation();
+            resetOscillator();
+            
+            function animate() {
+                stepOscillator();
+                drawPhaseSpace();
+                drawTimeEvolution();
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function stopAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+        
+        // Pendulum functions
+        function hamiltonianPendulum(theta, pTheta) {
+            return (pTheta * pTheta) / (2 * pendulumMass * pendulumLength * pendulumLength) - pendulumMass * gravity * pendulumLength * Math.cos(theta);
+        }
+        
+        function drawPhasePortrait() {
+            pendulumLength = parseFloat(document.getElementById('pendulumLength').value);
+            pendulumMass = parseFloat(document.getElementById('pendulumMass').value);
+            gravity = parseFloat(document.getElementById('gravity').value);
+            
+            const canvas = document.getElementById('pendulumPhaseCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scaleTheta = canvas.width / (4 * Math.PI); // -2π to 2π
+            const scaleP = 50;
+            
+            // Draw axes
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Draw energy contours
+            const energyLevels = [0, 0.5, 1.0, 2.0, 3.0, 5.0];
+            const maxEnergy = pendulumMass * gravity * pendulumLength;
+            
+            for (let e = 0; e < energyLevels.length; e++) {
+                const E = energyLevels[e] * maxEnergy;
+                ctx.strokeStyle = `hsl(${60 + e * 30}, 70%, 60%)`;
+                ctx.lineWidth = 1;
+                
+                ctx.beginPath();
+                let first = true;
+                for (let thetaVal = -2 * Math.PI; thetaVal <= 2 * Math.PI; thetaVal += 0.05) {
+                    const V = -pendulumMass * gravity * pendulumLength * Math.cos(thetaVal);
+                    const T = E - V;
+                    
+                    if (T >= 0) {
+                        const pVal = Math.sqrt(2 * pendulumMass * pendulumLength * pendulumLength * T);
+                        const x = centerX + thetaVal * scaleTheta;
+                        const y1 = centerY - pVal * scaleP;
+                        const y2 = centerY + pVal * scaleP;
+                        
+                        if (first) {
+                            ctx.moveTo(x, y1);
+                            first = false;
+                        } else {
+                            ctx.lineTo(x, y1);
+                        }
+                    }
+                }
+                ctx.stroke();
+                
+                // Draw negative momentum part
+                ctx.beginPath();
+                first = true;
+                for (let thetaVal = -2 * Math.PI; thetaVal <= 2 * Math.PI; thetaVal += 0.05) {
+                    const V = -pendulumMass * gravity * pendulumLength * Math.cos(thetaVal);
+                    const T = E - V;
+                    
+                    if (T >= 0) {
+                        const pVal = Math.sqrt(2 * pendulumMass * pendulumLength * pendulumLength * T);
+                        const x = centerX + thetaVal * scaleTheta;
+                        const y2 = centerY + pVal * scaleP;
+                        
+                        if (first) {
+                            ctx.moveTo(x, y2);
+                            first = false;
+                        } else {
+                            ctx.lineTo(x, y2);
+                        }
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '14px Arial';
+            ctx.fillText('θ', canvas.width - 20, centerY - 10);
+            ctx.fillText('p', centerX + 10, 20);
+        }
+        
+        function startPendulumTrajectory() {
+            // Set initial conditions
+            theta = Math.PI / 6; // 30 degrees
+            pTheta = 0.0;
+            
+            const canvas = document.getElementById('pendulumCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function animatePendulum() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Update pendulum using Hamilton's equations
+                const dthetadt = pTheta / (pendulumMass * pendulumLength * pendulumLength);
+                const dpdt = -pendulumMass * gravity * pendulumLength * Math.sin(theta);
+                
+                theta += dthetadt * dt;
+                pTheta += dpdt * dt;
+                
+                // Draw pendulum
+                const centerX = canvas.width / 2;
+                const centerY = 50;
+                const bobX = centerX + pendulumLength * 150 * Math.sin(theta);
+                const bobY = centerY + pendulumLength * 150 * Math.cos(theta);
+                
+                // Rod
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(bobX, bobY);
+                ctx.stroke();
+                
+                // Pivot
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Bob
+                ctx.fillStyle = '#87ceeb';
+                ctx.beginPath();
+                ctx.arc(bobX, bobY, 15, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Energy display
+                const E = hamiltonianPendulum(theta, pTheta);
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = '14px Arial';
+                ctx.fillText(`θ = ${(theta * 180 / Math.PI).toFixed(1)}°`, 10, 25);
+                ctx.fillText(`H = ${E.toFixed(3)} J`, 10, 45);
+                
+                animationId = requestAnimationFrame(animatePendulum);
+            }
+            
+            stopAnimation();
+            animationId = requestAnimationFrame(animatePendulum);
+        }
+        
+        // Initialize
+        updateDisplayValues();
+        resetOscillator();
+        drawPhasePortrait();
+    </script>
+</body>
+</html>

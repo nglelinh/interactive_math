@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Numbers Fundamentals - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+        }
+        
+        .operation-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        
+        #complexPlane {
+            width: 100%;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Complex Numbers Fundamentals</h1>
+        
+        <div class="math-explanation">
+            <h2>📚 Mathematical Foundation</h2>
+            <p><strong>Complex Number Definition:</strong> A complex number is expressed as \( z = a + bi \) where:</p>
+            <ul>
+                <li>\( a \) is the <strong>real part</strong> (Re(z))</li>
+                <li>\( b \) is the <strong>imaginary part</strong> (Im(z))</li>
+                <li>\( i \) is the imaginary unit where \( i^2 = -1 \)</li>
+            </ul>
+            
+            <div class="formula-box">
+                <strong>Polar Form:</strong> \( z = r(\cos θ + i\sin θ) = re^{iθ} \)<br>
+                <strong>Magnitude:</strong> \( |z| = r = \sqrt{a^2 + b^2} \)<br>
+                <strong>Argument:</strong> \( \arg(z) = θ = \arctan(b/a) \)
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('arithmetic')">Arithmetic Operations</button>
+            <button class="tab" onclick="showTab('polar')">Polar Form</button>
+            <button class="tab" onclick="showTab('powers')">Powers & Roots</button>
+        </div>
+        
+        <div id="arithmetic" class="tab-content active">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🔢 Complex Numbers</h3>
+                    
+                    <div class="input-group">
+                        <label>First Complex Number (z₁)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="real1" value="3" step="0.1" style="width: 60px;">
+                            <span>+</span>
+                            <input type="number" id="imag1" value="2" step="0.1" style="width: 60px;">
+                            <span>i</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Second Complex Number (z₂)</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="real2" value="1" step="0.1" style="width: 60px;">
+                            <span>+</span>
+                            <input type="number" id="imag2" value="-1" step="0.1" style="width: 60px;">
+                            <span>i</span>
+                        </div>
+                    </div>
+                    
+                    <div class="operation-buttons">
+                        <button onclick="performOperation('add')">Addition</button>
+                        <button onclick="performOperation('subtract')">Subtraction</button>
+                        <button onclick="performOperation('multiply')">Multiplication</button>
+                        <button onclick="performOperation('divide')">Division</button>
+                    </div>
+                    
+                    <div class="value-display" id="result">
+                        Result: 4 + 1i
+                    </div>
+                    
+                    <div class="value-display" id="properties">
+                        <div>|z₁| = 3.61</div>
+                        <div>|z₂| = 1.41</div>
+                        <div>arg(z₁) = 33.7°</div>
+                        <div>arg(z₂) = -45.0°</div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="complexPlane"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="polar" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🎯 Polar Form Conversion</h3>
+                    
+                    <div class="input-group">
+                        <label>Magnitude (r): <span id="magnitudeValue">5</span></label>
+                        <input type="range" id="magnitude" min="0.1" max="10" step="0.1" value="5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Angle (θ degrees): <span id="angleValue">30</span></label>
+                        <input type="range" id="angle" min="0" max="360" step="1" value="30">
+                    </div>
+                    
+                    <div class="value-display" id="polarResult">
+                        Rectangular: 4.33 + 2.50i<br>
+                        Polar: 5(cos 30° + i sin 30°)<br>
+                        Exponential: 5e^(i·π/6)
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="polarPlane"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="powers" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>⚡ Powers and Roots</h3>
+                    
+                    <div class="input-group">
+                        <label>Base Complex Number</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="baseReal" value="1" step="0.1" style="width: 60px;">
+                            <span>+</span>
+                            <input type="number" id="baseImag" value="1" step="0.1" style="width: 60px;">
+                            <span>i</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Power (n): <span id="powerValue">2</span></label>
+                        <input type="range" id="power" min="1" max="8" step="1" value="2">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Root (nth root): <span id="rootValue">2</span></label>
+                        <input type="range" id="rootOrder" min="2" max="6" step="1" value="2">
+                    </div>
+                    
+                    <div class="value-display" id="powerResult">
+                        z² = 0 + 2i<br>
+                        √z = 1.10 + 0.46i, -1.10 - 0.46i
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="powerPlane"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🎯 Applications in Engineering & Physics</h2>
+            <ul>
+                <li><strong>Electrical Engineering:</strong> AC circuit analysis using complex impedance</li>
+                <li><strong>Signal Processing:</strong> Fourier transforms và frequency domain analysis</li>
+                <li><strong>Quantum Mechanics:</strong> Wave functions và probability amplitudes</li>
+                <li><strong>Control Theory:</strong> Stability analysis using complex plane</li>
+                <li><strong>Computer Graphics:</strong> 2D rotations và transformations</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+
+        let currentOperation = 'add';
+        
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Update visualizations
+            if (tabName === 'arithmetic') {
+                updateArithmeticVisualization();
+            } else if (tabName === 'polar') {
+                updatePolarVisualization();
+            } else if (tabName === 'powers') {
+                updatePowerVisualization();
+            }
+        }
+        
+        // Complex number operations
+        function performOperation(operation) {
+            currentOperation = operation;
+            updateArithmeticVisualization();
+        }
+        
+        function updateArithmeticVisualization() {
+            const real1 = parseFloat(document.getElementById('real1').value);
+            const imag1 = parseFloat(document.getElementById('imag1').value);
+            const real2 = parseFloat(document.getElementById('real2').value);
+            const imag2 = parseFloat(document.getElementById('imag2').value);
+            
+            let resultReal, resultImag;
+            let operationSymbol;
+            
+            switch(currentOperation) {
+                case 'add':
+                    resultReal = real1 + real2;
+                    resultImag = imag1 + imag2;
+                    operationSymbol = '+';
+                    break;
+                case 'subtract':
+                    resultReal = real1 - real2;
+                    resultImag = imag1 - imag2;
+                    operationSymbol = '-';
+                    break;
+                case 'multiply':
+                    resultReal = real1 * real2 - imag1 * imag2;
+                    resultImag = real1 * imag2 + imag1 * real2;
+                    operationSymbol = '×';
+                    break;
+                case 'divide':
+                    const denom = real2 * real2 + imag2 * imag2;
+                    resultReal = (real1 * real2 + imag1 * imag2) / denom;
+                    resultImag = (imag1 * real2 - real1 * imag2) / denom;
+                    operationSymbol = '÷';
+                    break;
+            }
+            
+            // Update result display
+            document.getElementById('result').innerHTML = 
+                `Result: ${resultReal.toFixed(2)} + ${resultImag.toFixed(2)}i`;
+            
+            // Update properties
+            const mag1 = Math.sqrt(real1 * real1 + imag1 * imag1);
+            const mag2 = Math.sqrt(real2 * real2 + imag2 * imag2);
+            const arg1 = Math.atan2(imag1, real1) * 180 / Math.PI;
+            const arg2 = Math.atan2(imag2, real2) * 180 / Math.PI;
+            
+            document.getElementById('properties').innerHTML = `
+                <div>|z₁| = ${mag1.toFixed(2)}</div>
+                <div>|z₂| = ${mag2.toFixed(2)}</div>
+                <div>arg(z₁) = ${arg1.toFixed(1)}°</div>
+                <div>arg(z₂) = ${arg2.toFixed(1)}°</div>
+            `;
+            
+            // Plot complex plane
+            plotComplexPlane([
+                {real: real1, imag: imag1, name: 'z₁', color: '#4fc3f7'},
+                {real: real2, imag: imag2, name: 'z₂', color: '#81c784'},
+                {real: resultReal, imag: resultImag, name: `z₁ ${operationSymbol} z₂`, color: '#ff8a65'}
+            ], 'complexPlane');
+        }
+        
+        function updatePolarVisualization() {
+            const magnitude = parseFloat(document.getElementById('magnitude').value);
+            const angleDeg = parseFloat(document.getElementById('angle').value);
+            const angleRad = angleDeg * Math.PI / 180;
+            
+            document.getElementById('magnitudeValue').textContent = magnitude;
+            document.getElementById('angleValue').textContent = angleDeg;
+            
+            const real = magnitude * Math.cos(angleRad);
+            const imag = magnitude * Math.sin(angleRad);
+            
+            document.getElementById('polarResult').innerHTML = `
+                Rectangular: ${real.toFixed(2)} + ${imag.toFixed(2)}i<br>
+                Polar: ${magnitude}(cos ${angleDeg}° + i sin ${angleDeg}°)<br>
+                Exponential: ${magnitude}e^(i·${(angleRad).toFixed(3)})
+            `;
+            
+            plotPolarVisualization(magnitude, angleDeg, real, imag);
+        }
+        
+        function updatePowerVisualization() {
+            const baseReal = parseFloat(document.getElementById('baseReal').value);
+            const baseImag = parseFloat(document.getElementById('baseImag').value);
+            const power = parseInt(document.getElementById('power').value);
+            const rootOrder = parseInt(document.getElementById('rootOrder').value);
+            
+            document.getElementById('powerValue').textContent = power;
+            document.getElementById('rootValue').textContent = rootOrder;
+            
+            // Calculate power using polar form
+            const magnitude = Math.sqrt(baseReal * baseReal + baseImag * baseImag);
+            const angle = Math.atan2(baseImag, baseReal);
+            
+            const powerMagnitude = Math.pow(magnitude, power);
+            const powerAngle = angle * power;
+            const powerReal = powerMagnitude * Math.cos(powerAngle);
+            const powerImag = powerMagnitude * Math.sin(powerAngle);
+            
+            // Calculate roots
+            const rootMagnitude = Math.pow(magnitude, 1/rootOrder);
+            const roots = [];
+            for (let k = 0; k < rootOrder; k++) {
+                const rootAngle = (angle + 2 * Math.PI * k) / rootOrder;
+                roots.push({
+                    real: rootMagnitude * Math.cos(rootAngle),
+                    imag: rootMagnitude * Math.sin(rootAngle)
+                });
+            }
+            
+            let rootString = roots.map(root => 
+                `${root.real.toFixed(2)} + ${root.imag.toFixed(2)}i`
+            ).join(', ');
+            
+            document.getElementById('powerResult').innerHTML = `
+                z^${power} = ${powerReal.toFixed(2)} + ${powerImag.toFixed(2)}i<br>
+                ${rootOrder}√z = ${rootString}
+            `;
+            
+            plotPowerVisualization(baseReal, baseImag, powerReal, powerImag, roots);
+        }
+        
+        function plotComplexPlane(points, elementId) {
+            const traces = points.map(point => ({
+                x: [0, point.real],
+                y: [0, point.imag],
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: point.name,
+                line: {color: point.color, width: 3},
+                marker: {size: 8, color: point.color}
+            }));
+            
+            // Add grid lines
+            const gridRange = 6;
+            traces.push({
+                x: [-gridRange, gridRange],
+                y: [0, 0],
+                mode: 'lines',
+                line: {color: 'rgba(255,255,255,0.3)', width: 1},
+                showlegend: false
+            });
+            
+            traces.push({
+                x: [0, 0],
+                y: [-gridRange, gridRange],
+                mode: 'lines',
+                line: {color: 'rgba(255,255,255,0.3)', width: 1},
+                showlegend: false
+            });
+            
+            const layout = {
+                title: 'Complex Plane Visualization',
+                xaxis: {title: 'Real Axis', range: [-6, 6], gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Imaginary Axis', range: [-6, 6], gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot(elementId, traces, layout, {responsive: true});
+        }
+        
+        function plotPolarVisualization(magnitude, angleDeg, real, imag) {
+            const angleRad = angleDeg * Math.PI / 180;
+            
+            // Polar plot with magnitude and angle visualization
+            const trace1 = {
+                x: [0, real],
+                y: [0, imag],
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: 'Complex Vector',
+                line: {color: '#4fc3f7', width: 4},
+                marker: {size: 10, color: '#4fc3f7'}
+            };
+            
+            // Angle arc
+            const arcPoints = 50;
+            const arcRadius = Math.min(magnitude * 0.3, 1);
+            const arcX = [];
+            const arcY = [];
+            
+            for (let i = 0; i <= arcPoints; i++) {
+                const theta = (i / arcPoints) * angleRad;
+                arcX.push(arcRadius * Math.cos(theta));
+                arcY.push(arcRadius * Math.sin(theta));
+            }
+            
+            const trace2 = {
+                x: arcX,
+                y: arcY,
+                mode: 'lines',
+                type: 'scatter',
+                name: `Angle: ${angleDeg}°`,
+                line: {color: '#81c784', width: 2}
+            };
+            
+            // Magnitude circle
+            const circlePoints = 100;
+            const circleX = [];
+            const circleY = [];
+            
+            for (let i = 0; i <= circlePoints; i++) {
+                const theta = (i / circlePoints) * 2 * Math.PI;
+                circleX.push(magnitude * Math.cos(theta));
+                circleY.push(magnitude * Math.sin(theta));
+            }
+            
+            const trace3 = {
+                x: circleX,
+                y: circleY,
+                mode: 'lines',
+                type: 'scatter',
+                name: `Magnitude: ${magnitude}`,
+                line: {color: 'rgba(255,138,101,0.5)', width: 1, dash: 'dash'}
+            };
+            
+            const layout = {
+                title: 'Polar Form Visualization',
+                xaxis: {title: 'Real Axis', range: [-12, 12], gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Imaginary Axis', range: [-12, 12], gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('polarPlane', [trace1, trace2, trace3], layout, {responsive: true});
+        }
+        
+        function plotPowerVisualization(baseReal, baseImag, powerReal, powerImag, roots) {
+            const traces = [];
+            
+            // Base number
+            traces.push({
+                x: [0, baseReal],
+                y: [0, baseImag],
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: 'Base (z)',
+                line: {color: '#4fc3f7', width: 3},
+                marker: {size: 8, color: '#4fc3f7'}
+            });
+            
+            // Power
+            traces.push({
+                x: [0, powerReal],
+                y: [0, powerImag],
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: 'Power (z^n)',
+                line: {color: '#ff8a65', width: 3},
+                marker: {size: 8, color: '#ff8a65'}
+            });
+            
+            // Roots
+            roots.forEach((root, index) => {
+                traces.push({
+                    x: [0, root.real],
+                    y: [0, root.imag],
+                    mode: 'lines+markers',
+                    type: 'scatter',
+                    name: `Root ${index + 1}`,
+                    line: {color: '#81c784', width: 2},
+                    marker: {size: 6, color: '#81c784'}
+                });
+            });
+            
+            const layout = {
+                title: 'Powers and Roots Visualization',
+                xaxis: {title: 'Real Axis', range: [-5, 5], gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Imaginary Axis', range: [-5, 5], gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('powerPlane', traces, layout, {responsive: true});
+        }
+        
+        // Event listeners
+        document.getElementById('real1').addEventListener('input', updateArithmeticVisualization);
+        document.getElementById('imag1').addEventListener('input', updateArithmeticVisualization);
+        document.getElementById('real2').addEventListener('input', updateArithmeticVisualization);
+        document.getElementById('imag2').addEventListener('input', updateArithmeticVisualization);
+        
+        document.getElementById('magnitude').addEventListener('input', updatePolarVisualization);
+        document.getElementById('angle').addEventListener('input', updatePolarVisualization);
+        
+        document.getElementById('baseReal').addEventListener('input', updatePowerVisualization);
+        document.getElementById('baseImag').addEventListener('input', updatePowerVisualization);
+        document.getElementById('power').addEventListener('input', updatePowerVisualization);
+        document.getElementById('rootOrder').addEventListener('input', updatePowerVisualization);
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                updateArithmeticVisualization();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

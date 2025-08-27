@@ -1,890 +1,553 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taylor Series - Interactive Visualization</title>
+    <title>Taylor Series</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        body {
-            margin: 0;
-            background: #111;
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #ffffff;
+            font-size: 20px;
+            line-height: 1.6;
+            color: #000000;
+        }
+        .section { 
+            margin-bottom: 40px; 
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #e9ecef;
+        }
+        .toggle-buttons {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .toggle-btn {
+            padding: 20px 40px;
+            margin: 0 10px;
+            background: #0056b3;
             color: white;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
-        }
-        
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-        
-        .canvas-container {
-            flex: 1;
-            position: relative;
-        }
-        
-        canvas {
-            background: #000;
-            border: 1px solid #444;
-        }
-        
-        .controls {
-            width: 420px;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-left: 1px solid #444;
-            overflow-y: auto;
-        }
-        
-        .control-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid #0056b3;
             border-radius: 8px;
-        }
-        
-        .control-section h3 {
-            margin: 0 0 15px 0;
-            color: #0ff;
-            font-size: 16px;
-        }
-        
-        .function-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .function-button {
-            padding: 10px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            text-align: center;
-            transition: background 0.2s;
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-transform: uppercase;
         }
-        
-        .function-button:hover {
-            background: #555;
+        .toggle-btn:hover {
+            background: #004085;
+            border-color: #004085;
+            transform: scale(1.05);
         }
-        
-        .function-button.active {
-            background: #0ff;
-            color: #000;
+        .toggle-btn.active {
+            background: #dc3545;
+            border-color: #dc3545;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
         }
-        
-        .taylor-info {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            margin-bottom: 15px;
+        .example { 
+            background: #fff3cd; 
+            padding: 25px; 
+            border-radius: 10px; 
+            margin: 30px 0; 
+            border-left: 6px solid #856404;
+            font-size: 18px;
+            border: 2px solid #ffeaa7;
         }
-        
-        .series-display {
-            background: rgba(255, 255, 0, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            line-height: 1.3;
-            margin-bottom: 15px;
-            border-left: 3px solid #ffff00;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        
-        .error-display {
-            background: rgba(255, 0, 0, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-bottom: 15px;
-            border-left: 3px solid #ff0000;
-        }
-        
-        .toggle-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .toggle-button {
-            padding: 8px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            text-align: center;
-        }
-        
-        .toggle-button.active {
-            background: #0ff;
-            color: #000;
-        }
-        
-        .info-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            max-width: 350px;
-            z-index: 10;
-        }
-        
-        .legend {
-            font-size: 11px;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-        
-        .legend-item {
-            margin: 3px 0;
-        }
-        
-        .slider-group {
-            margin: 10px 0;
-        }
-        
-        .slider-group label {
+        canvas { 
+            border: 3px solid #000000; 
+            margin-top: 30px; 
             display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #aaa;
+            margin-left: auto;
+            margin-right: auto;
+            background: #ffffff;
         }
-        
-        .slider-group input[type="range"] {
-            width: 100%;
+        .theory { 
+            background: #e3f2fd; 
+            padding: 30px; 
+            border-radius: 12px; 
+            border: 2px solid #1976d2;
         }
-        
-        .slider-value {
-            font-size: 12px;
-            color: #0ff;
-            text-align: right;
-            margin-top: 2px;
-        }
-        
-        .center-input {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .center-input input {
-            width: 80px;
-            padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+        .control-panel {
             text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: #f1f3f4;
+            border-radius: 12px;
+            border: 2px solid #9aa0a6;
         }
-        
-        .term-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 15px;
+        .control-panel label {
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 22px;
+            color: #1a73e8;
         }
-        
-        .term-button {
-            padding: 6px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+        .control-panel input[type="range"] {
+            width: 400px;
+            height: 8px;
+            margin: 0 15px;
+            -webkit-appearance: none;
+            background: #ddd;
+            border-radius: 5px;
+        }
+        .control-panel input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            background: #1a73e8;
             cursor: pointer;
-            font-size: 11px;
-            text-align: center;
+            border-radius: 50%;
         }
-        
-        .term-button.active {
-            background: #f39c12;
-            color: #000;
+        #orderValue {
+            font-weight: bold;
+            color: #dc3545;
+            font-size: 28px;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #dc3545;
+        }
+        h1 {
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            font-size: 36px;
+            color: #1976d2;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #1976d2;
+            padding-bottom: 10px;
+        }
+        h3 {
+            font-size: 28px;
+            color: #2e7d32;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        li {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        b {
+            font-size: 22px;
+            color: #1565c0;
+        }
+        i {
+            font-size: 16px;
+            color: #555;
         }
     </style>
-
-
-
-
-
 </head>
 <body>
-    <div class="container">
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
-            <div class="info-panel">
-                <strong>🌊 Taylor Series Expansion</strong><br/>
-                Interactive exploration of Taylor/Maclaurin series approximations and convergence.
-                <div class="legend">
-                    <div class="legend-item" style="color: #0ff;">🔵 Original Function f(x)</div>
-                    <div class="legend-item" style="color: #e74c3c;">🔴 Taylor Polynomial Pₙ(x)</div>
-                    <div class="legend-item" style="color: #f39c12;">🟠 Individual Terms</div>
-                    <div class="legend-item" style="color: #2ecc71;">🟢 Center Point a</div>
-                    <div class="legend-item" style="color: #9b59b6;">🟣 Error |f(x) - Pₙ(x)|</div>
-                </div>
+    <h1 style="text-align: center; color: #333;">Taylor Series</h1>
+    
+    <div class="toggle-buttons">
+        <button class="toggle-btn active" id="theoryBtn" onclick="showSection('theory')">Theory</button>
+        <button class="toggle-btn" id="illustrationBtn" onclick="showSection('illustration')">Illustration</button>
+    </div>
+
+    <div id="theorySection" class="section theory">
+        <h2>Theory</h2>
+        <p>
+            The Taylor series is a representation of a function as an infinite sum of terms, each term being derived from the derivatives of the function at a single point. It is a cornerstone of mathematical analysis, providing polynomial approximations to functions that are infinitely differentiable at a point.
+        </p>
+        <p>
+            <b>General Form:</b><br>
+            For a function \( f(x) \) that is infinitely differentiable at \( x = a \), the Taylor series expansion about \( a \) is:
+        </p>
+        <p style="font-size: 1.2em; text-align: center;">
+            \[
+                f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!} (x-a)^n
+            \]
+        </p>
+        <p>
+            <b>Special Case: Maclaurin Series</b><br>
+            When \( a = 0 \), the Taylor series is called the Maclaurin series:
+        </p>
+        <p style="font-size: 1.2em; text-align: center;">
+            \[
+                f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(0)}{n!} x^n
+            \]
+        </p>
+        
+        <h3>Why Taylor Series?</h3>
+        <ul>
+            <li>Approximates complicated functions with polynomials</li>
+            <li>Used in numerical methods, physics, engineering, and computer science</li>
+            <li>Helps analyze local behavior of functions</li>
+            <li>Foundation for many computational algorithms</li>
+        </ul>
+        
+        <h3>Common Examples</h3>
+        <div class="example">
+            <b>Example 1: Taylor Series for \( e^x \) at \( a = 0 \)</b><br>
+            \[
+                e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \frac{x^4}{4!} + \cdots = \sum_{n=0}^{\infty} \frac{x^n}{n!}
+            \]
+            <i>All derivatives of \( e^x \) are \( e^x \), so at \( x=0 \), each derivative equals 1.</i>
+        </div>
+        
+        <div class="example">
+            <b>Example 2: Taylor Series for \( \sin(x) \) at \( a = 0 \)</b><br>
+            \[
+                \sin(x) = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!} + \cdots = \sum_{n=0}^{\infty} \frac{(-1)^n x^{2n+1}}{(2n+1)!}
+            \]
+            <i>The series alternates in sign and only odd powers appear.</i>
+        </div>
+        
+        <div class="example">
+            <b>Example 3: Taylor Series for \( \cos(x) \) at \( a = 0 \)</b><br>
+            \[
+                \cos(x) = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \frac{x^6}{6!} + \cdots = \sum_{n=0}^{\infty} \frac{(-1)^n x^{2n}}{(2n)!}
+            \]
+            <i>Only even powers appear, alternating in sign.</i>
+        </div>
+        
+        <div class="example">
+            <b>Example 4: Taylor Series for \( \ln(1+x) \) at \( a = 0 \), \( |x| < 1 \)</b><br>
+            \[
+                \ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \frac{x^4}{4} + \cdots = \sum_{n=1}^{\infty} \frac{(-1)^{n+1} x^n}{n}
+            \]
+            <i>This series converges for \( |x| < 1 \).</i>
+        </div>
+        
+        <h3>Convergence and Radius of Convergence</h3>
+        <p>
+            The Taylor series does not always converge to the function for all values of \( x \). The <b>radius of convergence</b> \( R \) determines the interval \( |x-a| < R \) where the series converges to the function.
+        </p>
+        <ul>
+            <li>For \( e^x \): \( R = \infty \) (converges everywhere)</li>
+            <li>For \( \sin(x) \) and \( \cos(x) \): \( R = \infty \)</li>
+            <li>For \( \ln(1+x) \): \( R = 1 \)</li>
+            <li>For \( \frac{1}{1-x} \): \( R = 1 \)</li>
+        </ul>
+    </div>
+
+    <div id="illustrationSection" class="section" style="display:none;">
+        <h2>Interactive Illustration</h2>
+        <p>
+            Below is an interactive illustration of the Taylor series approximation for various functions at \( a = 0 \) (Maclaurin series):
+        </p>
+        
+        <div class="control-panel">
+            <div style="margin-bottom: 25px;">
+                <label for="functionSelect">Select Function:</label>
+                <select id="functionSelect" onchange="updateTaylor()" style="font-size: 20px; padding: 10px; border: 2px solid #1a73e8; border-radius: 5px; background: white;">
+                    <option value="sin">sin(x)</option>
+                    <option value="cos">cos(x)</option>
+                    <option value="exp">e^x</option>
+                    <option value="ln">ln(1+x)</option>
+                </select>
+            </div>
+            <div>
+                <label for="order">Taylor Polynomial Order (n):</label>
+                <input type="range" id="order" min="1" max="15" value="3" oninput="updateTaylor()">
+                <span id="orderValue">3</span>
             </div>
         </div>
         
-        <div class="controls">
-            <div class="control-section">
-                <h3>Function Selection</h3>
-                <div class="function-selector">
-                    <button class="function-button active" onclick="selectFunction('exp')">e^x</button>
-                    <button class="function-button" onclick="selectFunction('sin')">sin(x)</button>
-                    <button class="function-button" onclick="selectFunction('cos')">cos(x)</button>
-                    <button class="function-button" onclick="selectFunction('ln')">ln(1+x)</button>
-                    <button class="function-button" onclick="selectFunction('atan')">arctan(x)</button>
-                    <button class="function-button" onclick="selectFunction('sqrt')">√(1+x)</button>
-                    <button class="function-button" onclick="selectFunction('power')">1/(1-x)</button>
-                    <button class="function-button" onclick="selectFunction('sinh')">sinh(x)</button>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Expansion Center</h3>
-                <div class="center-input">
-                    <label>a = </label>
-                    <input type="number" id="centerPoint" step="0.1" value="0" min="-3" max="3">
-                    <button onclick="resetCenter()">Reset to 0</button>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Taylor Series Terms</h3>
-                <div class="slider-group">
-                    <label>Number of Terms:</label>
-                    <input type="range" id="numTerms" min="1" max="15" step="1" value="5">
-                    <div class="slider-value" id="numTermsValue">5 terms</div>
-                </div>
-                <div class="term-controls" id="termControls">
-                    <!-- Individual term toggles will be generated here -->
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Current Function</h3>
-                <div id="taylor-info" class="taylor-info">
-                    <!-- Function information will be displayed here -->
-                </div>
-                <div id="series-display" class="series-display">
-                    <!-- Taylor series will be displayed here -->
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Visualization Options</h3>
-                <div class="toggle-section">
-                    <div class="toggle-button active" id="toggle-original" onclick="toggleVisualization('original')">
-                        Original f(x)
-                    </div>
-                    <div class="toggle-button active" id="toggle-taylor" onclick="toggleVisualization('taylor')">
-                        Taylor Pₙ(x)
-                    </div>
-                    <div class="toggle-button" id="toggle-terms" onclick="toggleVisualization('terms')">
-                        Individual Terms
-                    </div>
-                    <div class="toggle-button" id="toggle-error" onclick="toggleVisualization('error')">
-                        Error Function
-                    </div>
-                    <div class="toggle-button active" id="toggle-grid" onclick="toggleVisualization('grid')">
-                        Grid Lines
-                    </div>
-                    <div class="toggle-button active" id="toggle-center" onclick="toggleVisualization('center')">
-                        Center Point
-                    </div>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Error Analysis</h3>
-                <div id="error-display" class="error-display">
-                    <!-- Error analysis will be displayed here -->
-                </div>
-                <div class="slider-group">
-                    <label>Analysis Point:</label>
-                    <input type="range" id="analysisPoint" min="-3" max="3" step="0.1" value="1">
-                    <div class="slider-value" id="analysisPointValue">x = 1.0</div>
-                </div>
-            </div>
-            
-            <div class="control-section">
-                <h3>Animation</h3>
-                <div class="toggle-section">
-                    <div class="toggle-button" id="toggle-animation" onclick="toggleAnimation()">
-                        ▶ Animate Terms
-                    </div>
-                    <div class="toggle-button" onclick="resetView()">
-                        🔄 Reset View
-                    </div>
-                </div>
-            </div>
+        <canvas id="taylorCanvas" width="1000" height="500"></canvas>
+        
+        <div class="example">
+            <b>Instructions:</b>
+            <ul>
+                <li>Select a function from the dropdown menu</li>
+                <li>Use the slider to change the order \( n \) of the Taylor polynomial</li>
+                <li>Watch how higher-order terms improve the approximation near \( x = 0 \)</li>
+                <li>Notice that the approximation gets worse as you move away from the center point \( x = 0 \)</li>
+            </ul>
+        </div>
+        
+        <div class="example">
+            <b>Visual Elements:</b>
+            <ul>
+                <li><span style="color: #0074D9;">Blue curve:</span> True function</li>
+                <li><span style="color: #FF4136;">Red curve:</span> Taylor polynomial approximation of order \( n \)</li>
+                <li><span style="color: #2ECC40;">Green curve:</span> Error = \( |f(x) - P_n(x)| \)</li>
+            </ul>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const width = canvas.width;
-        const height = canvas.height;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const scale = 60;
-        
-        // Current function and parameters
-        let currentFunction = 'exp';
-        let centerPoint = 0;
-        let numTerms = 5;
-        let analysisPoint = 1;
-        let animationId = null;
-        let isAnimating = false;
-        let animatedTerms = 1;
-        
-        // Term visibility
-        let termVisibility = Array(15).fill(true);
-        
-        // Visualization options
-        let showOptions = {
-            original: true,
-            taylor: true,
-            terms: false,
-            error: false,
-            grid: true,
-            center: true
-        };
-        
-        // Function definitions with Taylor series
-        const functions = {
-            exp: {
-                name: 'Exponential Function',
-                expr: 'f(x) = e^x',
-                func: (x) => Math.exp(x),
-                taylorCoeff: (n, a) => Math.exp(a) / factorial(n),
-                series: 'e^a + e^a(x-a) + e^a(x-a)²/2! + e^a(x-a)³/3! + ...',
-                convergenceRadius: Infinity
-            },
-            sin: {
-                name: 'Sine Function',
-                expr: 'f(x) = sin(x)',
-                func: (x) => Math.sin(x),
-                taylorCoeff: (n, a) => {
-                    const derivatives = [Math.sin(a), Math.cos(a), -Math.sin(a), -Math.cos(a)];
-                    return derivatives[n % 4] / factorial(n);
-                },
-                series: 'sin(a) + cos(a)(x-a) - sin(a)(x-a)²/2! - cos(a)(x-a)³/3! + ...',
-                convergenceRadius: Infinity
-            },
-            cos: {
-                name: 'Cosine Function',
-                expr: 'f(x) = cos(x)',
-                func: (x) => Math.cos(x),
-                taylorCoeff: (n, a) => {
-                    const derivatives = [Math.cos(a), -Math.sin(a), -Math.cos(a), Math.sin(a)];
-                    return derivatives[n % 4] / factorial(n);
-                },
-                series: 'cos(a) - sin(a)(x-a) - cos(a)(x-a)²/2! + sin(a)(x-a)³/3! + ...',
-                convergenceRadius: Infinity
-            },
-            ln: {
-                name: 'Natural Logarithm',
-                expr: 'f(x) = ln(1+x)',
-                func: (x) => x > -1 ? Math.log(1 + x) : NaN,
-                taylorCoeff: (n, a) => {
-                    if (n === 0) return Math.log(1 + a);
-                    const sign = (n - 1) % 2 === 0 ? 1 : -1;
-                    return sign / (n * Math.pow(1 + a, n));
-                },
-                series: 'x - x²/2 + x³/3 - x⁴/4 + ... (for a=0)',
-                convergenceRadius: 1
-            },
-            atan: {
-                name: 'Arctangent Function',
-                expr: 'f(x) = arctan(x)',
-                func: (x) => Math.atan(x),
-                taylorCoeff: (n, a) => {
-                    if (a === 0) {
-                        return n % 2 === 0 ? 0 : (n % 4 === 1 ? 1 : -1) / (n);
-                    }
-                    // For non-zero a, use numerical differentiation
-                    return numericalDerivative(Math.atan, a, n) / factorial(n);
-                },
-                series: 'x - x³/3 + x⁵/5 - x⁷/7 + ... (for a=0)',
-                convergenceRadius: 1
-            },
-            sqrt: {
-                name: 'Square Root Function',
-                expr: 'f(x) = √(1+x)',
-                func: (x) => x > -1 ? Math.sqrt(1 + x) : NaN,
-                taylorCoeff: (n, a) => {
-                    if (1 + a <= 0) return 0;
-                    if (n === 0) return Math.sqrt(1 + a);
-                    let coeff = 1;
-                    for (let i = 0; i < n; i++) {
-                        coeff *= (0.5 - i) / (i + 1);
-                    }
-                    return coeff * Math.pow(1 + a, 0.5 - n);
-                },
-                series: '1 + x/2 - x²/8 + x³/16 - 5x⁴/128 + ... (for a=0)',
-                convergenceRadius: 1
-            },
-            power: {
-                name: 'Power Function',
-                expr: 'f(x) = 1/(1-x)',
-                func: (x) => x !== 1 ? 1 / (1 - x) : NaN,
-                taylorCoeff: (n, a) => {
-                    if (1 - a === 0) return NaN;
-                    return Math.pow(1 - a, -(n + 1));
-                },
-                series: '1 + x + x² + x³ + x⁴ + ... (for a=0)',
-                convergenceRadius: 1
-            },
-            sinh: {
-                name: 'Hyperbolic Sine',
-                expr: 'f(x) = sinh(x)',
-                func: (x) => Math.sinh(x),
-                taylorCoeff: (n, a) => {
-                    return n % 2 === 0 ? Math.sinh(a) / factorial(n) : Math.cosh(a) / factorial(n);
-                },
-                series: 'sinh(a) + cosh(a)(x-a) + sinh(a)(x-a)²/2! + cosh(a)(x-a)³/3! + ...',
-                convergenceRadius: Infinity
+        function getFunction(functionType) {
+            switch(functionType) {
+                case 'sin': return Math.sin;
+                case 'cos': return Math.cos;
+                case 'exp': return Math.exp;
+                case 'ln': return x => x > -1 ? Math.log(1 + x) : NaN;
+                default: return Math.sin;
             }
-        };
+        }
+        
+        function getFunctionName(functionType) {
+            switch(functionType) {
+                case 'sin': return 'sin(x)';
+                case 'cos': return 'cos(x)';
+                case 'exp': return 'e^x';
+                case 'ln': return 'ln(1+x)';
+                default: return 'sin(x)';
+            }
+        }
+        
+        function taylorSin(x, n) {
+            let sum = 0;
+            for (let k = 0; k < n; k++) {
+                let coeff = (k % 2 === 0 ? 1 : -1);
+                sum += coeff * Math.pow(x, 2*k+1) / factorial(2*k+1);
+            }
+            return sum;
+        }
+        
+        function taylorCos(x, n) {
+            let sum = 0;
+            for (let k = 0; k < n; k++) {
+                let coeff = (k % 2 === 0 ? 1 : -1);
+                sum += coeff * Math.pow(x, 2*k) / factorial(2*k);
+            }
+            return sum;
+        }
+        
+        function taylorExp(x, n) {
+            let sum = 0;
+            for (let k = 0; k < n; k++) {
+                sum += Math.pow(x, k) / factorial(k);
+            }
+            return sum;
+        }
+        
+        function taylorLn(x, n) {
+            if (x <= -1) return NaN;
+            let sum = 0;
+            for (let k = 1; k <= n; k++) {
+                let coeff = (k % 2 === 1 ? 1 : -1);
+                sum += coeff * Math.pow(x, k) / k;
+            }
+            return sum;
+        }
+        
+        function getTaylorFunction(functionType) {
+            switch(functionType) {
+                case 'sin': return taylorSin;
+                case 'cos': return taylorCos;
+                case 'exp': return taylorExp;
+                case 'ln': return taylorLn;
+                default: return taylorSin;
+            }
+        }
         
         function factorial(n) {
-            if (n <= 1) return 1;
-            let result = 1;
-            for (let i = 2; i <= n; i++) {
-                result *= i;
-            }
-            return result;
+            if (n === 0 || n === 1) return 1;
+            let res = 1;
+            for (let i = 2; i <= n; i++) res *= i;
+            return res;
         }
         
-        function numericalDerivative(func, x, order) {
-            const h = 0.001;
-            if (order === 0) return func(x);
-            if (order === 1) return (func(x + h) - func(x - h)) / (2 * h);
+        function updateTaylor() {
+            const order = parseInt(document.getElementById('order').value);
+            const functionType = document.getElementById('functionSelect').value;
+            document.getElementById('orderValue').textContent = order;
             
-            // Use recursive formula for higher orders
-            return (numericalDerivative(func, x + h, order - 1) - 
-                   numericalDerivative(func, x - h, order - 1)) / (2 * h);
-        }
-        
-        function toCanvasX(x) {
-            return centerX + x * scale;
-        }
-        
-        function toCanvasY(y) {
-            return centerY - y * scale;
-        }
-        
-        function fromCanvasX(canvasX) {
-            return (canvasX - centerX) / scale;
-        }
-        
-        function fromCanvasY(canvasY) {
-            return (centerY - canvasY) / scale;
-        }
-        
-        function evaluateOriginalFunction(x) {
-            return functions[currentFunction].func(x);
-        }
-        
-        function evaluateTaylorSeries(x, terms = numTerms) {
-            const func = functions[currentFunction];
-            let result = 0;
+            const canvas = document.getElementById('taylorCanvas');
+            if (!canvas) return;
             
-            for (let n = 0; n < terms; n++) {
-                if (termVisibility[n]) {
-                    const coeff = func.taylorCoeff(n, centerPoint);
-                    if (!isNaN(coeff) && isFinite(coeff)) {
-                        result += coeff * Math.pow(x - centerPoint, n);
-                    }
-                }
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scaleX = 60; // pixels per unit
+            const scaleY = 80; // pixels per unit
+            
+            // Adjust scale for different functions
+            let yScale = scaleY;
+            if (functionType === 'exp') {
+                yScale = 20; // e^x grows very fast
             }
             
-            return result;
-        }
-        
-        function evaluateNthTerm(x, n) {
-            const func = functions[currentFunction];
-            const coeff = func.taylorCoeff(n, centerPoint);
-            if (isNaN(coeff) || !isFinite(coeff)) return 0;
-            return coeff * Math.pow(x - centerPoint, n);
-        }
-        
-        function drawGrid() {
-            if (!showOptions.grid) return;
-            
-            ctx.strokeStyle = '#222';
+            // Draw grid
+            ctx.strokeStyle = '#f0f0f0';
             ctx.lineWidth = 1;
-            
             for (let i = -10; i <= 10; i++) {
-                // Vertical lines
-                ctx.beginPath();
-                ctx.moveTo(toCanvasX(i), 0);
-                ctx.lineTo(toCanvasX(i), height);
-                ctx.stroke();
-                
-                // Horizontal lines
-                ctx.beginPath();
-                ctx.moveTo(0, toCanvasY(i));
-                ctx.lineTo(width, toCanvasY(i));
-                ctx.stroke();
-            }
-            
-            // Axes
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 2;
-            
-            ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(width, centerY);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, 0);
-            ctx.lineTo(centerX, height);
-            ctx.stroke();
-        }
-        
-        function drawFunction(func, color, lineWidth = 2, maxTerms = numTerms) {
-            const step = 0.01;
-            const xMin = -6;
-            const xMax = 6;
-            
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.beginPath();
-            
-            let firstPoint = true;
-            
-            for (let x = xMin; x <= xMax; x += step) {
-                let y;
-                if (func === 'original') {
-                    y = evaluateOriginalFunction(x);
-                } else if (func === 'taylor') {
-                    y = evaluateTaylorSeries(x, maxTerms);
-                } else if (typeof func === 'number') {
-                    y = evaluateNthTerm(x, func);
-                }
-                
-                if (!isNaN(y) && isFinite(y) && Math.abs(y) < 10) {
-                    const canvasX = toCanvasX(x);
-                    const canvasY = toCanvasY(y);
+                if (i !== 0) {
+                    // Vertical lines
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + i * scaleX, 0);
+                    ctx.lineTo(centerX + i * scaleX, canvas.height);
+                    ctx.stroke();
                     
-                    if (canvasX >= 0 && canvasX <= width && canvasY >= -100 && canvasY <= height + 100) {
-                        if (firstPoint) {
-                            ctx.moveTo(canvasX, canvasY);
-                            firstPoint = false;
-                        } else {
-                            ctx.lineTo(canvasX, canvasY);
-                        }
-                    } else {
-                        firstPoint = true;
-                    }
-                } else {
-                    firstPoint = true;
+                    // Horizontal lines
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY + i * yScale);
+                    ctx.lineTo(canvas.width, centerY + i * yScale);
+                    ctx.stroke();
                 }
             }
             
-            ctx.stroke();
-        }
-        
-        function drawCenterPoint() {
-            if (!showOptions.center) return;
-            
-            const centerY_val = evaluateOriginalFunction(centerPoint);
-            if (!isNaN(centerY_val) && isFinite(centerY_val)) {
-                ctx.fillStyle = '#2ecc71';
-                ctx.beginPath();
-                ctx.arc(toCanvasX(centerPoint), toCanvasY(centerY_val), 6, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Draw label
-                ctx.fillStyle = '#2ecc71';
-                ctx.font = '12px Arial';
-                ctx.fillText(`a = ${centerPoint.toFixed(1)}`, 
-                    toCanvasX(centerPoint) + 10, 
-                    toCanvasY(centerY_val) - 10);
-            }
-        }
-        
-        function drawAnalysisPoint() {
-            const originalY = evaluateOriginalFunction(analysisPoint);
-            const taylorY = evaluateTaylorSeries(analysisPoint);
-            
-            if (!isNaN(originalY) && !isNaN(taylorY) && isFinite(originalY) && isFinite(taylorY)) {
-                // Draw analysis line
-                ctx.strokeStyle = '#666';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(toCanvasX(analysisPoint), 0);
-                ctx.lineTo(toCanvasX(analysisPoint), height);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Draw points
-                ctx.fillStyle = '#0ff';
-                ctx.beginPath();
-                ctx.arc(toCanvasX(analysisPoint), toCanvasY(originalY), 4, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                ctx.fillStyle = '#e74c3c';
-                ctx.beginPath();
-                ctx.arc(toCanvasX(analysisPoint), toCanvasY(taylorY), 4, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-        }
-        
-        function drawErrorFunction() {
-            if (!showOptions.error) return;
-            
-            const step = 0.02;
-            const xMin = -4;
-            const xMax = 4;
-            
-            ctx.strokeStyle = '#9b59b6';
+            // Draw axes
+            ctx.strokeStyle = '#666';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
-            let firstPoint = true;
-            
-            for (let x = xMin; x <= xMax; x += step) {
-                const originalY = evaluateOriginalFunction(x);
-                const taylorY = evaluateTaylorSeries(x);
-                const error = Math.abs(originalY - taylorY);
-                
-                if (!isNaN(error) && isFinite(error) && error < 5) {
-                    const canvasX = toCanvasX(x);
-                    const canvasY = toCanvasY(error);
-                    
-                    if (canvasX >= 0 && canvasX <= width) {
-                        if (firstPoint) {
-                            ctx.moveTo(canvasX, canvasY);
-                            firstPoint = false;
-                        } else {
-                            ctx.lineTo(canvasX, canvasY);
-                        }
-                    } else {
-                        firstPoint = true;
-                    }
-                } else {
-                    firstPoint = true;
-                }
-            }
-            
+            ctx.moveTo(0, centerY); 
+            ctx.lineTo(canvas.width, centerY); // x-axis
+            ctx.moveTo(centerX, 0); 
+            ctx.lineTo(centerX, canvas.height); // y-axis
             ctx.stroke();
-        }
-        
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
             
-            drawGrid();
-            
-            if (showOptions.original) {
-                drawFunction('original', '#0ff', 3);
+            // Draw axis labels
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            for (let i = -6; i <= 6; i++) {
+                if (i !== 0) {
+                    ctx.fillText(i.toString(), centerX + i * scaleX, centerY + 25);
+                }
             }
-            
-            if (showOptions.taylor) {
-                const maxTerms = isAnimating ? animatedTerms : numTerms;
-                drawFunction('taylor', '#e74c3c', 3, maxTerms);
-            }
-            
-            if (showOptions.terms) {
-                const colors = ['#f39c12', '#e67e22', '#d35400', '#f1c40f', '#f39c12', '#e67e22'];
-                for (let n = 0; n < numTerms; n++) {
-                    if (termVisibility[n]) {
-                        drawFunction(n, colors[n % colors.length], 1);
-                    }
+            ctx.textAlign = 'left';
+            let yLabelMax = functionType === 'exp' ? 10 : 2;
+            for (let i = -yLabelMax; i <= yLabelMax; i++) {
+                if (i !== 0) {
+                    ctx.fillText(i.toString(), centerX + 8, centerY - i * yScale + 5);
                 }
             }
             
-            drawErrorFunction();
-            drawCenterPoint();
-            drawAnalysisPoint();
-        }
-        
-        function selectFunction(funcName) {
-            currentFunction = funcName;
+            // Get functions
+            const originalFunc = getFunction(functionType);
+            const taylorFunc = getTaylorFunction(functionType);
+            const funcName = getFunctionName(functionType);
             
-            // Update active button
-            document.querySelectorAll('.function-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            updateFunctionInfo();
-            updateTermControls();
-            updateErrorAnalysis();
-            draw();
-        }
-        
-        function updateFunctionInfo() {
-            const func = functions[currentFunction];
-            const taylorInfo = document.getElementById('taylor-info');
-            const seriesDisplay = document.getElementById('series-display');
-            
-            taylorInfo.innerHTML = `
-                <strong>${func.name}</strong><br/>
-                ${func.expr}<br/>
-                Convergence Radius: ${func.convergenceRadius === Infinity ? '∞' : func.convergenceRadius}
-            `;
-            
-            // Generate Taylor series expansion
-            let seriesText = `Taylor Series about a = ${centerPoint.toFixed(1)}:\n\n`;
-            
-            for (let n = 0; n < numTerms; n++) {
-                const coeff = func.taylorCoeff(n, centerPoint);
-                if (!isNaN(coeff) && isFinite(coeff) && Math.abs(coeff) > 1e-10) {
-                    const sign = n > 0 && coeff >= 0 ? '+' : '';
-                    const term = centerPoint === 0 ? 
-                        (n === 0 ? `${coeff.toFixed(4)}` : 
-                         n === 1 ? `${coeff.toFixed(4)}x` : 
-                         `${coeff.toFixed(4)}x^${n}`) :
-                        (n === 0 ? `${coeff.toFixed(4)}` : 
-                         n === 1 ? `${coeff.toFixed(4)}(x-${centerPoint.toFixed(1)})` : 
-                         `${coeff.toFixed(4)}(x-${centerPoint.toFixed(1)})^${n}`);
-                    seriesText += `${sign}${term}\n`;
+            // Draw original function
+            ctx.strokeStyle = '#0074D9';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let first = true;
+            for (let px = 0; px <= canvas.width; px += 2) {
+                let x = (px - centerX) / scaleX;
+                let y = originalFunc(x);
+                
+                // Skip invalid values
+                if (isNaN(y) || !isFinite(y)) continue;
+                
+                // Clamp values for display
+                if (functionType === 'exp' && Math.abs(y) > 20) continue;
+                if (functionType === 'ln' && x <= -1) continue;
+                
+                let py = centerY - y * yScale;
+                
+                if (first) {
+                    ctx.moveTo(px, py);
+                    first = false;
+                } else {
+                    ctx.lineTo(px, py);
                 }
             }
+            ctx.stroke();
             
-            seriesDisplay.textContent = seriesText;
-        }
-        
-        function updateTermControls() {
-            const termControls = document.getElementById('termControls');
-            termControls.innerHTML = '';
-            
-            for (let n = 0; n < numTerms; n++) {
-                const button = document.createElement('button');
-                button.className = `term-button ${termVisibility[n] ? 'active' : ''}`;
-                button.textContent = `T${n}`;
-                button.onclick = () => toggleTerm(n);
-                termControls.appendChild(button);
+            // Draw Taylor approximation
+            ctx.strokeStyle = '#FF4136';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            first = true;
+            for (let px = 0; px <= canvas.width; px += 2) {
+                let x = (px - centerX) / scaleX;
+                let y = taylorFunc(x, order);
+                
+                // Skip invalid values
+                if (isNaN(y) || !isFinite(y)) continue;
+                
+                // Clamp y values to avoid drawing off-screen
+                if (Math.abs(y) > (functionType === 'exp' ? 20 : 10)) continue;
+                
+                let py = centerY - y * yScale;
+                
+                if (first) {
+                    ctx.moveTo(px, py);
+                    first = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
             }
-        }
-        
-        function updateErrorAnalysis() {
-            const originalY = evaluateOriginalFunction(analysisPoint);
-            const taylorY = evaluateTaylorSeries(analysisPoint);
-            const error = Math.abs(originalY - taylorY);
-            const relativeError = Math.abs(error / originalY) * 100;
+            ctx.stroke();
             
-            document.getElementById('error-display').innerHTML = `
-                <strong>Error Analysis at x = ${analysisPoint.toFixed(2)}</strong><br/>
-                f(x) = ${originalY.toFixed(6)}<br/>
-                Pₙ(x) = ${taylorY.toFixed(6)}<br/>
-                Absolute Error = ${error.toFixed(6)}<br/>
-                Relative Error = ${relativeError.toFixed(2)}%
-            `;
-        }
-        
-        function toggleTerm(n) {
-            termVisibility[n] = !termVisibility[n];
-            updateTermControls();
-            draw();
-        }
-        
-        function toggleVisualization(option) {
-            showOptions[option] = !showOptions[option];
-            const button = document.getElementById(`toggle-${option}`);
-            button.classList.toggle('active', showOptions[option]);
-            draw();
-        }
-        
-        function toggleAnimation() {
-            isAnimating = !isAnimating;
-            const button = document.getElementById('toggle-animation');
+            // Draw error curve
+            ctx.strokeStyle = '#2ECC40';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            first = true;
+            for (let px = 0; px <= canvas.width; px += 2) {
+                let x = (px - centerX) / scaleX;
+                let originalY = originalFunc(x);
+                let taylorY = taylorFunc(x, order);
+                
+                if (isNaN(originalY) || isNaN(taylorY) || !isFinite(originalY) || !isFinite(taylorY)) continue;
+                if (functionType === 'ln' && x <= -1) continue;
+                
+                let error = Math.abs(originalY - taylorY);
+                if (error > (functionType === 'exp' ? 20 : 5)) continue; // Don't draw huge errors
+                
+                let py = centerY - error * yScale;
+                
+                if (first) {
+                    ctx.moveTo(px, py);
+                    first = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
             
-            if (isAnimating) {
-                button.textContent = '⏸ Pause';
-                animatedTerms = 1;
-                animate();
+            // Legend
+            ctx.fillStyle = '#0074D9';
+            ctx.fillRect(30, 30, 25, 25);
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(funcName, 65, 48);
+            
+            ctx.fillStyle = '#FF4136';
+            ctx.fillRect(30, 65, 25, 25);
+            ctx.fillStyle = '#000';
+            ctx.fillText('Taylor Polynomial (order ' + order + ')', 65, 83);
+            
+            ctx.fillStyle = '#2ECC40';
+            ctx.fillRect(30, 100, 25, 25);
+            ctx.fillStyle = '#000';
+            ctx.fillText('|Error|', 65, 118);
+        }
+        
+        function showSection(section) {
+            const theorySection = document.getElementById('theorySection');
+            const illustrationSection = document.getElementById('illustrationSection');
+            const theoryBtn = document.getElementById('theoryBtn');
+            const illustrationBtn = document.getElementById('illustrationBtn');
+            
+            if (section === 'theory') {
+                theorySection.style.display = 'block';
+                illustrationSection.style.display = 'none';
+                theoryBtn.classList.add('active');
+                illustrationBtn.classList.remove('active');
             } else {
-                button.textContent = '▶ Animate Terms';
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                }
+                theorySection.style.display = 'none';
+                illustrationSection.style.display = 'block';
+                theoryBtn.classList.remove('active');
+                illustrationBtn.classList.add('active');
+                // Update the illustration when showing it
+                setTimeout(updateTaylor, 100);
             }
         }
         
-        function animate() {
-            if (!isAnimating) return;
-            
-            // Cycle through terms
-            animatedTerms = ((Date.now() / 1000) % numTerms) + 1;
-            
-            draw();
-            animationId = requestAnimationFrame(animate);
-        }
-        
-        function resetCenter() {
-            centerPoint = 0;
-            document.getElementById('centerPoint').value = 0;
-            updateFunctionInfo();
-            updateErrorAnalysis();
-            draw();
-        }
-        
-        function resetView() {
-            isAnimating = false;
-            animatedTerms = 1;
-            document.getElementById('toggle-animation').textContent = '▶ Animate Terms';
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            draw();
-        }
-        
-        // Event listeners
-        document.getElementById('centerPoint').addEventListener('input', function() {
-            centerPoint = parseFloat(this.value);
-            updateFunctionInfo();
-            updateTermControls();
-            updateErrorAnalysis();
-            draw();
-        });
-        
-        document.getElementById('numTerms').addEventListener('input', function() {
-            numTerms = parseInt(this.value);
-            document.getElementById('numTermsValue').textContent = `${numTerms} terms`;
-            
-            // Reset term visibility
-            termVisibility = Array(15).fill(true);
-            
-            updateFunctionInfo();
-            updateTermControls();
-            updateErrorAnalysis();
-            draw();
-        });
-        
-        document.getElementById('analysisPoint').addEventListener('input', function() {
-            analysisPoint = parseFloat(this.value);
-            document.getElementById('analysisPointValue').textContent = `x = ${analysisPoint.toFixed(1)}`;
-            updateErrorAnalysis();
-            draw();
-        });
-        
-        // Initialize
-        updateFunctionInfo();
-        updateTermControls();
-        updateErrorAnalysis();
-        draw();
+        // Initialize on page load
+        window.onload = function() {
+            showSection('theory');
+        };
     </script>
 </body>
 </html>

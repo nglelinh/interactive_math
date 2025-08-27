@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔢 Number Theory Foundations - Cryptography Building Blocks</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2C1810 0%, #8B4513 50%, #D2691E 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #FFD700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #DEB887;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .topic-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+        
+        .topic-card h3 {
+            color: #FFD700;
+            margin: 0 0 15px 0;
+            font-size: 1.4em;
+        }
+        
+        .interactive-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #FFD700;
+        }
+        
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #8B4513;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-panel {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #FFD700;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .result-panel h4 {
+            margin: 0 0 10px 0;
+            color: #FFD700;
+        }
+        
+        .math-display {
+            background: rgba(139, 69, 19, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #DAA520;
+        }
+        
+        .prime-visual {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 15px 0;
+        }
+        
+        .number-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .prime {
+            background: #228B22;
+            color: white;
+        }
+        
+        .composite {
+            background: #DC143C;
+            color: white;
+        }
+        
+        .highlight {
+            background: #FFD700;
+            color: #000;
+        }
+        
+        .algorithm-steps {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .step {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            border-left: 3px solid #DAA520;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔢 Number Theory Foundations</h1>
+        <div class="subtitle">
+            Essential mathematical concepts for cryptography: primes, modular arithmetic, and algorithmic number theory
+        </div>
+        
+        <div class="topic-grid">
+            <!-- Prime Numbers Section -->
+            <div class="topic-card">
+                <h3>🎯 Prime Numbers</h3>
+                <p>Prime numbers are the building blocks of RSA and many cryptographic systems.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>Check if number is prime:</label>
+                        <input type="number" id="primeCheck" value="97" min="2" max="10000">
+                        <button class="btn" onclick="checkPrime()">Check Prime</button>
+                        <button class="btn" onclick="generateRandomPrime()">Random Prime</button>
+                    </div>
+                    
+                    <div class="result-panel">
+                        <h4>🔍 Prime Test Result:</h4>
+                        <div id="primeResult">Enter a number to check if it's prime</div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Visualize primes up to:</label>
+                        <input type="number" id="primeRange" value="100" min="10" max="200">
+                        <button class="btn" onclick="visualizePrimes()">Sieve of Eratosthenes</button>
+                    </div>
+                    
+                    <div class="prime-visual" id="primeVisualization">
+                        <p>Click "Sieve of Eratosthenes" to see prime visualization</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modular Arithmetic Section -->
+            <div class="topic-card">
+                <h3>⚙️ Modular Arithmetic</h3>
+                <p>The foundation of all cryptographic calculations.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>Base (a):</label>
+                        <input type="number" id="modBase" value="7" min="1" max="1000">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Exponent (b):</label>
+                        <input type="number" id="modExp" value="3" min="1" max="100">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Modulus (m):</label>
+                        <input type="number" id="modMod" value="13" min="2" max="1000">
+                    </div>
+                    
+                    <button class="btn" onclick="calculateModular()">Calculate a^b mod m</button>
+                    
+                    <div class="result-panel">
+                        <h4>📊 Modular Exponentiation:</h4>
+                        <div id="modularResult">Enter values to calculate modular exponentiation</div>
+                    </div>
+                    
+                    <div class="algorithm-steps" id="modularSteps">
+                        <p>Click calculate to see step-by-step algorithm</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GCD Section -->
+            <div class="topic-card">
+                <h3>🔗 Greatest Common Divisor (GCD)</h3>
+                <p>Essential for RSA key generation and modular inverses.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>Number A:</label>
+                        <input type="number" id="gcdA" value="48" min="1" max="10000">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Number B:</label>
+                        <input type="number" id="gcdB" value="18" min="1" max="10000">
+                    </div>
+                    
+                    <button class="btn" onclick="calculateGCD()">Euclidean Algorithm</button>
+                    <button class="btn" onclick="calculateExtendedGCD()">Extended GCD</button>
+                    
+                    <div class="result-panel">
+                        <h4>🧮 GCD Results:</h4>
+                        <div id="gcdResult">Calculate GCD to see results</div>
+                    </div>
+                    
+                    <div class="algorithm-steps" id="gcdSteps">
+                        <p>Run algorithm to see steps</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fermat's Little Theorem Section -->
+            <div class="topic-card">
+                <h3>⭐ Fermat's Little Theorem</h3>
+                <p>Key theorem used in RSA and primality testing.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>Base (a):</label>
+                        <input type="number" id="fermatA" value="2" min="1" max="100">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Prime (p):</label>
+                        <input type="number" id="fermatP" value="7" min="3" max="100">
+                    </div>
+                    
+                    <button class="btn" onclick="testFermat()">Test: a^(p-1) ≡ 1 (mod p)</button>
+                    <button class="btn" onclick="fermatPrimalityTest()">Fermat Primality Test</button>
+                    
+                    <div class="result-panel">
+                        <h4>🎭 Fermat's Theorem Test:</h4>
+                        <div id="fermatResult">Test Fermat's Little Theorem</div>
+                    </div>
+                    
+                    <div class="math-display">
+                        <strong>Fermat's Little Theorem:</strong><br>
+                        If p is prime and gcd(a,p) = 1, then:<br>
+                        a^(p-1) ≡ 1 (mod p)
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modular Inverse Section -->
+            <div class="topic-card">
+                <h3>🔄 Modular Inverse</h3>
+                <p>Critical for computing RSA private keys.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>Number (a):</label>
+                        <input type="number" id="invA" value="7" min="1" max="1000">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Modulus (m):</label>
+                        <input type="number" id="invM" value="26" min="2" max="1000">
+                    </div>
+                    
+                    <button class="btn" onclick="calculateModularInverse()">Find a^(-1) mod m</button>
+                    
+                    <div class="result-panel">
+                        <h4>🔄 Modular Inverse:</h4>
+                        <div id="inverseResult">Calculate modular inverse</div>
+                    </div>
+                    
+                    <div class="algorithm-steps" id="inverseSteps">
+                        <p>Calculate to see Extended Euclidean Algorithm steps</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chinese Remainder Theorem Section -->
+            <div class="topic-card">
+                <h3>🏮 Chinese Remainder Theorem</h3>
+                <p>Used for efficient RSA computation and breaking small RSA keys.</p>
+                
+                <div class="interactive-panel">
+                    <div class="control-group">
+                        <label>x ≡ a₁ (mod m₁): a₁ =</label>
+                        <input type="number" id="crt_a1" value="2" min="0" max="100">
+                        <label>m₁ =</label>
+                        <input type="number" id="crt_m1" value="3" min="2" max="100">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>x ≡ a₂ (mod m₂): a₂ =</label>
+                        <input type="number" id="crt_a2" value="3" min="0" max="100">
+                        <label>m₂ =</label>
+                        <input type="number" id="crt_m2" value="5" min="2" max="100">
+                    </div>
+                    
+                    <button class="btn" onclick="solveCRT()">Solve System</button>
+                    
+                    <div class="result-panel">
+                        <h4>🧩 CRT Solution:</h4>
+                        <div id="crtResult">Solve the system of congruences</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topic-card" style="margin-top: 30px;">
+            <h3>🎓 Cryptographic Applications</h3>
+            <div class="math-display">
+                <h4>🔐 How These Concepts Enable RSA:</h4>
+                <p><strong>1. Prime Numbers:</strong> p, q → Security through factorization difficulty</p>
+                <p><strong>2. Modular Arithmetic:</strong> All RSA operations use mod n</p>
+                <p><strong>3. GCD & Coprimality:</strong> Ensures e and φ(n) are coprime</p>
+                <p><strong>4. Modular Inverse:</strong> Computing d from e and φ(n)</p>
+                <p><strong>5. Fermat/Euler:</strong> Proves why RSA decryption works</p>
+                <p><strong>6. CRT:</strong> Fast RSA decryption using p and q</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prime number functions
+        function isPrime(n) {
+            if (n < 2) return false;
+            if (n === 2) return true;
+            if (n % 2 === 0) return false;
+            
+            for (let i = 3; i * i <= n; i += 2) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+        
+        function checkPrime() {
+            const num = parseInt(document.getElementById('primeCheck').value);
+            const result = isPrime(num);
+            const factors = [];
+            
+            if (!result && num > 1) {
+                for (let i = 2; i <= Math.sqrt(num); i++) {
+                    if (num % i === 0) {
+                        factors.push(i);
+                        if (i !== num / i) factors.push(num / i);
+                    }
+                }
+                factors.sort((a, b) => a - b);
+            }
+            
+            document.getElementById('primeResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Number:</strong> ${num}</p>
+                    <p><strong>Result:</strong> ${result ? '✅ PRIME' : '❌ COMPOSITE'}</p>
+                    ${!result && factors.length > 0 ? `<p><strong>Factors:</strong> ${factors.join(', ')}</p>` : ''}
+                    ${result ? '<p><strong>Security:</strong> Can be used in cryptography!</p>' : '<p><strong>Note:</strong> Composite numbers are not suitable for crypto keys</p>'}
+                </div>
+            `;
+        }
+        
+        function generateRandomPrime() {
+            let candidate;
+            do {
+                candidate = Math.floor(Math.random() * 900) + 100; // 100-1000 range
+                if (candidate % 2 === 0) candidate++;
+            } while (!isPrime(candidate));
+            
+            document.getElementById('primeCheck').value = candidate;
+            checkPrime();
+        }
+        
+        function sieveOfEratosthenes(limit) {
+            const sieve = new Array(limit + 1).fill(true);
+            sieve[0] = sieve[1] = false;
+            
+            for (let i = 2; i * i <= limit; i++) {
+                if (sieve[i]) {
+                    for (let j = i * i; j <= limit; j += i) {
+                        sieve[j] = false;
+                    }
+                }
+            }
+            
+            return sieve;
+        }
+        
+        function visualizePrimes() {
+            const limit = parseInt(document.getElementById('primeRange').value);
+            const sieve = sieveOfEratosthenes(limit);
+            const visualization = document.getElementById('primeVisualization');
+            
+            let html = '<p><strong>Green = Prime, Red = Composite</strong></p>';
+            
+            for (let i = 2; i <= limit; i++) {
+                const className = sieve[i] ? 'prime' : 'composite';
+                html += `<div class="number-box ${className}">${i}</div>`;
+            }
+            
+            const primeCount = sieve.slice(2).filter(x => x).length;
+            html += `<p style="width: 100%; margin-top: 15px;"><strong>Found ${primeCount} primes up to ${limit}</strong></p>`;
+            
+            visualization.innerHTML = html;
+        }
+        
+        // Modular arithmetic functions
+        function modPow(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            const steps = [];
+            
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                    steps.push(`Result = ${result}`);
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+                if (exp > 0) steps.push(`Base = ${base}, Exp = ${exp}`);
+            }
+            
+            return { result, steps };
+        }
+        
+        function calculateModular() {
+            const a = parseInt(document.getElementById('modBase').value);
+            const b = parseInt(document.getElementById('modExp').value);
+            const m = parseInt(document.getElementById('modMod').value);
+            
+            const { result, steps } = modPow(a, b, m);
+            
+            document.getElementById('modularResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Calculation:</strong> ${a}^${b} mod ${m} = ${result}</p>
+                    <p><strong>Direct calculation would be:</strong> ${Math.pow(a, b)} mod ${m}</p>
+                    <p><strong>Fast algorithm result:</strong> ${result}</p>
+                </div>
+            `;
+            
+            document.getElementById('modularSteps').innerHTML = `
+                <h4>🚀 Fast Exponentiation Steps:</h4>
+                <div class="step">
+                    <p><strong>Binary representation of ${b}:</strong> ${b.toString(2)}</p>
+                    <p><strong>Algorithm steps:</strong></p>
+                    ${steps.map(step => `<p>• ${step}</p>`).join('')}
+                </div>
+            `;
+        }
+        
+        // GCD functions
+        function gcd(a, b) {
+            const steps = [];
+            let original_a = a, original_b = b;
+            
+            while (b !== 0) {
+                const quotient = Math.floor(a / b);
+                const remainder = a % b;
+                steps.push(`${a} = ${b} × ${quotient} + ${remainder}`);
+                a = b;
+                b = remainder;
+            }
+            
+            return { result: a, steps };
+        }
+        
+        function extendedGcd(a, b) {
+            if (a === 0) return { gcd: b, x: 0, y: 1, steps: [] };
+            
+            const steps = [];
+            let old_r = a, r = b;
+            let old_s = 1, s = 0;
+            let old_t = 0, t = 1;
+            
+            while (r !== 0) {
+                const quotient = Math.floor(old_r / r);
+                steps.push(`q = ${quotient}, r = ${old_r} - ${quotient} × ${r} = ${old_r - quotient * r}`);
+                
+                [old_r, r] = [r, old_r - quotient * r];
+                [old_s, s] = [s, old_s - quotient * s];
+                [old_t, t] = [t, old_t - quotient * t];
+            }
+            
+            return { gcd: old_r, x: old_s, y: old_t, steps };
+        }
+        
+        function calculateGCD() {
+            const a = parseInt(document.getElementById('gcdA').value);
+            const b = parseInt(document.getElementById('gcdB').value);
+            
+            const { result, steps } = gcd(a, b);
+            
+            document.getElementById('gcdResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>GCD(${a}, ${b}) = ${result}</strong></p>
+                    <p><strong>Coprime?</strong> ${result === 1 ? '✅ Yes (suitable for cryptography)' : '❌ No'}</p>
+                </div>
+            `;
+            
+            document.getElementById('gcdSteps').innerHTML = `
+                <h4>📐 Euclidean Algorithm Steps:</h4>
+                ${steps.map(step => `<div class="step">${step}</div>`).join('')}
+                <div class="step"><strong>Final result: GCD = ${result}</strong></div>
+            `;
+        }
+        
+        function calculateExtendedGCD() {
+            const a = parseInt(document.getElementById('gcdA').value);
+            const b = parseInt(document.getElementById('gcdB').value);
+            
+            const { gcd, x, y, steps } = extendedGcd(a, b);
+            
+            document.getElementById('gcdResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Extended GCD(${a}, ${b}):</strong></p>
+                    <p><strong>GCD:</strong> ${gcd}</p>
+                    <p><strong>Bézout coefficients:</strong> x = ${x}, y = ${y}</p>
+                    <p><strong>Verification:</strong> ${a} × ${x} + ${b} × ${y} = ${a * x + b * y}</p>
+                </div>
+            `;
+            
+            document.getElementById('gcdSteps').innerHTML = `
+                <h4>🔧 Extended Euclidean Algorithm:</h4>
+                ${steps.map(step => `<div class="step">${step}</div>`).join('')}
+                <div class="step"><strong>Result: ${a} × ${x} + ${b} × ${y} = ${gcd}</strong></div>
+            `;
+        }
+        
+        // Fermat's Little Theorem
+        function testFermat() {
+            const a = parseInt(document.getElementById('fermatA').value);
+            const p = parseInt(document.getElementById('fermatP').value);
+            
+            if (!isPrime(p)) {
+                document.getElementById('fermatResult').innerHTML = `
+                    <div class="math-display">
+                        <p><strong>Error:</strong> ${p} is not prime!</p>
+                        <p>Fermat's Little Theorem only applies to prime numbers.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const result = modPow(a, p - 1, p).result;
+            const holds = result === 1;
+            
+            document.getElementById('fermatResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Test:</strong> ${a}^(${p}-1) mod ${p} = ${a}^${p-1} mod ${p}</p>
+                    <p><strong>Result:</strong> ${result}</p>
+                    <p><strong>Fermat's theorem:</strong> ${holds ? '✅ HOLDS' : '❌ VIOLATED'}</p>
+                    ${holds ? 
+                        '<p><strong>✅ This confirms our theorem and suggests good primality!</strong></p>' :
+                        '<p><strong>⚠️ This violates Fermat\'s theorem - something is wrong!</strong></p>'
+                    }
+                </div>
+            `;
+        }
+        
+        function fermatPrimalityTest() {
+            const p = parseInt(document.getElementById('fermatP').value);
+            const witnesses = [2, 3, 5, 7, 11, 13, 17, 19];
+            
+            let passed = 0;
+            let results = [];
+            
+            for (let a of witnesses) {
+                if (a >= p) continue;
+                const result = modPow(a, p - 1, p).result;
+                const holds = result === 1;
+                results.push(`${a}^${p-1} ≡ ${result} (mod ${p}) ${holds ? '✅' : '❌'}`);
+                if (holds) passed++;
+            }
+            
+            const likely_prime = passed === results.length && passed > 0;
+            const actual_prime = isPrime(p);
+            
+            document.getElementById('fermatResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Fermat Primality Test for ${p}:</strong></p>
+                    ${results.map(r => `<p>• ${r}</p>`).join('')}
+                    <p><strong>Tests passed:</strong> ${passed}/${results.length}</p>
+                    <p><strong>Fermat verdict:</strong> ${likely_prime ? 'Probably prime' : 'Composite'}</p>
+                    <p><strong>Actual status:</strong> ${actual_prime ? 'Prime' : 'Composite'}</p>
+                    ${likely_prime === actual_prime ? 
+                        '<p style="color: #00ff88;">✅ Test gave correct result!</p>' :
+                        '<p style="color: #ff4444;">⚠️ Fermat test can give false positives (Carmichael numbers)</p>'
+                    }
+                </div>
+            `;
+        }
+        
+        // Modular inverse
+        function calculateModularInverse() {
+            const a = parseInt(document.getElementById('invA').value);
+            const m = parseInt(document.getElementById('invM').value);
+            
+            const { gcd, x, y, steps } = extendedGcd(a, m);
+            
+            if (gcd !== 1) {
+                document.getElementById('inverseResult').innerHTML = `
+                    <div class="math-display">
+                        <p><strong>No modular inverse exists!</strong></p>
+                        <p>GCD(${a}, ${m}) = ${gcd} ≠ 1</p>
+                        <p>Modular inverse only exists when numbers are coprime.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const inverse = ((x % m) + m) % m;
+            const verification = (a * inverse) % m;
+            
+            document.getElementById('inverseResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Modular Inverse:</strong> ${a}^(-1) ≡ ${inverse} (mod ${m})</p>
+                    <p><strong>Verification:</strong> ${a} × ${inverse} ≡ ${verification} (mod ${m})</p>
+                    <p><strong>✅ Inverse found successfully!</strong></p>
+                </div>
+            `;
+            
+            document.getElementById('inverseSteps').innerHTML = `
+                <h4>🔧 Extended Euclidean Algorithm:</h4>
+                ${steps.map(step => `<div class="step">${step}</div>`).join('')}
+                <div class="step"><strong>From ${a} × ${x} + ${m} × ${y} = 1</strong></div>
+                <div class="step"><strong>We get: ${a} × ${x} ≡ 1 (mod ${m})</strong></div>
+                <div class="step"><strong>So: ${a}^(-1) ≡ ${x} ≡ ${inverse} (mod ${m})</strong></div>
+            `;
+        }
+        
+        // Chinese Remainder Theorem
+        function solveCRT() {
+            const a1 = parseInt(document.getElementById('crt_a1').value);
+            const m1 = parseInt(document.getElementById('crt_m1').value);
+            const a2 = parseInt(document.getElementById('crt_a2').value);
+            const m2 = parseInt(document.getElementById('crt_m2').value);
+            
+            const { gcd } = extendedGcd(m1, m2);
+            
+            if (gcd !== 1) {
+                document.getElementById('crtResult').innerHTML = `
+                    <div class="math-display">
+                        <p><strong>Error:</strong> m₁ and m₂ must be coprime!</p>
+                        <p>GCD(${m1}, ${m2}) = ${gcd} ≠ 1</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const M = m1 * m2;
+            const M1 = M / m1;
+            const M2 = M / m2;
+            
+            const y1 = extendedGcd(M1, m1).x;
+            const y2 = extendedGcd(M2, m2).x;
+            
+            const x = (a1 * M1 * y1 + a2 * M2 * y2) % M;
+            const solution = ((x % M) + M) % M;
+            
+            document.getElementById('crtResult').innerHTML = `
+                <div class="math-display">
+                    <p><strong>System:</strong></p>
+                    <p>x ≡ ${a1} (mod ${m1})</p>
+                    <p>x ≡ ${a2} (mod ${m2})</p>
+                    <p><strong>Solution:</strong> x ≡ ${solution} (mod ${M})</p>
+                    <p><strong>Verification:</strong></p>
+                    <p>• ${solution} mod ${m1} = ${solution % m1} ${solution % m1 === a1 ? '✅' : '❌'}</p>
+                    <p>• ${solution} mod ${m2} = ${solution % m2} ${solution % m2 === a2 ? '✅' : '❌'}</p>
+                </div>
+            `;
+        }
+        
+        // Initialize
+        window.onload = function() {
+            checkPrime();
+            visualizePrimes();
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa tương tác - Toán học cơ bản và Machine Learning</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="./math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -58,6 +60,17 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
+        .special-card {
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(41, 182, 246, 0.3)) !important;
+            border: 2px solid rgba(79, 195, 247, 0.6) !important;
+            grid-column: 1 / -1;
+            max-width: none;
+        }
+        .special-card:hover {
+            transform: translateY(-8px) !important;
+            box-shadow: 0 15px 40px rgba(79, 195, 247, 0.4) !important;
+            border-color: #4fc3f7 !important;
+        }
         .card-icon {
             font-size: 3em;
             text-align: center;
@@ -78,45 +91,6 @@
             line-height: 1.7;
             font-size: 1.1em;
             font-weight: 500;
-        }
-        .card-topics {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .card-topics h4 {
-            margin: 0 0 15px 0;
-            font-size: 1.4em;
-            font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-        .card-topics ul {
-            margin: 0;
-            padding-left: 25px;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-        .card-topics li {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-        .open-button {
-            background: linear-gradient(45deg, #ff4757, #ff3742);
-            color: white;
-            border: none;
-            padding: 18px 30px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1.3em;
-            font-weight: 800;
-            width: 100%;
-            transition: all 0.3s ease;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
-        }
-        .open-button:hover {
-            transform: scale(1.02);
         }
         .intro-section {
             background: rgba(255, 255, 255, 0.1);
@@ -225,128 +199,74 @@
             <div class="illustrations-grid">
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/vector_illustration.html')">
                     <div class="card-icon">🎯</div>
-                    <div class="card-title">Vector và Vector Space - Nền tảng của Features</div>
+                    <div class="card-title">Vector và Vector Space</div>
                     <div class="card-description">
-                        🔥 <strong>ML Connection:</strong> Mỗi data point là 1 vector trong không gian features! Ví dụ: ảnh 28x28 pixel = vector 784 chiều. Dot product tính similarity giữa các documents trong NLP, cosine similarity cho recommendation systems.
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🧠 Ứng dụng trong ML:</h4>
-                        <ul>
-                            <li><strong>Feature vectors:</strong> Biểu diễn data points (age, income) → (25, 50000)</li>
-                            <li><strong>Cosine similarity:</strong> So sánh documents, user preferences</li>
-                            <li><strong>Distance metrics:</strong> K-means clustering, KNN classification</li>
-                            <li><strong>Word embeddings:</strong> Word2Vec, GloVe representations</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Khám phá Vector Space 🚀</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/matrix_illustration.html')">
                     <div class="card-icon">🔢</div>
-                    <div class="card-title">Ma Trận - Trái tim của Deep Learning</div>
+                    <div class="card-title">Ma Trận</div>
                     <div class="card-description">
-                        💡 <strong>Thực tế:</strong> Mỗi layer trong neural network là 1 phép nhân ma trận! Dataset với 1000 samples, 50 features = ma trận 1000×50. Weights và biases cũng là ma trận. Hiểu matrix operations = hiểu cách neural networks hoạt động!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🎯 Applications trong AI/ML:</h4>
-                        <ul>
-                            <li><strong>Dataset representation:</strong> Rows = samples, Columns = features</li>
-                            <li><strong>Neural networks:</strong> Forward pass = chuỗi matrix multiplications</li>
-                            <li><strong>Covariance matrix:</strong> PCA, feature correlation analysis</li>
-                            <li><strong>Transformation matrices:</strong> Data augmentation, computer vision</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Thực hành Matrix Ops 🧮</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/cannon_algorithm_illustration.html')">
                     <div class="card-icon">🧮</div>
-                    <div class="card-title">Cannon's Algorithm - Distributed AI Training</div>
+                    <div class="card-title">Cannon's Algorithm</div>
                     <div class="card-description">
-                        ⚡ <strong>Big Data Reality:</strong> Training GPT models cần nhân ma trận khổng lồ (billions parameters)! Cannon's algorithm giúp phân tán computation trên nhiều GPUs. Ví dụ: BERT training trên 64 TPUs, mỗi TPU xử lý 1 phần của ma trận weights.
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🌐 Distributed ML Applications:</h4>
-                        <ul>
-                            <li><strong>GPU cluster training:</strong> Phân tán matrix multiplication cho large models</li>
-                            <li><strong>MapReduce paradigm:</strong> Big data processing, Spark MLlib</li>
-                            <li><strong>Federated learning:</strong> Training across multiple devices</li>
-                            <li><strong>Model parallelism:</strong> Different GPUs handle different layers</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Tìm hiểu Parallel Computing 🌐</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/strassen_algorithm_illustration.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Strassen's Algorithm</div>
                     <div class="card-description">
-                        Minh họa recursive matrix multiplication với Strassen's Algorithm
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>7 multiplications vs 8</li>
-                            <li>Recursive decomposition</li>
-                            <li>O(n^2.807) complexity</li>
-                            <li>Performance comparison</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/matrix_transformations.html')">
                     <div class="card-icon">🔄</div>
                     <div class="card-title">Matrix Transformations</div>
                     <div class="card-description">
-                        Minh họa mối quan hệ giữa ma trận và các phép biến đổi hình học
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Scale, rotation, shear, reflection transformations</li>
-                            <li>Matrix representation of geometric operations</li>
-                            <li>Determinant and transformation properties</li>
-                            <li>Interactive vector transformation</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/eigenvalues_eigenvectors.html')">
                     <div class="card-icon">🔍</div>
-                    <div class="card-title">Eigenvalues & Eigenvectors - Linh hồn của PCA</div>
+                    <div class="card-title">Eigenvalues & Eigenvectors</div>
                     <div class="card-description">
-                        🎯 <strong>PCA Magic:</strong> Principal Component Analysis = tìm eigenvectors của covariance matrix! Eigenvectors chỉ ra directions với variance cao nhất trong data. Netflix recommendations, face recognition đều dùng PCA để giảm dimensions từ 1000s features xuống vài chục!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🔥 ML Breakthroughs với Eigenanalysis:</h4>
-                        <ul>
-                            <li><strong>PCA:</strong> Dimensionality reduction, data visualization, noise removal</li>
-                            <li><strong>PageRank algorithm:</strong> Google's ranking system dựa trên dominant eigenvector</li>
-                            <li><strong>Spectral clustering:</strong> Graph-based clustering sử dụng eigenvalues</li>
-                            <li><strong>Stability analysis:</strong> Neural network training stability</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Khám phá PCA Power 🎯</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-algebra/svd_visualization.html')">
                     <div class="card-icon">🔬</div>
-                    <div class="card-title">SVD - Netflix's Billion Dollar Algorithm</div>
+                    <div class="card-title">SVD</div>
                     <div class="card-description">
-                        💰 <strong>Industry Impact:</strong> SVD là trái tim của collaborative filtering! Netflix Prize (2009) - $1M giải thưởng cho recommendation system. SVD phân tách user-movie matrix thành latent factors, tìm ra hidden patterns. Amazon, Spotify đều dùng SVD variants!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>💎 SVD trong Data Science:</h4>
-                        <ul>
-                            <li><strong>Recommender systems:</strong> Matrix factorization, collaborative filtering</li>
-                            <li><strong>Image compression:</strong> Chỉ giữ top-k singular values, giảm file size</li>
-                            <li><strong>Latent Semantic Analysis:</strong> NLP, document similarity, topic modeling</li>
-                            <li><strong>Data imputation:</strong> Fill missing values trong incomplete datasets</li>
-                        </ul>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('linear-algebra/nonlinear_transformations.html')">
+                    <div class="card-icon">🌊</div>
+                    <div class="card-title">Nonlinear Transformations</div>
+                    <div class="card-description">
+                        Interactive exploration of nonlinear mappings and their applications
                     </div>
-                    <button class="open-button">Master SVD Magic 💎</button>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('linear-algebra/tensors_comprehensive.html')">
+                    <div class="card-icon">🧮</div>
+                    <div class="card-title">Tensors - Deep Learning Foundation</div>
+                    <div class="card-description">
+                        Complete mathematical foundation of tensors with deep learning applications
+                    </div>
                 </div>
             </div>
         </div>
@@ -360,128 +280,58 @@
             <div class="illustrations-grid">
                 <div class="illustration-card" onclick="openIllustration('calculus/gradient_illustration.html')">
                     <div class="card-icon">📈</div>
-                    <div class="card-title">Gradient - GPS của Neural Networks</div>
+                    <div class="card-title">Gradient</div>
                     <div class="card-description">
-                        🧭 <strong>The Learning Direction:</strong> Gradient = hướng tăng nhanh nhất của loss function! Neural networks dùng -gradient để "đi xuống núi" loss landscape. Ví dụ: Training ResNet, gradient magnitude cho biết liệu model có bị vanishing/exploding gradients không.
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🎯 Gradient trong Deep Learning:</h4>
-                        <ul>
-                            <li><strong>Gradient Descent:</strong> Optimizer cơ bản - SGD, Adam, RMSprop</li>
-                            <li><strong>Backpropagation:</strong> Tính gradient qua chain rule từ output về input</li>
-                            <li><strong>Gradient clipping:</strong> Giải quyết exploding gradients problem</li>
-                            <li><strong>Saliency maps:</strong> Visualize what CNN "nhìn" thấy trong images</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Navigate Loss Landscape 🧭</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/differentiation.html')">
                     <div class="card-icon">📈</div>
                     <div class="card-title">Interactive Differentiation</div>
                     <div class="card-description">
-                        Minh họa tương tác đạo hàm với nhiều hàm số và chế độ xem khác nhau
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Multiple function types (sin, cos, polynomial, exponential)</li>
-                            <li>Tangent line visualization</li>
-                            <li>Single & split view modes</li>
-                            <li>Manual control & animation</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/differentiation_multidimension.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Multidimensional Differentiation</div>
                     <div class="card-description">
-                        Minh họa 3D tương tác về đạo hàm riêng và gradient vector
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Partial derivatives ∂f/∂x, ∂f/∂y</li>
-                            <li>Gradient vector ∇f visualization</li>
-                            <li>3D surface interaction</li>
-                            <li>Multiple function types (saddle, paraboloid, etc.)</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/continuity_uniform_continuity_demo.html')">
                     <div class="card-icon">📊</div>
                     <div class="card-title">Continuity Demo</div>
                     <div class="card-description">
-                        Demo tính liên tục và liên tục đều của hàm số
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Continuity definition</li>
-                            <li>Uniform continuity</li>
-                            <li>Epsilon-delta proofs</li>
-                            <li>Function behavior</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/vector_calculus_fields.html')">
                     <div class="card-icon">🌊</div>
                     <div class="card-title">Vector Calculus Fields</div>
                     <div class="card-description">
-                        Minh họa tương tác về vector fields, gradient fields và các tính chất trường vector
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Vector fields visualization (gradient, circulation, radial)</li>
-                            <li>Divergence and curl analysis</li>
-                            <li>Conservative vs non-conservative fields</li>
-                            <li>Potential functions and streamlines</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/taylor_series.html')">
                     <div class="card-icon">🌊</div>
-                    <div class="card-title">Taylor Series - Foundation of Approximations</div>
+                    <div class="card-title">Taylor Series</div>
                     <div class="card-description">
-                        🎯 <strong>Approximation Power:</strong> Taylor series = xấp xỉ functions phức tạp bằng polynomials đơn giản! Activation functions (tanh, sigmoid) được approximate, numerical optimization methods, even quantum computing algorithms đều dựa trên Taylor expansions!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>⚡ Applications trong ML Computing:</h4>
-                        <ul>
-                            <li><strong>Activation approximations:</strong> Fast computation cho embedded AI systems</li>
-                            <li><strong>Newton's method:</strong> Second-order optimization dựa trên Taylor expansion</li>
-                            <li><strong>Numerical stability:</strong> Tránh overflow/underflow trong exponentials</li>
-                            <li><strong>Model interpretability:</strong> LIME sử dụng linear approximations</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Master Approximations ⚡</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('calculus/level_curves.html')">
                     <div class="card-icon">🗺️</div>
-                    <div class="card-title">Level Curves - Loss Function Landscapes</div>
+                    <div class="card-title">Level Curves</div>
                     <div class="card-description">
-                        🗺️ <strong>Optimization Navigation:</strong> Level curves = contour maps của loss functions! Mỗi đường cong biểu diễn constant loss values. Gradient descent "leo xuống" level curves để tìm minimum. Essential for understanding neural network training landscapes!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🧭 Navigation cho AI Training:</h4>
-                        <ul>
-                            <li><strong>Loss landscapes:</strong> Visualize neural network training difficulty</li>
-                            <li><strong>Optimization paths:</strong> How gradient descent navigates contours</li>
-                            <li><strong>Critical points:</strong> Local minima, saddle points trong deep learning</li>
-                            <li><strong>Hyperparameter tuning:</strong> Grid search visualization with contours</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Navigate AI Landscapes 🗺️</button>
                 </div>
             </div>
         </div>
@@ -497,36 +347,37 @@
                     <div class="card-icon">🔢</div>
                     <div class="card-title">Set Theory & Real Analysis Foundations</div>
                     <div class="card-description">
-                        🎯 <strong>Mathematical Rigor:</strong> Set Theory là ngôn ngữ của toán học hiện đại! Mọi concept trong ML - từ probability spaces, feature spaces, đến function spaces - đều được define bằng set theory. Real Analysis cung cấp rigorous definitions cho limits, continuity, convergence!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🏛️ Foundational Concepts:</h4>
-                        <ul>
-                            <li><strong>Set Operations:</strong> Union, intersection, complement with interactive Venn diagrams</li>
-                            <li><strong>Sequences & Limits:</strong> Convergence analysis for optimization algorithms</li>
-                            <li><strong>Cardinality & Infinity:</strong> Countable vs uncountable sets, continuum hypothesis</li>
-                            <li><strong>Topology:</strong> Open sets, closed sets, compactness in metric spaces</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Explore Mathematical Foundations 🏛️</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('real-analysis/continuity_differentiability.html')">
                     <div class="card-icon">📐</div>
-                    <div class="card-title">Continuity & Differentiability - ε-δ Rigor</div>
+                    <div class="card-title">Continuity & Differentiability</div>
                     <div class="card-description">
-                        🔍 <strong>Mathematical Precision:</strong> ε-δ definitions là heart của mathematical rigor! Understanding WHY gradient descent converges, WHEN loss functions are smooth, HOW optimization landscapes behave - all require deep understanding của continuity và differentiability theory!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>⚡ Rigorous Analysis:</h4>
-                        <ul>
-                            <li><strong>ε-δ Continuity:</strong> Interactive visualization of epsilon-delta proofs</li>
-                            <li><strong>Differentiability:</strong> Difference quotient limits and derivative existence</li>
-                            <li><strong>Function Pathologies:</strong> Continuous but non-differentiable functions</li>
-                            <li><strong>Uniform Continuity:</strong> Heine-Cantor theorem and practical implications</li>
-                        </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- COMPLEX ANALYSIS SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>🌌 Bài 3.5: Complex Analysis - Elegant Mathematical Universe</h2>
+                <p>✨ <strong>Mathematical Beauty Meets Power:</strong> Complex Analysis là bridge giữa algebra và geometry! Từ quantum mechanics wave functions, signal processing với complex exponentials, electrical engineering với AC circuits, đến computer graphics với complex transformations - complex numbers mở ra whole new dimension of mathematical thinking! Plus Riemann surfaces, conformal mappings, và contour integration - tools cực kỳ powerful cho advanced physics và engineering!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card special-card" onclick="openIllustration('complex-analysis/index.html')">
+                    <div class="card-icon" style="font-size: 3em;">🌌</div>
+                    <div class="card-title" style="font-size: 1.6em; color: #4fc3f7;">Browse All Complex Analysis Topics</div>
+                    <div class="card-description" style="font-size: 1.1em;">
+                        <strong>📚 Complete Collection:</strong> Complex numbers fundamentals, audio processing applications, analytic functions, contour integration, conformal mappings, power series, Riemann surfaces, and real-world engineering applications.
+                        <br><br>
+                        <strong>🎵 Featured:</strong> Two-part audio processing series covering everything from basic complex sinusoids to professional spectral effects!
+                        <br><br>
+                        <em>Click to explore all topics with guided learning paths →</em>
                     </div>
-                    <button class="open-button">Master Mathematical Rigor ⚡</button>
                 </div>
             </div>
         </div>
@@ -538,76 +389,73 @@
                 <p>🎵 <strong>Wave Revolution:</strong> Fourier transforms là DNA của signal processing! Từ Siri speech recognition, Spotify audio features, đến JPEG compression - tất cả đều dựa trên việc phân tách signals thành frequency components. CNNs thậm chí "học" giống Fourier filters!</p>
             </div>
             <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_transform_lesson.html')">
+                    <div class="card-icon">🎓</div>
+                    <div class="card-title">Fourier Transform - Bài Học Cơ Bản</div>
+                    <div class="card-description">
+                        Học từ cơ bản đến nâng cao với trực quan hóa tương tác
+                    </div>
+                </div>
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_mathematical_foundation.html')">
+                    <div class="card-icon">📐</div>
+                    <div class="card-title">Fourier Mathematical Foundation</div>
+                    <div class="card-description">
+                        Minh họa tương tác
+                    </div>
+                </div>
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_enhanced.html')">
+                    <div class="card-icon">⚙️</div>
+                    <div class="card-title">Fourier Series Enhanced</div>
+                    <div class="card-description">
+                        Minh họa tương tác
+                    </div>
+                </div>
                 <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier.html')">
                     <div class="card-icon">🌊</div>
-                    <div class="card-title">Fourier Series - Spotify's Music DNA</div>
+                    <div class="card-title">Fourier Series</div>
                     <div class="card-description">
-                        🎵 <strong>Music Intelligence:</strong> Spotify analyze 30 triệu bài hát bằng Fourier! Decompose audio thành frequency bands để detect genre, mood, energy level. Machine learning models dùng spectrograms (Fourier transforms) để classify music, speech recognition, even bird song identification!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🎼 Audio AI Applications:</h4>
-                        <ul>
-                            <li><strong>Music recommendation:</strong> Genre classification, mood analysis, audio fingerprinting</li>
-                            <li><strong>Speech processing:</strong> ASR systems, voice assistants, noise reduction</li>
-                            <li><strong>Signal classification:</strong> Medical ECG analysis, earthquake detection</li>
-                            <li><strong>Feature extraction:</strong> MFCCs, spectral features cho ML models</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Decode Audio Signals 🎼</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_square_wave.html')">
                     <div class="card-icon">⬜</div>
-                    <div class="card-title">Fourier Series - Square Wave</div>
+                    <div class="card-title">Fourier Series</div>
                     <div class="card-description">
-                        Minh họa chuỗi Fourier cho sóng vuông với các hài bậc lẻ
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Square wave decomposition</li>
-                            <li>Odd harmonics</li>
-                            <li>Gibbs phenomenon</li>
-                            <li>Convergence analysis</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_sawtooth.html')">
                     <div class="card-icon">📐</div>
-                    <div class="card-title">Fourier Series - Sawtooth Wave</div>
+                    <div class="card-title">Fourier Series</div>
                     <div class="card-description">
-                        Minh họa chuỗi Fourier cho sóng xung răng cưa
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Sawtooth wave analysis</li>
-                            <li>All harmonics</li>
-                            <li>Phase relationships</li>
-                            <li>Series convergence</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_triagle.html')">
                     <div class="card-icon">📊</div>
-                    <div class="card-title">Fourier Series - Triangle Wave</div>
+                    <div class="card-title">Fourier Series</div>
                     <div class="card-description">
-                        Minh họa chuỗi Fourier cho sóng tam giác
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Triangle wave decomposition</li>
-                            <li>Even function symmetry</li>
-                            <li>Harmonic content</li>
-                            <li>Amplitude relationships</li>
-                        </ul>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/fast_fourier_transform.html')">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Fast Fourier Transform (FFT)</div>
+                    <div class="card-description">
+                        Thuật toán FFT và ứng dụng thực tế
                     </div>
-                    <button class="open-button">Mở minh họa</button>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/noise_cancellation_spectral_subtraction.html')">
+                    <div class="card-icon">🎧</div>
+                    <div class="card-title">Khử Tiếng Ồn với Spectral Subtraction</div>
+                    <div class="card-description">
+                        Noise cancellation thực tế với Spectral Subtraction - Công nghệ trong tai nghe AirPods Pro!
+                    </div>
                 </div>
             </div>
         </div>
@@ -619,148 +467,75 @@
                 <p>Thuật toán Simplex, đối ngẫu và bài toán tối ưu tuyến tính</p>
             </div>
             <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('linear-programming/linear_programming_mathematical_foundation.html')">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Linear Programming</div>
+                    <div class="card-description">
+                        Minh họa tương tác
+                    </div>
+                </div>
                 <div class="illustration-card" onclick="openIllustration('linear-programming/linear_programming_illustration.html')">
                     <div class="card-icon">📊</div>
                     <div class="card-title">Linear Programming</div>
                     <div class="card-description">
-                        Minh họa bài toán quy hoạch tuyến tính với vùng khả thi và điểm tối ưu
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Feasible region</li>
-                            <li>Corner point method</li>
-                            <li>Objective function</li>
-                            <li>Linear constraints</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/linear_programming_demo.html')">
                     <div class="card-icon">📈</div>
                     <div class="card-title">Linear Programming Demo</div>
                     <div class="card-description">
-                        Demo quy hoạch tuyến tính với phương pháp đồ thị
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Linear objective functions</li>
-                            <li>Feasible region display</li>
-                            <li>Graphical method</li>
-                            <li>Optimal solution finding</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/simplex_illustration.html')">
                     <div class="card-icon">🧮</div>
                     <div class="card-title">Simplex Algorithm</div>
                     <div class="card-description">
-                        Minh họa thuật toán Simplex với bảng Simplex và các bước thực hiện
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Simplex tableau</li>
-                            <li>Pivot operations</li>
-                            <li>Entering/leaving variables</li>
-                            <li>Optimality conditions</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/simplex_algorithm_demo.html')">
                     <div class="card-icon">📊</div>
                     <div class="card-title">Simplex Algorithm Demo</div>
                     <div class="card-description">
-                        Demo thuật toán Simplex với bảng tableau từng bước
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Simplex tableau method</li>
-                            <li>Pivot operations</li>
-                            <li>Variable selection</li>
-                            <li>Step-by-step solving</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/simplex_optimization_demo.html')">
                     <div class="card-icon">📊</div>
                     <div class="card-title">Simplex Optimization Demo</div>
                     <div class="card-description">
-                        Demo tối ưu hóa với thuật toán Simplex
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Simplex method steps</li>
-                            <li>Basic feasible solutions</li>
-                            <li>Optimality testing</li>
-                            <li>Degeneracy handling</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/duality_illustration.html')">
                     <div class="card-icon">🔄</div>
                     <div class="card-title">Duality in Linear Programming</div>
                     <div class="card-description">
-                        Minh họa Primal/Dual problems và Duality theory
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Primal vs Dual problems</li>
-                            <li>Weak and Strong duality</li>
-                            <li>Complementary slackness</li>
-                            <li>SVM duality</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/duality_linear_programming.html')">
                     <div class="card-icon">🔄</div>
                     <div class="card-title">LP Duality</div>
                     <div class="card-description">
-                        Minh họa đối ngẫu trong quy hoạch tuyến tính
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Primal-dual construction</li>
-                            <li>Strong duality theorem</li>
-                            <li>Economic interpretation</li>
-                            <li>Shadow prices</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('linear-programming/general_duality_illustration.html')">
                     <div class="card-icon">🔗</div>
                     <div class="card-title">General Duality Theory</div>
                     <div class="card-description">
-                        Minh họa lý thuyết đối ngẫu tổng quát với Lagrangian và điều kiện KKT
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Lagrangian function</li>
-                            <li>Primal-dual relationships</li>
-                            <li>KKT conditions</li>
-                            <li>Complementary slackness</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
             </div>
         </div>
@@ -774,110 +549,58 @@
             <div class="illustrations-grid">
                 <div class="illustration-card" onclick="openIllustration('convex-analysis/convex_sets_illustration.html')">
                     <div class="card-icon">🔷</div>
-                    <div class="card-title">Convex Sets - Foundation of Reliable AI</div>
+                    <div class="card-title">Convex Sets</div>
                     <div class="card-description">
-                        🛡️ <strong>Reliability Guarantee:</strong> Convex sets đảm bảo mọi local optimum đều là global optimum! SVM feasible region, regularization constraints (L1 ball, L2 ball) đều là convex sets. Netflix, Google Ads optimization đều leverage convex constraints để đảm bảo stable solutions!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🏛️ Convex Sets trong Production ML:</h4>
-                        <ul>
-                            <li><strong>SVM margin constraints:</strong> Maximum margin = convex optimization problem</li>
-                            <li><strong>Regularization regions:</strong> L1/L2 balls, elastic net constraints</li>
-                            <li><strong>Probability simplex:</strong> Softmax outputs, mixture model weights</li>
-                            <li><strong>Semi-definite constraints:</strong> Covariance matrices, kernel learning</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Build Reliable Models 🛡️</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('convex-analysis/convex_optimization_illustration.html')">
                     <div class="card-icon">🔷</div>
                     <div class="card-title">Convex Optimization</div>
                     <div class="card-description">
-                        Minh họa bài toán tối ưu lồi và điều kiện tối ưu bậc nhất
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Convex vs non-convex functions</li>
-                            <li>First-order optimality conditions</li>
-                            <li>Convexity testing</li>
-                            <li>Constrained optimization</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('convex-analysis/convex_demo.html')">
                     <div class="card-icon">🔷</div>
                     <div class="card-title">Convex Functions Demo</div>
                     <div class="card-description">
-                        Demo tương tác về hàm lồi và tính chất tối ưu
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Convex function properties</li>
-                            <li>Jensen's inequality</li>
-                            <li>Global minimum</li>
-                            <li>Convexity testing</li>
-                        </ul>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('calculus/convex_functions_multivariable.html')">
+                    <div class="card-icon">🎲</div>
+                    <div class="card-title">Convex Functions - Multivariable 3D</div>
+                    <div class="card-description">
+                        Interactive 3D visualization of multivariable convex functions with real-time surface plots and gradient exploration
                     </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('convex-analysis/convex_constraints_feasible_regions.html')">
                     <div class="card-icon">🎯</div>
                     <div class="card-title">Convex Constraints & Feasible Regions</div>
                     <div class="card-description">
-                        Minh họa tương tác về ràng buộc lồi và vùng khả thi trong tối ưu hóa có ràng buộc
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Interactive constraint definition and feasible region visualization</li>
-                            <li>Linear programming with equality and inequality constraints</li>
-                            <li>Vertex enumeration and extreme points identification</li>
-                            <li>Preset problems: bounded, unbounded, infeasible cases</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/lagrangian_kkt_conditions.html')">
                     <div class="card-icon">⚖️</div>
-                    <div class="card-title">KKT Conditions - The SVM Secret</div>
+                    <div class="card-title">KKT Conditions</div>
                     <div class="card-description">
-                        🎯 <strong>SVM's Mathematical Core:</strong> KKT conditions explain tại sao chỉ support vectors quan trọng! Lagrange multipliers αᵢ = 0 cho non-support vectors, αᵢ > 0 cho support vectors. Complementary slackness = key insight behind SVM efficiency và sparse solutions!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>⚖️ KKT trong Production Algorithms:</h4>
-                        <ul>
-                            <li><strong>SVM training:</strong> SMO algorithm leverage KKT conditions</li>
-                            <li><strong>Portfolio optimization:</strong> Budget constraints, no-short selling</li>
-                            <li><strong>Neural Architecture Search:</strong> Resource-constrained model design</li>
-                            <li><strong>Fairness constraints:</strong> ML fairness thông qua constrained optimization</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Decode SVM Magic ⚖️</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('convex-analysis/convex_conjugates_duality.html')">
                     <div class="card-icon">🔄</div>
-                    <div class="card-title">Duality - Two Sides of ML Coin</div>
+                    <div class="card-title">Duality</div>
                     <div class="card-description">
-                        💰 <strong>Algorithmic Breakthrough:</strong> Duality theory = solve difficult primal problems qua easier dual problems! SVM dual formulation cho phép kernel trick. Fenchel duality giải thích tại sao regularization works. Hiểu duality = unlock advanced ML algorithms!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🪙 Duality trong Advanced ML:</h4>
-                        <ul>
-                            <li><strong>SVM kernel trick:</strong> Dual formulation enables infinite-dimensional feature spaces</li>
-                            <li><strong>Fenchel-Rockafellar duality:</strong> Foundation of proximal methods</li>
-                            <li><strong>Lagrangian relaxation:</strong> Large-scale optimization decomposition</li>
-                            <li><strong>GANs mathematical foundation:</strong> Minimax games và duality theory</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Flip the ML Coin 🪙</button>
                 </div>
             </div>
         </div>
@@ -892,362 +615,511 @@
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/gradient_descent_illustration.html')">
                     <div class="card-icon">📉</div>
-                    <div class="card-title">Gradient Descent - The Learning Algorithm</div>
+                    <div class="card-title">Gradient Descent</div>
                     <div class="card-description">
-                        🧠 <strong>Universal Learning Principle:</strong> Mọi neural network đều học thông qua gradient descent! Từ simple linear regression đến GPT models với 175 billion parameters. Learning rate scheduling, momentum, adaptive methods - tất cả đều variations của gradient descent core idea!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🔥 GD Variants trong Deep Learning:</h4>
-                        <ul>
-                            <li><strong>SGD + Momentum:</strong> Accelerated convergence, escape saddle points</li>
-                            <li><strong>Adam optimizer:</strong> Adaptive learning rates, default choice cho deep learning</li>
-                            <li><strong>Learning rate scheduling:</strong> Warmup, cosine decay, step decay</li>
-                            <li><strong>Gradient clipping:</strong> Stable training cho RNNs, Transformers</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Train Like GPT 🧠</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/gradient_descent_demo.html')">
                     <div class="card-icon">📉</div>
                     <div class="card-title">Gradient Descent Demo</div>
                     <div class="card-description">
-                        Demo tương tác thuật toán Gradient Descent
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Step size selection</li>
-                            <li>Convergence visualization</li>
-                            <li>Different objective functions</li>
-                            <li>Learning rate effects</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/newton_method_illustration.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Newton's Method</div>
                     <div class="card-description">
-                        Minh họa Newton's Method và so sánh với Gradient Descent
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Hessian matrix</li>
-                            <li>Second-order methods</li>
-                            <li>Quadratic convergence</li>
-                            <li>Method comparison</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/newtons_method_demo.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Newton's Method Demo</div>
                     <div class="card-description">
-                        Demo phương pháp Newton với Hessian matrix
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Second-order methods</li>
-                            <li>Hessian computation</li>
-                            <li>Quadratic convergence</li>
-                            <li>Line search</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/quasi_newton_illustration.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Quasi-Newton Methods</div>
                     <div class="card-description">
-                        Minh họa Quasi-Newton methods và so sánh với Newton's method
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>BFGS update formula</li>
-                            <li>Hessian approximation</li>
-                            <li>Secant equation</li>
-                            <li>Computational efficiency</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/quasi_newton_demo.html')">
                     <div class="card-icon">🔬</div>
                     <div class="card-title">Quasi-Newton Demo</div>
                     <div class="card-description">
-                        Demo các phương pháp Quasi-Newton (BFGS, L-BFGS)
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>BFGS updates</li>
-                            <li>Hessian approximation</li>
-                            <li>Limited memory BFGS</li>
-                            <li>Secant conditions</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/subgradient_illustration.html')">
                     <div class="card-icon">📐</div>
                     <div class="card-title">Subgradient Method</div>
                     <div class="card-description">
-                        Minh họa phương pháp Subgradient và so sánh với Gradient Descent
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Subgradient definition</li>
-                            <li>Non-differentiable functions</li>
-                            <li>Subgradient vs gradient</li>
-                            <li>Step size selection</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/subgradient_demo.html')">
                     <div class="card-icon">📐</div>
                     <div class="card-title">Subgradient Method Demo</div>
                     <div class="card-description">
-                        Demo phương pháp subgradient cho hàm không khả vi
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Subgradient computation</li>
-                            <li>Non-differentiable optimization</li>
-                            <li>Step size rules</li>
-                            <li>Convergence analysis</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/proximal_gradient_illustration.html')">
                     <div class="card-icon">🎯</div>
                     <div class="card-title">Proximal Gradient Descent</div>
                     <div class="card-description">
-                        Minh họa Proximal Gradient Descent và Proximal Operator
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Proximal operator</li>
-                            <li>Soft thresholding</li>
-                            <li>Lasso regression</li>
-                            <li>Non-smooth optimization</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/proximal_gradient_demo.html')">
                     <div class="card-icon">🎯</div>
                     <div class="card-title">Proximal Gradient Demo</div>
                     <div class="card-description">
-                        Demo thuật toán Proximal Gradient cho tối ưu composite
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Proximal operators</li>
-                            <li>Composite optimization</li>
-                            <li>ISTA/FISTA algorithms</li>
-                            <li>Soft thresholding</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/proximal_operator_demo.html')">
                     <div class="card-icon">🎯</div>
                     <div class="card-title">Proximal Operator Demo</div>
                     <div class="card-description">
-                        Demo các proximal operator cho các hàm khác nhau
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Proximal operator definition</li>
-                            <li>Soft thresholding</li>
-                            <li>Projection operators</li>
-                            <li>Moreau envelope</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/stochastic_gradient_illustration.html')">
                     <div class="card-icon">🎲</div>
                     <div class="card-title">Stochastic Gradient Descent</div>
                     <div class="card-description">
-                        Minh họa SGD, Batch GD và Mini-batch GD
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Batch vs SGD</li>
-                            <li>Mini-batch GD</li>
-                            <li>Learning rate scheduling</li>
-                            <li>Noise and convergence</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/stochastic_gradient_demo.html')">
                     <div class="card-icon">🎲</div>
                     <div class="card-title">Stochastic Gradient Demo</div>
                     <div class="card-description">
-                        Demo SGD và các biến thể với noise và mini-batch
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>SGD vs batch GD</li>
-                            <li>Mini-batch strategies</li>
-                            <li>Learning rate scheduling</li>
-                            <li>Variance reduction</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/kkt_conditions_demo.html')">
                     <div class="card-icon">✅</div>
                     <div class="card-title">KKT Conditions Demo</div>
                     <div class="card-description">
-                        Demo điều kiện KKT cho tối ưu có ràng buộc
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Karush-Kuhn-Tucker conditions</li>
-                            <li>Constrained optimization</li>
-                            <li>Lagrange multipliers</li>
-                            <li>Complementary slackness</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/parallel_computing_illustration.html')">
                     <div class="card-icon">🚀</div>
                     <div class="card-title">Parallel Computing in ML</div>
                     <div class="card-description">
-                        Minh họa các loại parallelism và performance metrics
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Data vs Model parallelism</li>
-                            <li>Speedup và Efficiency</li>
-                            <li>Communication overhead</li>
-                            <li>Worker coordination</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
+                <div class="illustration-card" onclick="openIllustration('optimization/least_squares_problems.html')">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Least-Squares Problems</div>
+                    <div class="card-description">
+                        Minh họa tương tác
+                    </div>
+                </div>
+
                 <div class="illustration-card" onclick="openIllustration('optimization/Nelder-Mead.html')">
                     <div class="card-icon">🔍</div>
                     <div class="card-title">Nelder-Mead Algorithm</div>
                     <div class="card-description">
-                        Minh họa thuật toán Nelder-Mead simplex method
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Simplex operations</li>
-                            <li>Reflection, expansion, contraction</li>
-                            <li>Direct search method</li>
-                            <li>Derivative-free optimization</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('optimization/loss_function_landscapes.html')">
                     <div class="card-icon">🏔️</div>
-                    <div class="card-title">Loss Landscapes - The AI Training Terrain</div>
+                    <div class="card-title">Loss Landscapes</div>
                     <div class="card-description">
-                        🏔️ <strong>Deep Learning Geography:</strong> Neural network loss landscapes có millions peaks và valleys! Visualize why deep learning works: good local minima everywhere, flat minima generalize better. Explore famous landscapes: Rosenbrock (optimization benchmark), loss surfaces của real neural networks!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🗺️ Navigate AI Training Terrain:</h4>
-                        <ul>
-                            <li><strong>Loss surface analysis:</strong> Visualize why ResNets train better than plain networks</li>
-                            <li><strong>Optimizer comparison:</strong> SGD vs Adam vs RMSprop trajectories</li>
-                            <li><strong>Learning rate effects:</strong> Too high = divergence, too low = slow convergence</li>
-                            <li><strong>Saddle points:</strong> Dominant obstacle trong high-dimensional optimization</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Explore AI Terrain 🗺️</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('machine-learning/neural_network_illustration.html')">
                     <div class="card-icon">🧠</div>
-                    <div class="card-title">Neural Networks - The Universal Approximator</div>
+                    <div class="card-title">Neural Networks</div>
                     <div class="card-description">
-                        🌟 <strong>The AI Revolution:</strong> Neural networks = universal function approximators! Từ recognizing cats trong photos đến generating human-like text. Forward pass = predictions, backpropagation = learning từ mistakes. Tất cả chỉ là matrix multiplications và non-linear activations!
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>🌟 Neural Network Revolution:</h4>
-                        <ul>
-                            <li><strong>Universal approximation:</strong> Any continuous function can be approximated</li>
-                            <li><strong>Backpropagation:</strong> Chain rule enables deep learning revolution</li>
-                            <li><strong>Activation functions:</strong> ReLU, Sigmoid, Tanh - sources of non-linearity</li>
-                            <li><strong>Architecture evolution:</strong> MLPs → CNNs → RNNs → Transformers</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Build Your First AI 🌟</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('machine-learning/lasso_regression_demo.html')">
                     <div class="card-icon">🎯</div>
                     <div class="card-title">Lasso Regression Demo</div>
                     <div class="card-description">
-                        Demo hồi quy Lasso với regularization L1
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>L1 regularization</li>
-                            <li>Feature selection</li>
-                            <li>Sparsity induction</li>
-                            <li>Regularization path</li>
-                        </ul>
-                    </div>
-                    <button class="open-button">Mở minh họa</button>
                 </div>
                 
                 <div class="illustration-card" onclick="openIllustration('machine-learning/linear_regression_demo.html')">
                     <div class="card-icon">📉</div>
                     <div class="card-title">Linear Regression Demo</div>
                     <div class="card-description">
-                        Demo hồi quy tuyến tính với least squares method
+                        Minh họa tương tác
                     </div>
-                    <div class="card-topics">
-                        <h4>Khái niệm chính:</h4>
-                        <ul>
-                            <li>Least squares method</li>
-                            <li>Best-fit line calculation</li>
-                            <li>Interactive data points</li>
-                            <li>Statistical measures</li>
-                        </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GRAPH THEORY SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>🕸️ Bài 7: Graph Theory - Network Mathematics của Digital Age</h2>
+                <p>🌐 <strong>The Connected World:</strong> Graph Theory = mathematics of networks! Từ social media algorithms (Facebook friend suggestions), internet routing protocols, blockchain consensus mechanisms, đến neural network architectures trong AI - tất cả đều dựa trên graph theory. Plus recommendation systems, supply chain optimization, và cybersecurity threat detection. Hiểu graphs = hiểu cách information flows trong modern digital ecosystem!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('graph-theory/index.html')">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-title">Graph Theory Hub</div>
+                    <div class="card-description">
+                        Complete graph theory learning center với 12 comprehensive lessons từ fundamentals đến advanced applications
                     </div>
-                    <button class="open-button">Mở minh họa</button>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('graph-theory/graph_fundamentals.html')">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Graph Fundamentals</div>
+                    <div class="card-description">
+                        Interactive exploration của vertices, edges, graph properties với hands-on visualization
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('graph-theory/graph_traversal.html')">
+                    <div class="card-icon">🗺️</div>
+                    <div class="card-title">Graph Traversal Algorithms</div>
+                    <div class="card-description">
+                        BFS, DFS algorithms với step-by-step animation - foundation của search engines và AI pathfinding
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('graph-theory/shortest_path.html')">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Shortest Path Algorithms</div>
+                    <div class="card-description">
+                        Dijkstra, Bellman-Ford algorithms - core của GPS navigation và network routing protocols
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('graph-theory/social_network_analysis.html')">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title">Social Network Analysis</div>
+                    <div class="card-description">
+                        Centrality measures, community detection - mathematics behind LinkedIn connections và viral marketing
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('graph-theory/graph_neural_networks.html')">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title">Graph Neural Networks</div>
+                    <div class="card-description">
+                        Modern AI architecture cho knowledge graphs, molecular analysis, và recommendation systems
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ALGORITHMS & DATA STRUCTURES SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>🔧 Bài 8: Algorithms & Data Structures - Programming Foundations</h2>
+                <p>💻 <strong>Code Excellence:</strong> Algorithms = problem-solving blueprints! Data structures = memory organization mastery! Từ sorting algorithms trong databases, hash tables trong caching systems, đến graph algorithms trong social networks - đây là foundation của efficient programming và system design!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/index.html')">
+                    <div class="card-icon">🏗️</div>
+                    <div class="card-title">Algorithms & Data Structures Hub</div>
+                    <div class="card-description">
+                        Complete learning hub with interactive lessons on fundamental data structures and algorithms
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/arrays_and_dynamic_arrays.html')">
+                    <div class="card-icon">📊</div>
+                    <div class="card-title">Arrays & Dynamic Arrays</div>
+                    <div class="card-description">
+                        Interactive exploration of arrays, dynamic resizing, and fundamental operations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/linked_lists.html')">
+                    <div class="card-icon">🔗</div>
+                    <div class="card-title">Linked Lists</div>
+                    <div class="card-description">
+                        Comprehensive guide to singly and doubly linked lists with visualizations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/stacks_and_queues.html')">
+                    <div class="card-icon">📚</div>
+                    <div class="card-title">Stacks & Queues</div>
+                    <div class="card-description">
+                        LIFO and FIFO data structures with real-world applications and implementations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/bubble_sort_visualization.html')">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-title">Bubble Sort Visualization</div>
+                    <div class="card-description">
+                        Step-by-step visualization of bubble sort algorithm with complexity analysis
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/bloom_filter.html')">
+                    <div class="card-icon">🌸</div>
+                    <div class="card-title">Bloom Filter</div>
+                    <div class="card-description">
+                        Interactive exploration of probabilistic data structure used in databases, browsers, and big data systems
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('algorithms-datastructures/drunken_bishop.html')">
+                    <div class="card-icon">🍺</div>
+                    <div class="card-title">Drunken Bishop Algorithm</div>
+                    <div class="card-description">
+                        Visual fingerprint generation từ hash data - core của SSH key verification và cryptographic visualization
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CRYPTOGRAPHY SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>🔐 Bài 9: Mật Mã Học - Toán học bảo mật thông tin</h2>
+                <p>🛡️ <strong>Mathematics of Security:</strong> Cryptography = applied mathematics for information security! Từ RSA encryption (number theory), elliptic curve cryptography (algebraic geometry), đến blockchain (hash functions, digital signatures) - tất cả đều dựa trên mathematical foundations. Hiểu crypto math = hiểu cách internet được bảo mật!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('cryptography/rsa_encryption_demo.html')">
+                    <div class="card-icon">🔐</div>
+                    <div class="card-title">RSA Encryption</div>
+                    <div class="card-description">
+                        Interactive RSA key generation, encryption/decryption with prime number theory and modular arithmetic
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/number_theory_foundations.html')">
+                    <div class="card-icon">🔢</div>
+                    <div class="card-title">Number Theory Foundations</div>
+                    <div class="card-description">
+                        Prime numbers, GCD, modular arithmetic, and Fermat's Little Theorem - the building blocks of cryptography
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/elliptic_curve_crypto.html')">
+                    <div class="card-icon">📈</div>
+                    <div class="card-title">Elliptic Curve Cryptography</div>
+                    <div class="card-description">
+                        Modern ECC visualization: elliptic curves, point addition, and why ECC provides stronger security with smaller keys
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/hash_functions_demo.html')">
+                    <div class="card-icon">🧮</div>
+                    <div class="card-title">Hash Functions & SHA</div>
+                    <div class="card-description">
+                        Cryptographic hash functions, avalanche effect, collision resistance, and applications in blockchain
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/digital_signatures.html')">
+                    <div class="card-icon">✍️</div>
+                    <div class="card-title">Digital Signatures</div>
+                    <div class="card-description">
+                        Authentication and non-repudiation: how mathematical signatures ensure message integrity and authenticity
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/aes_encryption.html')">
+                    <div class="card-icon">🔒</div>
+                    <div class="card-title">AES Symmetric Encryption</div>
+                    <div class="card-description">
+                        Advanced Encryption Standard: substitution-permutation networks, S-boxes, and linear algebra in block ciphers
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/diffie_hellman.html')">
+                    <div class="card-icon">🤝</div>
+                    <div class="card-title">Diffie-Hellman Key Exchange</div>
+                    <div class="card-description">
+                        Secure key establishment over insecure channels using discrete logarithms and modular exponentiation
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/quantum_cryptography.html')">
+                    <div class="card-icon">⚛️</div>
+                    <div class="card-title">Quantum Cryptography</div>
+                    <div class="card-description">
+                        Quantum key distribution, post-quantum cryptography, and preparing for the quantum computing era
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('cryptography/steganography_demo.html')">
+                    <div class="card-icon">🕵️</div>
+                    <div class="card-title">Steganography & Hidden Messages</div>
+                    <div class="card-description">
+                        Information hiding in images, LSB encoding, and the mathematics of covert communication
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- BLOCKCHAIN MATHEMATICS SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>⛓️ Blockchain Mathematics</h2>
+                <p>🚀 <strong>Decentralized Future:</strong> Blockchain = mathematical consensus in trustless networks! Từ SHA-256 hashing, proof-of-work mining (difficulty adjustment algorithms), smart contracts (state machines), đến DeFi protocols (automated market makers, bonding curves). Plus NFT rarity calculations, zero-knowledge proofs, và token economics. Hiểu blockchain math = hiểu future of finance!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('blockchain/index.html')">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-title">Blockchain Hub</div>
+                    <div class="card-description">
+                        Complete blockchain mathematics learning center with 5 comprehensive lessons from basics to advanced
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('blockchain/blockchain_fundamentals.html')">
+                    <div class="card-icon">⛓️</div>
+                    <div class="card-title">Blockchain Fundamentals</div>
+                    <div class="card-description">
+                        Hash functions, mining simulation, proof-of-work, and consensus mechanisms with interactive demonstrations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('blockchain/smart_contracts_consensus.html')">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">Smart Contracts & Consensus</div>
+                    <div class="card-description">
+                        Advanced contract deployment, gas economics, and Byzantine fault tolerance with real simulations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('blockchain/defi_mathematics.html')">
+                    <div class="card-icon">💱</div>
+                    <div class="card-title">DeFi Mathematics</div>
+                    <div class="card-description">
+                        Automated market makers, constant product formula, impermanent loss, and yield farming analytics
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('blockchain/zero_knowledge_proofs.html')">
+                    <div class="card-icon">🔒</div>
+                    <div class="card-title">Zero-Knowledge Proofs</div>
+                    <div class="card-description">
+                        Interactive privacy protocols, Schnorr signatures, commitment schemes, and cryptographic proofs
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('blockchain/nft_token_economics.html')">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-title">NFT & Token Economics</div>
+                    <div class="card-description">
+                        NFT rarity mathematics, marketplace dynamics, bonding curves, and governance token mechanisms
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MECHANICS SECTION -->
+        <div class="topic-section">
+            <div class="topic-header">
+                <h2>⚙️ Mechanics & Physics</h2>
+                <p>🚀 <strong>Classical to Quantum:</strong> Mechanics = the mathematical foundation of physical reality! Từ Newton's laws (F=ma), Lagrangian mechanics (principle of least action), Hamiltonian formalism (energy conservation), đến rigid body dynamics (Euler equations), celestial mechanics (orbital mechanics), và nonlinear dynamics (chaos theory). Plus continuum mechanics (fluid/solid mechanics) và advanced topics. Hiểu mechanics = hiểu how the universe works!</p>
+            </div>
+            <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('mechanics/index.html')">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-title">Mechanics Hub</div>
+                    <div class="card-description">
+                        Complete mechanics learning center with 8 comprehensive lessons from Newtonian to advanced topics
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/newtonian_mechanics.html')">
+                    <div class="card-icon">🍎</div>
+                    <div class="card-title">Newtonian Mechanics</div>
+                    <div class="card-description">
+                        Newton's laws, force analysis, motion simulations, collisions, and energy conservation with interactive demos
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/kinematics_dynamics.html')">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">Kinematics & Dynamics</div>
+                    <div class="card-description">
+                        Projectile motion, circular motion, oscillations, and advanced kinematic analysis with real-time calculations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/lagrangian_mechanics.html')">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Lagrangian Mechanics</div>
+                    <div class="card-description">
+                        Principle of least action, Euler-Lagrange equations, generalized coordinates, and advanced analytical mechanics
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/hamiltonian_mechanics.html')">
+                    <div class="card-icon">🔋</div>
+                    <div class="card-title">Hamiltonian Mechanics</div>
+                    <div class="card-description">
+                        Phase space, canonical transformations, Hamilton's equations, and symplectic geometry applications
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/rigid_body_mechanics.html')">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-title">Rigid Body Mechanics</div>
+                    <div class="card-description">
+                        Angular momentum, Euler equations, gyroscopic motion, and rotational dynamics with 3D visualizations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/celestial_mechanics.html')">
+                    <div class="card-icon">🌍</div>
+                    <div class="card-title">Celestial Mechanics</div>
+                    <div class="card-description">
+                        Orbital mechanics, Kepler's laws, N-body problems, and gravitational dynamics with space mission simulations
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/continuum_mechanics.html')">
+                    <div class="card-icon">🌊</div>
+                    <div class="card-title">Continuum Mechanics</div>
+                    <div class="card-description">
+                        Fluid mechanics, solid mechanics, stress-strain analysis, and partial differential equations in physics
+                    </div>
+                </div>
+                
+                <div class="illustration-card" onclick="openIllustration('mechanics/nonlinear_dynamics.html')">
+                    <div class="card-icon">🌀</div>
+                    <div class="card-title">Nonlinear Dynamics</div>
+                    <div class="card-description">
+                        Chaos theory, bifurcations, strange attractors, and complex dynamical systems with interactive visualizations
+                    </div>
                 </div>
             </div>
         </div>
@@ -1259,6 +1131,13 @@
                 <p>Regression, classification algorithms và advanced optimization methods</p>
             </div>
             <div class="illustrations-grid">
+                <div class="illustration-card" onclick="openIllustration('machine-learning/machine_learning_mathematical_foundation.html')">
+                    <div class="card-icon">🤖</div>
+                    <div class="card-title">Machine Learning</div>
+                    <div class="card-description">
+                        Minh họa tương tác
+                    </div>
+                </div>
                 <!-- The rest of ML visualizations will continue in the existing sections -->
     </div>
         

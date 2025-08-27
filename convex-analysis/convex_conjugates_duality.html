@@ -3,195 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convex Conjugates & Duality - Interactive Visualization</title>
+    <title>🔄 Hàm Liên Hợp & Đối Ngẫu - Lý Thuyết & Minh Họa Tương Tác</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
     <style>
         body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
+            font-size: 20px;
+            line-height: 1.8;
             margin: 0;
-            background: #111;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
+            min-height: 100vh;
         }
-        
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-        
-        .canvas-container {
-            flex: 1;
-            position: relative;
-        }
-        
         canvas {
             background: #000;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
             border: 1px solid #444;
         }
         
-        .controls {
-            width: 450px;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            border-left: 1px solid #444;
-            overflow-y: auto;
+        .theory-section {
+            background: linear-gradient(145deg, rgba(25, 25, 60, 0.9), rgba(15, 15, 40, 0.7));
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px auto;
+            max-width: 1000px;
+            text-align: left;
+            border: 2px solid rgba(100, 200, 255, 0.4);
         }
         
+        .interactive-section {
+            background: linear-gradient(145deg, rgba(15, 40, 15, 0.9), rgba(25, 60, 25, 0.7));
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px auto;
+            border: 2px solid rgba(76, 175, 80, 0.4);
+        }
+        .controls {
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+        }
         .control-section {
-            margin-bottom: 20px;
+            margin: 20px 0;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .control-section h3 {
             margin: 0 0 15px 0;
-            color: #0ff;
+            color: #4caf50;
+            font-size: 18px;
+            text-align: center;
+        }
+        .function-info, .conjugate-info, .duality-gap, .tangent-line, .optimization-problem {
+            background: rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        
+        .formula-container {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .formula-title {
             font-size: 16px;
+            color: #ffeb3b;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .function-info {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            margin-bottom: 15px;
+        .math-environment {
+            font-size: 18px;
+            text-align: center;
+            margin: 15px 0;
+            color: #ffffff;
         }
         
-        .conjugate-info {
-            background: rgba(255, 0, 255, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            margin-bottom: 15px;
-            border-left: 3px solid #ff00ff;
+        .formula-description {
+            font-size: 14px;
+            color: #b8e6ff;
+            font-style: italic;
+            margin-top: 8px;
+            text-align: center;
         }
-        
-        .duality-gap {
-            background: rgba(255, 255, 0, 0.1);
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-bottom: 15px;
-            border-left: 3px solid #ffff00;
-        }
-        
         .toggle-section {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
-            margin-bottom: 15px;
+            margin: 20px 0;
         }
         
-        .toggle-button {
-            padding: 8px;
-            background: #333;
+        .toggle-button, .function-button {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
             text-align: center;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-button:hover, .function-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
         
         .toggle-button.active {
-            background: #0ff;
+            background: #4caf50;
             color: #000;
-        }
-        
-        .info-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            max-width: 380px;
-            z-index: 10;
-        }
-        
-        .legend {
-            font-size: 11px;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-        
-        .legend-item {
-            margin: 3px 0;
-        }
-        
-        .slider-group {
-            margin: 10px 0;
-        }
-        
-        .slider-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #aaa;
-        }
-        
-        .slider-group input[type="range"] {
-            width: 100%;
-        }
-        
-        .slider-value {
-            font-size: 12px;
-            color: #0ff;
-            text-align: right;
-            margin-top: 2px;
-        }
-        
-        .function-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .function-button {
-            padding: 8px;
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-            text-align: center;
-            transition: background 0.2s;
-        }
-        
-        .function-button:hover {
-            background: #555;
         }
         
         .function-button.active {
             background: #f39c12;
             color: #000;
         }
-        
-        .tangent-line {
-            background: rgba(0, 255, 0, 0.1);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-bottom: 15px;
-            border-left: 3px solid #00ff00;
+        .info-panel {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin: 20px auto;
+            max-width: 600px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
         }
         
-        .optimization-problem {
-            background: rgba(255, 165, 0, 0.1);
-            padding: 12px;
+        .legend {
+            font-size: 13px;
+            margin-top: 15px;
+            line-height: 1.6;
+            text-align: left;
+        }
+        
+        .legend-item {
+            margin: 8px 0;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            line-height: 1.3;
-            margin-bottom: 15px;
-            border-left: 3px solid #ffa500;
+        }
+        .slider-group {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .slider-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #4caf50;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .slider-value {
+            font-size: 16px;
+            color: #0ff;
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .function-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
         }
     </style>
 
@@ -201,24 +215,148 @@
 
 </head>
 <body>
-    <div class="container">
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
-            <div class="info-panel">
-                <strong>🔄 Convex Conjugates & Duality</strong><br/>
-                Interactive exploration of convex conjugate functions, Fenchel duality, and geometric interpretations.
-                <div class="legend">
-                    <div class="legend-item" style="color: #0ff;">🔵 Original Function f(x)</div>
-                    <div class="legend-item" style="color: #ff00ff;">🟣 Conjugate Function f*(y)</div>
-                    <div class="legend-item" style="color: #00ff00;">🟢 Tangent Line yx - f*(y)</div>
-                    <div class="legend-item" style="color: #ff6b6b;">🔴 Supporting Hyperplane</div>
-                    <div class="legend-item" style="color: #ffa500;">🟠 Epigraph</div>
-                    <div class="legend-item" style="color: #ffff00;">🟡 Dual Point</div>
-                </div>
-            </div>
+  <h2 style="font-size: 3.2em; font-weight: 900; text-shadow: 4px 4px 8px rgba(0,0,0,0.8); margin-bottom: 40px; letter-spacing: 1px;">🔄 Hàm Liên Hợp & Đối Ngẫu - Lý Thuyết & Minh Họa Tương Tác</h2>
+  
+  <!-- ===========================================
+       PHẦN LÝ THUYẾT (THEORY SECTION)
+       =========================================== -->
+  
+  <div class="theory-section">
+    <h2 style="color: #00d4ff; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">📖 LÝ THUYẾT VỀ HÀM LIÊN HỢP & ĐỐI NGẪU</h2>
+    
+    <div class="formula-container">
+      <div class="formula-title">Định Nghĩa Hàm Liên Hợp</div>
+      <div class="math-environment">
+        $$f^*(y) = \sup_{x \in \text{dom}(f)} \{yx - f(x)\}$$
+      </div>
+      <div class="formula-description">Hàm liên hợp là phép biến đổi Legendre-Fenchel</div>
+    </div>
+
+    <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 25px 0;">
+      <h3 style="font-size: 1.8em; font-weight: 800; color: #FFD700; margin-bottom: 15px;">🔍 Đặc Tính Cơ Bản</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <p><strong>Fenchel-Moreau:</strong> Nếu f là hàm lồi thì $f^{**} = f$</p>
+          <p><strong>Bất đẳng thức Fenchel:</strong> $f(x) + f^*(y) \geq xy$</p>
         </div>
+        <div>
+          <p><strong>Dạng Biến Phân:</strong> $y \in \partial f(x) \Leftrightarrow x \in \partial f^*(y)$</p>
+          <p><strong>Đối Ngẫu Fenchel:</strong> $\min f(x) = -\max(-f^*(0))$</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+      <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #ffd700;">⚡ Ví Dụ Hàm Liên Hợp</h4>
+        <div class="formula-container">
+          <div class="formula-title">Hàm Bậc 2</div>
+          <div class="math-environment">$$f(x) = \frac{1}{2}x^2 \Rightarrow f^*(y) = \frac{1}{2}y^2$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Hàm Mũ</div>
+          <div class="math-environment">$$f(x) = e^x \Rightarrow f^*(y) = y\log(y) - y$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Giá Trị Tuyệt Đối</div>
+          <div class="math-environment">$$f(x) = |x| \Rightarrow f^*(y) = \delta_{[-1,1]}(y)$$</div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #007bff;">📐 Đối Ngẫu Fenchel</h4>
+        <div class="formula-container">
+          <div class="formula-title">Bài Toán Gốc (Primal)</div>
+          <div class="math-environment">$$\inf_{x} f(x) + g(Ax)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Bài Toán Đối Ngẫu (Dual)</div>
+          <div class="math-environment">$$\sup_{y} -f^*(A^T y) - g^*(-y)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đối Ngẫu Mạnh</div>
+          <div class="math-environment">$$\inf \text{ primal} = \sup \text{ dual}$$</div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #28a745;">🎯 Ứng Dụng Thực Tiễn</h4>
+        <div class="formula-container">
+          <div class="formula-title">Tối ưu Lồi</div>
+          <div class="math-environment">$$\text{Dual problem solving}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Machine Learning</div>
+          <div class="math-environment">$$\text{SVM, Lasso, Ridge}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Xử Lý Tín Hiệu</div>
+          <div class="math-environment">$$\text{Image reconstruction}$$</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="background: rgba(220, 53, 69, 0.1); padding: 20px; border-radius: 8px; margin-top: 20px;">
+      <h4 style="color: #dc3545; font-size: 1.6em; margin-bottom: 15px;">🎯 Tầm Quan Trọng Trong Toán Học</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div>
+          <h5 style="color: #ff6b6b; font-size: 1.3em;">Giải Tích Lồi:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>Biến đổi giữa hàm gốc và hàm liên hợp</li>
+            <li>Định lý Fenchel-Moreau: $f^{**} = f$</li>
+            <li>Biến phân (subdifferential) và tối ưu hóa</li>
+            <li>Hình học của epigraph và simpeau</li>
+          </ul>
+        </div>
+        <div>
+          <h5 style="color: #4ecdc4; font-size: 1.3em;">Tối ưu Hóa:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>Đối ngẫu Lagrange và Fenchel</li>
+            <li>Điều kiện KKT và đối ngẫu mạnh</li>
+            <li>Thuật toán proximal và ADMM</li>
+            <li>Bài toán min-max và điểm yên ngựa</li>
+          </ul>
+        </div>
+        <div>
+          <h5 style="color: #7c4dff; font-size: 1.3em;">Machine Learning:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>SVM: Dual formulation cho kernel methods</li>
+            <li>Lasso regression: Soft-thresholding operator</li>
+            <li>Deep learning: Regularization theory</li>
+            <li>GANs: Optimal transport và Wasserstein distance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===========================================
+       PHẦN MINH HỌA TƯƠNG TÁC (INTERACTIVE ILLUSTRATION)
+       =========================================== -->
+  
+  <div class="interactive-section">
+    <h2 style="color: #4caf50; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">🎮 MINH HỌA TƯƠNG TÁC</h2>
+    
+    <div style="text-align: center; margin-bottom: 20px; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px;">
+      <p style="font-size: 18px; color: #81c784; margin: 0;">Khám phá trực quan hàm liên hợp, đối ngẫu Fenchel và các giải thích hình học</p>
+    </div>
+
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div class="info-panel">
+      <h3 style="color: #4caf50; text-align: center; margin-bottom: 15px;">🔄 Hàm Liên Hợp & Đối Ngẫu</h3>
+      <p style="text-align: center; margin-bottom: 15px;">Khám phá tương tác các hàm liên hợp, đối ngẫu Fenchel và giải thích hình học.</p>
+      <div class="legend">
+        <div class="legend-item" style="color: #0ff;">🔵 Hàm gốc f(x)</div>
+        <div class="legend-item" style="color: #ff00ff;">🟣 Hàm liên hợp f*(y)</div>
+        <div class="legend-item" style="color: #00ff00;">🟢 Đường tiếp tuyến yx - f*(y)</div>
+        <div class="legend-item" style="color: #ff6b6b;">🔴 Siêu phẳng đỡ trợ</div>
+        <div class="legend-item" style="color: #ffa500;">🟠 Epigraph</div>
+        <div class="legend-item" style="color: #ffff00;">🟡 Điểm đối ngẫu</div>
+      </div>
+    </div>
         
-        <div class="controls">
+    <div class="controls">
             <div class="control-section">
                 <h3>Function Selection</h3>
                 <div class="function-selector">
@@ -305,18 +443,18 @@
             <div class="control-section">
                 <h3>Advanced Controls</h3>
                 <div class="toggle-section">
-                    <div class="toggle-button" onclick="animateDuality()">
-                        🎬 Animate Duality
-                    </div>
-                    <div class="toggle-button" onclick="resetView()">
-                        🔄 Reset View
-                    </div>
-                    <div class="toggle-button" onclick="showBiconjugate()">
-                        🔄🔄 Biconjugate
-                    </div>
-                    <div class="toggle-button" onclick="findSaddlePoint()">
-                        🎯 Saddle Point
-                    </div>
+          <div class="toggle-button" onclick="animateDuality()">
+            🎬 Hoạt Hình Đối Ngẫu
+          </div>
+          <div class="toggle-button" onclick="resetView()">
+            🔄 Đặt Lại
+          </div>
+          <div class="toggle-button" onclick="showBiconjugate()">
+            🔄🔄 Song Liên Hợp
+          </div>
+          <div class="toggle-button" onclick="findSaddlePoint()">
+            🎯 Điểm Yên Ngựa
+          </div>
                 </div>
             </div>
         </div>

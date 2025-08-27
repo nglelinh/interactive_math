@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Classical & Analytical Mechanics Hub</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f1419 0%, #1a202c 50%, #2d3748 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #63b3ed;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            color: #e2e8f0;
+            background: rgba(99, 179, 237, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #63b3ed;
+        }
+        
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .lesson-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lesson-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #63b3ed, #4299e1);
+        }
+        
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            border-color: #63b3ed;
+            box-shadow: 0 20px 40px rgba(99, 179, 237, 0.3);
+        }
+        
+        .lesson-card.beginner::before {
+            background: linear-gradient(90deg, #48bb78, #38a169);
+        }
+        
+        .lesson-card.intermediate::before {
+            background: linear-gradient(90deg, #ed8936, #dd6b20);
+        }
+        
+        .lesson-card.advanced::before {
+            background: linear-gradient(90deg, #e53e3e, #c53030);
+        }
+        
+        .lesson-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .lesson-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #63b3ed;
+        }
+        
+        .lesson-description {
+            color: #cbd5e0;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .difficulty {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .difficulty.beginner {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 1px solid #48bb78;
+        }
+        
+        .difficulty.intermediate {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+            border: 1px solid #ed8936;
+        }
+        
+        .difficulty.advanced {
+            background: rgba(229, 62, 62, 0.2);
+            color: #e53e3e;
+            border: 1px solid #e53e3e;
+        }
+        
+        .lesson-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .lesson-features li {
+            padding: 5px 0;
+            color: #a0aec0;
+            font-size: 0.9em;
+        }
+        
+        .lesson-features li::before {
+            content: '⚡ ';
+            color: #63b3ed;
+            font-weight: bold;
+        }
+        
+        .concepts-section {
+            margin: 50px 0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .concept-item {
+            background: rgba(99, 179, 237, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #63b3ed;
+        }
+        
+        .concept-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .math-foundations {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #ed8936;
+        }
+        
+        .applications-section {
+            background: rgba(72, 187, 120, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .learning-path {
+            background: rgba(128, 90, 213, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #805ad5;
+        }
+        
+        @media (max-width: 768px) {
+            .lessons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ Classical & Analytical Mechanics Hub</h1>
+        
+        <div class="intro">
+            <p><strong>Explore the Mathematical Beauty of Motion and Forces</strong></p>
+            <p>From Newton's laws to Lagrangian formalism, from rigid body dynamics to celestial mechanics - discover the elegant mathematical frameworks that describe how objects move and interact in our universe.</p>
+        </div>
+        
+        <div class="lessons-grid">
+            <div class="lesson-card beginner" onclick="window.open('newtonian_mechanics.html', '_blank')">
+                <div class="difficulty beginner">Beginner</div>
+                <span class="lesson-icon">🍎</span>
+                <div class="lesson-title">Newtonian Mechanics</div>
+                <div class="lesson-description">
+                    Explore Newton's three laws of motion with interactive simulations of forces, acceleration, and momentum conservation.
+                </div>
+                <ul class="lesson-features">
+                    <li>Newton's three laws of motion</li>
+                    <li>Force vector analysis</li>
+                    <li>Momentum and impulse</li>
+                    <li>Work and energy theorems</li>
+                    <li>Conservation principles</li>
+                    <li>Interactive physics simulations</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card beginner" onclick="window.open('kinematics_dynamics.html', '_blank')">
+                <div class="difficulty beginner">Beginner</div>
+                <span class="lesson-icon">📈</span>
+                <div class="lesson-title">Kinematics & Dynamics</div>
+                <div class="lesson-description">
+                    Mathematical description of motion: position, velocity, acceleration, and their relationships in 1D, 2D, and 3D space.
+                </div>
+                <ul class="lesson-features">
+                    <li>Position and displacement vectors</li>
+                    <li>Velocity and acceleration</li>
+                    <li>Projectile motion analysis</li>
+                    <li>Circular and rotational motion</li>
+                    <li>Reference frames and relativity</li>
+                    <li>Motion in various force fields</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card intermediate" onclick="window.open('lagrangian_mechanics.html', '_blank')">
+                <div class="difficulty intermediate">Intermediate</div>
+                <span class="lesson-icon">🌊</span>
+                <div class="lesson-title">Lagrangian Mechanics</div>
+                <div class="lesson-description">
+                    Advanced formulation using generalized coordinates, Lagrangian function, and Euler-Lagrange equations for complex systems.
+                </div>
+                <ul class="lesson-features">
+                    <li>Generalized coordinates and constraints</li>
+                    <li>Lagrangian function L = T - V</li>
+                    <li>Euler-Lagrange equations</li>
+                    <li>Principle of least action</li>
+                    <li>Noether's theorem applications</li>
+                    <li>Symmetries and conservation laws</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card intermediate" onclick="window.open('hamiltonian_mechanics.html', '_blank')">
+                <div class="difficulty intermediate">Intermediate</div>
+                <span class="lesson-icon">⚡</span>
+                <div class="lesson-title">Hamiltonian Mechanics</div>
+                <div class="lesson-description">
+                    Phase space formulation with canonical coordinates, Hamilton's equations, and symplectic geometry foundations.
+                </div>
+                <ul class="lesson-features">
+                    <li>Canonical momentum and coordinates</li>
+                    <li>Hamiltonian function H = T + V</li>
+                    <li>Hamilton's canonical equations</li>
+                    <li>Phase space and Liouville's theorem</li>
+                    <li>Canonical transformations</li>
+                    <li>Poisson brackets and symplectic structure</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card intermediate" onclick="window.open('rigid_body_mechanics.html', '_blank')">
+                <div class="difficulty intermediate">Intermediate</div>
+                <span class="lesson-icon">🔄</span>
+                <div class="lesson-title">Rigid Body Mechanics</div>
+                <div class="lesson-description">
+                    Rotational dynamics, moment of inertia tensors, Euler's equations, and gyroscopic motion analysis.
+                </div>
+                <ul class="lesson-features">
+                    <li>Moment of inertia tensor</li>
+                    <li>Angular momentum and torque</li>
+                    <li>Euler's equations for rotation</li>
+                    <li>Principal axes and eigenvalues</li>
+                    <li>Gyroscopic effects and precession</li>
+                    <li>Spinning top dynamics</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card advanced" onclick="window.open('celestial_mechanics.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🌍</span>
+                <div class="lesson-title">Celestial Mechanics</div>
+                <div class="lesson-description">
+                    Orbital dynamics, Kepler's laws, perturbation theory, and n-body problems in gravitational systems.
+                </div>
+                <ul class="lesson-features">
+                    <li>Kepler's laws and orbital elements</li>
+                    <li>Two-body problem solutions</li>
+                    <li>Gravitational potential theory</li>
+                    <li>Perturbation methods</li>
+                    <li>Three-body problem dynamics</li>
+                    <li>Lagrange points and stability</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card advanced" onclick="window.open('continuum_mechanics.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🌊</span>
+                <div class="lesson-title">Continuum Mechanics</div>
+                <div class="lesson-description">
+                    Mechanics of deformable bodies: stress tensors, strain analysis, elasticity theory, and fluid dynamics foundations.
+                </div>
+                <ul class="lesson-features">
+                    <li>Stress and strain tensors</li>
+                    <li>Constitutive equations</li>
+                    <li>Elasticity and Hooke's law</li>
+                    <li>Fluid mechanics principles</li>
+                    <li>Navier-Stokes equations</li>
+                    <li>Material response modeling</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card advanced" onclick="window.open('nonlinear_dynamics.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🌀</span>
+                <div class="lesson-title">Nonlinear Dynamics & Chaos</div>
+                <div class="lesson-description">
+                    Chaotic systems, strange attractors, bifurcation theory, and the mathematical beauty of complex dynamical behavior.
+                </div>
+                <ul class="lesson-features">
+                    <li>Phase portraits and attractors</li>
+                    <li>Lyapunov exponents</li>
+                    <li>Bifurcation diagrams</li>
+                    <li>Poincaré maps and sections</li>
+                    <li>Chaos theory applications</li>
+                    <li>Fractal geometry in dynamics</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="concepts-section">
+            <h2>🔬 Core Mathematical Concepts</h2>
+            <p>Mechanics relies on sophisticated mathematical frameworks that reveal the deep structure of physical reality:</p>
+            
+            <div class="concepts-grid">
+                <div class="concept-item">
+                    <span class="concept-icon">📐</span>
+                    <div><strong>Vector Calculus</strong></div>
+                    <div>Gradients, divergence, curl, line integrals</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🧮</span>
+                    <div><strong>Differential Equations</strong></div>
+                    <div>ODEs, PDEs, boundary value problems</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🔢</span>
+                    <div><strong>Linear Algebra</strong></div>
+                    <div>Matrices, eigenvalues, tensor analysis</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">📊</span>
+                    <div><strong>Variational Calculus</strong></div>
+                    <div>Functional derivatives, optimization</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🌐</span>
+                    <div><strong>Differential Geometry</strong></div>
+                    <div>Manifolds, curvature, symplectic geometry</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">⚡</span>
+                    <div><strong>Complex Analysis</strong></div>
+                    <div>Analytic functions, residue theory</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-foundations">
+            <h2>🧮 Mathematical Foundations</h2>
+            <p><strong>Core Equations of Mechanics:</strong></p>
+            <p>• <strong>Newton's Second Law:</strong> $\vec{F} = m\vec{a} = m\frac{d^2\vec{r}}{dt^2}$</p>
+            <p>• <strong>Euler-Lagrange Equation:</strong> $\frac{d}{dt}\frac{\partial L}{\partial \dot{q}_i} - \frac{\partial L}{\partial q_i} = 0$</p>
+            <p>• <strong>Hamilton's Equations:</strong> $\dot{q}_i = \frac{\partial H}{\partial p_i}$, $\dot{p}_i = -\frac{\partial H}{\partial q_i}$</p>
+            <p>• <strong>Conservation of Energy:</strong> $E = T + V = \text{constant}$</p>
+            <p>• <strong>Angular Momentum:</strong> $\vec{L} = \vec{r} \times \vec{p} = I\vec{\omega}$</p>
+            <p>• <strong>Action Principle:</strong> $\delta S = \delta \int_{t_1}^{t_2} L \, dt = 0$</p>
+        </div>
+        
+        <div class="applications-section">
+            <h2>🌍 Real-World Applications</h2>
+            <p><strong>Engineering & Technology:</strong></p>
+            <p>• <strong>Aerospace:</strong> Spacecraft trajectories, orbital mechanics, attitude control</p>
+            <p>• <strong>Robotics:</strong> Manipulator dynamics, path planning, control systems</p>
+            <p>• <strong>Automotive:</strong> Vehicle dynamics, suspension systems, crash analysis</p>
+            <p>• <strong>Civil Engineering:</strong> Structural analysis, earthquake simulation, bridge dynamics</p>
+            <p>• <strong>Biomechanics:</strong> Human motion analysis, prosthetic design, sports science</p>
+            <p>• <strong>Energy Systems:</strong> Wind turbines, pendulum clocks, oscillatory systems</p>
+        </div>
+        
+        <div class="learning-path">
+            <h2>🎯 Suggested Learning Path</h2>
+            <p><strong>1. Foundation (Beginner):</strong> Start with Newtonian Mechanics and Kinematics & Dynamics</p>
+            <p><strong>2. Classical Theory (Intermediate):</strong> Progress to Lagrangian and Hamiltonian Mechanics</p>
+            <p><strong>3. Specialized Topics (Intermediate):</strong> Explore Rigid Body Mechanics for rotational systems</p>
+            <p><strong>4. Advanced Applications (Advanced):</strong> Dive into Celestial Mechanics and Continuum Mechanics</p>
+            <p><strong>5. Modern Frontiers (Advanced):</strong> Master Nonlinear Dynamics and Chaos Theory</p>
+            <p><em>Each lesson builds upon previous concepts while introducing new mathematical tools and physical insights.</em></p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax when page loads
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

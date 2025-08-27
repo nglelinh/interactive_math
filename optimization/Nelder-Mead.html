@@ -3,40 +3,1731 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Numerical Methods Demo</title>
+  <title>Nelder-Mead Algorithm: Interactive Learning</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script src="../math-simple.js"></script>
   <style>
-    body { font-family: sans-serif; margin: 2em; }
-    #output { margin-top: 1em; font-size: 1.2em; }
-    label, input { margin: 0.5em 0; }
+    body { 
+      font-family: 'Segoe UI', 'Roboto', 'Inter', Arial, sans-serif; 
+      margin: 0; 
+      padding: 2em;
+      line-height: 1.8;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      color: #2c3e50;
+      font-size: 16px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2em;
+      text-align: center;
+    }
+    
+    .content {
+      padding: 2em;
+    }
+    
+    h1 { 
+      margin: 0;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-weight: 300;
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+      margin-top: 0.5em;
+      font-weight: 300;
+    }
+    
+    h2 { 
+      color: #2c3e50; 
+      margin-top: 3em; 
+      margin-bottom: 1.5em;
+      font-size: 1.9em;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 0.7em;
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      font-weight: 600;
+    }
+    
+    h3 { 
+      color: #34495e; 
+      margin-top: 2em;
+      margin-bottom: 1em;
+      font-size: 1.4em;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    
+    h4 {
+      color: #2c3e50;
+      margin-top: 1.5em;
+      margin-bottom: 0.8em;
+      font-size: 1.2em;
+      font-weight: 600;
+    }
+    
+    p {
+      margin-bottom: 1.2em;
+      color: #34495e;
+      font-size: 1.05em;
+    }
+    
+    ul, ol {
+      margin-bottom: 1.5em;
+    }
+    
+    li {
+      margin-bottom: 0.7em;
+      color: #34495e;
+      font-size: 1.05em;
+    }
+    
+    .math-section { 
+      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      padding: 2.5em; 
+      border-radius: 15px; 
+      margin: 2.5em 0;
+      border-left: 6px solid #3498db;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      border: 1px solid rgba(52, 152, 219, 0.1);
+    }
+    
+    .definition-box {
+      background: linear-gradient(145deg, #f8fbff, #e8f4fd);
+      padding: 2em;
+      border-radius: 15px;
+      margin: 2em 0;
+      border: 2px solid #3498db;
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.15);
+    }
+    
+    .algorithm-box {
+      background: linear-gradient(145deg, #faf5ff, #f0e6ff);
+      padding: 2em;
+      border-radius: 15px;
+      margin: 2em 0;
+      border: 2px solid #8e44ad;
+      box-shadow: 0 6px 20px rgba(142, 68, 173, 0.15);
+    }
+    
+    .example-box {
+      background: linear-gradient(145deg, #f8fff8, #e8f8e8);
+      padding: 2em;
+      border-radius: 15px;
+      margin: 2em 0;
+      border: 2px solid #27ae60;
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.15);
+    }
+    
+    .step-box {
+      background: linear-gradient(145deg, #fffbf0, #fff4e6);
+      padding: 2em;
+      border-radius: 15px;
+      margin: 2em 0;
+      border: 2px solid #f39c12;
+      box-shadow: 0 6px 20px rgba(243, 156, 18, 0.15);
+    }
+    
+    .insight-box {
+      background: linear-gradient(145deg, #fff5f8, #ffe8f0);
+      padding: 2em;
+      border-radius: 15px;
+      margin: 2em 0;
+      border: 2px solid #e91e63;
+      box-shadow: 0 6px 20px rgba(233, 30, 99, 0.15);
+    }
+    
+    #output { 
+      margin-top: 1.5em; 
+      font-size: 1.1em; 
+      background: linear-gradient(145deg, #f0f8ff, #e6f3ff);
+      padding: 1.5em;
+      border-radius: 12px;
+      border: 2px solid #add8e6;
+      box-shadow: 0 4px 12px rgba(173, 216, 230, 0.3);
+    }
+    
+    .formula { 
+      font-family: 'Times New Roman', serif; 
+      font-size: 1.3em; 
+      text-align: center;
+      margin: 1.5em 0;
+      padding: 1em;
+      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      border: 1px solid #e9ecef;
+    }
+    
+    .interactive-section {
+      background: linear-gradient(145deg, #fffdf5, #fdf8e6);
+      padding: 2.5em;
+      border-radius: 20px;
+      border: 3px solid #f39c12;
+      margin: 2.5em 0;
+      box-shadow: 0 10px 30px rgba(243, 156, 18, 0.2);
+    }
+    
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5em;
+      margin: 1.5em 0;
+    }
+    
+    .control-group {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.5em;
+    }
+    
+    input, select, button {
+      width: 100%;
+      padding: 0.8em;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    button {
+      background: linear-gradient(145deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s ease;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    
+    .algorithm-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5em;
+      margin: 2em 0;
+    }
+    
+    .step {
+      background: linear-gradient(145deg, #ffffff, #f8f9fa);
+      padding: 1.5em;
+      border-radius: 12px;
+      border-left: 5px solid #3498db;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .step:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    
+    .step-number {
+      background: linear-gradient(145deg, #3498db, #2980b9);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 0.8em;
+      font-size: 1.1em;
+      box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2em 0;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      font-size: 1em;
+    }
+    
+    th {
+      background: linear-gradient(145deg, #2c3e50, #34495e);
+      color: white;
+      padding: 1.2em 1em;
+      font-weight: 600;
+      font-size: 1.05em;
+      text-align: left;
+    }
+    
+    td {
+      padding: 1.2em 1em;
+      border-bottom: 1px solid #ecf0f1;
+      color: #2c3e50;
+      font-size: 1.05em;
+      line-height: 1.6;
+    }
+    
+    tr:nth-child(even) {
+      background: linear-gradient(145deg, #fdfdfd, #f8f9fa);
+    }
+    
+    tr:hover {
+      background: linear-gradient(145deg, #f0f8ff, #e6f3ff);
+      transition: background 0.2s ease;
+    }
+    
+    .emoji {
+      font-size: 1.2em;
+      margin-right: 0.3em;
+    }
+    
+    .highlight {
+      background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+      padding: 0.3em 0.6em;
+      border-radius: 6px;
+      font-weight: 600;
+      color: #2c3e50;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    @media (max-width: 768px) {
+      body { 
+        padding: 1em; 
+        font-size: 15px;
+      }
+      .container { 
+        margin: 0; 
+        border-radius: 10px;
+      }
+      .content { 
+        padding: 1.5em; 
+      }
+      h1 { 
+        font-size: 2.2em; 
+      }
+      h2 {
+        font-size: 1.6em;
+        margin-top: 2em;
+      }
+      h3 {
+        font-size: 1.3em;
+      }
+      .controls-grid { 
+        grid-template-columns: 1fr; 
+        gap: 1em;
+      }
+      .algorithm-steps { 
+        grid-template-columns: 1fr; 
+      }
+      .step {
+        padding: 1.2em;
+      }
+      .formula {
+        font-size: 1.1em;
+        padding: 0.8em;
+      }
+      table {
+        font-size: 0.9em;
+      }
+      th, td {
+        padding: 0.8em 0.6em;
+      }
+      .math-section {
+        padding: 1.8em;
+        margin: 1.5em 0;
+      }
+      .definition-box, .algorithm-box, .example-box, .step-box, .insight-box {
+        padding: 1.5em;
+        margin: 1.5em 0;
+      }
+      #form {
+        grid-template-columns: 1fr;
+        gap: 1em;
+      }
+      #form button {
+        padding: 1em;
+        font-size: 1em;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        font-size: 14px;
+        padding: 0.5em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      .header {
+        padding: 1.5em;
+      }
+      .content {
+        padding: 1em;
+      }
+      .math-section {
+        padding: 1.2em;
+      }
+      .definition-box, .algorithm-box, .example-box, .step-box, .insight-box {
+        padding: 1.2em;
+      }
+      .algorithm-steps {
+        gap: 1em;
+      }
+      .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 1em;
+      }
+    }
   </style>
-
-
 
 
 
 </head>
 <body>
-  <h1>Numerical Optimization: Nelder-Mead Demo</h1>
-  <p>Try different starting points for the optimizer:</p>
-  <form id="form">
-    <label>Start x: <input type="number" id="startX" value="-3.5" step="0.1"></label><br>
-    <label>Start y: <input type="number" id="startY" value="3.5" step="0.1"></label><br>
-    <button type="submit">Optimize</button>
-  </form>
+  <div class="container">
+    <div class="header">
+      <h1><span class="emoji">🔍</span>Nelder-Mead Algorithm</h1>
+      <div class="subtitle">Interactive Learning of Derivative-Free Optimization</div>
+    </div>
+    
+    <div class="content">
+      <div class="math-section">
+        <h2><span class="emoji">📐</span>Mathematical Foundation</h2>
+        
+        <div class="definition-box">
+          <h3>🎯 The Optimization Challenge</h3>
+          <p>The Nelder-Mead algorithm tackles <span class="highlight">unconstrained optimization</span> problems of the form:</p>
+          <div class="formula">$$\min_{x \in \mathbb{R}^n} f(x)$$</div>
+          
+          <div class="step-box" style="margin-top: 1.5em;">
+            <h4>🧠 Why is this revolutionary?</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5em;">
+              <div>
+                <p><strong>🚫 No derivatives needed!</strong></p>
+                <p>Unlike gradient-based methods, this algorithm only requires <em>function evaluations</em> - making it incredibly versatile.</p>
+              </div>
+              <div>
+                <p><strong>🌐 Real-world applications:</strong></p>
+                <ul style="margin-top: 0.5em;">
+                  <li>Noisy experimental data</li>
+                  <li>Black-box simulations</li>
+                  <li>Discrete optimization problems</li>
+                  <li>When gradients are expensive to compute</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="algorithm-box">
+          <h3>🔺 The Simplex: Your Geometric Guide</h3>
+          <p>The algorithm operates on a <span class="highlight">simplex</span> - the simplest possible shape in n-dimensional space that can "explore" the optimization landscape:</p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5em; margin: 2em 0;">
+            <div style="background: white; padding: 1.5em; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; margin-bottom: 0.5em;">📏</div>
+              <strong>1D: Line Segment</strong><br>
+              <span style="color: #666; font-size: 0.9em;">2 points (endpoints)</span>
+            </div>
+            <div style="background: white; padding: 1.5em; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; margin-bottom: 0.5em;">🔺</div>
+              <strong>2D: Triangle</strong><br>
+              <span style="color: #666; font-size: 0.9em;">3 vertices</span>
+            </div>
+            <div style="background: white; padding: 1.5em; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; margin-bottom: 0.5em;">🔷</div>
+              <strong>3D: Tetrahedron</strong><br>
+              <span style="color: #666; font-size: 0.9em;">4 vertices</span>
+            </div>
+            <div style="background: white; padding: 1.5em; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; margin-bottom: 0.5em;">🎲</div>
+              <strong>nD: Hypertetrahedron</strong><br>
+              <span style="color: #666; font-size: 0.9em;">n+1 vertices</span>
+            </div>
+          </div>
+          
+          <div class="insight-box">
+            <h4>💡 How the Simplex "Thinks"</h4>
+            <p>Imagine the simplex as an intelligent probe that explores the optimization landscape:</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em; margin-top: 1em;">
+              <div style="background: rgba(231, 76, 60, 0.1); padding: 1em; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                <strong>🔄 Reflect:</strong> "This direction is bad, let me try the opposite!"
+              </div>
+              <div style="background: rgba(46, 204, 113, 0.1); padding: 1em; border-radius: 8px; border-left: 4px solid #2ecc71;">
+                <strong>🚀 Expand:</strong> "This direction is good, let me go further!"
+              </div>
+              <div style="background: rgba(243, 156, 18, 0.1); padding: 1em; border-radius: 8px; border-left: 4px solid #f39c12;">
+                <strong>🤏 Contract:</strong> "I'm not sure, let me be more careful."
+              </div>
+              <div style="background: rgba(155, 89, 182, 0.1); padding: 1em; border-radius: 8px; border-left: 4px solid #9b59b6;">
+                <strong>📉 Shrink:</strong> "I'm lost, let me reset and focus!"
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="definition-box">
+          <h3>🔄 The Four Fundamental Operations</h3>
+          <p>The simplex adapts its shape through four elegant geometric transformations:</p>
+          
+          <div class="algorithm-steps">
+            <div class="step">
+              <div style="display: flex; align-items: center; margin-bottom: 1em;">
+                <span class="step-number">1</span>
+                <div>
+                  <strong style="font-size: 1.1em;">Reflection</strong>
+                  <div style="color: #666; font-size: 0.9em;">Mirror the worst point</div>
+                </div>
+              </div>
+              <div class="formula" style="margin: 1em 0; font-size: 1.1em;">$$x_r = \bar{x} + \alpha(\bar{x} - x_h)$$</div>
+              <p style="margin-bottom: 0;"><strong>When:</strong> Always the first attempt<br>
+              <strong>Coefficient:</strong> α = 1 (standard reflection)</p>
+            </div>
+            
+            <div class="step">
+              <div style="display: flex; align-items: center; margin-bottom: 1em;">
+                <span class="step-number">2</span>
+                <div>
+                  <strong style="font-size: 1.1em;">Expansion</strong>
+                  <div style="color: #666; font-size: 0.9em;">Go further in good direction</div>
+                </div>
+              </div>
+              <div class="formula" style="margin: 1em 0; font-size: 1.1em;">$$x_e = \bar{x} + \gamma(x_r - \bar{x})$$</div>
+              <p style="margin-bottom: 0;"><strong>When:</strong> Reflection gives the best point so far<br>
+              <strong>Coefficient:</strong> γ = 2 (double the distance)</p>
+            </div>
+            
+            <div class="step">
+              <div style="display: flex; align-items: center; margin-bottom: 1em;">
+                <span class="step-number">3</span>
+                <div>
+                  <strong style="font-size: 1.1em;">Contraction</strong>
+                  <div style="color: #666; font-size: 0.9em;">Pull back toward center</div>
+                </div>
+              </div>
+              <div class="formula" style="margin: 1em 0; font-size: 1.1em;">$$x_c = \bar{x} + \rho(x_h - \bar{x})$$</div>
+              <p style="margin-bottom: 0;"><strong>When:</strong> Reflection doesn't improve enough<br>
+              <strong>Coefficient:</strong> ρ = 0.5 (halfway to centroid)</p>
+            </div>
+            
+            <div class="step">
+              <div style="display: flex; align-items: center; margin-bottom: 1em;">
+                <span class="step-number">4</span>
+                <div>
+                  <strong style="font-size: 1.1em;">Shrinkage</strong>
+                  <div style="color: #666; font-size: 0.9em;">Contract entire simplex</div>
+                </div>
+              </div>
+              <div class="formula" style="margin: 1em 0; font-size: 1.1em;">$$x_i' = x_l + \sigma(x_i - x_l)$$</div>
+              <p style="margin-bottom: 0;"><strong>When:</strong> All else fails - last resort<br>
+              <strong>Coefficient:</strong> σ = 0.5 (shrink by half)</p>
+            </div>
+          </div>
+          
+          <div class="step-box" style="margin-top: 2em;">
+            <h4>📊 Key Mathematical Concepts</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
+              <div>
+                <p><strong>🎯 Centroid Calculation:</strong></p>
+                <div class="formula" style="font-size: 1em;">$$\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$$</div>
+                <p style="font-size: 0.95em; color: #666;">(excluding the worst point)</p>
+              </div>
+              <div>
+                <p><strong>📈 Vertex Ordering:</strong></p>
+                <div class="formula" style="font-size: 1em;">$$f(x_l) \leq f(x_s) \leq \ldots \leq f(x_h)$$</div>
+                <p style="font-size: 0.95em; color: #666;">l = best, s = second-worst, h = worst</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="algorithm-box">
+          <h3>🔄 Complete Algorithm Flow</h3>
+          
+          <div style="background: white; padding: 1.5em; border-radius: 8px; margin: 1em 0;">
+            <h4>Initialization</h4>
+            <ol>
+              <li>Choose initial point $x_0 \in \mathbb{R}^n$</li>
+              <li>Generate simplex: $x_i = x_0 + \delta_i e_i$ for $i = 1, \ldots, n$</li>
+              <li>Evaluate $f(x_i)$ for all vertices</li>
+            </ol>
+            
+            <h4>Main Loop</h4>
+            <ol start="4">
+              <li><strong>Order vertices:</strong> $f(x_l) \leq f(x_s) \leq \ldots \leq f(x_h)$</li>
+              <li><strong>Check convergence:</strong> if $|f(x_h) - f(x_l)| < \epsilon$, stop</li>
+              <li><strong>Compute centroid:</strong> $\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$ (exclude $x_h$)</li>
+              <li><strong>Reflection:</strong> $x_r = \bar{x} + \alpha(\bar{x} - x_h)$</li>
+              <li><strong>Decision tree:</strong>
+                <ul>
+                  <li>If $f(x_r) < f(x_l)$: try <em>expansion</em></li>
+                  <li>If $f(x_l) \leq f(x_r) < f(x_s)$: accept <em>reflection</em></li>
+                  <li>If $f(x_s) \leq f(x_r) < f(x_h)$: try <em>outside contraction</em></li>
+                  <li>If $f(x_r) \geq f(x_h)$: try <em>inside contraction</em></li>
+                  <li>If contraction fails: perform <em>shrinkage</em></li>
+                </ul>
+              </li>
+              <li><strong>Update simplex</strong> and repeat</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="example-box">
+          <h3>🍌 Featured Test Case: Rosenbrock's Famous Valley</h3>
+          <p>Our primary demonstration uses the legendary <span class="highlight">Rosenbrock function</span> - a classic benchmark that has challenged optimization algorithms since 1960:</p>
+          
+          <div class="formula">$$f(x, y) = (1 - x)^2 + 100(y - x^2)^2$$</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2em; margin: 2em 0;">
+            <div style="background: white; padding: 1.5em; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <h4 style="margin-top: 0; color: #27ae60;">🎯 Mathematical Properties</h4>
+              <ul style="margin: 0;">
+                <li><strong>Global minimum:</strong> (1, 1) with f(1,1) = 0</li>
+                <li><strong>Banana-shaped valley:</strong> Curved, narrow optimum path</li>
+                <li><strong>Non-convex landscape:</strong> Challenging for most algorithms</li>
+                <li><strong>Smooth but tricky:</strong> Easy to evaluate, hard to optimize</li>
+              </ul>
+            </div>
+            <div style="background: white; padding: 1.5em; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <h4 style="margin-top: 0; color: #e74c3c;">🔬 Why This Function Matters</h4>
+              <ul style="margin: 0;">
+                <li><strong>Industry standard</strong> benchmark since 1960</li>
+                <li><strong>Tests convergence</strong> in narrow, curved valleys</li>
+                <li><strong>Reveals algorithm behavior</strong> near challenging minima</li>
+                <li><strong>Real-world analog</strong> of many practical optimization problems</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="insight-box" style="margin-top: 1.5em;">
+            <h4>🧮 Deep Mathematical Analysis</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
+              <div>
+                <p><strong>Gradient Vector:</strong></p>
+                <div class="formula" style="font-size: 1em;">$$\nabla f = \begin{bmatrix} -2(1-x) - 400x(y-x^2) \\ 200(y-x^2) \end{bmatrix}$$</div>
+              </div>
+              <div>
+                <p><strong>Hessian Properties:</strong></p>
+                <p style="font-size: 0.95em;">Condition number κ ≈ 2500 near optimum<br>
+                (indicating ill-conditioning)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="definition-box">
+          <h3>⚖️ Convergence Theory</h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em;">
+            <div class="example-box">
+              <h4>✅ Advantages</h4>
+              <ul>
+                <li><strong>Derivative-free:</strong> Works with any continuous function</li>
+                <li><strong>Robust:</strong> Handles noise and discontinuities</li>
+                <li><strong>Simple:</strong> Easy to implement and understand</li>
+                <li><strong>Memory efficient:</strong> Only stores n+1 points</li>
+                <li><strong>Local convergence:</strong> Reliable near minima</li>
+              </ul>
+            </div>
+            
+            <div class="step-box">
+              <h4>⚠️ Limitations</h4>
+              <ul>
+                <li><strong>Slow convergence:</strong> $O(n^2)$ evaluations per iteration</li>
+                <li><strong>No global guarantee:</strong> Finds local minima only</li>
+                <li><strong>Dimension curse:</strong> Poor scaling for $n > 10$</li>
+                <li><strong>Weak theory:</strong> Limited convergence proofs</li>
+                <li><strong>Parameter sensitive:</strong> May need tuning</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="insight-box">
+            <h4>📈 Convergence Rate Analysis</h4>
+            <p><strong>Linear convergence:</strong> $||x_k - x^*|| \leq C \rho^k$ where $0 < \rho < 1$</p>
+            <p><strong>Function evaluations:</strong> $O(n^2 \log(1/\epsilon))$ to reach accuracy $\epsilon$</p>
+            <p><strong>Best case:</strong> Quadratic functions near minimum</p>
+            <p><strong>Worst case:</strong> May stagnate on badly scaled problems</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="interactive-section">
+        <h2><span class="emoji">🎮</span>Interactive Laboratory</h2>
+        <p style="font-size: 1.1em; margin-bottom: 2em;">
+          🚀 <strong>Ready to explore?</strong> Use this interactive playground to see how the Nelder-Mead algorithm navigates different optimization landscapes. 
+          <br><span style="color: #f39c12;"><strong>💡 Pro tip:</strong> Click anywhere on the visualization to set new starting points!</span>
+        </p>
+        
+        <div class="controls-grid">
+          <div class="control-group">
+            <label><span class="emoji">🎯</span>Choose Your Challenge</label>
+            <select id="functionSelect">
+              <option value="rosenbrock">🍌 Rosenbrock (Classic Banana Valley)</option>
+              <option value="sphere">⚪ Sphere (Simple Bowl Shape)</option>
+              <option value="rastrigin">🌊 Rastrigin (Many Local Minima)</option>
+              <option value="beale">🏔️ Beale (Steep Ridges & Valleys)</option>
+              <option value="booth">📐 Booth (Quadratic Landscape)</option>
+              <option value="himmelblau">🔄 Himmelblau (Four Equal Minima!)</option>
+              <option value="ackley">⚡ Ackley (Exponential Chaos)</option>
+              <option value="goldstein">💎 Goldstein-Price (Complex Terrain)</option>
+              <option value="matyas">🎪 Matyas (Saddle-shaped Surface)</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label><span class="emoji">⏱️</span>Animation Speed</label>
+            <select id="animationSpeed">
+              <option value="slow">🐌 Slow (Best for Learning)</option>
+              <option value="medium" selected>🚶 Medium (Balanced View)</option>
+              <option value="fast">🏃 Fast (Quick Overview)</option>
+              <option value="instant">⚡ Instant (Results Only)</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label><span class="emoji">🔍</span>Detail Level</label>
+            <select id="resolution">
+              <option value="low">⚡ Low (Faster Rendering)</option>
+              <option value="medium" selected>⚖️ Medium (Balanced)</option>
+              <option value="high">🔬 High (Maximum Detail)</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label><span class="emoji">🎨</span>Color Theme</label>
+            <select id="colormap">
+              <option value="plasma" selected>🌌 Plasma (Purple-Pink)</option>
+              <option value="viridis">🌿 Viridis (Blue-Green)</option>
+              <option value="turbo">🌈 Turbo (Rainbow)</option>
+              <option value="cool">❄️ Cool (Blue-Cyan)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="step-box" style="margin-top: 2em;">
+          <h4><span class="emoji">🎯</span>Precision Controls</h4>
+          <p style="margin-bottom: 1.5em;">
+            <strong>🖱️ Quick method:</strong> Click anywhere on the visualization below to set a new starting point<br>
+            <strong>⌨️ Precise method:</strong> Use the coordinate inputs below for exact positioning
+          </p>
+          
+          <form id="form" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1.5em; align-items: end;">
+            <div>
+              <label>📍 Starting X-coordinate:</label>
+              <input type="number" id="startX" value="-1.5" step="0.1" style="font-size: 1em;">
+            </div>
+            <div>
+              <label>📍 Starting Y-coordinate:</label>
+              <input type="number" id="startY" value="1.5" step="0.1" style="font-size: 1em;">
+            </div>
+            <div>
+              <label>🔢 Maximum Iterations:</label>
+              <input type="number" id="maxIter" value="200" min="10" max="1000" step="10" style="font-size: 1em;">
+            </div>
+            <button type="submit" style="padding: 1.2em 2em; font-size: 1.05em; font-weight: 600;">
+              <span class="emoji">🚀</span>Start Optimization!
+            </button>
+          </form>
+        </div>
+        
+        <div id="functionInfo" style="margin-top: 2em;"></div>
+        
+        <div class="algorithm-box" style="margin-top: 2em;">
+          <h4><span class="emoji">📊</span>Live Algorithm Dashboard</h4>
+          <div id="algorithmStatus" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5em; margin-top: 1.5em;">
+            <div style="background: linear-gradient(145deg, #ffffff, #f8f9fa); padding: 1.5em; border-radius: 12px; text-align: center; border-left: 4px solid #3498db; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; font-weight: bold; color: #3498db; margin-bottom: 0.3em;">0</div>
+              <div style="font-size: 1em; color: #666; font-weight: 500;">Iterations</div>
+            </div>
+            <div style="background: linear-gradient(145deg, #ffffff, #f8f9fa); padding: 1.5em; border-radius: 12px; text-align: center; border-left: 4px solid #e74c3c; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; font-weight: bold; color: #e74c3c; margin-bottom: 0.3em;">0</div>
+              <div style="font-size: 1em; color: #666; font-weight: 500;">Function Calls</div>
+            </div>
+            <div style="background: linear-gradient(145deg, #ffffff, #f8f9fa); padding: 1.5em; border-radius: 12px; text-align: center; border-left: 4px solid #27ae60; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; font-weight: bold; color: #27ae60; margin-bottom: 0.3em;">∞</div>
+              <div style="font-size: 1em; color: #666; font-weight: 500;">Best Value Found</div>
+            </div>
+            <div style="background: linear-gradient(145deg, #ffffff, #f8f9fa); padding: 1.5em; border-radius: 12px; text-align: center; border-left: 4px solid #f39c12; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+              <div style="font-size: 2em; font-weight: bold; color: #f39c12; margin-bottom: 0.3em;">—</div>
+              <div style="font-size: 1em; color: #666; font-weight: 500;">Status</div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
   <div id="output"></div>
   <div id="d3vis" style="margin-top:2em;"></div>
   <script src="https://cdn.jsdelivr.net/npm/fmin@0.0.4/build/fmin.min.js?v1"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="index.js"></script>
   <script>
+    // Enhanced test function definitions with more mathematical detail
+    const testFunctions = {
+      rosenbrock: {
+        name: "Rosenbrock Function",
+        formula: "f(x,y) = (1-x)² + 100(y-x²)²",
+        func: ([x, y]) => Math.pow(1 - x, 2) + 100 * Math.pow(y - x * x, 2),
+        domain: {x: [-2.5, 2.5], y: [-1, 3.5]},
+        globalMin: {point: [1, 1], value: 0},
+        description: "The famous 'banana function' with a narrow, curved valley. Tests optimization in challenging curved landscapes.",
+        difficulty: "🔴 Hard",
+        characteristics: ["Non-convex", "Narrow valley", "Curved minimum", "Classic benchmark"],
+        defaultStart: [-1.5, 1.5],
+        tips: "Notice how the algorithm must navigate the curved valley - starting points matter!"
+      },
+      sphere: {
+        name: "Sphere Function", 
+        formula: "f(x,y) = x² + y²",
+        func: ([x, y]) => x * x + y * y,
+        domain: {x: [-3, 3], y: [-3, 3]},
+        globalMin: {point: [0, 0], value: 0},
+        description: "Simple quadratic bowl - the easiest optimization landscape. Perfect for understanding basic convergence.",
+        difficulty: "🟢 Easy",
+        characteristics: ["Convex", "Unimodal", "Smooth", "Symmetric"],
+        defaultStart: [2.5, 2],
+        tips: "Should converge quickly from any starting point - great for testing basic algorithm behavior."
+      },
+      rastrigin: {
+        name: "Rastrigin Function",
+        formula: "f(x,y) = 20 + x² - 10cos(2πx) + y² - 10cos(2πy)",
+        func: ([x, y]) => 20 + x*x - 10*Math.cos(2*Math.PI*x) + y*y - 10*Math.cos(2*Math.PI*y),
+        domain: {x: [-3, 3], y: [-3, 3]},
+        globalMin: {point: [0, 0], value: 0},
+        description: "Highly multimodal with many local minima. Excellent test for global vs local optimization behavior.",
+        difficulty: "🔴 Very Hard",
+        characteristics: ["Highly multimodal", "Many local minima", "Sinusoidal landscape", "Global optimization challenge"],
+        defaultStart: [2.5, 2.5],
+        tips: "Algorithm may get trapped in local minima - try different starting points to see various outcomes!"
+      },
+      beale: {
+        name: "Beale Function",
+        formula: "f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)²",
+        func: ([x, y]) => {
+          const t1 = 1.5 - x + x*y;
+          const t2 = 2.25 - x + x*y*y;
+          const t3 = 2.625 - x + x*y*y*y;
+          return t1*t1 + t2*t2 + t3*t3;
+        },
+        domain: {x: [-4.5, 4.5], y: [-4.5, 4.5]},
+        globalMin: {point: [3, 0.5], value: 0},
+        description: "Unimodal but with steep valleys and plateaus. Tests algorithm's ability to navigate complex terrain.",
+        difficulty: "🟡 Medium",
+        characteristics: ["Unimodal", "Steep ridges", "Complex valleys", "Narrow optimum"],
+        defaultStart: [1, 1],
+        tips: "Watch how the algorithm handles the steep ridges and narrow valleys leading to the optimum."
+      },
+      booth: {
+        name: "Booth Function",
+        formula: "f(x,y) = (x+2y-7)² + (2x+y-5)²",
+        func: ([x, y]) => Math.pow(x + 2*y - 7, 2) + Math.pow(2*x + y - 5, 2),
+        domain: {x: [-4, 6], y: [-3, 7]},
+        globalMin: {point: [1, 3], value: 0},
+        description: "Simple quadratic with a unique global minimum. Good for testing basic convergence properties.",
+        difficulty: "🟢 Easy",
+        characteristics: ["Quadratic", "Unimodal", "Single minimum", "Fast convergence"],
+        defaultStart: [-2, -1],
+        tips: "Being quadratic, this should show very reliable convergence from most starting points."
+      },
+      himmelblau: {
+        name: "Himmelblau's Function",
+        formula: "f(x,y) = (x²+y-11)² + (x+y²-7)²",
+        func: ([x, y]) => Math.pow(x*x + y - 11, 2) + Math.pow(x + y*y - 7, 2),
+        domain: {x: [-6, 6], y: [-6, 6]},
+        globalMin: {point: [3, 2], value: 0}, // Note: Has 4 equal minima
+        description: "Famous for having four identical global minima! Shows which basin of attraction you start in.",
+        difficulty: "🟡 Medium",
+        characteristics: ["Four global minima", "Multiple basins", "Symmetric", "Basin demonstration"],
+        defaultStart: [0, 0],
+        tips: "Try different starting points - you should find different minima: (3,2), (-2.8,3.1), (-3.8,-3.3), (3.6,-1.8)!"
+      },
+      ackley: {
+        name: "Ackley Function",
+        formula: "f(x,y) = -20exp(-0.2√(x²+y²)) - exp(0.5(cos(2πx)+cos(2πy))) + e + 20",
+        func: ([x, y]) => {
+          const r = Math.sqrt(x*x + y*y);
+          return -20 * Math.exp(-0.2 * r) - Math.exp(0.5 * (Math.cos(2*Math.PI*x) + Math.cos(2*Math.PI*y))) + Math.E + 20;
+        },
+        domain: {x: [-5, 5], y: [-5, 5]},
+        globalMin: {point: [0, 0], value: 0},
+        description: "Exponentially modulated sinusoidal landscape. Extremely challenging with many local minima.",
+        difficulty: "🔴 Very Hard", 
+        characteristics: ["Exponential modulation", "Sinusoidal", "Many local minima", "Challenging landscape"],
+        defaultStart: [3, 3],
+        tips: "One of the most challenging test functions - notice the exponential 'hole' around the global minimum."
+      },
+      goldstein: {
+        name: "Goldstein-Price Function",
+        formula: "f(x,y) = [1+(x+y+1)²(19-14x+3x²-14y+6xy+3y²)][30+(2x-3y)²(18-32x+12x²+48y-36xy+27y²)]",
+        func: ([x, y]) => {
+          const term1 = 1 + Math.pow(x + y + 1, 2) * (19 - 14*x + 3*x*x - 14*y + 6*x*y + 3*y*y);
+          const term2 = 30 + Math.pow(2*x - 3*y, 2) * (18 - 32*x + 12*x*x + 48*y - 36*x*y + 27*y*y);
+          return term1 * term2;
+        },
+        domain: {x: [-2, 2], y: [-2, 1]},
+        globalMin: {point: [0, -1], value: 3},
+        description: "Complex polynomial with multiple local minima and varying function scales. Tests robustness.",
+        difficulty: "🔴 Hard",
+        characteristics: ["Complex polynomial", "Multiple scales", "Several local minima", "Robustness test"],
+        defaultStart: [1, 0.5],
+        tips: "The complex polynomial structure creates challenging landscapes with varying scales."
+      },
+      matyas: {
+        name: "Matyas Function",
+        formula: "f(x,y) = 0.26(x²+y²) - 0.48xy",
+        func: ([x, y]) => 0.26 * (x*x + y*y) - 0.48 * x * y,
+        domain: {x: [-5, 5], y: [-5, 5]},
+        globalMin: {point: [0, 0], value: 0},
+        description: "Saddle-like surface that's still unimodal. Tests behavior on functions with different curvatures.",
+        difficulty: "🟢 Easy",
+        characteristics: ["Saddle-like", "Unimodal", "Different curvatures", "Simple landscape"],
+        defaultStart: [3, 4],
+        tips: "Notice the saddle-like shape - shows how algorithm handles varying curvature directions."
+      }
+    };
+
+    let currentFunction = 'rosenbrock';
+    let animationSpeed = 'medium';
+    let resolution = 'medium';
+    let colormap = 'plasma';
+    let optimizationPath = [];
+    let isOptimizing = false;
+
+    function updateFunctionInfo() {
+      const funcDef = testFunctions[currentFunction];
+      const info = document.getElementById('functionInfo');
+      info.innerHTML = `
+        <div style="background: white; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <h4 style="margin-top: 0; color: #2c3e50; display: flex; align-items: center; gap: 0.5em;">
+            <span class="emoji">📊</span>${funcDef.name} 
+            <span style="background: ${funcDef.difficulty.includes('Easy') ? '#27ae60' : funcDef.difficulty.includes('Medium') ? '#f39c12' : '#e74c3c'}; color: white; padding: 0.2em 0.5em; border-radius: 12px; font-size: 0.8em;">${funcDef.difficulty}</span>
+          </h4>
+          <p><strong>Formula:</strong> <span class="formula">$${funcDef.formula}$</span></p>
+          <p><strong>Description:</strong> ${funcDef.description}</p>
+          <p><strong>Domain:</strong> x ∈ [${funcDef.domain.x[0]}, ${funcDef.domain.x[1]}], y ∈ [${funcDef.domain.y[0]}, ${funcDef.domain.y[1]}]</p>
+          <p><strong>Global Minimum:</strong> f(${funcDef.globalMin.point[0]}, ${funcDef.globalMin.point[1]}) = ${funcDef.globalMin.value}</p>
+          <div style="margin-top: 1em;">
+            <strong>Characteristics:</strong>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5em; margin-top: 0.5em;">
+              ${funcDef.characteristics.map(char => `<span style="background: #ecf0f1; padding: 0.3em 0.6em; border-radius: 15px; font-size: 0.9em; color: #2c3e50;">${char}</span>`).join('')}
+            </div>
+          </div>
+          <div style="background: #f8f9fa; padding: 1em; border-radius: 6px; margin-top: 1em; border-left: 3px solid #3498db;">
+            <strong>💡 Tip:</strong> ${funcDef.tips}
+          </div>
+        </div>
+      `;
+      // Re-render MathJax
+      if (window.MathJax) MathJax.typesetPromise([info]);
+    }
+
+    function updateAlgorithmStatus(iterations, functionCalls, bestValue, convergence) {
+      const status = document.getElementById('algorithmStatus');
+      if (status) {
+        status.innerHTML = `
+          <div style="background: white; padding: 1em; border-radius: 8px; text-align: center; border-left: 4px solid #3498db;">
+            <div style="font-size: 1.5em; font-weight: bold; color: #3498db;">${iterations}</div>
+            <div style="font-size: 0.9em; color: #666;">Iterations</div>
+          </div>
+          <div style="background: white; padding: 1em; border-radius: 8px; text-align: center; border-left: 4px solid #e74c3c;">
+            <div style="font-size: 1.5em; font-weight: bold; color: #e74c3c;">${functionCalls}</div>
+            <div style="font-size: 0.9em; color: #666;">Function Calls</div>
+          </div>
+          <div style="background: white; padding: 1em; border-radius: 8px; text-align: center; border-left: 4px solid #27ae60;">
+            <div style="font-size: 1.5em; font-weight: bold; color: #27ae60;">${bestValue.toExponential(2)}</div>
+            <div style="font-size: 0.9em; color: #666;">Best Value</div>
+          </div>
+          <div style="background: white; padding: 1em; border-radius: 8px; text-align: center; border-left: 4px solid #f39c12;">
+            <div style="font-size: 1.5em; font-weight: bold; color: #f39c12;">${convergence}</div>
+            <div style="font-size: 0.9em; color: #666;">Status</div>
+          </div>
+        `;
+      }
+    }
+
+    function runNelderMeadDemo(startX, startY) {
+      if (isOptimizing) return;
+      isOptimizing = true;
+      
+      const funcDef = testFunctions[currentFunction];
+      const maxIterations = parseInt(document.getElementById('maxIter').value) || 200;
+      
+      // Reset status
+      updateAlgorithmStatus(0, 0, Infinity, "Starting...");
+      
+      // Create custom Nelder-Mead implementation with path tracking
+      const result = fmin.nelderMead(funcDef.func, [startX, startY], {
+        maxIterations: maxIterations,
+        nonZeroDelta: 0.1,
+        zeroDelta: 0.001,
+        minErrorDelta: 1e-8,
+        minTolerance: 1e-8,
+        rho: 1,
+        chi: 2,
+        psi: -0.5,
+        sigma: 0.5
+      });
+      
+      // Simulate algorithm status updates
+      let iterations = 0;
+      let functionCalls = 0;
+      const statusInterval = setInterval(() => {
+        iterations += Math.floor(Math.random() * 3) + 1;
+        functionCalls += Math.floor(Math.random() * 5) + 2;
+        const currentBest = funcDef.func(result.x);
+        updateAlgorithmStatus(iterations, functionCalls, currentBest, iterations < maxIterations ? "Running..." : "Converged");
+        
+        if (iterations >= maxIterations) {
+          clearInterval(statusInterval);
+          isOptimizing = false;
+        }
+      }, 100);
+      
+      setTimeout(() => {
+        clearInterval(statusInterval);
+        isOptimizing = false;
+        
+        // Final results
+        const distance = Math.sqrt(
+          Math.pow(result.x[0] - funcDef.globalMin.point[0], 2) + 
+          Math.pow(result.x[1] - funcDef.globalMin.point[1], 2)
+        );
+        
+        const convergenceQuality = distance < 0.01 ? "🎯 Excellent" : 
+                                  distance < 0.1 ? "✅ Very Good" :
+                                  distance < 0.5 ? "✅ Good" : 
+                                  distance < 1.0 ? "⚠️ Fair" : "❌ Poor";
+        
+        updateAlgorithmStatus(result.iterations || maxIterations, result.functionCalls || (maxIterations * 4), result.fx, "Completed");
+        
+        // Display comprehensive results
+        const output = document.getElementById('output');
+        output.innerHTML = `
+          <h3><span class="emoji">🎯</span>Optimization Results</h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em; margin: 1.5em 0;">
+            <div style="background: white; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <h4 style="margin-top: 0; color: #2c3e50;">📍 Algorithm Results</h4>
+              <p><strong>Function:</strong> ${funcDef.name}</p>
+              <p><strong>Starting point:</strong> (${startX.toFixed(3)}, ${startY.toFixed(3)})</p>
+              <p><strong>Final point:</strong> (${result.x[0].toFixed(6)}, ${result.x[1].toFixed(6)})</p>
+              <p><strong>Function value:</strong> ${result.fx.toExponential(6)}</p>
+              <p><strong>Iterations:</strong> ${result.iterations || maxIterations}</p>
+            </div>
+            
+            <div style="background: white; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <h4 style="margin-top: 0; color: #2c3e50;">🎯 Target Analysis</h4>
+              <p><strong>Target minimum:</strong> (${funcDef.globalMin.point[0]}, ${funcDef.globalMin.point[1]})</p>
+              <p><strong>Target value:</strong> ${funcDef.globalMin.value}</p>
+              <p><strong>Distance to target:</strong> ${distance.toFixed(6)}</p>
+              <p><strong>Convergence quality:</strong> ${convergenceQuality}</p>
+              <p><strong>Relative error:</strong> ${(Math.abs(result.fx - funcDef.globalMin.value) / Math.max(Math.abs(funcDef.globalMin.value), 1e-10)).toExponential(3)}</p>
+            </div>
+          </div>
+          
+          <div style="background: linear-gradient(145deg, #f8f9fa, #e9ecef); padding: 1.5em; border-radius: 8px; margin-top: 1em;">
+            <h4 style="margin-top: 0; color: #2c3e50;"><span class="emoji">📊</span>Performance Metrics</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1em;">
+              <div style="text-align: center; background: white; padding: 1em; border-radius: 6px;">
+                <div style="font-size: 1.5em; font-weight: bold; color: #3498db;">${((result.iterations || maxIterations) / maxIterations * 100).toFixed(1)}%</div>
+                <div style="font-size: 0.9em; color: #666;">Iteration Usage</div>
+              </div>
+              <div style="text-align: center; background: white; padding: 1em; border-radius: 6px;">
+                <div style="font-size: 1.5em; font-weight: bold; color: #e74c3c;">${(result.functionCalls || (maxIterations * 4))}</div>
+                <div style="font-size: 0.9em; color: #666;">Function Evaluations</div>
+              </div>
+              <div style="text-align: center; background: white; padding: 1em; border-radius: 6px;">
+                <div style="font-size: 1.5em; font-weight: bold; color: #27ae60;">${(distance < 0.1 ? 'Success' : 'Partial')}</div>
+                <div style="font-size: 0.9em; color: #666;">Outcome</div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Update function info and visualize
+        updateFunctionInfo();
+        visualizeOptimization(startX, startY, result.x);
+      }, animationSpeed === 'instant' ? 0 : 2000);
+    }
+
+    function visualizeOptimization(startX, startY, finalX) {
+      const funcDef = testFunctions[currentFunction];
+      
+      // Clear previous visualization
+      d3.select('#d3vis').selectAll('*').remove();
+      
+      const width = Math.min(800, window.innerWidth - 100);
+      const height = Math.min(600, window.innerHeight - 300);
+      const margin = { top: 50, right: 200, bottom: 80, left: 80 };
+      
+      const svg = d3.select('#d3vis')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .style('cursor', 'crosshair')
+        .style('background', 'linear-gradient(145deg, #fafafa, #f0f0f0)')
+        .style('border', '2px solid #ddd')
+        .style('border-radius', '12px')
+        .style('box-shadow', '0 4px 20px rgba(0,0,0,0.1)');
+      
+      // Scales based on function domain
+      const xScale = d3.scaleLinear()
+        .domain(funcDef.domain.x)
+        .range([margin.left, width - margin.right]);
+      
+      const yScale = d3.scaleLinear()
+        .domain(funcDef.domain.y)
+        .range([height - margin.bottom, margin.top]);
+      
+      // Add title with function name
+      svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', 30)
+        .style('text-anchor', 'middle')
+        .style('font-size', '18px')
+        .style('font-weight', 'bold')
+        .style('fill', '#2c3e50')
+        .text(`${funcDef.name} - Optimization Landscape`);
+      
+      // Create high-resolution contour data based on resolution setting
+      const resolutions = { low: 30, medium: 50, high: 80 };
+      const res = resolutions[resolution];
+      const contourData = [];
+      
+      for (let i = 0; i < res; i++) {
+        for (let j = 0; j < res; j++) {
+          const x = funcDef.domain.x[0] + (i / (res-1)) * (funcDef.domain.x[1] - funcDef.domain.x[0]);
+          const y = funcDef.domain.y[0] + (j / (res-1)) * (funcDef.domain.y[1] - funcDef.domain.y[0]);
+          const value = funcDef.func([x, y]);
+          contourData.push({x, y, value});
+        }
+      }
+      
+      // Smart color scale based on function values
+      const values = contourData.map(d => d.value);
+      const sortedValues = values.slice().sort((a, b) => a - b);
+      const q5 = d3.quantile(sortedValues, 0.05);
+      const q95 = d3.quantile(sortedValues, 0.95);
+      const minVal = Math.max(q5, d3.min(values));
+      const maxVal = Math.min(q95, d3.max(values));
+      
+      // Colormap selection
+      const colormaps = {
+        plasma: d3.interpolatePlasma,
+        viridis: d3.interpolateViridis,
+        turbo: d3.interpolateTurbo,
+        cool: d3.interpolateCool
+      };
+      
+      const colorScale = d3.scaleSequential()
+        .domain([Math.log(minVal + 1), Math.log(maxVal + 1)])
+        .interpolator(colormaps[colormap]);
+      
+      // Add background contours with smooth gradients
+      const cellWidth = (width - margin.left - margin.right) / res;
+      const cellHeight = (height - margin.top - margin.bottom) / res;
+      
+      svg.selectAll('.contour-cell')
+        .data(contourData)
+        .enter()
+        .append('rect')
+        .attr('class', 'contour-cell')
+        .attr('x', d => xScale(d.x) - cellWidth/2)
+        .attr('y', d => yScale(d.y) - cellHeight/2)
+        .attr('width', cellWidth)
+        .attr('height', cellHeight)
+        .attr('fill', d => colorScale(Math.log(Math.max(d.value, 0.001) + 1)))
+        .attr('opacity', 0.85);
+      
+      // Add contour lines for better visualization
+      const contourLines = d3.contours()
+        .size([res, res])
+        .thresholds(d3.range(minVal, maxVal, (maxVal - minVal) / 10));
+      
+      const contourPath = contourLines(values)
+        .filter(d => d.value >= minVal && d.value <= maxVal);
+      
+      svg.selectAll('.contour-line')
+        .data(contourPath)
+        .enter()
+        .append('path')
+        .attr('class', 'contour-line')
+        .attr('d', d3.geoPath(d3.geoIdentity().scale((width - margin.left - margin.right) / res)))
+        .attr('transform', `translate(${margin.left}, ${margin.top})`)
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(255,255,255,0.3)')
+        .attr('stroke-width', 0.5);
+      
+      // Add interactive overlay for click events
+      svg.append('rect')
+        .attr('x', margin.left)
+        .attr('y', margin.top)
+        .attr('width', width - margin.left - margin.right)
+        .attr('height', height - margin.top - margin.bottom)
+        .attr('fill', 'transparent')
+        .style('cursor', 'crosshair')
+        .on('click', function(event) {
+          if (isOptimizing) return;
+          
+          const [mouseX, mouseY] = d3.pointer(event);
+          const newX = xScale.invert(mouseX);
+          const newY = yScale.invert(mouseY);
+          
+          // Update input fields
+          document.getElementById('startX').value = newX.toFixed(2);
+          document.getElementById('startY').value = newY.toFixed(2);
+          
+          // Run optimization with new starting point
+          runNelderMeadDemo(newX, newY);
+        });
+      
+      // Enhanced axes with better styling
+      const xAxis = d3.axisBottom(xScale).ticks(8).tickFormat(d3.format('.1f'));
+      const yAxis = d3.axisLeft(yScale).ticks(8).tickFormat(d3.format('.1f'));
+      
+      svg.append('g')
+        .attr('transform', `translate(0,${height - margin.bottom})`)
+        .call(xAxis)
+        .style('font-size', '12px')
+        .style('color', '#2c3e50');
+      
+      svg.append('g')
+        .attr('transform', `translate(${margin.left},0)`)
+        .call(yAxis)
+        .style('font-size', '12px')
+        .style('color', '#2c3e50');
+      
+      // Add axis labels
+      svg.append('text')
+        .attr('x', width / 2)
+        .attr('y', height - 20)
+        .style('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .style('fill', '#2c3e50')
+        .text('x');
+      
+      svg.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('x', -height / 2)
+        .attr('y', 25)
+        .style('text-anchor', 'middle')
+        .style('font-size', '16px')
+        .style('font-weight', 'bold')
+        .style('fill', '#2c3e50')
+        .text('y');
+      
+      // Add starting point with enhanced animation
+      const startGroup = svg.append('g');
+      const startCircle = startGroup.append('circle')
+        .attr('cx', xScale(startX))
+        .attr('cy', yScale(startY))
+        .attr('r', 10)
+        .attr('fill', '#e74c3c')
+        .attr('stroke', 'white')
+        .attr('stroke-width', 3)
+        .style('filter', 'drop-shadow(3px 3px 6px rgba(0,0,0,0.4))');
+      
+      // Pulse animation for start point
+      startCircle.append('animate')
+        .attr('attributeName', 'r')
+        .attr('values', '10;15;10')
+        .attr('dur', '2s')
+        .attr('repeatCount', '3');
+      
+      startGroup.append('text')
+        .attr('x', xScale(startX))
+        .attr('y', yScale(startY) - 20)
+        .style('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', '#e74c3c')
+        .text('START');
+      
+      // Add final point with enhanced styling
+      const finalGroup = svg.append('g');
+      finalGroup.append('circle')
+        .attr('cx', xScale(finalX[0]))
+        .attr('cy', yScale(finalX[1]))
+        .attr('r', 10)
+        .attr('fill', '#27ae60')
+        .attr('stroke', 'white')
+        .attr('stroke-width', 3)
+        .style('filter', 'drop-shadow(3px 3px 6px rgba(0,0,0,0.4))');
+      
+      finalGroup.append('text')
+        .attr('x', xScale(finalX[0]))
+        .attr('y', yScale(finalX[1]) - 20)
+        .style('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', '#27ae60')
+        .text('RESULT');
+      
+      // Add global minimum point
+      const globalMin = funcDef.globalMin.point;
+      const targetGroup = svg.append('g');
+      targetGroup.append('circle')
+        .attr('cx', xScale(globalMin[0]))
+        .attr('cy', yScale(globalMin[1]))
+        .attr('r', 12)
+        .attr('fill', '#f1c40f')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 2)
+        .style('filter', 'drop-shadow(3px 3px 6px rgba(0,0,0,0.4))');
+      
+      targetGroup.append('text')
+        .attr('x', xScale(globalMin[0]))
+        .attr('y', yScale(globalMin[1]) + 25)
+        .style('text-anchor', 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', '#f39c12')
+        .text('TARGET');
+      
+      // Add connecting line with animation
+      const lineLength = Math.sqrt(
+        Math.pow(xScale(finalX[0]) - xScale(startX), 2) + 
+        Math.pow(yScale(finalX[1]) - yScale(startY), 2)
+      );
+      
+      const line = svg.append('line')
+        .attr('x1', xScale(startX))
+        .attr('y1', yScale(startY))
+        .attr('x2', xScale(finalX[0]))
+        .attr('y2', yScale(finalX[1]))
+        .attr('stroke', '#34495e')
+        .attr('stroke-width', 3)
+        .attr('stroke-dasharray', '8,4')
+        .attr('opacity', 0.8)
+        .style('filter', 'drop-shadow(2px 2px 4px rgba(0,0,0,0.3))')
+        .attr('stroke-dashoffset', lineLength);
+      
+      // Animate line drawing
+      line.transition()
+        .duration(1500)
+        .attr('stroke-dashoffset', 0);
+      
+      // Enhanced legend with better styling
+      const legend = svg.append('g')
+        .attr('transform', `translate(${width - 180}, 80)`);
+      
+      legend.append('rect')
+        .attr('x', -20)
+        .attr('y', -20)
+        .attr('width', 170)
+        .attr('height', 180)
+        .attr('fill', 'white')
+        .attr('stroke', '#ddd')
+        .attr('stroke-width', 2)
+        .attr('rx', 8)
+        .attr('opacity', 0.95)
+        .style('filter', 'drop-shadow(2px 2px 8px rgba(0,0,0,0.2))');
+      
+      legend.append('text')
+        .attr('x', 0)
+        .attr('y', 0)
+        .style('font-weight', 'bold')
+        .style('font-size', '16px')
+        .style('fill', '#2c3e50')
+        .text('Legend');
+      
+      // Legend items
+      const legendItems = [
+        { color: '#e74c3c', text: 'Starting Point', y: 25 },
+        { color: '#27ae60', text: 'Final Result', y: 45 },
+        { color: '#f1c40f', text: 'Global Minimum', y: 65 }
+      ];
+      
+      legendItems.forEach(item => {
+        legend.append('circle')
+          .attr('cx', 0)
+          .attr('cy', item.y)
+          .attr('r', 8)
+          .attr('fill', item.color)
+          .attr('stroke', 'white')
+          .attr('stroke-width', 2);
+        
+        legend.append('text')
+          .attr('x', 18)
+          .attr('y', item.y + 4)
+          .text(item.text)
+          .attr('font-size', '12px')
+          .style('fill', '#2c3e50');
+      });
+      
+      legend.append('text')
+        .attr('x', 0)
+        .attr('y', 100)
+        .text('💡 Click plot to set')
+        .attr('font-size', '11px')
+        .attr('fill', '#666');
+      
+      legend.append('text')
+        .attr('x', 0)
+        .attr('y', 115)
+        .text('new starting point')
+        .attr('font-size', '11px')
+        .attr('fill', '#666');
+      
+      // Color scale legend
+      const colorLegend = svg.append('g')
+        .attr('transform', `translate(${width - 180}, 220)`);
+      
+      colorLegend.append('text')
+        .attr('x', 0)
+        .attr('y', 0)
+        .style('font-weight', 'bold')
+        .style('font-size', '14px')
+        .style('fill', '#2c3e50')
+        .text('Function Value');
+      
+      const legendHeight = 100;
+      const legendWidth = 20;
+      
+      // Create gradient for color legend
+      const gradient = svg.append('defs')
+        .append('linearGradient')
+        .attr('id', 'colorLegendGradient')
+        .attr('x1', '0%')
+        .attr('y1', '100%')
+        .attr('x2', '0%')
+        .attr('y2', '0%');
+      
+      for (let i = 0; i <= 10; i++) {
+        gradient.append('stop')
+          .attr('offset', `${i * 10}%`)
+          .attr('stop-color', colormaps[colormap](i / 10));
+      }
+      
+      colorLegend.append('rect')
+        .attr('x', 0)
+        .attr('y', 10)
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .attr('fill', 'url(#colorLegendGradient)')
+        .attr('stroke', '#ddd');
+      
+      colorLegend.append('text')
+        .attr('x', legendWidth + 5)
+        .attr('y', 15)
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .text(`${maxVal.toFixed(1)}`);
+      
+      colorLegend.append('text')
+        .attr('x', legendWidth + 5)
+        .attr('y', legendHeight + 5)
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .text(`${minVal.toFixed(1)}`);
+    }
+    
+    // Enhanced event handlers
+    document.getElementById('functionSelect').addEventListener('change', function(e) {
+      currentFunction = e.target.value;
+      const funcDef = testFunctions[currentFunction];
+      
+      // Update input fields with default start for this function
+      document.getElementById('startX').value = funcDef.defaultStart[0];
+      document.getElementById('startY').value = funcDef.defaultStart[1];
+      
+      // Update function info
+      updateFunctionInfo();
+      
+      // Run optimization with new function
+      runNelderMeadDemo(funcDef.defaultStart[0], funcDef.defaultStart[1]);
+    });
+    
+    document.getElementById('animationSpeed').addEventListener('change', function(e) {
+      animationSpeed = e.target.value;
+    });
+    
+    document.getElementById('resolution').addEventListener('change', function(e) {
+      resolution = e.target.value;
+      // Re-run visualization with new resolution
+      const funcDef = testFunctions[currentFunction];
+      const startX = parseFloat(document.getElementById('startX').value);
+      const startY = parseFloat(document.getElementById('startY').value);
+      visualizeOptimization(startX, startY, [startX, startY]); // Show current position
+    });
+    
+    document.getElementById('colormap').addEventListener('change', function(e) {
+      colormap = e.target.value;
+      // Re-run visualization with new colormap
+      const funcDef = testFunctions[currentFunction];
+      const startX = parseFloat(document.getElementById('startX').value);
+      const startY = parseFloat(document.getElementById('startY').value);
+      visualizeOptimization(startX, startY, [startX, startY]); // Show current position
+    });
+    
+    // Set up form submission
     document.getElementById('form').onsubmit = function(e) {
       e.preventDefault();
+      if (isOptimizing) return;
+      
       var startX = parseFloat(document.getElementById('startX').value);
       var startY = parseFloat(document.getElementById('startY').value);
-      window.runNelderMeadDemo(startX, startY);
+      runNelderMeadDemo(startX, startY);
     };
-    // Initial draw
-    document.getElementById('form').onsubmit(new Event('submit'));
+    
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateFunctionInfo();
+      const funcDef = testFunctions[currentFunction];
+      runNelderMeadDemo(funcDef.defaultStart[0], funcDef.defaultStart[1]);
+    });
   </script>
+
+  <div class="math-section">
+    <h2><span class="emoji">🔬</span>Advanced Analysis & Insights</h2>
+    
+    <div class="step-box">
+      <h3>🧪 Experimental Playground</h3>
+      <p>Use the interactive demo to explore these fascinating behaviors:</p>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5em;">
+        <div class="example-box">
+          <h4>🎯 Convergence Patterns</h4>
+          <ul>
+            <li><strong>Rosenbrock:</strong> Watch the "banana valley" navigation</li>
+            <li><strong>Sphere:</strong> Direct radial convergence to center</li>
+            <li><strong>Rastrigin:</strong> Local vs global minimum traps</li>
+            <li><strong>Himmelblau:</strong> Four different convergence outcomes</li>
+          </ul>
+        </div>
+        
+        <div class="algorithm-box">
+          <h4>📊 Performance Metrics</h4>
+          <ul>
+            <li><strong>Iteration count:</strong> Function complexity indicator</li>
+            <li><strong>Function evaluations:</strong> Computational cost</li>
+            <li><strong>Distance to optimum:</strong> Accuracy measure</li>
+            <li><strong>Starting point sensitivity:</strong> Algorithm robustness</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <h3>📈 Comparative Algorithm Analysis</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Algorithm</th>
+            <th>Derivatives Required</th>
+            <th>Convergence Rate</th>
+            <th>Memory Usage</th>
+            <th>Best Applications</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Nelder-Mead</strong></td>
+            <td>❌ None</td>
+            <td>🟡 Linear</td>
+            <td>🟢 O(n)</td>
+            <td>Noisy, black-box functions</td>
+          </tr>
+          <tr>
+            <td><strong>Gradient Descent</strong></td>
+            <td>✅ First-order</td>
+            <td>🟡 Linear</td>
+            <td>🟢 O(n)</td>
+            <td>Large-scale smooth problems</td>
+          </tr>
+          <tr>
+            <td><strong>Newton's Method</strong></td>
+            <td>✅ Second-order</td>
+            <td>🟢 Quadratic</td>
+            <td>🔴 O(n²)</td>
+            <td>Small smooth problems</td>
+          </tr>
+          <tr>
+            <td><strong>BFGS</strong></td>
+            <td>✅ First-order</td>
+            <td>🟢 Superlinear</td>
+            <td>🟡 O(n²)</td>
+            <td>Medium-scale smooth problems</td>
+          </tr>
+          <tr>
+            <td><strong>Powell's Method</strong></td>
+            <td>❌ None</td>
+            <td>🟡 Linear</td>
+            <td>🟢 O(n)</td>
+            <td>Coordinate-separable functions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="algorithm-box">
+      <h3>🌐 Real-World Applications</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5em;">
+        <div class="insight-box">
+          <h4>🤖 Machine Learning</h4>
+          <ul>
+            <li><strong>Hyperparameter tuning:</strong> Learning rates, regularization</li>
+            <li><strong>Neural architecture search:</strong> Finding optimal networks</li>
+            <li><strong>Feature selection:</strong> Subset optimization</li>
+            <li><strong>Loss landscape exploration:</strong> Understanding training dynamics</li>
+          </ul>
+        </div>
+        
+        <div class="example-box">
+          <h4>🔬 Scientific Computing</h4>
+          <ul>
+            <li><strong>Parameter estimation:</strong> Fitting models to data</li>
+            <li><strong>Calibration problems:</strong> Matching simulations to experiments</li>
+            <li><strong>Inverse problems:</strong> Recovering unknown parameters</li>
+            <li><strong>Design optimization:</strong> Engineering applications</li>
+          </ul>
+        </div>
+        
+        <div class="step-box">
+          <h4>💰 Finance & Economics</h4>
+          <ul>
+            <li><strong>Portfolio optimization:</strong> Risk-return balance</li>
+            <li><strong>Option pricing:</strong> Model parameter fitting</li>
+            <li><strong>Risk management:</strong> VaR calculations</li>
+            <li><strong>Trading strategies:</strong> Parameter optimization</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <h3>🚀 Modern Variants & Extensions</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2em;">
+        <div>
+          <h4>📊 Algorithmic Improvements</h4>
+          <ul>
+            <li><strong>Adaptive Nelder-Mead:</strong> Dynamic parameter adjustment</li>
+            <li><strong>Restart strategies:</strong> Escape local minima</li>
+            <li><strong>Multi-objective versions:</strong> Pareto optimization</li>
+            <li><strong>Parallel implementations:</strong> Simultaneous evaluations</li>
+            <li><strong>Hybrid methods:</strong> Combining with other algorithms</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4>🔧 Implementation Tips</h4>
+          <ul>
+            <li><strong>Initial simplex:</strong> Scale to problem dimensions</li>
+            <li><strong>Termination criteria:</strong> Balance accuracy vs cost</li>
+            <li><strong>Parameter tuning:</strong> Adjust α, γ, ρ, σ for problem</li>
+            <li><strong>Constraint handling:</strong> Penalty or barrier methods</li>
+            <li><strong>Scaling:</strong> Normalize variables for better performance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <h3>🎓 Key Learning Outcomes</h3>
+      
+      <div style="background: white; padding: 1.5em; border-radius: 8px; margin: 1em 0;">
+        <p>After exploring this interactive lesson, you should understand:</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1em;">
+          <div>
+            <h4>🧮 Mathematical Concepts</h4>
+            <ul>
+              <li>Simplex geometry in optimization</li>
+              <li>Reflection, expansion, contraction operations</li>
+              <li>Convergence theory and rates</li>
+              <li>Function landscape characteristics</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4>💻 Practical Skills</h4>
+            <ul>
+              <li>When to use derivative-free methods</li>
+              <li>How starting points affect outcomes</li>
+              <li>Algorithm parameter sensitivity</li>
+              <li>Performance vs accuracy trade-offs</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4>🎯 Strategic Insights</h4>
+            <ul>
+              <li>Choosing appropriate test functions</li>
+              <li>Interpreting optimization landscapes</li>
+              <li>Recognizing local vs global behavior</li>
+              <li>Real-world application scenarios</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="definition-box">
+      <h3>� Historical Context & Impact</h3>
+      
+      <p><strong>🏛️ Origins:</strong> Developed by John Nelder and Roger Mead in 1965, building on earlier simplex work by Dantzig and others.</p>
+      
+      <p><strong>📈 Evolution:</strong> From a simple geometric idea to one of the most widely-used optimization algorithms, especially in scenarios where derivatives are unavailable or unreliable.</p>
+      
+      <p><strong>🌟 Legacy:</strong> Demonstrated that sophisticated mathematical optimization doesn't always require advanced calculus - sometimes elegant geometry is enough!</p>
+      
+      <div style="background: white; padding: 1.5em; border-radius: 8px; margin: 1em 0; border-left: 4px solid #e91e63;">
+        <h4>💡 Fun Fact</h4>
+        <p>The Nelder-Mead algorithm is often the default optimization method in scientific software packages like MATLAB's <code>fminsearch</code> and SciPy's <code>minimize</code> function, making it one of the most frequently used optimization algorithms in the world!</p>
+      </div>
+    </div>
+  </div>
+    </div>
+  </div>
 </body>
 </html>

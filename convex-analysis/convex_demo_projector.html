@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔷 Convex Functions - Projector Optimized Demo</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+  <style>
+    body { 
+      font-family: 'Arial', 'Helvetica', sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: #1a1a1a;
+      color: #ffffff;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    
+    .main-container {
+      display: flex;
+      gap: 30px;
+      max-width: 1800px;
+      margin: 0 auto;
+      height: 100vh;
+    }
+    
+    .theory-panel {
+      flex: 1;
+      background: #2d3436;
+      padding: 30px;
+      border-radius: 15px;
+      border: 3px solid #00b894;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0, 185, 148, 0.3);
+    }
+    
+    .interactive-panel {
+      flex: 1.5;
+      background: #2d3436;
+      padding: 30px;
+      border-radius: 15px;
+      border: 3px solid #0984e3;
+      box-shadow: 0 8px 32px rgba(9, 132, 227, 0.3);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #00cec9;
+      margin-bottom: 40px;
+      font-size: 3.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      font-weight: bold;
+    }
+    
+    h2 {
+      color: #00b894;
+      font-size: 2.2em;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      border-bottom: 3px solid #00b894;
+      padding-bottom: 10px;
+    }
+    
+    h3 {
+      color: #0984e3;
+      font-size: 1.8em;
+      margin: 25px 0 15px 0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    h4 {
+      color: #fdcb6e;
+      font-size: 1.4em;
+      margin: 20px 0 10px 0;
+    }
+    
+    .definition-box {
+      background: rgba(0, 184, 148, 0.15);
+      padding: 25px;
+      border-radius: 12px;
+      border: 2px solid #00b894;
+      margin: 20px 0;
+      font-size: 1.1em;
+    }
+    
+    .formula-highlight {
+      background: rgba(253, 203, 110, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 1.3em;
+      text-align: center;
+      margin: 20px 0;
+      border: 2px solid #fdcb6e;
+      font-weight: bold;
+      color: #fdcb6e;
+    }
+    
+    .key-insight {
+      background: rgba(255, 107, 107, 0.15);
+      padding: 25px;
+      border-radius: 12px;
+      border: 2px solid #ff6b6b;
+      margin: 20px 0;
+      font-size: 1.2em;
+    }
+    
+    .key-insight h4 {
+      color: #ff6b6b;
+      margin-top: 0;
+    }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 25px;
+      border-radius: 12px;
+      border: 2px solid #636e72;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .control-group label {
+      font-weight: bold;
+      color: #00cec9;
+      font-size: 1.1em;
+    }
+    
+    .control-group select,
+    .control-group input[type="range"] {
+      font-size: 1.1em;
+      padding: 8px;
+      background: #636e72;
+      color: white;
+      border: 2px solid #00cec9;
+      border-radius: 6px;
+    }
+    
+    .control-group select {
+      height: 45px;
+    }
+    
+    .control-group input[type="range"] {
+      height: 30px;
+    }
+    
+    .control-group span {
+      font-weight: bold;
+      color: #fdcb6e;
+      font-size: 1.2em;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      transform: scale(1.5);
+    }
+    
+    .checkbox-group label {
+      font-size: 1.2em;
+      color: #00cec9;
+      font-weight: bold;
+    }
+    
+    #canvas {
+      border: 4px solid #0984e3;
+      display: block;
+      margin: 20px auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(9, 132, 227, 0.4);
+    }
+    
+    .info {
+      background: rgba(9, 132, 227, 0.15);
+      padding: 25px;
+      border-radius: 12px;
+      margin-top: 25px;
+      border: 2px solid #0984e3;
+      font-size: 1.1em;
+    }
+    
+    .convex-property {
+      background: rgba(0, 184, 148, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border-left: 6px solid #00b894;
+      font-size: 1.1em;
+    }
+    
+    .non-convex-property {
+      background: rgba(255, 107, 107, 0.2);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border-left: 6px solid #ff6b6b;
+      font-size: 1.1em;
+    }
+    
+    .property-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .property-card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .property-card h5 {
+      color: #00cec9;
+      margin-top: 0;
+      font-size: 1.3em;
+    }
+    
+    .examples-list {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+    
+    .examples-list li {
+      background: rgba(253, 203, 110, 0.1);
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border-left: 4px solid #fdcb6e;
+      font-size: 1.05em;
+    }
+    
+    .highlight-text {
+      color: #fdcb6e;
+      font-weight: bold;
+    }
+    
+    .gradient-info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #ff6b6b;
+      font-size: 1.1em;
+      min-width: 200px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1400px) {
+      .main-container {
+        flex-direction: column;
+        height: auto;
+      }
+      
+      .theory-panel,
+      .interactive-panel {
+        flex: none;
+      }
+      
+      h1 {
+        font-size: 2.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔷 Convex Functions - Interactive Demo</h1>
+  
+  <div class="main-container">
+    <!-- Theory Panel -->
+    <div class="theory-panel">
+      <h2>📚 Theory & Definitions</h2>
+      
+      <div class="definition-box">
+        <h4>🎯 What is a Convex Function?</h4>
+        <p>A function $f(x)$ is <strong>convex</strong> if for any two points $x_1, x_2$ and any $\lambda \in [0,1]$:</p>
+      </div>
+      
+      <div class="formula-highlight">
+        $$f(\lambda x_1 + (1-\lambda)x_2) \leq \lambda f(x_1) + (1-\lambda)f(x_2)$$
+      </div>
+      
+      <div class="key-insight">
+        <h4>🚀 Key Insight</h4>
+        <p><strong>Any local minimum is a global minimum!</strong></p>
+        <p>This makes optimization much easier and guarantees we'll find the best solution.</p>
+      </div>
+      
+      <h3>🔍 Visual Test</h3>
+      <div class="property-card">
+        <h5>Line Segment Test</h5>
+        <p>Draw a line between any two points on the function. If the line segment lies <strong>above</strong> the function curve, it's convex.</p>
+      </div>
+      
+      <h3>🧮 Mathematical Test</h3>
+      <div class="property-card">
+        <h5>Second Derivative Test</h5>
+        <p>If $f''(x) \geq 0$ for all $x$ in the domain, then $f(x)$ is convex.</p>
+      </div>
+      
+      <h3>📊 Function Examples</h3>
+      <div class="property-grid">
+        <div class="property-card">
+          <h5>✅ Convex Functions</h5>
+          <ul class="examples-list">
+            <li><span class="highlight-text">Quadratic:</span> $f(x) = ax^2 + bx + c$ (when $a > 0$)</li>
+            <li><span class="highlight-text">Exponential:</span> $f(x) = e^x$ (always convex)</li>
+            <li><span class="highlight-text">Absolute Value:</span> $f(x) = |x|$</li>
+            <li><span class="highlight-text">Logarithmic:</span> $f(x) = -\log(-x)$ for $x < 0$</li>
+          </ul>
+        </div>
+        
+        <div class="property-card">
+          <h5>❌ Non-Convex Functions</h5>
+          <ul class="examples-list">
+            <li><span class="highlight-text">Sine:</span> $f(x) = \sin(x)$ (oscillating)</li>
+            <li><span class="highlight-text">Cubic:</span> $f(x) = x^3$ (S-shaped)</li>
+            <li><span class="highlight-text">Negative Quadratic:</span> $f(x) = -x^2$ (upside-down parabola)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <h3>🎯 Why Convexity Matters</h3>
+      <div class="property-grid">
+        <div class="property-card">
+          <h5>🚀 Optimization Guarantees</h5>
+          <p>Gradient descent will always find the global minimum, no matter where you start!</p>
+        </div>
+        
+        <div class="property-card">
+          <h5>🧠 Machine Learning Applications</h5>
+          <p>Linear regression, logistic regression, and SVM all use convex loss functions for guaranteed optimal solutions.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Interactive Panel -->
+    <div class="interactive-panel">
+      <h2>🎮 Interactive Exploration</h2>
+      
+      <div class="controls">
+        <div class="control-group">
+          <label for="functionSelect">Function Type:</label>
+          <select id="functionSelect">
+            <option value="quadratic">🔵 Quadratic (x²)</option>
+            <option value="exponential">🟠 Exponential (eˣ)</option>
+            <option value="absolute">🟢 Absolute Value (|x|)</option>
+            <option value="log">🟣 -Log(-x)</option>
+            <option value="logistic">🔴 Logistic Function</option>
+            <option value="hinge">🟡 Hinge Function</option>
+            <option value="sine">❌ Sine (Non-convex)</option>
+            <option value="cubic">❌ Cubic (Non-convex)</option>
+          </select>
+        </div>
+        
+        <div class="control-group">
+          <label for="aParam">Parameter a:</label>
+          <input type="range" id="aParam" min="0.1" max="3" step="0.1" value="1">
+          <span id="aValue">1.0</span>
+        </div>
+        
+        <div class="control-group">
+          <label for="bParam">Parameter b:</label>
+          <input type="range" id="bParam" min="-2" max="2" step="0.1" value="0">
+          <span id="bValue">0.0</span>
+        </div>
+        
+        <div class="control-group">
+          <label for="learningRate">Learning Rate:</label>
+          <input type="range" id="learningRate" min="0.01" max="0.5" step="0.01" value="0.1">
+          <span id="learningRateValue">0.10</span>
+        </div>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="showSecondDerivative">
+        <label for="showSecondDerivative">Show Second Derivative (Orange)</label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="showConvexTest">
+        <label for="showConvexTest">Show Convexity Test (Green Line)</label>
+      </div>
+      
+      <div class="checkbox-group">
+        <input type="checkbox" id="showGradientDescent">
+        <label for="showGradientDescent">Show Gradient Descent Path</label>
+      </div>
+      
+      <canvas id="canvas" width="900" height="600"></canvas>
+      
+      <div class="info">
+        <h3>🔍 Function Analysis</h3>
+        <div id="convexInfo"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Parameters
+    let functionType = 'quadratic';
+    let aParam = 1.0;
+    let bParam = 0.0;
+    let showSecondDerivative = false;
+    let showConvexTest = false;
+    let showGradientDescent = false;
+    let learningRate = 0.1;
+    let gdPath = [];
+    let gdStep = 0;
+    
+    // Define functions
+    const functions = {
+      quadratic: {
+        f: (x) => aParam * x * x + bParam * x,
+        f_prime: (x) => 2 * aParam * x + bParam,
+        f_double_prime: (x) => 2 * aParam,
+        name: `${aParam.toFixed(1)}x² + ${bParam.toFixed(1)}x`,
+        isConvex: () => aParam > 0,
+        description: "Quadratic Function - Parabola",
+        mlContext: "Used in linear regression as MSE loss function."
+      },
+      exponential: {
+        f: (x) => Math.exp(aParam * x),
+        f_prime: (x) => aParam * Math.exp(aParam * x),
+        f_double_prime: (x) => aParam * aParam * Math.exp(aParam * x),
+        name: `e^(${aParam.toFixed(1)}x)`,
+        isConvex: () => true,
+        description: "Exponential Function - Always Convex",
+        mlContext: "Used in exponential family distributions."
+      },
+      absolute: {
+        f: (x) => aParam * Math.abs(x + bParam),
+        f_prime: (x) => x + bParam >= 0 ? aParam : -aParam,
+        f_double_prime: (x) => 0,
+        name: `${aParam.toFixed(1)}|x + ${bParam.toFixed(1)}|`,
+        isConvex: () => aParam > 0,
+        description: "Absolute Value - V-shaped Function",
+        mlContext: "Used in L1 regularization (Lasso regression)."
+      },
+      log: {
+        f: (x) => x < 0 ? -aParam * Math.log(-x) : NaN,
+        f_prime: (x) => x < 0 ? -aParam / x : NaN,
+        f_double_prime: (x) => x < 0 ? aParam / (x * x) : NaN,
+        name: `-${aParam.toFixed(1)}ln(-x)`,
+        isConvex: () => aParam > 0,
+        description: "Negative Logarithm - Convex on Domain",
+        mlContext: "Used in maximum likelihood estimation."
+      },
+      logistic: {
+        f: (x) => Math.log(1 + Math.exp(aParam * x)),
+        f_prime: (x) => aParam * Math.exp(aParam * x) / (1 + Math.exp(aParam * x)),
+        f_double_prime: (x) => {
+          const exp_ax = Math.exp(aParam * x);
+          return aParam * aParam * exp_ax / Math.pow(1 + exp_ax, 2);
+        },
+        name: `log(1 + e^(${aParam.toFixed(1)}x))`,
+        isConvex: () => true,
+        description: "Logistic Function - Smooth S-curve",
+        mlContext: "Used in logistic regression classification."
+      },
+      hinge: {
+        f: (x) => Math.max(0, aParam - bParam * x),
+        f_prime: (x) => (aParam - bParam * x) > 0 ? -bParam : 0,
+        f_double_prime: (x) => 0,
+        name: `max(0, ${aParam.toFixed(1)} - ${bParam.toFixed(1)}x)`,
+        isConvex: () => true,
+        description: "Hinge Function - Piecewise Linear",
+        mlContext: "Used in Support Vector Machines (SVM)."
+      },
+      sine: {
+        f: (x) => aParam * Math.sin(x + bParam),
+        f_prime: (x) => aParam * Math.cos(x + bParam),
+        f_double_prime: (x) => -aParam * Math.sin(x + bParam),
+        name: `${aParam.toFixed(1)}sin(x + ${bParam.toFixed(1)})`,
+        isConvex: () => false,
+        description: "Sine Function - Oscillating Non-Convex",
+        mlContext: "Example of non-convex optimization challenges."
+      },
+      cubic: {
+        f: (x) => aParam * x * x * x + bParam * x,
+        f_prime: (x) => 3 * aParam * x * x + bParam,
+        f_double_prime: (x) => 6 * aParam * x,
+        name: `${aParam.toFixed(1)}x³ + ${bParam.toFixed(1)}x`,
+        isConvex: () => false,
+        description: "Cubic Function - S-shaped Non-Convex",
+        mlContext: "Complex optimization landscapes with multiple minima."
+      }
+    };
+    
+    // Coordinate transformation
+    const xMin = -5, xMax = 5;
+    const yMin = -10, yMax = 10;
+    
+    function toCanvasX(x) {
+      return (x - xMin) / (xMax - xMin) * width;
+    }
+    
+    function toCanvasY(y) {
+      return height - (y - yMin) / (yMax - yMin) * height;
+    }
+    
+    function fromCanvasX(canvasX) {
+      return xMin + (canvasX / width) * (xMax - xMin);
+    }
+    
+    // Draw axes with larger, more visible elements
+    function drawAxes() {
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+      
+      // Grid
+      for (let x = -5; x <= 5; x++) {
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(x), 0);
+        ctx.lineTo(toCanvasX(x), height);
+        ctx.stroke();
+      }
+      
+      for (let y = -10; y <= 10; y += 2) {
+        ctx.beginPath();
+        ctx.moveTo(0, toCanvasY(y));
+        ctx.lineTo(width, toCanvasY(y));
+        ctx.stroke();
+      }
+      
+      // Main axes
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 4;
+      
+      // X-axis
+      ctx.beginPath();
+      ctx.moveTo(0, toCanvasY(0));
+      ctx.lineTo(width, toCanvasY(0));
+      ctx.stroke();
+      
+      // Y-axis
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(0), 0);
+      ctx.lineTo(toCanvasX(0), height);
+      ctx.stroke();
+      
+      // Labels with larger font
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 16px Arial';
+      for (let x = -4; x <= 4; x += 2) {
+        if (x !== 0) {
+          ctx.fillText(x.toString(), toCanvasX(x) - 8, toCanvasY(0) + 25);
+        }
+      }
+      for (let y = -8; y <= 8; y += 4) {
+        if (y !== 0) {
+          ctx.fillText(y.toString(), toCanvasX(0) + 10, toCanvasY(y) + 6);
+        }
+      }
+    }
+    
+    // Draw function with thicker line
+    function drawFunction() {
+      const func = functions[functionType];
+      if (!func) return;
+      
+      ctx.strokeStyle = '#2196F3';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      
+      let started = false;
+      for (let canvasX = 0; canvasX <= width; canvasX++) {
+        const x = fromCanvasX(canvasX);
+        const y = func.f(x);
+        
+        if (isFinite(y) && y >= yMin && y <= yMax) {
+          if (!started) {
+            ctx.moveTo(canvasX, toCanvasY(y));
+            started = true;
+          } else {
+            ctx.lineTo(canvasX, toCanvasY(y));
+          }
+        } else {
+          started = false;
+        }
+      }
+      ctx.stroke();
+    }
+    
+    // Draw second derivative
+    function drawSecondDerivative() {
+      if (!showSecondDerivative) return;
+      
+      const func = functions[functionType];
+      if (!func) return;
+      
+      ctx.strokeStyle = '#FF9800';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      
+      let started = false;
+      for (let canvasX = 0; canvasX <= width; canvasX++) {
+        const x = fromCanvasX(canvasX);
+        const y = func.f_double_prime(x);
+        
+        if (isFinite(y) && y >= yMin && y <= yMax) {
+          if (!started) {
+            ctx.moveTo(canvasX, toCanvasY(y));
+            started = true;
+          } else {
+            ctx.lineTo(canvasX, toCanvasY(y));
+          }
+        } else {
+          started = false;
+        }
+      }
+      ctx.stroke();
+    }
+    
+    // Draw convex test with larger elements
+    function drawConvexTest() {
+      if (!showConvexTest) return;
+      
+      const func = functions[functionType];
+      if (!func) return;
+      
+      // Choose two test points
+      const x1 = -2, x2 = 2;
+      const y1 = func.f(x1), y2 = func.f(x2);
+      
+      if (!isFinite(y1) || !isFinite(y2)) return;
+      
+      // Draw line segment
+      ctx.strokeStyle = '#4CAF50';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([10, 8]);
+      ctx.beginPath();
+      ctx.moveTo(toCanvasX(x1), toCanvasY(y1));
+      ctx.lineTo(toCanvasX(x2), toCanvasY(y2));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw points
+      ctx.fillStyle = '#4CAF50';
+      ctx.beginPath();
+      ctx.arc(toCanvasX(x1), toCanvasY(y1), 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(toCanvasX(x2), toCanvasY(y2), 8, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      // Test convexity at midpoint
+      const xMid = (x1 + x2) / 2;
+      const yMid = (y1 + y2) / 2;
+      const fMid = func.f(xMid);
+      
+      if (isFinite(fMid)) {
+        const isConvexAtMid = fMid <= yMid;
+        ctx.fillStyle = isConvexAtMid ? '#4CAF50' : '#F44336';
+        ctx.beginPath();
+        ctx.arc(toCanvasX(xMid), toCanvasY(fMid), 8, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Draw vertical line showing the test
+        ctx.strokeStyle = isConvexAtMid ? '#4CAF50' : '#F44336';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(toCanvasX(xMid), toCanvasY(fMid));
+        ctx.lineTo(toCanvasX(xMid), toCanvasY(yMid));
+        ctx.stroke();
+      }
+    }
+    
+    // Initialize gradient descent
+    function initializeGradientDescent() {
+      gdPath = [];
+      gdStep = 0;
+      
+      // Start from a random point
+      let startX = (Math.random() - 0.5) * 8; // Random point between -4 and 4
+      
+      // Ensure we start from a valid domain
+      const func = functions[functionType];
+      if (functionType === 'log') {
+        startX = -Math.abs(startX) - 0.5; // Ensure x < 0 for log function
+      }
+      
+      gdPath.push({ x: startX, y: func.f(startX) });
+      
+      // Perform gradient descent steps
+      let currentX = startX;
+      for (let i = 0; i < 50 && Math.abs(currentX) < 10; i++) {
+        const gradient = func.f_prime(currentX);
+        if (!isFinite(gradient)) break;
+        
+        currentX = currentX - learningRate * gradient;
+        const currentY = func.f(currentX);
+        
+        if (isFinite(currentY)) {
+          gdPath.push({ x: currentX, y: currentY });
+        } else {
+          break;
+        }
+        
+        // Stop if converged
+        if (Math.abs(gradient) < 0.001) break;
+      }
+    }
+    
+    // Draw gradient descent path with larger elements
+    function drawGradientDescent() {
+      if (!showGradientDescent || gdPath.length < 2) return;
+      
+      // Draw path
+      ctx.strokeStyle = '#FF4444';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([15, 8]);
+      ctx.beginPath();
+      
+      for (let i = 0; i < gdPath.length; i++) {
+        const point = gdPath[i];
+        const canvasX = toCanvasX(point.x);
+        const canvasY = toCanvasY(point.y);
+        
+        if (i === 0) {
+          ctx.moveTo(canvasX, canvasY);
+        } else {
+          ctx.lineTo(canvasX, canvasY);
+        }
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw points along path
+      gdPath.forEach((point, index) => {
+        const canvasX = toCanvasX(point.x);
+        const canvasY = toCanvasY(point.y);
+        
+        if (index === 0) {
+          // Starting point
+          ctx.fillStyle = '#FF6B6B';
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 10, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.fillStyle = '#333';
+          ctx.font = 'bold 14px Arial';
+          ctx.fillText('START', canvasX + 15, canvasY - 15);
+        } else if (index === gdPath.length - 1) {
+          // End point
+          ctx.fillStyle = '#4CAF50';
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 12, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.fillStyle = '#333';
+          ctx.font = 'bold 14px Arial';
+          ctx.fillText('MINIMUM', canvasX + 15, canvasY - 15);
+        } else if (index % 5 === 0) {
+          // Intermediate points (every 5th step)
+          ctx.fillStyle = '#FFA726';
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 5, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      });
+    }
+    
+    // Update convex info with larger text
+    function updateConvexInfo() {
+      const func = functions[functionType];
+      if (!func) return;
+      
+      const infoDiv = document.getElementById('convexInfo');
+      const isConvex = func.isConvex();
+      
+      infoDiv.innerHTML = `
+        <div class="${isConvex ? 'convex-property' : 'non-convex-property'}">
+          <strong>📊 Function:</strong> f(x) = ${func.name}<br><br>
+          <strong>🎯 Status:</strong> ${isConvex ? '✅ CONVEX FUNCTION' : '❌ NON-CONVEX FUNCTION'}<br><br>
+          <strong>📝 Type:</strong> ${func.description}<br><br>
+          <strong>🧠 ML Application:</strong> ${func.mlContext}<br><br>
+          <strong>🔢 Second Derivative:</strong> f''(x) = ${getFSecondDerivativeString()}<br><br>
+          <strong>${isConvex ? '🚀 Optimization Guarantee:' : '⚠️ Optimization Challenge:'}</strong> 
+          ${isConvex ? 'Global minimum guaranteed!' : 'Multiple local minima possible'}
+        </div>
+      `;
+    }
+    
+    function getFSecondDerivativeString() {
+      switch(functionType) {
+        case 'quadratic':
+          return `${(2 * aParam).toFixed(1)}`;
+        case 'exponential':
+          return `${(aParam * aParam).toFixed(1)}e^(${aParam.toFixed(1)}x)`;
+        case 'absolute':
+          return '0 (undefined at corner)';
+        case 'log':
+          return `${aParam.toFixed(1)}/x²`;
+        case 'logistic':
+          return `${aParam.toFixed(1)}²⋅σ(x)⋅(1-σ(x))`;
+        case 'hinge':
+          return '0 (undefined at kink)';
+        case 'sine':
+          return `-${aParam.toFixed(1)}sin(x + ${bParam.toFixed(1)})`;
+        case 'cubic':
+          return `${(6 * aParam).toFixed(1)}x`;
+        default:
+          return 'Unknown';
+      }
+    }
+    
+    // Main draw function
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      drawAxes();
+      drawFunction();
+      drawSecondDerivative();
+      drawConvexTest();
+      drawGradientDescent();
+      updateConvexInfo();
+    }
+    
+    // Event listeners
+    document.getElementById('showSecondDerivative').addEventListener('change', (e) => {
+      showSecondDerivative = e.target.checked;
+      draw();
+    });
+    
+    document.getElementById('showConvexTest').addEventListener('change', (e) => {
+      showConvexTest = e.target.checked;
+      draw();
+    });
+    
+    document.getElementById('showGradientDescent').addEventListener('change', (e) => {
+      showGradientDescent = e.target.checked;
+      if (showGradientDescent) {
+        initializeGradientDescent();
+      }
+      draw();
+    });
+    
+    document.getElementById('learningRate').addEventListener('input', (e) => {
+      learningRate = parseFloat(e.target.value);
+      document.getElementById('learningRateValue').textContent = learningRate.toFixed(2);
+      if (showGradientDescent) {
+        initializeGradientDescent();
+        draw();
+      }
+    });
+    
+    document.getElementById('functionSelect').addEventListener('change', (e) => {
+      functionType = e.target.value;
+      if (showGradientDescent) {
+        initializeGradientDescent();
+      }
+      draw();
+    });
+    
+    document.getElementById('aParam').addEventListener('input', (e) => {
+      aParam = parseFloat(e.target.value);
+      document.getElementById('aValue').textContent = aParam.toFixed(1);
+      if (showGradientDescent) {
+        initializeGradientDescent();
+      }
+      draw();
+    });
+    
+    document.getElementById('bParam').addEventListener('input', (e) => {
+      bParam = parseFloat(e.target.value);
+      document.getElementById('bValue').textContent = bParam.toFixed(1);
+      if (showGradientDescent) {
+        initializeGradientDescent();
+      }
+      draw();
+    });
+    
+    // Initial draw
+    draw();
+  </script>
+</body>
+</html>

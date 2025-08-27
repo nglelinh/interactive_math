@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Theory - Interactive Learning Hub</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #ffffff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            font-size: 3.5em;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .intro-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .illustrations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .illustration-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .illustration-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .card-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 1.8em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            line-height: 1.3;
+        }
+        .card-description {
+            text-align: center;
+            margin-bottom: 25px;
+            opacity: 1;
+            line-height: 1.7;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← Quay lại trang chính</a>
+        
+        <h1>🕸️ Graph Theory Learning Hub</h1>
+        
+        <div class="intro-section">
+            <h2>🚀 Lý Thuyết Đồ Thị - Nền tảng của Networks và AI</h2>
+            <p>
+                <strong>Tại sao Graph Theory lại quan trọng?</strong> Bởi vì thế giới được kết nối thông qua graphs! 🌐 
+                Từ social networks (Facebook friends), internet routing, recommendation systems (Netflix, Spotify), 
+                đến neural network architectures, DNA analysis, và blockchain consensus - tất cả đều dựa trên graph theory. 
+                Hiểu graphs = hiểu cách information flows trong modern world!
+            </p>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔗</div>
+                    <h3>Network Analysis</h3>
+                    <p>Social media algorithms, internet protocols, và transportation systems</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🧠</div>
+                    <h3>AI Applications</h3>
+                    <p>Graph Neural Networks, knowledge graphs, và recommendation engines</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💼</div>
+                    <h3>Business Impact</h3>
+                    <p>Supply chain optimization, fraud detection, và market analysis</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="illustrations-grid">
+            <div class="illustration-card" onclick="openIllustration('graph_fundamentals.html')">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Graph Fundamentals</div>
+                <div class="card-description">
+                    Vertices, edges, directed/undirected graphs, và basic properties với interactive visualization
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('graph_traversal.html')">
+                <div class="card-icon">🗺️</div>
+                <div class="card-title">Graph Traversal Algorithms</div>
+                <div class="card-description">
+                    BFS, DFS, và advanced traversal techniques với step-by-step visualization
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('shortest_path.html')">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Shortest Path Algorithms</div>
+                <div class="card-description">
+                    Dijkstra, Bellman-Ford, Floyd-Warshall với real-time pathfinding simulation
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('minimum_spanning_tree.html')">
+                <div class="card-icon">🌳</div>
+                <div class="card-title">Minimum Spanning Trees</div>
+                <div class="card-description">
+                    Kruskal và Prim algorithms với network design applications
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('network_flow.html')">
+                <div class="card-icon">🌊</div>
+                <div class="card-title">Network Flow Problems</div>
+                <div class="card-description">
+                    Max flow min cut theorem, Ford-Fulkerson algorithm với practical applications
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('graph_coloring.html')">
+                <div class="card-icon">🎨</div>
+                <div class="card-title">Graph Coloring</div>
+                <div class="card-description">
+                    Vertex coloring, scheduling problems, và four color theorem exploration
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('social_network_analysis.html')">
+                <div class="card-icon">👥</div>
+                <div class="card-title">Social Network Analysis</div>
+                <div class="card-description">
+                    Centrality measures, community detection, và influence propagation models
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('graph_neural_networks.html')">
+                <div class="card-icon">🧠</div>
+                <div class="card-title">Graph Neural Networks</div>
+                <div class="card-description">
+                    GNN architectures, message passing, và modern AI applications
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('planar_graphs.html')">
+                <div class="card-icon">🗺️</div>
+                <div class="card-title">Planar Graphs</div>
+                <div class="card-description">
+                    Euler's formula, planarity testing, và geographic network applications
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('random_graphs.html')">
+                <div class="card-icon">🎲</div>
+                <div class="card-title">Random Graph Theory</div>
+                <div class="card-description">
+                    Erdős–Rényi model, percolation theory, và complex network emergence
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('matching_algorithms.html')">
+                <div class="card-icon">💑</div>
+                <div class="card-title">Matching Algorithms</div>
+                <div class="card-description">
+                    Bipartite matching, stable marriage problem, và assignment optimization
+                </div>
+            </div>
+            
+            <div class="illustration-card" onclick="openIllustration('spectral_graph_theory.html')">
+                <div class="card-icon">🌈</div>
+                <div class="card-title">Spectral Graph Theory</div>
+                <div class="card-description">
+                    Graph Laplacian, eigenvalues, và advanced mathematical properties
+                </div>
+            </div>
+        </div>
+        
+        <div class="intro-section" style="margin-top: 50px;">
+            <h2>💼 Industry Applications</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; text-align: left;">
+                <div>
+                    <h3>🏢 Tech Companies</h3>
+                    <p><strong>Google:</strong> PageRank algorithm cho search results<br>
+                    <strong>Facebook:</strong> Friend recommendations và news feed<br>
+                    <strong>LinkedIn:</strong> Professional network analysis<br>
+                    <strong>Uber:</strong> Route optimization và driver matching</p>
+                </div>
+                <div>
+                    <h3>🔬 Research Fields</h3>
+                    <p><strong>Biology:</strong> Protein interaction networks<br>
+                    <strong>Chemistry:</strong> Molecular structure analysis<br>
+                    <strong>Physics:</strong> Quantum graph theory<br>
+                    <strong>Economics:</strong> Market network effects</p>
+                </div>
+                <div>
+                    <h3>💰 Business Applications</h3>
+                    <p><strong>Finance:</strong> Risk network analysis<br>
+                    <strong>Logistics:</strong> Supply chain optimization<br>
+                    <strong>Cybersecurity:</strong> Attack pattern detection<br>
+                    <strong>Marketing:</strong> Viral campaign modeling</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openIllustration(filename) {
+            window.open(filename, '_blank');
+        }
+        
+        // Add interactive effects
+        document.querySelectorAll('.illustration-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.15)';
+            });
+        });
+    </script>
+</body>
+</html>

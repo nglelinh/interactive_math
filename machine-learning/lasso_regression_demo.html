@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>LASSO Regression Interactive Demo</title>
+  <title>LASSO Regression - Demo Tương Tác với Lý Thuyết</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
     #container {
@@ -351,12 +353,12 @@
       <div class="section">
         <h4>Algorithm: Coordinate Descent</h4>
         <div style="font-size: 11px;">
-          <div><strong>1.</strong> Initialize β = 0</div>
+          <div><strong>1.</strong> Initialize $\vb{\beta} = \vb{0}$</div>
           <div><strong>2.</strong> For each feature j:</div>
-          <div class="math-formula" style="font-size: 10px; margin: 5px 0;">
-            β_j ← S(X_j^T(y - X₋ⱼβ₋ⱼ), λ) / ||X_j||²
+          <div class="math-environment">
+            $$\beta_j \leftarrow \frac{S(\mb{X}_j^T(\vb{y} - \mb{X}_{-j}\vb{\beta}_{-j}), \lambda)}{\|\mb{X}_j\|_2^2}$$
           </div>
-          <div><strong>3.</strong> S(z,λ) = sign(z)max(|z|-λ, 0) (soft thresholding)</div>
+          <div><strong>3.</strong> $S(z,\lambda) = \text{sign}(z)\max(|z|-\lambda, 0)$ (soft thresholding)</div>
           <div><strong>4.</strong> Repeat until convergence</div>
         </div>
       </div>

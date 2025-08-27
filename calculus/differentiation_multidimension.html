@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Multidimensional Differentiation - Interactive 3D Visualization</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body { 
       margin: 0; 
@@ -83,9 +85,9 @@
       <option value="gaussian">f(x,y) = e^(-(x²+y²))</option>
     </select>
     <div class="function-info" id="functionInfo">
-      Function: f(x,y) = sin(x)cos(y)<br/>
-      ∂f/∂x = cos(x)cos(y)<br/>
-      ∂f/∂y = -sin(x)sin(y)
+      Function: $f(x,y) = \sin(x)\cos(y)$<br/>
+      $\frac{\partial f}{\partial x} = \cos(x)\cos(y)$<br/>
+      $\frac{\partial f}{\partial y} = -\sin(x)\sin(y)$
     </div>
     <button onclick="resetView()">Reset View</button>
   </div>
@@ -299,9 +301,9 @@
       document.getElementById('values').innerHTML =
         `<strong>Point:</strong> (${x.toFixed(2)}, ${y.toFixed(2)})<br/>` +
         `<strong>f(x,y) =</strong> ${z.toFixed(3)}<br/>` +
-        `<strong>∂f/∂x =</strong> ${dx.toFixed(3)}<br/>` +
-        `<strong>∂f/∂y =</strong> ${dy.toFixed(3)}<br/>` +
-        `<strong>|∇f| =</strong> ${gradLength.toFixed(3)}`;
+        `<strong>$\\frac{\\partial f}{\\partial x}$ =</strong> ${dx.toFixed(3)}<br/>` +
+        `<strong>$\\frac{\\partial f}{\\partial y}$ =</strong> ${dy.toFixed(3)}<br/>` +
+        `<strong>$|\\nabla f|$ =</strong> ${gradLength.toFixed(3)}`;
     }
 
     function updateFunctionInfo() {

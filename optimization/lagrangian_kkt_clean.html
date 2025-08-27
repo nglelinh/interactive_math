@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lagrangian & Điều Kiện KKT - Tối Ưu Hóa Có Ràng Buộc</title>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mhtml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            chtml: {
+                displayAlign: 'left'
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Main App Container */
+        .app-container {
+            max-width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header with Title */
+        .app-header {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 15px 30px;
+            border-bottom: 3px solid rgba(0, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .app-title {
+            font-size: 1.8em;
+            margin: 0;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .app-subtitle {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 5px 0 0 0;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0;
+            display: flex;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .tab-button {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab-button:hover {
+            background: rgba(0, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .tab-button.active {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00FFFF;
+            border-bottom-color: #00FFFF;
+        }
+        
+        /* Tab Content Container */
+        .tab-content-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Interactive Content Layout */
+        .interactive-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .visualization-row {
+            display: flex;
+            gap: 20px;
+            min-height: 600px;
+        }
+        
+        .canvas-container {
+            flex: 2;
+            position: relative;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .canvas-3d-container {
+            flex: 2;
+            position: relative;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid rgba(138, 43, 226, 0.3);
+        }
+        
+        #canvas, #canvas3d {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .controls {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-section h3 {
+            color: #FFD700;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .section-divider {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(45deg, rgba(138, 43, 226, 0.2), rgba(75, 0, 130, 0.2));
+            border-radius: 10px;
+            border: 2px solid rgba(138, 43, 226, 0.5);
+        }
+        
+        .section-divider h3 {
+            color: #DA70D6;
+            font-size: 1.3em;
+            margin: 0;
+        }
+        
+        .toggle-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .toggle-button {
+            background: linear-gradient(45deg, #333, #666);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-button:hover {
+            background: linear-gradient(45deg, #666, #999);
+            border-color: #00FFFF;
+        }
+        
+        .toggle-button.active {
+            background: linear-gradient(45deg, #0080FF, #00BFFF);
+            border-color: #00FFFF;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .slider-group {
+            margin: 10px 0;
+        }
+        
+        .slider-group label {
+            display: block;
+            color: #FFD700;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .slider-group input[type="range"] {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .slider-value {
+            color: #00FFFF;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .info-panel, .info-panel-3d {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            max-width: 200px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .info-panel-3d {
+            border-color: rgba(138, 43, 226, 0.5);
+        }
+        
+        .legend {
+            margin-top: 8px;
+            font-size: 0.75em;
+        }
+        
+        .legend-item {
+            margin: 2px 0;
+            opacity: 0.8;
+        }
+        
+        /* Theory Content */
+        .theory-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .theory-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .theory-header h1 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+        
+        .mathematical-foundation {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+        
+        .foundation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .foundation-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .foundation-item h4 {
+            color: #00FFFF;
+            margin-bottom: 10px;
+        }
+        
+        .theory-box, .example-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .theory-box h4, .example-box h4 {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .visualization-row {
+                flex-direction: column;
+            }
+            
+            .canvas-container, .canvas-3d-container, .controls {
+                flex: none;
+                max-height: none;
+            }
+            
+            .foundation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="app-title">⚖️ Lagrangian & Điều Kiện KKT</h1>
+            <p class="app-subtitle">Tối ưu hóa có ràng buộc - Interactive Learning</p>
+        </header>
+        
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab('interactive', event)">
+                🎯 Trực Quan Tương Tác
+            </button>
+            <button class="tab-button" onclick="switchTab('theory', event)">
+                📐 Nền Tảng Toán Học
+            </button>
+        </nav>
+        
+        <!-- Tab Content Container -->
+        <main class="tab-content-container">
+            <!-- Interactive Tab -->
+            <div id="interactive-tab" class="tab-content active">
+                <div class="interactive-content">
+                    <!-- 2D Visualization Row -->
+                    <div class="visualization-row">
+                        <div class="canvas-container">
+                            <canvas id="canvas" width="800" height="600"></canvas>
+                            <div class="info-panel">
+                                <strong>⚖️ 2D Lagrangian Visualization</strong><br/>
+                                Khám phá tương tác giữa hàm mục tiêu, ràng buộc và nhân tử Lagrange.
+                                <div class="legend">
+                                    <div class="legend-item">🔵 Đường mức hàm mục tiêu</div>
+                                    <div class="legend-item">🔴 Đường ràng buộc</div>
+                                    <div class="legend-item">🟢 Vùng khả thi</div>
+                                    <div class="legend-item">⭐ Điểm tối ưu</div>
+                                    <div class="legend-item">→ Vector gradient</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Controls -->
+                        <div class="controls">
+                            <div class="control-section">
+                                <h3>🎯 Lựa Chọn Bài Toán</h3>
+                                <div class="toggle-section">
+                                    <div class="toggle-button active" onclick="selectProblem('standard')">
+                                        Cơ Bản
+                                    </div>
+                                    <div class="toggle-button" onclick="selectProblem('equality')">
+                                        Ràng Buộc Đẳng Thức
+                                    </div>
+                                    <div class="toggle-button" onclick="selectProblem('inequality')">
+                                        Ràng Buộc Bất Đẳng Thức
+                                    </div>
+                                    <div class="toggle-button" onclick="selectProblem('mixed')">
+                                        Hỗn Hợp
+                                    </div>
+                                </div>
+                                <div id="problem-setup" class="problem-description">
+                                    <!-- Problem description will be generated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="control-section">
+                                <h3>📊 Hàm Lagrangian</h3>
+                                <div id="lagrangian-display" class="lagrangian-display">
+                                    <!-- Lagrangian function will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div class="control-section">
+                                <h3>⚖️ Nhân Tử Lagrange</h3>
+                                <div class="multiplier-controls" id="multiplier-controls">
+                                    <!-- Multiplier controls will be generated here -->
+                                </div>
+                                <div class="toggle-section">
+                                    <div class="toggle-button" onclick="findOptimalMultipliers()">
+                                        🎯 Tìm λ Tối Ưu
+                                    </div>
+                                    <div class="toggle-button" onclick="resetMultipliers()">
+                                        🔄 Đặt Lại λ
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="control-section">
+                                <h3>⚡ Điều Kiện KKT</h3>
+                                <div id="kkt-conditions" class="kkt-conditions">
+                                    <!-- KKT conditions will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div class="control-section">
+                                <h3>🎨 Tùy Chọn Hiển Thị</h3>
+                                <div class="toggle-section">
+                                    <div class="toggle-button active" id="toggle-objective" onclick="toggleVisualization('objective')">
+                                        Đường Mức f(x,y)
+                                    </div>
+                                    <div class="toggle-button active" id="toggle-constraints" onclick="toggleVisualization('constraints')">
+                                        Đường Ràng Buộc
+                                    </div>
+                                    <div class="toggle-button active" id="toggle-feasible" onclick="toggleVisualization('feasible')">
+                                        Vùng Khả Thi
+                                    </div>
+                                    <div class="toggle-button active" id="toggle-gradients" onclick="toggleVisualization('gradients')">
+                                        Vector Gradient
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section Divider -->
+                    <div class="section-divider">
+                        <h3>🔄 3D Surface Visualization - Khám phá bề mặt tối ưu hóa trong không gian 3D</h3>
+                    </div>
+                    
+                    <!-- 3D Visualization Row -->
+                    <div class="visualization-row">
+                        <div class="canvas-3d-container">
+                            <div id="canvas3d"></div>
+                            <div class="info-panel-3d">
+                                <strong>🌐 3D Lagrangian Surface</strong><br/>
+                                Bề mặt hàm mục tiêu và ràng buộc trong không gian 3D
+                                <div class="legend">
+                                    <div class="legend-item">🌊 Bề mặt hàm mục tiêu f(x,y)</div>
+                                    <div class="legend-item">🔴 Mặt phẳng ràng buộc</div>
+                                    <div class="legend-item">🟣 Điểm tối ưu</div>
+                                    <div class="legend-item">🎮 Kéo để xoay, cuộn để zoom</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 3D Controls -->
+                        <div class="controls">
+                            <div class="control-section">
+                                <h3>🌐 Điều Khiển 3D</h3>
+                                <div class="toggle-section">
+                                    <label>
+                                        <input type="checkbox" id="show3DSurface" checked onchange="update3DVisualization()">
+                                        Hiển thị bề mặt hàm mục tiêu
+                                    </label><br>
+                                    <label>
+                                        <input type="checkbox" id="show3DConstraints" checked onchange="update3DVisualization()">
+                                        Hiển thị ràng buộc
+                                    </label><br>
+                                    <label>
+                                        <input type="checkbox" id="show3DOptimal" checked onchange="update3DVisualization()">
+                                        Hiển thị điểm tối ưu
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Theory Tab -->
+            <div id="theory-tab" class="tab-content">
+                <div class="theory-content">
+                    <div class="theory-header">
+                        <h1>⚖️ Lagrangian & Điều Kiện KKT - Tối Ưu Hóa Có Ràng Buộc</h1>
+                        <p><strong>🎯 Mục Tiêu:</strong> Khám phá phương pháp Lagrange và điều kiện Karush-Kuhn-Tucker (KKT) trong tối ưu hóa có ràng buộc</p>
+                        <p><strong>💡 Ý Nghĩa:</strong> Tìm điểm tối ưu khi có các ràng buộc đẳng thức và bất đẳng thức</p>
+                    </div>
+                    
+                    <div class="mathematical-foundation">
+                        <h3 style="color: #FFD700; margin: 0 0 15px 0; font-size: 1.2em;">📐 Nền Tảng Toán Học</h3>
+                        
+                        <div class="foundation-grid">
+                            <div class="foundation-item">
+                                <h4>🔍 Bài Toán Tổng Quát</h4>
+                                <p>
+                                    $$\min_{x} f(x)$$
+                                    $$\text{s.t. } g_i(x) = 0, \quad i = 1,\ldots,m$$
+                                    $$h_j(x) \leq 0, \quad j = 1,\ldots,p$$
+                                </p>
+                            </div>
+                            
+                            <div class="foundation-item">
+                                <h4>📚 Hàm Lagrangian</h4>
+                                <p>
+                                    $$L(x,\lambda,\mu) = f(x) + \sum_{i=1}^m \lambda_i g_i(x) + \sum_{j=1}^p \mu_j h_j(x)$$
+                                    <br><strong>λ:</strong> nhân tử Lagrange cho ràng buộc đẳng thức
+                                    <br><strong>μ:</strong> nhân tử KKT cho ràng buộc bất đẳng thức
+                                </p>
+                            </div>
+                            
+                            <div class="foundation-item">
+                                <h4>⚡ Điều Kiện KKT</h4>
+                                <p>
+                                    1. <strong>Stationarity:</strong> $\nabla_x L = 0$<br>
+                                    2. <strong>Primal feasibility:</strong> $g_i(x) = 0$, $h_j(x) \leq 0$<br>
+                                    3. <strong>Dual feasibility:</strong> $\mu_j \geq 0$<br>
+                                    4. <strong>Complementary slackness:</strong> $\mu_j h_j(x) = 0$
+                                </p>
+                            </div>
+                            
+                            <div class="foundation-item">
+                                <h4>🎯 Ý Nghĩa Hình Học</h4>
+                                <p>
+                                    Tại điểm tối ưu, gradient của hàm mục tiêu là tổ hợp tuyến tính của gradient các ràng buộc active:
+                                    $$\nabla f(x^*) = -\sum_i \lambda_i^* \nabla g_i(x^*) - \sum_j \mu_j^* \nabla h_j(x^*)$$
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="theory-box">
+                            <h4>🧮 Định Lý Cơ Bản</h4>
+                            <p>
+                                <strong>Điều kiện cần:</strong> Nếu $x^*$ là điểm tối ưu địa phương và LICQ (Linear Independence Constraint Qualification) thỏa mãn, 
+                                thì tồn tại $(\lambda^*, \mu^*)$ sao cho điều kiện KKT được thỏa mãn.<br><br>
+                                
+                                <strong>Điều kiện đủ:</strong> Nếu hàm mục tiêu và ràng buộc bất đẳng thức là convex, ràng buộc đẳng thức là affine, 
+                                và điều kiện KKT thỏa mãn tại $(x^*, \lambda^*, \mu^*)$, thì $x^*$ là điểm tối ưu toàn cục.
+                            </p>
+                        </div>
+                        
+                        <div class="example-box">
+                            <h4>📋 Ứng Dụng Thực Tế</h4>
+                            <p>
+                                • <strong>Portfolio Optimization:</strong> Tối ưu hóa danh mục đầu tư với ràng buộc ngân sách và rủi ro<br>
+                                • <strong>Machine Learning:</strong> Support Vector Machines (SVM) với ràng buộc margin<br>
+                                • <strong>Engineering Design:</strong> Thiết kế tối ưu với ràng buộc về vật liệu và an toàn<br>
+                                • <strong>Resource Allocation:</strong> Phân bổ tài nguyên với ràng buộc về dung lượng
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTab = 'interactive';
+        let currentProblem = 'standard';
+        let canvas, ctx;
+        let problems = {};
+        let visualizationOptions = {
+            objective: true,
+            constraints: true,
+            feasible: true,
+            gradients: true,
+            optimal: true,
+            lagrangian: false
+        };
+
+        // Tab Management
+        function switchTab(tabName, event) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected tab and button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // Fallback: find the button by tab name
+                document.querySelector(`[onclick*="${tabName}"]`).classList.add('active');
+            }
+            
+            currentTab = tabName;
+            
+            // Redraw canvas when switching to interactive tab
+            if (tabName === 'interactive' && typeof draw === 'function') {
+                setTimeout(() => draw(), 100);
+            }
+        }
+
+        // Initialize the application
+        function init() {
+            canvas = document.getElementById('canvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            ctx = canvas.getContext('2d');
+            
+            setupProblems();
+            selectProblem('standard');
+            draw();
+            
+            // Initialize 3D visualization
+            setTimeout(init3D, 500);
+        }
+
+        // Problem definitions
+        function setupProblems() {
+            problems = {
+                standard: {
+                    name: 'Bài Toán Cơ Bản',
+                    description: 'Tối thiểu hóa hàm bậc hai với ràng buộc tuyến tính.',
+                    objective: {
+                        func: (x, y) => x*x + y*y,
+                        gradient: (x, y) => [2*x, 2*y]
+                    },
+                    constraints: [
+                        {
+                            type: 'inequality',
+                            func: (x, y) => x + y - 2,
+                            gradient: (x, y) => [1, 1],
+                            description: 'x + y ≤ 2'
+                        }
+                    ],
+                    optimalPoint: { x: 1, y: 1 },
+                    optimalValue: 2,
+                    optimalMultipliers: { mu1: 2 }
+                }
+            };
+        }
+
+        // Problem selection
+        function selectProblem(problemType) {
+            if (!problems[problemType]) return;
+            
+            currentProblem = problemType;
+            
+            // Update active button
+            document.querySelectorAll('.toggle-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update displays
+            updateProblemDisplay();
+            updateLagrangianDisplay();
+            updateMultiplierControls();
+            updateKKTConditions();
+            
+            draw();
+        }
+
+        // Update problem display
+        function updateProblemDisplay() {
+            const problem = problems[currentProblem];
+            const html = `
+                <h4>${problem.name}</h4>
+                <p>${problem.description}</p>
+                <div style="margin-top: 10px;">
+                    <strong>Hàm mục tiêu:</strong> f(x,y) = x² + y²<br>
+                    <strong>Ràng buộc:</strong> ${problem.constraints[0].description}
+                </div>
+            `;
+            document.getElementById('problem-setup').innerHTML = html;
+        }
+
+        // Update Lagrangian display
+        function updateLagrangianDisplay() {
+            const html = `
+                <div style="font-family: monospace; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+                    L(x,y,μ) = x² + y² + μ(x + y - 2)
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em;">
+                    <strong>Gradient:</strong><br>
+                    ∂L/∂x = 2x + μ = 0<br>
+                    ∂L/∂y = 2y + μ = 0<br>
+                    ∂L/∂μ = x + y - 2 ≤ 0
+                </div>
+            `;
+            document.getElementById('lagrangian-display').innerHTML = html;
+        }
+
+        // Update multiplier controls
+        function updateMultiplierControls() {
+            const html = `
+                <div class="slider-group">
+                    <label>μ₁ (nhân tử bất đẳng thức):</label>
+                    <input type="range" id="mu1" min="0" max="5" step="0.1" value="2">
+                    <div class="slider-value" id="mu1Value">2.0</div>
+                </div>
+            `;
+            document.getElementById('multiplier-controls').innerHTML = html;
+            
+            // Add event listener
+            document.getElementById('mu1').addEventListener('input', function() {
+                document.getElementById('mu1Value').textContent = this.value;
+                updateKKTConditions();
+                draw();
+            });
+        }
+
+        // Update KKT conditions
+        function updateKKTConditions() {
+            const mu1 = parseFloat(document.getElementById('mu1')?.value || 2);
+            const problem = problems[currentProblem];
+            const optimal = problem.optimalPoint;
+            
+            const constraint_value = optimal.x + optimal.y - 2;
+            const complementary_slack = mu1 * constraint_value;
+            
+            const html = `
+                <div style="font-size: 0.9em;">
+                    <div style="margin: 5px 0; color: ${Math.abs(2*optimal.x + mu1) < 0.1 ? '#00FF00' : '#FF6B6B'};">
+                        ✓ Stationarity X: ∂L/∂x = ${(2*optimal.x + mu1).toFixed(2)} ${Math.abs(2*optimal.x + mu1) < 0.1 ? '≈ 0' : '≠ 0'}
+                    </div>
+                    <div style="margin: 5px 0; color: ${Math.abs(2*optimal.y + mu1) < 0.1 ? '#00FF00' : '#FF6B6B'};">
+                        ✓ Stationarity Y: ∂L/∂y = ${(2*optimal.y + mu1).toFixed(2)} ${Math.abs(2*optimal.y + mu1) < 0.1 ? '≈ 0' : '≠ 0'}
+                    </div>
+                    <div style="margin: 5px 0; color: ${constraint_value <= 0.1 ? '#00FF00' : '#FF6B6B'};">
+                        ✓ Primal feasibility: x + y - 2 = ${constraint_value.toFixed(2)} ${constraint_value <= 0.1 ? '≤ 0' : '> 0'}
+                    </div>
+                    <div style="margin: 5px 0; color: ${mu1 >= 0 ? '#00FF00' : '#FF6B6B'};">
+                        ✓ Dual feasibility: μ = ${mu1.toFixed(2)} ${mu1 >= 0 ? '≥ 0' : '< 0'}
+                    </div>
+                    <div style="margin: 5px 0; color: ${Math.abs(complementary_slack) < 0.1 ? '#00FF00' : '#FF6B6B'};">
+                        ✓ Complementary slackness: μ·h = ${complementary_slack.toFixed(2)} ${Math.abs(complementary_slack) < 0.1 ? '≈ 0' : '≠ 0'}
+                    </div>
+                </div>
+            `;
+            document.getElementById('kkt-conditions').innerHTML = html;
+        }
+
+        // Visualization toggle
+        function toggleVisualization(option) {
+            visualizationOptions[option] = !visualizationOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            if (button) {
+                button.classList.toggle('active');
+            }
+            draw();
+        }
+
+        // Drawing function
+        function draw() {
+            if (!ctx) return;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const problem = problems[currentProblem];
+            if (!problem) return;
+            
+            // Draw coordinate system
+            drawCoordinateSystem();
+            
+            // Draw objective function contours
+            if (visualizationOptions.objective) {
+                drawObjectiveContours(problem);
+            }
+            
+            // Draw constraints
+            if (visualizationOptions.constraints) {
+                drawConstraints(problem);
+            }
+            
+            // Draw feasible region
+            if (visualizationOptions.feasible) {
+                drawFeasibleRegion(problem);
+            }
+            
+            // Draw optimal point
+            if (visualizationOptions.optimal) {
+                drawOptimalPoint(problem);
+            }
+            
+            // Draw gradients
+            if (visualizationOptions.gradients) {
+                drawGradients(problem);
+            }
+        }
+
+        // Draw coordinate system
+        function drawCoordinateSystem() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            
+            // Grid
+            for (let i = 0; i <= 8; i++) {
+                const x = i * 100;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 600);
+                ctx.stroke();
+                
+                const y = i * 75;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(800, y);
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, 300);
+            ctx.lineTo(800, 300);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(400, 0);
+            ctx.lineTo(400, 600);
+            ctx.stroke();
+        }
+
+        // Draw objective function contours
+        function drawObjectiveContours(problem) {
+            ctx.strokeStyle = '#00BFFF';
+            ctx.lineWidth = 2;
+            
+            const levels = [1, 2, 4, 6, 8, 10];
+            
+            levels.forEach(level => {
+                ctx.beginPath();
+                
+                for (let angle = 0; angle <= 2 * Math.PI; angle += 0.1) {
+                    const radius = Math.sqrt(level);
+                    const x = 400 + radius * 100 * Math.cos(angle);
+                    const y = 300 - radius * 75 * Math.sin(angle);
+                    
+                    if (angle === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.stroke();
+            });
+        }
+
+        // Draw constraints
+        function drawConstraints(problem) {
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 3;
+            
+            // Draw x + y = 2 line
+            ctx.beginPath();
+            ctx.moveTo(0, 450); // y = 2 when x = 0 -> screen y = 300 - 2*75 = 150, but we need y = 300 + 2*75 = 450 for inverted y
+            ctx.lineTo(800, -150); // When x = 8, y = -6, screen y = 300 - (-6)*75 = 750
+            
+            // Actually, let's be more careful with coordinate transformation
+            // x = 0 to 8, y = 2 to -6
+            const x1 = 0, y1 = 2;
+            const x2 = 8, y2 = -6;
+            
+            const screenX1 = x1 * 100;
+            const screenY1 = 300 - y1 * 75;
+            const screenX2 = x2 * 100;
+            const screenY2 = 300 - y2 * 75;
+            
+            ctx.moveTo(screenX1, screenY1);
+            ctx.lineTo(screenX2, screenY2);
+            ctx.stroke();
+            
+            // Add constraint label
+            ctx.fillStyle = '#FF6B6B';
+            ctx.font = '14px Arial';
+            ctx.fillText('x + y = 2', 200, 180);
+        }
+
+        // Draw feasible region
+        function drawFeasibleRegion(problem) {
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.1)';
+            
+            ctx.beginPath();
+            // Feasible region is below the line x + y = 2
+            ctx.moveTo(0, 450); // (0, 2)
+            ctx.lineTo(800, 750); // (8, -6)
+            ctx.lineTo(800, 600); // bottom right
+            ctx.lineTo(0, 600); // bottom left
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Draw optimal point
+        function drawOptimalPoint(problem) {
+            const optimal = problem.optimalPoint;
+            const screenX = optimal.x * 100;
+            const screenY = 300 - optimal.y * 75;
+            
+            // Draw point
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw label
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`(${optimal.x}, ${optimal.y})`, screenX + 15, screenY - 10);
+        }
+
+        // Draw gradients
+        function drawGradients(problem) {
+            const optimal = problem.optimalPoint;
+            const screenX = optimal.x * 100;
+            const screenY = 300 - optimal.y * 75;
+            
+            // Objective gradient
+            const objGrad = problem.objective.gradient(optimal.x, optimal.y);
+            ctx.strokeStyle = '#00FFFF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(screenX, screenY);
+            ctx.lineTo(screenX + objGrad[0] * 30, screenY - objGrad[1] * 30);
+            ctx.stroke();
+            
+            // Constraint gradient
+            if (problem.constraints.length > 0) {
+                const constGrad = problem.constraints[0].gradient(optimal.x, optimal.y);
+                ctx.strokeStyle = '#FF69B4';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(screenX, screenY);
+                ctx.lineTo(screenX + constGrad[0] * 30, screenY - constGrad[1] * 30);
+                ctx.stroke();
+            }
+        }
+
+        // Find optimal multipliers
+        function findOptimalMultipliers() {
+            const problem = problems[currentProblem];
+            const optimal = problem.optimalMultipliers;
+            
+            if (optimal.mu1 !== undefined) {
+                document.getElementById('mu1').value = optimal.mu1;
+                document.getElementById('mu1Value').textContent = optimal.mu1.toFixed(1);
+            }
+            
+            updateKKTConditions();
+            draw();
+        }
+
+        // Reset multipliers
+        function resetMultipliers() {
+            document.getElementById('mu1').value = 0;
+            document.getElementById('mu1Value').textContent = '0.0';
+            updateKKTConditions();
+            draw();
+        }
+
+        // 3D Visualization
+        let scene3D, camera3D, renderer3D, controls3D;
+        
+        function init3D() {
+            const container = document.getElementById('canvas3d');
+            if (!container) return;
+            
+            // Scene setup
+            scene3D = new THREE.Scene();
+            camera3D = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            renderer3D.setSize(container.clientWidth, container.clientHeight);
+            renderer3D.setClearColor(0x000000, 0.1);
+            container.appendChild(renderer3D.domElement);
+            
+            // Controls
+            controls3D = new THREE.OrbitControls(camera3D, renderer3D.domElement);
+            controls3D.enableDamping = true;
+            controls3D.dampingFactor = 0.1;
+            
+            // Camera position
+            camera3D.position.set(5, 5, 5);
+            controls3D.update();
+            
+            // Create 3D visualization
+            create3DVisualization();
+            
+            // Start animation loop
+            animate3D();
+        }
+
+        function create3DVisualization() {
+            // Create objective function surface
+            const geometry = new THREE.PlaneGeometry(10, 10, 50, 50);
+            const vertices = geometry.attributes.position.array;
+            
+            for (let i = 0; i < vertices.length; i += 3) {
+                const x = vertices[i];
+                const y = vertices[i + 1];
+                vertices[i + 2] = (x*x + y*y) * 0.1; // z = f(x,y) scaled down
+            }
+            
+            geometry.computeVertexNormals();
+            
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x00BFFF,
+                transparent: true,
+                opacity: 0.7,
+                side: THREE.DoubleSide
+            });
+            
+            const surface = new THREE.Mesh(geometry, material);
+            scene3D.add(surface);
+            
+            // Add lighting
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            scene3D.add(light);
+            
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene3D.add(ambientLight);
+            
+            // Add constraint plane
+            const constraintGeometry = new THREE.PlaneGeometry(10, 10);
+            const constraintMaterial = new THREE.MeshBasicMaterial({
+                color: 0xFF6B6B,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.DoubleSide
+            });
+            
+            const constraintPlane = new THREE.Mesh(constraintGeometry, constraintMaterial);
+            // Rotate and position to represent x + y = 2
+            constraintPlane.rotation.x = -Math.PI / 4;
+            constraintPlane.position.y = 1;
+            scene3D.add(constraintPlane);
+            
+            // Add optimal point
+            const pointGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const pointMaterial = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
+            const optimalPoint3D = new THREE.Mesh(pointGeometry, pointMaterial);
+            optimalPoint3D.position.set(1, 1, 0.2); // (1,1) with z = f(1,1) = 2, scaled
+            scene3D.add(optimalPoint3D);
+        }
+
+        function update3DVisualization() {
+            // This function can be called when 3D controls change
+            if (renderer3D && scene3D && camera3D) {
+                renderer3D.render(scene3D, camera3D);
+            }
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            
+            if (controls3D) {
+                controls3D.update();
+            }
+            
+            if (renderer3D && scene3D && camera3D) {
+                renderer3D.render(scene3D, camera3D);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

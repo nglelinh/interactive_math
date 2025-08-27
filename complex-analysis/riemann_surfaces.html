@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riemann Surfaces - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #riemannPlot {
+            width: 100%;
+            height: 500px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        .branch-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Riemann Surfaces</h1>
+        
+        <div class="math-explanation">
+            <h2>🎨 Mathematical Foundation</h2>
+            <p><strong>Riemann Surface:</strong> A connected 1-dimensional complex manifold that provides a natural domain for multi-valued complex functions, making them single-valued.</p>
+            
+            <div class="formula-box">
+                <strong>Key Concepts:</strong><br>
+                • <strong>Branch Points:</strong> Points where function values "branch" or split<br>
+                • <strong>Branch Cuts:</strong> Curves connecting branch points to make function single-valued<br>
+                • <strong>Sheets:</strong> Multiple copies of complex plane "glued" together<br>
+                • <strong>Riemann Surface:</strong> Natural domain where multi-valued function becomes single-valued
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('sqrt')">Square Root</button>
+            <button class="tab" onclick="showTab('log')">Logarithm</button>
+            <button class="tab" onclick="showTab('algebraic')">Algebraic Functions</button>
+        </div>
+        
+        <div id="sqrt" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🌿 Square Root Function</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Function Type:</label>
+                        <select id="sqrtFunction">
+                            <option value="sqrt_z">√z</option>
+                            <option value="sqrt_z_minus_1">√(z-1)</option>
+                            <option value="sqrt_z2_minus_1">√(z²-1)</option>
+                            <option value="sqrt_polynomial">√(z³-z)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Visualization Mode:</label>
+                        <select id="visualizationMode">
+                            <option value="domain_coloring">Domain Coloring</option>
+                            <option value="3d_surface">3D Surface</option>
+                            <option value="branch_cuts">Branch Cuts</option>
+                            <option value="sheets">Multiple Sheets</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Branch Cut Angle: <span id="branchAngleValue">0</span>°</label>
+                        <input type="range" id="branchAngle" min="0" max="360" step="10" value="0">
+                    </div>
+                    
+                    <button onclick="showBranchPoints()">🎯 Show Branch Points</button>
+                    <button onclick="animateSheets()">🎬 Animate Sheets</button>
+                    <button onclick="showMonodromy()">🔄 Show Monodromy</button>
+                    
+                    <div class="branch-info" id="branchPointInfo">
+                        <strong>Branch Points:</strong><br>
+                        z = 0 (branch point of order 2)<br>
+                        z = ∞ (branch point of order 2)
+                    </div>
+                    
+                    <div class="value-display" id="surfaceInfo">
+                        <strong>Riemann Surface:</strong><br>
+                        Genus: 0 (sphere)<br>
+                        Sheets: 2<br>
+                        Branch points: 2
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="riemannPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="log" class="tab-content" style="display: none;">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>📊 Logarithmic Function</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Logarithm Type:</label>
+                        <select id="logFunction">
+                            <option value="log_z">log(z)</option>
+                            <option value="log_z_minus_1">log(z-1)</option>
+                            <option value="log_z_plus_1">log(z+1)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Number of Sheets: <span id="numSheetsValue">3</span></label>
+                        <input type="range" id="numSheets" min="2" max="8" step="1" value="3">
+                    </div>
+                    
+                    <div class="branch-info" id="logBranchInfo">
+                        <strong>Logarithm Properties:</strong><br>
+                        Branch point: z = 0<br>
+                        Branch cut: negative real axis<br>
+                        Infinite sheets (spiral structure)
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="logPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="algebraic" class="tab-content" style="display: none;">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🔢 Algebraic Functions</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Algebraic Function:</label>
+                        <select id="algebraicFunction">
+                            <option value="w2_z3_1">w² = z³ + 1</option>
+                            <option value="w2_z_1_z_1">w² = (z-1)(z+1)</option>
+                            <option value="w3_z_1">w³ = z - 1</option>
+                            <option value="elliptic">y² = x³ - x (elliptic curve)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="value-display" id="algebraicInfo">
+                        <strong>Surface Properties:</strong><br>
+                        Equation: w² = z³ + 1<br>
+                        Genus: 1<br>
+                        Compactification: Riemann sphere
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="algebraicPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🔍 Understanding Riemann Surfaces</h2>
+            
+            <div class="grid-container">
+                <div class="info-box">
+                    <h4>🌿 Branch Points</h4>
+                    <p>Points where multiple function values meet - create "ramification" in the surface</p>
+                </div>
+                <div class="info-box">
+                    <h4>📏 Branch Cuts</h4>
+                    <p>Artificial boundaries to make multi-valued functions single-valued</p>
+                </div>
+                <div class="info-box">
+                    <h4>📄 Sheets</h4>
+                    <p>Multiple copies of complex plane connected at branch points</p>
+                </div>
+                <div class="info-box">
+                    <h4>🔄 Monodromy</h4>
+                    <p>How function values change when circling branch points</p>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <strong>Genus Formula:</strong> For algebraic curve of degree n with δ simple double points:<br>
+                $g = \frac{(n-1)(n-2)}{2} - δ$<br><br>
+                <strong>Examples:</strong><br>
+                • Rational functions: g = 0 (sphere)<br>
+                • Elliptic curves: g = 1 (torus)<br>
+                • Hyperelliptic curves: g ≥ 2
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🚀 Applications & Significance</h2>
+            <ul>
+                <li><strong>Complex Analysis:</strong> Natural domain for multi-valued functions</li>
+                <li><strong>Algebraic Geometry:</strong> Study of algebraic curves and their properties</li>
+                <li><strong>Number Theory:</strong> Elliptic curves, modular forms, L-functions</li>
+                <li><strong>Physics:</strong> String theory, quantum field theory, integrable systems</li>
+                <li><strong>Topology:</strong> Understanding of 2-dimensional manifolds</li>
+                <li><strong>Differential Equations:</strong> Solutions of algebraic differential equations</li>
+            </ul>
+            
+            <div class="grid-container">
+                <div class="info-box">
+                    <h4>🎯 Uniformization Theorem</h4>
+                    <p>Every Riemann surface is conformally equivalent to quotient of ℂ, ℂ\{0\}, or unit disk</p>
+                </div>
+                <div class="info-box">
+                    <h4>🌐 Moduli Spaces</h4>
+                    <p>Parameter spaces classifying Riemann surfaces of given genus</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentTab = 'sqrt';
+        
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            if (tabName === 'sqrt') {
+                visualizeSqrtSurface();
+            } else if (tabName === 'log') {
+                visualizeLogSurface();
+            } else if (tabName === 'algebraic') {
+                visualizeAlgebraicSurface();
+            }
+        }
+        
+        function visualizeSqrtSurface() {
+            const func = document.getElementById('sqrtFunction').value;
+            const mode = document.getElementById('visualizationMode').value;
+            const angle = parseInt(document.getElementById('branchAngle').value);
+            
+            // Update branch point information
+            let branchInfo = '';
+            let surfaceInfo = '';
+            
+            switch(func) {
+                case 'sqrt_z':
+                    branchInfo = 'Branch Points:<br>z = 0 (order 2)<br>z = ∞ (order 2)';
+                    surfaceInfo = 'Riemann Surface:<br>Genus: 0 (sphere)<br>Sheets: 2<br>Branch points: 2';
+                    break;
+                case 'sqrt_z_minus_1':
+                    branchInfo = 'Branch Points:<br>z = 1 (order 2)<br>z = ∞ (order 2)';
+                    surfaceInfo = 'Riemann Surface:<br>Genus: 0 (sphere)<br>Sheets: 2<br>Branch points: 2';
+                    break;
+                case 'sqrt_z2_minus_1':
+                    branchInfo = 'Branch Points:<br>z = ±1 (order 2)<br>z = ∞ (order 2)';
+                    surfaceInfo = 'Riemann Surface:<br>Genus: 0 (sphere)<br>Sheets: 2<br>Branch points: 3';
+                    break;
+                case 'sqrt_polynomial':
+                    branchInfo = 'Branch Points:<br>z = 0, ±1 (order 2)<br>z = ∞ (order 2)';
+                    surfaceInfo = 'Riemann Surface:<br>Genus: 1 (torus)<br>Sheets: 2<br>Branch points: 4';
+                    break;
+            }
+            
+            document.getElementById('branchPointInfo').innerHTML = branchInfo;
+            document.getElementById('surfaceInfo').innerHTML = surfaceInfo;
+            
+            plotRiemannSurface(func, mode, angle);
+        }
+        
+        function plotRiemannSurface(func, mode, angle) {
+            // Generate complex plane grid
+            const resolution = 50;
+            const range = 3;
+            const step = (2 * range) / resolution;
+            
+            const x = [];
+            const y = [];
+            const z1 = []; // First sheet
+            const z2 = []; // Second sheet
+            
+            for (let i = 0; i < resolution; i++) {
+                const xRow = [];
+                const yRow = [];
+                const z1Row = [];
+                const z2Row = [];
+                
+                for (let j = 0; j < resolution; j++) {
+                    const real = -range + i * step;
+                    const imag = -range + j * step;
+                    
+                    xRow.push(real);
+                    yRow.push(imag);
+                    
+                    // Calculate square root with branch cut consideration
+                    const r = Math.sqrt(real * real + imag * imag);
+                    let theta = Math.atan2(imag, real);
+                    
+                    // Adjust for branch cut angle
+                    const cutAngle = (angle * Math.PI) / 180;
+                    if (theta - cutAngle < -Math.PI) theta += 2 * Math.PI;
+                    if (theta - cutAngle >= Math.PI) theta -= 2 * Math.PI;
+                    
+                    const sqrtR = Math.sqrt(r);
+                    
+                    // First sheet: principal value
+                    const theta1 = theta / 2;
+                    z1Row.push(sqrtR * Math.cos(theta1));
+                    
+                    // Second sheet: add π to argument
+                    const theta2 = (theta + 2 * Math.PI) / 2;
+                    z2Row.push(sqrtR * Math.cos(theta2));
+                }
+                
+                x.push(xRow);
+                y.push(yRow);
+                z1.push(z1Row);
+                z2.push(z2Row);
+            }
+            
+            let traces = [];
+            
+            if (mode === '3d_surface') {
+                traces = [
+                    {
+                        z: z1,
+                        x: x[0],
+                        y: y.map(row => row[0]),
+                        type: 'surface',
+                        name: 'Sheet 1',
+                        colorscale: 'Blues',
+                        opacity: 0.8
+                    },
+                    {
+                        z: z2,
+                        x: x[0],
+                        y: y.map(row => row[0]),
+                        type: 'surface',
+                        name: 'Sheet 2',
+                        colorscale: 'Reds',
+                        opacity: 0.8
+                    }
+                ];
+                
+                const layout = {
+                    title: 'Riemann Surface of √z',
+                    scene: {
+                        xaxis: {title: 'Real'},
+                        yaxis: {title: 'Imaginary'},
+                        zaxis: {title: 'Function Value'},
+                        bgcolor: 'rgba(0,0,0,0)'
+                    },
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    font: {color: 'white'}
+                };
+                
+                Plotly.newPlot('riemannPlot', traces, layout, {responsive: true});
+            } else {
+                // Domain coloring or other 2D visualization
+                traces = [{
+                    z: z1,
+                    x: x[0],
+                    y: y.map(row => row[0]),
+                    type: 'heatmap',
+                    colorscale: 'RdYlBu',
+                    showscale: true
+                }];
+                
+                // Add branch cut line
+                const cutX = [];
+                const cutY = [];
+                for (let r = 0; r <= range; r += 0.1) {
+                    cutX.push(r * Math.cos((angle * Math.PI) / 180 + Math.PI));
+                    cutY.push(r * Math.sin((angle * Math.PI) / 180 + Math.PI));
+                }
+                
+                traces.push({
+                    x: cutX,
+                    y: cutY,
+                    mode: 'lines',
+                    type: 'scatter',
+                    name: 'Branch Cut',
+                    line: {color: 'red', width: 3}
+                });
+                
+                const layout = {
+                    title: 'Riemann Surface Projection',
+                    xaxis: {title: 'Real', range: [-range, range]},
+                    yaxis: {title: 'Imaginary', range: [-range, range]},
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    font: {color: 'white'},
+                    aspectratio: {x: 1, y: 1}
+                };
+                
+                Plotly.newPlot('riemannPlot', traces, layout, {responsive: true});
+            }
+        }
+        
+        function showBranchPoints() {
+            alert('Branch Points: Shows the special points where the Riemann surface branches');
+        }
+        
+        function animateSheets() {
+            alert('Animation: Would show how multiple sheets connect at branch points');
+        }
+        
+        function showMonodromy() {
+            alert('Monodromy: Shows how function values change when going around branch points');
+        }
+        
+        function visualizeLogSurface() {
+            alert('Logarithm Riemann Surface: Infinite spiral structure');
+        }
+        
+        function visualizeAlgebraicSurface() {
+            alert('Algebraic Function Surfaces: Higher genus surfaces from polynomial equations');
+        }
+        
+        // Event listeners
+        document.getElementById('sqrtFunction').addEventListener('change', visualizeSqrtSurface);
+        document.getElementById('visualizationMode').addEventListener('change', visualizeSqrtSurface);
+        document.getElementById('branchAngle').addEventListener('input', function() {
+            document.getElementById('branchAngleValue').textContent = this.value;
+            visualizeSqrtSurface();
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                visualizeSqrtSurface();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

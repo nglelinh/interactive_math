@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Least-Squares Problems - Tối Ưu Hóa Bình Phương Nhỏ Nhất</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5em;
+        }
+        
+        .theory-section {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #FFD700;
+        }
+        
+        .content-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .visualization-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            border: 2px solid #34495e;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .control-group h3 {
+            margin: 0 0 15px 0;
+            color: #00FFFF;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #2980b9, #1f5582);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .parameter-display {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .data-points-area {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .method-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .method-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .method-card:hover {
+            border-color: #3498db;
+            transform: translateY(-5px);
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .application-card {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .legend {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+        
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .error-display {
+            background: rgba(231, 76, 60, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Least-Squares Problems - Tối Ưu Hóa Bình Phương Nhỏ Nhất</h1>
+        
+        <!-- Theory Section -->
+        <div class="theory-section">
+            <h2 style="color: #FFD700; margin: 0 0 20px 0;">🎯 Lý Thuyết Cơ Bản</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px;">
+                <div>
+                    <h3 style="color: #00FFFF;">📐 Định Nghĩa Bài Toán</h3>
+                    <p><strong>Mục tiêu:</strong> Tìm x để minimize ||Ax - b||₂²</p>
+                    <p><strong>Ý nghĩa:</strong> Tìm nghiệm "tốt nhất" cho hệ phương trình có thể không có nghiệm chính xác</p>
+                    
+                    <div class="formula-box">
+                        minimize f(x) = ½||Ax - b||₂² = ½∑ᵢ(aᵢᵀx - bᵢ)²
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="color: #2ecc71;">⚡ Nghiệm Giải Tích</h3>
+                    <p><strong>Normal Equation:</strong> AᵀAx = Aᵀb</p>
+                    <p><strong>Nghiệm:</strong> x* = (AᵀA)⁻¹Aᵀb (nếu AᵀA khả nghịch)</p>
+                    
+                    <div class="formula-box">
+                        x* = A⁺b<br/>
+                        A⁺ = (AᵀA)⁻¹Aᵀ (Moore-Penrose pseudoinverse)
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(52, 152, 219, 0.1); padding: 20px; border-radius: 10px; margin-top: 20px;">
+                <h3 style="color: #3498db; margin: 0 0 15px 0;">🔍 Các Trường Hợp Đặc Biệt</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4>📊 Linear Regression</h4>
+                        <p>A = [1 x₁; 1 x₂; ...; 1 xₙ], b = [y₁; y₂; ...; yₙ]</p>
+                        <p>Tìm đường thẳng y = ax + b tốt nhất</p>
+                    </div>
+                    <div>
+                        <h4>🎯 Polynomial Fitting</h4>
+                        <p>A = [1 x₁ x₁²; 1 x₂ x₂²; ...; 1 xₙ xₙ²]</p>
+                        <p>Tìm đa thức bậc n tốt nhất</p>
+                    </div>
+                    <div>
+                        <h4>📈 Data Approximation</h4>
+                        <p>Xấp xỉ dữ liệu với các hàm cơ sở</p>
+                        <p>sin, cos, exponentials, splines</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Visualization -->
+        <div class="content-layout">
+            <div class="visualization-area">
+                <h3 style="color: #2c3e50; margin: 0 0 20px 0; text-align: center;">📊 Interactive Least-Squares Visualization</h3>
+                
+                <div class="canvas-container">
+                    <canvas id="lsCanvas" width="500" height="400"></canvas>
+                </div>
+                
+                <div class="data-points-area">
+                    <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📍 Data Points Management</h4>
+                    <button onclick="generateRandomData()">🎲 Random Data</button>
+                    <button onclick="generateNoiseData()">📊 Add Noise</button>
+                    <button onclick="clearDataPoints()">🗑️ Clear Points</button>
+                    <button onclick="addOutliers()">⚠️ Add Outliers</button>
+                    <p style="font-size: 12px; margin: 10px 0 0 0; color: #666;">💡 Click trên canvas để thêm điểm dữ liệu mới</p>
+                </div>
+                
+                <div class="parameter-display" id="solution-display">
+                    <strong>📐 Current Solution:</strong><br/>
+                    Fitting: y = ax + b<br/>
+                    Coefficients: a = 0.000, b = 0.000<br/>
+                    Error: ||Ax - b||₂ = 0.000<br/>
+                    R² = 0.000
+                </div>
+                
+                <div class="error-display" id="error-breakdown">
+                    <strong>📊 Error Analysis:</strong><br/>
+                    Sum of Squares: 0.000<br/>
+                    Mean Square Error: 0.000<br/>
+                    Root Mean Square Error: 0.000<br/>
+                    Condition Number: 1.000
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <span style="width: 15px; height: 15px; background: #3498db; border-radius: 50%; display: inline-block;"></span>
+                        <span>Data Points</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="width: 15px; height: 3px; background: #e74c3c; display: inline-block;"></span>
+                        <span>Least-Squares Fit</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="width: 15px; height: 1px; background: #95a5a6; display: inline-block;"></span>
+                        <span>Residuals</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="width: 15px; height: 15px; background: #f39c12; border-radius: 50%; display: inline-block;"></span>
+                        <span>Outliers</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🎯 Fitting Method</h3>
+                    <button id="method-linear" class="active" onclick="setFittingMethod('linear')">Linear (y=ax+b)</button>
+                    <button id="method-quadratic" onclick="setFittingMethod('quadratic')">Quadratic</button>
+                    <button id="method-cubic" onclick="setFittingMethod('cubic')">Cubic</button>
+                    <button id="method-sin" onclick="setFittingMethod('sin')">Sinusoidal</button>
+                    <button id="method-exp" onclick="setFittingMethod('exp')">Exponential</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚙️ Regularization</h3>
+                    <label>Ridge Parameter (λ):</label>
+                    <input type="range" id="ridge-param" min="0" max="1" step="0.01" value="0" oninput="updateRegularization()">
+                    <div class="parameter-display" id="ridge-value">λ = 0.00</div>
+                    
+                    <label>Show Regularization Path:</label>
+                    <button onclick="showRegularizationPath()">📈 Show Path</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>📊 Data Generation</h3>
+                    <label>Number of Points:</label>
+                    <input type="range" id="num-points" min="5" max="50" value="20" oninput="updateDataSize()">
+                    <div class="parameter-display" id="points-value">N = 20 points</div>
+                    
+                    <label>Noise Level:</label>
+                    <input type="range" id="noise-level" min="0" max="2" step="0.1" value="0.3" oninput="updateNoise()">
+                    <div class="parameter-display" id="noise-value">σ = 0.3</div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🔍 Analysis Tools</h3>
+                    <button onclick="showResidualPlot()">📊 Residual Plot</button>
+                    <button onclick="showNormalEquation()">⚡ Normal Equation</button>
+                    <button onclick="showSVDDecomposition()">🔧 SVD Solution</button>
+                    <button onclick="compareToAnalytical()">📐 Compare Methods</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>💾 Examples</h3>
+                    <button onclick="loadExample('economics')">📈 Economics Data</button>
+                    <button onclick="loadExample('physics')">🔬 Physics Experiment</button>
+                    <button onclick="loadExample('ml')">🤖 ML Training Data</button>
+                    <button onclick="loadExample('biology')">🧬 Biology Growth</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Method Comparison -->
+        <div class="method-comparison">
+            <div class="method-card">
+                <h3 style="color: #3498db;">⚡ Normal Equation</h3>
+                <p><strong>Formula:</strong> x = (AᵀA)⁻¹Aᵀb</p>
+                <p><strong>Ưu điểm:</strong> Exact, one-step solution</p>
+                <p><strong>Nhược điểm:</strong> O(n³), unstable khi AᵀA ill-conditioned</p>
+                <p><strong>Sử dụng:</strong> Small to medium problems (n < 10,000)</p>
+            </div>
+            
+            <div class="method-card">
+                <h3 style="color: #2ecc71;">🔧 SVD Decomposition</h3>
+                <p><strong>Formula:</strong> A = UΣVᵀ, x = VΣ⁺Uᵀb</p>
+                <p><strong>Ưu điểm:</strong> Numerically stable, handles rank deficiency</p>
+                <p><strong>Nhược điểm:</strong> More expensive O(mn²)</p>
+                <p><strong>Sử dụng:</strong> When A is ill-conditioned or rank deficient</p>
+            </div>
+            
+            <div class="method-card">
+                <h3 style="color: #e74c3c;">🎯 QR Factorization</h3>
+                <p><strong>Formula:</strong> A = QR, Rx = Qᵀb</p>
+                <p><strong>Ưu điểm:</strong> Good balance of speed and stability</p>
+                <p><strong>Nhược điểm:</strong> O(mn²) cost</p>
+                <p><strong>Sử dụng:</strong> General purpose, most common choice</p>
+            </div>
+            
+            <div class="method-card">
+                <h3 style="color: #9b59b6;">🚀 Iterative Methods</h3>
+                <p><strong>Examples:</strong> Gradient Descent, CG, LSQR</p>
+                <p><strong>Ưu điểm:</strong> Handle very large problems, O(n²) per iteration</p>
+                <p><strong>Nhược điểm:</strong> Approximate, convergence issues</p>
+                <p><strong>Sử dụng:</strong> Large-scale problems (n > 100,000)</p>
+            </div>
+        </div>
+        
+        <!-- Real-world Applications -->
+        <div class="applications-grid">
+            <div class="application-card">
+                <h3>🤖 Machine Learning</h3>
+                <ul>
+                    <li><strong>Linear Regression:</strong> Feature weights optimization</li>
+                    <li><strong>Neural Networks:</strong> Gradient descent = iterative least squares</li>
+                    <li><strong>PCA:</strong> Principal components via SVD</li>
+                    <li><strong>Recommender Systems:</strong> Matrix factorization</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <h3>📊 Data Science & Statistics</h3>
+                <ul>
+                    <li><strong>Curve Fitting:</strong> Polynomial, exponential, sinusoidal fits</li>
+                    <li><strong>Time Series:</strong> Trend analysis and forecasting</li>
+                    <li><strong>A/B Testing:</strong> Treatment effect estimation</li>
+                    <li><strong>Calibration:</strong> Sensor and instrument calibration</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <h3>🔬 Engineering & Physics</h3>
+                <ul>
+                    <li><strong>Signal Processing:</strong> Filter design, denoising</li>
+                    <li><strong>Image Processing:</strong> Image restoration, super-resolution</li>
+                    <li><strong>Control Systems:</strong> System identification</li>
+                    <li><strong>Finite Element:</strong> Structural analysis</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <h3>💰 Finance & Economics</h3>
+                <ul>
+                    <li><strong>Portfolio Optimization:</strong> Risk-return tradeoffs</li>
+                    <li><strong>Factor Models:</strong> Asset pricing (CAPM, Fama-French)</li>
+                    <li><strong>Time Series:</strong> Economic forecasting</li>
+                    <li><strong>Risk Management:</strong> VaR estimation</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <h3>🧬 Biology & Medicine</h3>
+                <ul>
+                    <li><strong>Genomics:</strong> Gene expression analysis</li>
+                    <li><strong>Drug Discovery:</strong> QSAR modeling</li>
+                    <li><strong>Medical Imaging:</strong> Image reconstruction</li>
+                    <li><strong>Epidemiology:</strong> Disease spread modeling</li>
+                </ul>
+            </div>
+            
+            <div class="application-card">
+                <h3>🌍 Environmental & Climate</h3>
+                <ul>
+                    <li><strong>Climate Modeling:</strong> Temperature trend analysis</li>
+                    <li><strong>Remote Sensing:</strong> Satellite data processing</li>
+                    <li><strong>Hydrology:</strong> Water flow modeling</li>
+                    <li><strong>Pollution:</strong> Air quality monitoring</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Mathematical Deep Dive -->
+        <div style="background: rgba(155, 89, 182, 0.1); padding: 25px; border-radius: 15px; margin-top: 30px;">
+            <h2 style="color: #9b59b6;">🔬 Mathematical Deep Dive</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px;">
+                <div>
+                    <h3>📐 Geometric Interpretation</h3>
+                    <p><strong>Orthogonal Projection:</strong> x* projects b onto column space of A</p>
+                    <p><strong>Residual:</strong> r = b - Ax* ⊥ Col(A)</p>
+                    <div class="formula-box">
+                        ||b - Ax*||₂ = min ||b - Ax||₂<br/>
+                        x∈Rⁿ
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>⚡ Computational Aspects</h3>
+                    <p><strong>Condition Number:</strong> κ(A) = σₘₐₓ/σₘᵢₙ</p>
+                    <p><strong>Numerical Stability:</strong> Use SVD when κ(A) > 10¹²</p>
+                    <div class="formula-box">
+                        Error ≈ κ(A) × machine precision<br/>
+                        ≈ κ(A) × 10⁻¹⁶
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>🎯 Regularization Theory</h3>
+                    <p><strong>Ridge Regression:</strong> minimize ||Ax - b||₂² + λ||x||₂²</p>
+                    <p><strong>Solution:</strong> x = (AᵀA + λI)⁻¹Aᵀb</p>
+                    <div class="formula-box">
+                        Bias-Variance Tradeoff:<br/>
+                        ↑λ → ↑Bias, ↓Variance
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>📊 Statistical Properties</h3>
+                    <p><strong>Unbiased Estimator:</strong> E[x*] = x (if noise ~ N(0,σ²I))</p>
+                    <p><strong>Covariance:</strong> Cov(x*) = σ²(AᵀA)⁻¹</p>
+                    <div class="formula-box">
+                        R² = 1 - SS_res/SS_tot<br/>
+                        0 ≤ R² ≤ 1
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('lsCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configuration
+        const width = canvas.width;
+        const height = canvas.height;
+        const margin = 50;
+        
+        // State variables
+        let dataPoints = [];
+        let currentMethod = 'linear';
+        let ridgeParameter = 0.0;
+        let noiseLevel = 0.3;
+        let numPoints = 20;
+        let solution = { coefficients: [], error: 0, rsquared: 0 };
+        
+        // Initialize with sample data
+        generateRandomData();
+        
+        function generateRandomData() {
+            dataPoints = [];
+            const trueA = 2;
+            const trueB = 1;
+            
+            for (let i = 0; i < numPoints; i++) {
+                const x = -4 + (8 * i / (numPoints - 1));
+                const trueY = trueA * x + trueB;
+                const noise = (Math.random() - 0.5) * 2 * noiseLevel;
+                const y = trueY + noise;
+                dataPoints.push({ x, y });
+            }
+            
+            updateVisualization();
+        }
+        
+        function generateNoiseData() {
+            dataPoints.forEach(point => {
+                const noise = (Math.random() - 0.5) * 2 * noiseLevel;
+                point.y += noise;
+            });
+            updateVisualization();
+        }
+        
+        function clearDataPoints() {
+            dataPoints = [];
+            updateVisualization();
+        }
+        
+        function addOutliers() {
+            for (let i = 0; i < 3; i++) {
+                const x = -4 + Math.random() * 8;
+                const y = -2 + Math.random() * 4;
+                dataPoints.push({ x, y, outlier: true });
+            }
+            updateVisualization();
+        }
+        
+        function setFittingMethod(method) {
+            currentMethod = method;
+            
+            // Update button states
+            document.querySelectorAll('#method-linear, #method-quadratic, #method-cubic, #method-sin, #method-exp').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('method-' + method).classList.add('active');
+            
+            updateVisualization();
+        }
+        
+        function updateRegularization() {
+            ridgeParameter = parseFloat(document.getElementById('ridge-param').value);
+            document.getElementById('ridge-value').textContent = `λ = ${ridgeParameter.toFixed(2)}`;
+            updateVisualization();
+        }
+        
+        function updateDataSize() {
+            numPoints = parseInt(document.getElementById('num-points').value);
+            document.getElementById('points-value').textContent = `N = ${numPoints} points`;
+            generateRandomData();
+        }
+        
+        function updateNoise() {
+            noiseLevel = parseFloat(document.getElementById('noise-level').value);
+            document.getElementById('noise-value').textContent = `σ = ${noiseLevel.toFixed(1)}`;
+        }
+        
+        function worldToScreen(x, y) {
+            const screenX = margin + (x + 4) * (width - 2 * margin) / 8;
+            const screenY = height - margin - (y + 3) * (height - 2 * margin) / 6;
+            return { x: screenX, y: screenY };
+        }
+        
+        function screenToWorld(screenX, screenY) {
+            const x = ((screenX - margin) * 8 / (width - 2 * margin)) - 4;
+            const y = ((height - margin - screenY) * 6 / (height - 2 * margin)) - 3;
+            return { x, y };
+        }
+        
+        function drawAxes() {
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            const yZero = worldToScreen(0, 0).y;
+            ctx.beginPath();
+            ctx.moveTo(margin, yZero);
+            ctx.lineTo(width - margin, yZero);
+            ctx.stroke();
+            
+            // Y-axis  
+            const xZero = worldToScreen(0, 0).x;
+            ctx.beginPath();
+            ctx.moveTo(xZero, margin);
+            ctx.lineTo(xZero, height - margin);
+            ctx.stroke();
+            
+            // Grid lines
+            ctx.strokeStyle = '#ecf0f1';
+            ctx.lineWidth = 1;
+            
+            for (let x = -4; x <= 4; x++) {
+                if (x !== 0) {
+                    const pos = worldToScreen(x, 0);
+                    ctx.beginPath();
+                    ctx.moveTo(pos.x, margin);
+                    ctx.lineTo(pos.x, height - margin);
+                    ctx.stroke();
+                }
+            }
+            
+            for (let y = -3; y <= 3; y++) {
+                if (y !== 0) {
+                    const pos = worldToScreen(0, y);
+                    ctx.beginPath();
+                    ctx.moveTo(margin, pos.y);
+                    ctx.lineTo(width - margin, pos.y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Labels
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            for (let x = -4; x <= 4; x += 2) {
+                const pos = worldToScreen(x, 0);
+                ctx.fillText(x.toString(), pos.x, pos.y + 20);
+            }
+            
+            ctx.textAlign = 'right';
+            for (let y = -2; y <= 2; y += 2) {
+                if (y !== 0) {
+                    const pos = worldToScreen(0, y);
+                    ctx.fillText(y.toString(), pos.x - 10, pos.y + 5);
+                }
+            }
+        }
+        
+        function drawDataPoints() {
+            dataPoints.forEach(point => {
+                const pos = worldToScreen(point.x, point.y);
+                
+                ctx.fillStyle = point.outlier ? '#f39c12' : '#3498db';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, point.outlier ? 6 : 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Outline
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+        }
+        
+        function drawFittedCurve() {
+            if (dataPoints.length < 2) return;
+            
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let first = true;
+            for (let x = -4; x <= 4; x += 0.1) {
+                const y = evaluateModel(x);
+                const pos = worldToScreen(x, y);
+                
+                if (pos.y >= margin && pos.y <= height - margin) {
+                    if (first) {
+                        ctx.moveTo(pos.x, pos.y);
+                        first = false;
+                    } else {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                }
+            }
+            
+            ctx.stroke();
+        }
+        
+        function drawResiduals() {
+            ctx.strokeStyle = '#95a5a6';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            dataPoints.forEach(point => {
+                const predictedY = evaluateModel(point.x);
+                const actualPos = worldToScreen(point.x, point.y);
+                const predictedPos = worldToScreen(point.x, predictedY);
+                
+                ctx.beginPath();
+                ctx.moveTo(actualPos.x, actualPos.y);
+                ctx.lineTo(predictedPos.x, predictedPos.y);
+                ctx.stroke();
+            });
+            
+            ctx.setLineDash([]);
+        }
+        
+        function solveLeastSquares() {
+            if (dataPoints.length < 2) return;
+            
+            const A = [];
+            const b = [];
+            
+            // Build matrices based on method
+            dataPoints.forEach(point => {
+                let row;
+                switch (currentMethod) {
+                    case 'linear':
+                        row = [1, point.x];
+                        break;
+                    case 'quadratic':
+                        row = [1, point.x, point.x * point.x];
+                        break;
+                    case 'cubic':
+                        row = [1, point.x, point.x * point.x, point.x * point.x * point.x];
+                        break;
+                    case 'sin':
+                        row = [1, Math.sin(point.x), Math.cos(point.x)];
+                        break;
+                    case 'exp':
+                        row = [1, Math.exp(point.x * 0.5)];
+                        break;
+                }
+                A.push(row);
+                b.push(point.y);
+            });
+            
+            // Solve normal equations with Ridge regularization
+            const AtA = matrixMultiply(transpose(A), A);
+            const Atb = matrixVectorMultiply(transpose(A), b);
+            
+            // Add ridge regularization
+            if (ridgeParameter > 0) {
+                for (let i = 0; i < AtA.length; i++) {
+                    AtA[i][i] += ridgeParameter;
+                }
+            }
+            
+            const coefficients = solveLinearSystem(AtA, Atb);
+            
+            // Calculate error metrics
+            const residuals = [];
+            let sumSquaredResiduals = 0;
+            dataPoints.forEach(point => {
+                const predicted = evaluateModelWithCoeffs(point.x, coefficients);
+                const residual = point.y - predicted;
+                residuals.push(residual);
+                sumSquaredResiduals += residual * residual;
+            });
+            
+            const meanY = dataPoints.reduce((sum, p) => sum + p.y, 0) / dataPoints.length;
+            const totalSumSquares = dataPoints.reduce((sum, p) => sum + (p.y - meanY) ** 2, 0);
+            const rsquared = 1 - (sumSquaredResiduals / totalSumSquares);
+            
+            solution = {
+                coefficients,
+                error: Math.sqrt(sumSquaredResiduals),
+                rsquared: Math.max(0, rsquared),
+                mse: sumSquaredResiduals / dataPoints.length,
+                rmse: Math.sqrt(sumSquaredResiduals / dataPoints.length)
+            };
+            
+            updateSolutionDisplay();
+        }
+        
+        function evaluateModel(x) {
+            return evaluateModelWithCoeffs(x, solution.coefficients);
+        }
+        
+        function evaluateModelWithCoeffs(x, coeffs) {
+            if (!coeffs || coeffs.length === 0) return 0;
+            
+            switch (currentMethod) {
+                case 'linear':
+                    return coeffs[0] + coeffs[1] * x;
+                case 'quadratic':
+                    return coeffs[0] + coeffs[1] * x + coeffs[2] * x * x;
+                case 'cubic':
+                    return coeffs[0] + coeffs[1] * x + coeffs[2] * x * x + coeffs[3] * x * x * x;
+                case 'sin':
+                    return coeffs[0] + coeffs[1] * Math.sin(x) + coeffs[2] * Math.cos(x);
+                case 'exp':
+                    return coeffs[0] + coeffs[1] * Math.exp(x * 0.5);
+                default:
+                    return 0;
+            }
+        }
+        
+        // Matrix operations
+        function transpose(matrix) {
+            return matrix[0].map((col, i) => matrix.map(row => row[i]));
+        }
+        
+        function matrixMultiply(A, B) {
+            const result = [];
+            for (let i = 0; i < A.length; i++) {
+                result[i] = [];
+                for (let j = 0; j < B[0].length; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < A[0].length; k++) {
+                        sum += A[i][k] * B[k][j];
+                    }
+                    result[i][j] = sum;
+                }
+            }
+            return result;
+        }
+        
+        function matrixVectorMultiply(A, v) {
+            return A.map(row => row.reduce((sum, val, i) => sum + val * v[i], 0));
+        }
+        
+        function solveLinearSystem(A, b) {
+            // Simple Gaussian elimination (for demo purposes)
+            const n = A.length;
+            const augmented = A.map((row, i) => [...row, b[i]]);
+            
+            // Forward elimination
+            for (let i = 0; i < n; i++) {
+                // Find pivot
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
+                        maxRow = k;
+                    }
+                }
+                
+                // Swap rows
+                [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
+                
+                // Make all rows below this one 0 in current column
+                for (let k = i + 1; k < n; k++) {
+                    const factor = augmented[k][i] / augmented[i][i];
+                    for (let j = i; j <= n; j++) {
+                        augmented[k][j] -= factor * augmented[i][j];
+                    }
+                }
+            }
+            
+            // Back substitution
+            const x = new Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = augmented[i][n];
+                for (let j = i + 1; j < n; j++) {
+                    x[i] -= augmented[i][j] * x[j];
+                }
+                x[i] /= augmented[i][i];
+            }
+            
+            return x;
+        }
+        
+        function updateSolutionDisplay() {
+            const coeffs = solution.coefficients;
+            let equation = '';
+            
+            switch (currentMethod) {
+                case 'linear':
+                    equation = `y = ${coeffs[1]?.toFixed(3) || 0}x + ${coeffs[0]?.toFixed(3) || 0}`;
+                    break;
+                case 'quadratic':
+                    equation = `y = ${coeffs[2]?.toFixed(3) || 0}x² + ${coeffs[1]?.toFixed(3) || 0}x + ${coeffs[0]?.toFixed(3) || 0}`;
+                    break;
+                case 'cubic':
+                    equation = `y = ${coeffs[3]?.toFixed(3) || 0}x³ + ${coeffs[2]?.toFixed(3) || 0}x² + ${coeffs[1]?.toFixed(3) || 0}x + ${coeffs[0]?.toFixed(3) || 0}`;
+                    break;
+                case 'sin':
+                    equation = `y = ${coeffs[0]?.toFixed(3) || 0} + ${coeffs[1]?.toFixed(3) || 0}sin(x) + ${coeffs[2]?.toFixed(3) || 0}cos(x)`;
+                    break;
+                case 'exp':
+                    equation = `y = ${coeffs[0]?.toFixed(3) || 0} + ${coeffs[1]?.toFixed(3) || 0}exp(0.5x)`;
+                    break;
+            }
+            
+            document.getElementById('solution-display').innerHTML = `
+                <strong>📐 Current Solution:</strong><br/>
+                Fitting: ${equation}<br/>
+                Error: ||Ax - b||₂ = ${solution.error.toFixed(3)}<br/>
+                R² = ${solution.rsquared.toFixed(3)}
+            `;
+            
+            document.getElementById('error-breakdown').innerHTML = `
+                <strong>📊 Error Analysis:</strong><br/>
+                Sum of Squares: ${(solution.error ** 2).toFixed(3)}<br/>
+                Mean Square Error: ${solution.mse?.toFixed(3) || 0}<br/>
+                Root Mean Square Error: ${solution.rmse?.toFixed(3) || 0}<br/>
+                Data Points: ${dataPoints.length}
+            `;
+        }
+        
+        function updateVisualization() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawAxes();
+            
+            if (dataPoints.length > 0) {
+                solveLeastSquares();
+                drawResiduals();
+                drawFittedCurve();
+                drawDataPoints();
+            }
+        }
+        
+        // Event listeners
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+            const worldPos = screenToWorld(screenX, screenY);
+            
+            dataPoints.push(worldPos);
+            updateVisualization();
+        });
+        
+        // Example data loading functions
+        function loadExample(type) {
+            dataPoints = [];
+            
+            switch (type) {
+                case 'economics':
+                    // GDP vs Investment relationship
+                    const economicsData = [
+                        [-3, -1.2], [-2, -0.8], [-1, 0.1], [0, 0.8], [1, 1.9], [2, 2.2], [3, 2.8]
+                    ];
+                    economicsData.forEach(([x, y]) => dataPoints.push({ x, y }));
+                    break;
+                    
+                case 'physics':
+                    // Projectile motion data with measurement errors
+                    for (let i = 0; i < 15; i++) {
+                        const t = i * 0.3;
+                        const x = t - 2;
+                        const y = 2 - 0.5 * (x + 1) ** 2 + (Math.random() - 0.5) * 0.3;
+                        dataPoints.push({ x, y });
+                    }
+                    setFittingMethod('quadratic');
+                    break;
+                    
+                case 'ml':
+                    // Training loss over epochs
+                    for (let i = 0; i < 20; i++) {
+                        const x = -3 + i * 0.3;
+                        const y = 2 * Math.exp(x * 0.3) - 1.5 + (Math.random() - 0.5) * 0.4;
+                        dataPoints.push({ x, y });
+                    }
+                    setFittingMethod('exp');
+                    break;
+                    
+                case 'biology':
+                    // Population growth data
+                    for (let i = 0; i < 16; i++) {
+                        const x = -3 + i * 0.4;
+                        const y = 0.5 * Math.sin(x * 1.5) + 0.3 * x + (Math.random() - 0.5) * 0.2;
+                        dataPoints.push({ x, y });
+                    }
+                    setFittingMethod('sin');
+                    break;
+            }
+            
+            updateVisualization();
+        }
+        
+        // Analysis functions (simplified implementations)
+        function showResidualPlot() {
+            alert('📊 Residual Plot: Shows residuals vs fitted values to check for patterns, heteroscedasticity, and outliers.');
+        }
+        
+        function showNormalEquation() {
+            alert('⚡ Normal Equation: AᵀAx = Aᵀb\n\nThis is the analytical solution to the least-squares problem. When AᵀA is invertible, x = (AᵀA)⁻¹Aᵀb gives the exact solution.');
+        }
+        
+        function showSVDDecomposition() {
+            alert('🔧 SVD Solution: A = UΣVᵀ\n\nSVD provides the most numerically stable solution: x = VΣ⁺Uᵀb, where Σ⁺ is the pseudoinverse. This handles rank-deficient matrices gracefully.');
+        }
+        
+        function compareToAnalytical() {
+            alert('📐 Method Comparison:\n\n• Normal Equation: Fast but unstable\n• QR Decomposition: Good balance\n• SVD: Most stable but slowest\n• Iterative: Best for large problems');
+        }
+        
+        function showRegularizationPath() {
+            alert('📈 Regularization Path: Shows how coefficients change as λ increases.\n\nRidge regression shrinks coefficients toward zero, preventing overfitting at the cost of some bias.');
+        }
+        
+        // Initialize
+        updateVisualization();
+    </script>
+</body>
+</html>

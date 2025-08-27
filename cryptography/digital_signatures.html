@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✍️ Digital Signatures - Cryptographic Authentication</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #f7fafc;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(247, 250, 252, 0.3);
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group textarea, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .control-group textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .result-panel {
+            background: rgba(72, 187, 120, 0.1);
+            border: 1px solid #48bb78;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .signature-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #48bb78;
+            word-break: break-all;
+        }
+        
+        .key-display {
+            background: rgba(66, 153, 225, 0.1);
+            border: 1px solid #4299e1;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .verification-result {
+            background: rgba(245, 101, 101, 0.1);
+            border: 1px solid #f56565;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .verification-result.valid {
+            background: rgba(72, 187, 120, 0.1);
+            border-color: #48bb78;
+            color: #48bb78;
+        }
+        
+        .verification-result.invalid {
+            background: rgba(245, 101, 101, 0.1);
+            border-color: #f56565;
+            color: #f56565;
+        }
+        
+        .workflow-step {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4299e1;
+        }
+        
+        .workflow-step h4 {
+            margin: 0 0 10px 0;
+            color: #4299e1;
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ed8936;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✍️ Digital Signatures</h1>
+        <div style="text-align: center; color: #cbd5e0; font-size: 1.2em; margin-bottom: 30px;">
+            Authentication, integrity, and non-repudiation through mathematical signatures
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🔑 Key Generation</h3>
+                
+                <div class="control-group">
+                    <label>Signature Algorithm:</label>
+                    <select id="signatureAlgorithm" onchange="updateAlgorithmInfo()">
+                        <option value="rsa">RSA-PSS</option>
+                        <option value="ecdsa">ECDSA</option>
+                        <option value="eddsa">EdDSA</option>
+                        <option value="simple">Simple Demo</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Key Size:</label>
+                    <select id="keySize" onchange="updateAlgorithmInfo()">
+                        <option value="1024">1024 bits (weak)</option>
+                        <option value="2048" selected>2048 bits (good)</option>
+                        <option value="3072">3072 bits (strong)</option>
+                        <option value="4096">4096 bits (very strong)</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateKeyPair()">🔑 Generate Key Pair</button>
+                
+                <div class="key-display" id="keyDisplay">
+                    <p>Click "Generate Key Pair" to create keys</p>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>🔐 Algorithm Info:</h4>
+                    <div id="algorithmInfo">Select algorithm to see details</div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>✍️ Message Signing</h3>
+                
+                <div class="control-group">
+                    <label>Message to Sign:</label>
+                    <textarea id="messageToSign" placeholder="Enter your message here...">This is a very important message that needs authentication.</textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Hash Algorithm:</label>
+                    <select id="hashAlgorithm">
+                        <option value="SHA-256" selected>SHA-256</option>
+                        <option value="SHA-384">SHA-384</option>
+                        <option value="SHA-512">SHA-512</option>
+                        <option value="SHA-1">SHA-1 (deprecated)</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="signMessage()">✍️ Sign Message</button>
+                <button class="btn btn-warning" onclick="loadSampleMessage()">📝 Load Sample</button>
+                
+                <div class="signature-display" id="signatureDisplay">
+                    <p>Sign a message to see the digital signature</p>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>📊 Signature Details:</h4>
+                    <div id="signatureDetails">No signature generated yet</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🔍 Signature Verification</h3>
+                
+                <div class="control-group">
+                    <label>Message to Verify:</label>
+                    <textarea id="messageToVerify" placeholder="Enter the message to verify..."></textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Digital Signature:</label>
+                    <textarea id="signatureToVerify" placeholder="Paste the signature here..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="verifySignature()">🔍 Verify Signature</button>
+                <button class="btn btn-danger" onclick="tamperMessage()">🔧 Tamper Message</button>
+                <button class="btn btn-danger" onclick="tamperSignature()">⚠️ Tamper Signature</button>
+                
+                <div class="verification-result" id="verificationResult">
+                    Verification result will appear here
+                </div>
+                
+                <div class="result-panel">
+                    <h4>📈 Verification Process:</h4>
+                    <div id="verificationProcess">Verify a signature to see the process</div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📜 Digital Contract Demo</h3>
+                
+                <div class="control-group">
+                    <label>Contract Content:</label>
+                    <textarea id="contractContent" placeholder="Enter contract terms...">
+DIGITAL CONTRACT
+
+Parties: Alice (Sender) and Bob (Receiver)
+Amount: $10,000
+Terms: Payment due within 30 days
+Date: ${new Date().toISOString().split('T')[0]}
+
+This contract is digitally signed for authenticity.
+                    </textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Signer Identity:</label>
+                    <input type="text" id="signerIdentity" value="Alice Smith (alice@example.com)">
+                </div>
+                
+                <button class="btn" onclick="signContract()">📝 Sign Contract</button>
+                <button class="btn btn-primary" onclick="verifyContract()">✅ Verify Contract</button>
+                
+                <div class="timeline" id="contractTimeline">
+                    <p>Sign contract to see timeline</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel" style="margin-top: 20px;">
+            <h3>📚 Digital Signature Workflow</h3>
+            
+            <div class="demo-grid">
+                <div>
+                    <div class="workflow-step">
+                        <h4>1. Key Generation</h4>
+                        <p>• Generate public/private key pair</p>
+                        <p>• Keep private key secret</p>
+                        <p>• Share public key with verifiers</p>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <h4>2. Signing Process</h4>
+                        <p>• Hash the message (SHA-256)</p>
+                        <p>• Encrypt hash with private key</p>
+                        <p>• Result is the digital signature</p>
+                    </div>
+                    
+                    <div class="workflow-step">
+                        <h4>3. Verification Process</h4>
+                        <p>• Hash the received message</p>
+                        <p>• Decrypt signature with public key</p>
+                        <p>• Compare hashes for validity</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="result-panel">
+                        <h4>🛡️ Security Properties:</h4>
+                        <p>• <strong>Authentication:</strong> Proves who signed</p>
+                        <p>• <strong>Integrity:</strong> Detects tampering</p>
+                        <p>• <strong>Non-repudiation:</strong> Signer can't deny</p>
+                        <p>• <strong>Timestamping:</strong> When it was signed</p>
+                    </div>
+                    
+                    <div class="result-panel">
+                        <h4>🌍 Real-World Uses:</h4>
+                        <p>• <strong>Legal Documents:</strong> Contracts, agreements</p>
+                        <p>• <strong>Software Distribution:</strong> Code signing</p>
+                        <p>• <strong>Email Security:</strong> S/MIME, PGP</p>
+                        <p>• <strong>Blockchain:</strong> Transaction validation</p>
+                        <p>• <strong>SSL/TLS:</strong> Certificate authentication</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentKeyPair = null;
+        let currentSignature = null;
+        let contractHistory = [];
+        
+        // Simple RSA-like implementation for demo
+        function generateSimpleKeyPair() {
+            // For demo purposes - not cryptographically secure
+            const p = 61;
+            const q = 53;
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+            const e = 17;
+            const d = 2753; // Precomputed for demo
+            
+            return {
+                publicKey: { n, e },
+                privateKey: { n, d },
+                algorithm: 'Simple RSA Demo'
+            };
+        }
+        
+        async function generateWebCryptoKeyPair() {
+            try {
+                const keySize = parseInt(document.getElementById('keySize').value);
+                const algorithm = document.getElementById('signatureAlgorithm').value;
+                
+                let keyGenParams;
+                let signAlgorithm;
+                
+                switch (algorithm) {
+                    case 'rsa':
+                        keyGenParams = {
+                            name: "RSA-PSS",
+                            modulusLength: keySize,
+                            publicExponent: new Uint8Array([1, 0, 1]),
+                            hash: "SHA-256",
+                        };
+                        signAlgorithm = "RSA-PSS";
+                        break;
+                    case 'ecdsa':
+                        keyGenParams = {
+                            name: "ECDSA",
+                            namedCurve: "P-256",
+                        };
+                        signAlgorithm = "ECDSA";
+                        break;
+                    default:
+                        return generateSimpleKeyPair();
+                }
+                
+                const keyPair = await crypto.subtle.generateKey(
+                    keyGenParams,
+                    true,
+                    ["sign", "verify"]
+                );
+                
+                return {
+                    publicKey: keyPair.publicKey,
+                    privateKey: keyPair.privateKey,
+                    algorithm: signAlgorithm
+                };
+            } catch (error) {
+                console.log('Web Crypto not supported, using simple demo');
+                return generateSimpleKeyPair();
+            }
+        }
+        
+        async function generateKeyPair() {
+            currentKeyPair = await generateWebCryptoKeyPair();
+            
+            const algorithm = document.getElementById('signatureAlgorithm').value;
+            const keySize = document.getElementById('keySize').value;
+            
+            let keyInfo = '';
+            
+            if (currentKeyPair.algorithm === 'Simple RSA Demo') {
+                keyInfo = `
+                    <p><strong>Algorithm:</strong> ${currentKeyPair.algorithm}</p>
+                    <p><strong>Public Key:</strong> (n=${currentKeyPair.publicKey.n}, e=${currentKeyPair.publicKey.e})</p>
+                    <p><strong>Private Key:</strong> (n=${currentKeyPair.privateKey.n}, d=${currentKeyPair.privateKey.d})</p>
+                    <p><em>Note: This is a demo implementation</em></p>
+                `;
+            } else {
+                keyInfo = `
+                    <p><strong>Algorithm:</strong> ${currentKeyPair.algorithm}</p>
+                    <p><strong>Key Size:</strong> ${keySize} bits</p>
+                    <p><strong>Public Key:</strong> [WebCrypto CryptoKey object]</p>
+                    <p><strong>Private Key:</strong> [WebCrypto CryptoKey object - keep secret!]</p>
+                    <p><strong>Extractable:</strong> Yes (for demo purposes)</p>
+                `;
+            }
+            
+            document.getElementById('keyDisplay').innerHTML = keyInfo;
+            
+            updateAlgorithmInfo();
+        }
+        
+        function updateAlgorithmInfo() {
+            const algorithm = document.getElementById('signatureAlgorithm').value;
+            const keySize = document.getElementById('keySize').value;
+            
+            let info = '';
+            
+            switch (algorithm) {
+                case 'rsa':
+                    info = `
+                        <p><strong>RSA-PSS (Probabilistic Signature Scheme)</strong></p>
+                        <p>• <strong>Security:</strong> Based on factoring large numbers</p>
+                        <p>• <strong>Key Size:</strong> ${keySize} bits</p>
+                        <p>• <strong>Hash:</strong> SHA-256 with salt</p>
+                        <p>• <strong>Use:</strong> Widely adopted, PKCS standards</p>
+                    `;
+                    break;
+                case 'ecdsa':
+                    info = `
+                        <p><strong>ECDSA (Elliptic Curve Digital Signature)</strong></p>
+                        <p>• <strong>Security:</strong> Elliptic curve discrete log</p>
+                        <p>• <strong>Curve:</strong> P-256 (secp256r1)</p>
+                        <p>• <strong>Equivalent RSA:</strong> ~3072 bits</p>
+                        <p>• <strong>Use:</strong> Bitcoin, modern TLS</p>
+                    `;
+                    break;
+                case 'eddsa':
+                    info = `
+                        <p><strong>EdDSA (Edwards-curve Digital Signature)</strong></p>
+                        <p>• <strong>Security:</strong> Twisted Edwards curves</p>
+                        <p>• <strong>Curve:</strong> Ed25519</p>
+                        <p>• <strong>Performance:</strong> Very fast verification</p>
+                        <p>• <strong>Use:</strong> Modern protocols, SSH</p>
+                    `;
+                    break;
+                case 'simple':
+                    info = `
+                        <p><strong>Simple Demo Implementation</strong></p>
+                        <p>• <strong>Purpose:</strong> Educational only</p>
+                        <p>• <strong>Security:</strong> Not cryptographically secure</p>
+                        <p>• <strong>Method:</strong> Basic RSA-like operations</p>
+                        <p>• <strong>Note:</strong> Do not use in production!</p>
+                    `;
+                    break;
+            }
+            
+            document.getElementById('algorithmInfo').innerHTML = info;
+        }
+        
+        async function signMessage() {
+            if (!currentKeyPair) {
+                alert('Generate key pair first!');
+                return;
+            }
+            
+            const message = document.getElementById('messageToSign').value;
+            const hashAlgorithm = document.getElementById('hashAlgorithm').value;
+            
+            if (!message.trim()) {
+                alert('Please enter a message to sign');
+                return;
+            }
+            
+            try {
+                let signature;
+                
+                if (currentKeyPair.algorithm === 'Simple RSA Demo') {
+                    // Simple demo signature
+                    const messageHash = await simpleHash(message);
+                    signature = await simpleSign(messageHash, currentKeyPair.privateKey);
+                } else {
+                    // Web Crypto API signature
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(message);
+                    
+                    const signatureBuffer = await crypto.subtle.sign(
+                        {
+                            name: currentKeyPair.algorithm,
+                            saltLength: 32,
+                        },
+                        currentKeyPair.privateKey,
+                        data
+                    );
+                    
+                    signature = Array.from(new Uint8Array(signatureBuffer))
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join('');
+                }
+                
+                currentSignature = {
+                    message: message,
+                    signature: signature,
+                    algorithm: currentKeyPair.algorithm,
+                    hash: hashAlgorithm,
+                    timestamp: new Date().toISOString()
+                };
+                
+                document.getElementById('signatureDisplay').innerHTML = `
+                    <p><strong>Digital Signature:</strong></p>
+                    <p style="word-break: break-all; font-size: 12px;">${signature}</p>
+                `;
+                
+                document.getElementById('signatureDetails').innerHTML = `
+                    <p><strong>Message Length:</strong> ${message.length} characters</p>
+                    <p><strong>Signature Length:</strong> ${signature.length} hex chars</p>
+                    <p><strong>Hash Algorithm:</strong> ${hashAlgorithm}</p>
+                    <p><strong>Signature Algorithm:</strong> ${currentKeyPair.algorithm}</p>
+                    <p><strong>Timestamp:</strong> ${currentSignature.timestamp}</p>
+                `;
+                
+                // Auto-populate verification fields
+                document.getElementById('messageToVerify').value = message;
+                document.getElementById('signatureToVerify').value = signature;
+                
+            } catch (error) {
+                alert('Signing failed: ' + error.message);
+            }
+        }
+        
+        async function verifySignature() {
+            if (!currentKeyPair) {
+                alert('Generate key pair first!');
+                return;
+            }
+            
+            const message = document.getElementById('messageToVerify').value;
+            const signature = document.getElementById('signatureToVerify').value;
+            
+            if (!message.trim() || !signature.trim()) {
+                alert('Please enter both message and signature');
+                return;
+            }
+            
+            try {
+                let isValid;
+                
+                if (currentKeyPair.algorithm === 'Simple RSA Demo') {
+                    // Simple demo verification
+                    const messageHash = await simpleHash(message);
+                    isValid = await simpleVerify(messageHash, signature, currentKeyPair.publicKey);
+                } else {
+                    // Web Crypto API verification
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(message);
+                    const signatureBuffer = new Uint8Array(
+                        signature.match(/.{2}/g).map(byte => parseInt(byte, 16))
+                    );
+                    
+                    isValid = await crypto.subtle.verify(
+                        {
+                            name: currentKeyPair.algorithm,
+                            saltLength: 32,
+                        },
+                        currentKeyPair.publicKey,
+                        signatureBuffer,
+                        data
+                    );
+                }
+                
+                const resultElement = document.getElementById('verificationResult');
+                
+                if (isValid) {
+                    resultElement.innerHTML = '✅ SIGNATURE VALID';
+                    resultElement.className = 'verification-result valid';
+                } else {
+                    resultElement.innerHTML = '❌ SIGNATURE INVALID';
+                    resultElement.className = 'verification-result invalid';
+                }
+                
+                document.getElementById('verificationProcess').innerHTML = `
+                    <div class="workflow-step">
+                        <h4>Verification Steps:</h4>
+                        <p>1. ✅ Hashed the message using ${document.getElementById('hashAlgorithm').value}</p>
+                        <p>2. ✅ Decrypted signature using public key</p>
+                        <p>3. ✅ Compared hashes</p>
+                        <p>4. ${isValid ? '✅ Hashes match - signature valid!' : '❌ Hashes differ - signature invalid!'}</p>
+                    </div>
+                    <div class="result-panel">
+                        <h4>Security Implications:</h4>
+                        <p>• <strong>Authenticity:</strong> ${isValid ? 'Confirmed - message from key owner' : 'Failed - message may be forged'}</p>
+                        <p>• <strong>Integrity:</strong> ${isValid ? 'Confirmed - message unchanged' : 'Failed - message may be tampered'}</p>
+                        <p>• <strong>Non-repudiation:</strong> ${isValid ? 'Signer cannot deny signing' : 'Signature cannot be trusted'}</p>
+                    </div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('verificationResult').innerHTML = '❌ VERIFICATION ERROR';
+                document.getElementById('verificationResult').className = 'verification-result invalid';
+                alert('Verification failed: ' + error.message);
+            }
+        }
+        
+        function tamperMessage() {
+            const message = document.getElementById('messageToVerify').value;
+            if (message.length > 0) {
+                const tamperedMessage = message + ' [TAMPERED]';
+                document.getElementById('messageToVerify').value = tamperedMessage;
+                verifySignature();
+            }
+        }
+        
+        function tamperSignature() {
+            const signature = document.getElementById('signatureToVerify').value;
+            if (signature.length > 0) {
+                const tamperedSignature = 'ff' + signature.substring(2);
+                document.getElementById('signatureToVerify').value = tamperedSignature;
+                verifySignature();
+            }
+        }
+        
+        function loadSampleMessage() {
+            const samples = [
+                "I, Alice, hereby transfer $1000 to Bob on " + new Date().toDateString(),
+                "This contract is valid until " + new Date(Date.now() + 30*24*60*60*1000).toDateString(),
+                "Software Release v2.1.0 - SHA256: a1b2c3d4e5f6...",
+                "Meeting minutes from " + new Date().toDateString() + " - Board approved budget increase"
+            ];
+            
+            const randomSample = samples[Math.floor(Math.random() * samples.length)];
+            document.getElementById('messageToSign').value = randomSample;
+        }
+        
+        async function signContract() {
+            const content = document.getElementById('contractContent').value;
+            const signer = document.getElementById('signerIdentity').value;
+            
+            if (!currentKeyPair) {
+                alert('Generate key pair first!');
+                return;
+            }
+            
+            const contractData = `${content}\n\nSigned by: ${signer}\nTimestamp: ${new Date().toISOString()}`;
+            
+            // Use the main signing function
+            document.getElementById('messageToSign').value = contractData;
+            await signMessage();
+            
+            // Add to contract history
+            contractHistory.push({
+                content: content,
+                signer: signer,
+                signature: currentSignature.signature,
+                timestamp: new Date().toISOString(),
+                status: 'signed'
+            });
+            
+            updateContractTimeline();
+        }
+        
+        async function verifyContract() {
+            if (contractHistory.length === 0) {
+                alert('No contracts to verify');
+                return;
+            }
+            
+            const latest = contractHistory[contractHistory.length - 1];
+            
+            // Reconstruct the signed data
+            const contractData = `${latest.content}\n\nSigned by: ${latest.signer}\nTimestamp: ${latest.timestamp}`;
+            
+            document.getElementById('messageToVerify').value = contractData;
+            document.getElementById('signatureToVerify').value = latest.signature;
+            
+            await verifySignature();
+            
+            // Update status
+            const isValid = document.getElementById('verificationResult').innerHTML.includes('VALID');
+            latest.status = isValid ? 'verified' : 'invalid';
+            
+            updateContractTimeline();
+        }
+        
+        function updateContractTimeline() {
+            const timeline = document.getElementById('contractTimeline');
+            
+            if (contractHistory.length === 0) {
+                timeline.innerHTML = '<p>No contract activity</p>';
+                return;
+            }
+            
+            let html = '<h4>📜 Contract Timeline:</h4>';
+            
+            contractHistory.forEach((entry, index) => {
+                const statusColor = entry.status === 'verified' ? '#48bb78' : 
+                                  entry.status === 'signed' ? '#ed8936' : '#f56565';
+                
+                html += `
+                    <div class="timeline-item" style="border-left-color: ${statusColor};">
+                        <h5>Contract ${index + 1} - ${entry.status.toUpperCase()}</h5>
+                        <p><strong>Signer:</strong> ${entry.signer}</p>
+                        <p><strong>Time:</strong> ${new Date(entry.timestamp).toLocaleString()}</p>
+                        <p><strong>Signature:</strong> ${entry.signature.substring(0, 32)}...</p>
+                        <details>
+                            <summary>View Content</summary>
+                            <pre style="white-space: pre-wrap; font-size: 12px;">${entry.content}</pre>
+                        </details>
+                    </div>
+                `;
+            });
+            
+            timeline.innerHTML = html;
+        }
+        
+        // Simple hash function for demo
+        async function simpleHash(message) {
+            let hash = 0;
+            for (let i = 0; i < message.length; i++) {
+                const char = message.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            return Math.abs(hash);
+        }
+        
+        // Simple signing for demo
+        async function simpleSign(messageHash, privateKey) {
+            // Simplified RSA signing: signature = messageHash^d mod n
+            const signature = modPow(messageHash, privateKey.d, privateKey.n);
+            return signature.toString(16);
+        }
+        
+        // Simple verification for demo
+        async function simpleVerify(messageHash, signature, publicKey) {
+            try {
+                const sig = parseInt(signature, 16);
+                const decrypted = modPow(sig, publicKey.e, publicKey.n);
+                return decrypted === messageHash;
+            } catch {
+                return false;
+            }
+        }
+        
+        // Modular exponentiation
+        function modPow(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+        
+        // Initialize
+        window.onload = function() {
+            updateAlgorithmInfo();
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

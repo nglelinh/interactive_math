@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa Duality trong Linear Programming</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,6 +174,171 @@
             margin-top: 0;
             color: #2c3e50;
         }
+        
+        /* Mathematical Theory Styles */
+        .mathematical-theory {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .theorem-section {
+            margin: 20px 0;
+        }
+        
+        .theorem-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.1);
+        }
+        
+        .theorem-box h5 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.2em;
+            border-bottom: 1px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .formula-display {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Times New Roman', serif;
+            border-radius: 5px;
+        }
+        
+        .duality-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .duality-table th,
+        .duality-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .duality-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .duality-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .interpretation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .interpretation-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .interpretation-card h5 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        
+        .shadow-price-analysis {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .application-examples {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .example-card h5 {
+            color: #2c3e50;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .algorithm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .algorithm-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .algorithm-card h5 {
+            color: #764ba2;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        
+        .sensitivity-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .sensitivity-content h5 {
+            color: #2c3e50;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .interpretation-grid,
+            .algorithm-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .duality-table {
+                font-size: 0.9em;
+            }
+            
+            .duality-table th,
+            .duality-table td {
+                padding: 8px;
+            }
+        }
     </style>
 
 
@@ -290,6 +457,264 @@
                 <strong>Weak Duality:</strong> bᵀy ≤ cᵀx (for any feasible x, y)<br>
                 <strong>Strong Duality:</strong> bᵀy* = cᵀx* (at optimal solutions)<br>
                 <strong>Complementary Slackness:</strong> yᵢ(Ax - b)ᵢ = 0, xⱼ(c - Aᵀy)ⱼ = 0
+            </div>
+            
+            <div class="mathematical-theory">
+                <h3>🔬 Mathematical Foundation of Duality Theory</h3>
+                
+                <div class="theorem-section">
+                    <h4>📐 Fundamental Duality Theorems</h4>
+                    
+                    <div class="theorem-box">
+                        <h5>Theorem 1: Weak Duality</h5>
+                        <p><strong>Statement:</strong> If x* is feasible for the primal and y* is feasible for the dual, then:</p>
+                        <div class="formula-display">
+                            $$\mathbf{b}^T\mathbf{y}^* \leq \mathbf{c}^T\mathbf{x}^*$$
+                        </div>
+                        <p><strong>Proof:</strong> Since x* is primal feasible: 𝐀x* ≥ 𝐛, and y* is dual feasible: 𝐀ᵀy* ≤ 𝐜 with y* ≥ 𝟎, x* ≥ 𝟎</p>
+                        <div class="formula-display">
+                            $$\mathbf{b}^T\mathbf{y}^* \leq (\mathbf{A}\mathbf{x}^*)^T\mathbf{y}^* = (\mathbf{x}^*)^T\mathbf{A}^T\mathbf{y}^* \leq (\mathbf{x}^*)^T\mathbf{c} = \mathbf{c}^T\mathbf{x}^*$$
+                        </div>
+                        <p><strong>Corollary:</strong> If primal is unbounded below, then dual is infeasible. If dual is unbounded above, then primal is infeasible.</p>
+                    </div>
+                    
+                    <div class="theorem-box">
+                        <h5>Theorem 2: Strong Duality</h5>
+                        <p><strong>Statement:</strong> If the primal LP has a finite optimal solution x*, then the dual LP has a finite optimal solution y*, and:</p>
+                        <div class="formula-display">
+                            $$\mathbf{c}^T\mathbf{x}^* = \mathbf{b}^T\mathbf{y}^*$$
+                        </div>
+                        <p><strong>Economic Interpretation:</strong> The minimum cost equals the maximum value of resources at optimal shadow prices.</p>
+                    </div>
+                    
+                    <div class="theorem-box">
+                        <h5>Theorem 3: Complementary Slackness</h5>
+                        <p><strong>Statement:</strong> Let x* and y* be optimal solutions to primal and dual respectively. Then:</p>
+                        <div class="formula-display">
+                            $$\begin{align}
+                            y_i^* > 0 &\Rightarrow \text{primal constraint } i \text{ is tight: } (\mathbf{A}\mathbf{x}^*)_i = b_i \\
+                            (\mathbf{A}\mathbf{x}^*)_i > b_i &\Rightarrow y_i^* = 0 \\
+                            x_j^* > 0 &\Rightarrow \text{dual constraint } j \text{ is tight: } (\mathbf{A}^T\mathbf{y}^*)_j = c_j \\
+                            (\mathbf{A}^T\mathbf{y}^*)_j < c_j &\Rightarrow x_j^* = 0
+                            \end{align}$$
+                        </div>
+                        <p><strong>Intuition:</strong> Either a constraint is binding, or its corresponding dual variable is zero.</p>
+                    </div>
+                </div>
+                
+                <div class="duality-rules">
+                    <h4>🔄 Comprehensive Duality Rules</h4>
+                    <table class="duality-table">
+                        <thead>
+                            <tr>
+                                <th>Primal</th>
+                                <th>⟷</th>
+                                <th>Dual</th>
+                                <th>Mathematical Relationship</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>minimize 𝐜ᵀ𝐱</td>
+                                <td>⟷</td>
+                                <td>maximize 𝐛ᵀ𝐲</td>
+                                <td>Objectives are transposes</td>
+                            </tr>
+                            <tr>
+                                <td>𝐀𝐱 ≥ 𝐛</td>
+                                <td>⟷</td>
+                                <td>𝐲 ≥ 𝟎</td>
+                                <td>≥ constraint ⟷ ≥ 0 variable</td>
+                            </tr>
+                            <tr>
+                                <td>𝐀𝐱 ≤ 𝐛</td>
+                                <td>⟷</td>
+                                <td>𝐲 ≤ 𝟎</td>
+                                <td>≤ constraint ⟷ ≤ 0 variable</td>
+                            </tr>
+                            <tr>
+                                <td>𝐀𝐱 = 𝐛</td>
+                                <td>⟷</td>
+                                <td>𝐲 free</td>
+                                <td>= constraint ⟷ unrestricted variable</td>
+                            </tr>
+                            <tr>
+                                <td>𝐱 ≥ 𝟎</td>
+                                <td>⟷</td>
+                                <td>𝐀ᵀ𝐲 ≤ 𝐜</td>
+                                <td>≥ 0 variable ⟷ ≤ constraint</td>
+                            </tr>
+                            <tr>
+                                <td>𝐱 ≤ 𝟎</td>
+                                <td>⟷</td>
+                                <td>𝐀ᵀ𝐲 ≥ 𝐜</td>
+                                <td>≤ 0 variable ⟷ ≥ constraint</td>
+                            </tr>
+                            <tr>
+                                <td>𝐱 free</td>
+                                <td>⟷</td>
+                                <td>𝐀ᵀ𝐲 = 𝐜</td>
+                                <td>unrestricted variable ⟷ = constraint</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="economic-interpretation">
+                    <h4>💰 Economic Interpretation of Duality</h4>
+                    
+                    <div class="interpretation-grid">
+                        <div class="interpretation-card">
+                            <h5>🏭 Primal Problem (Producer's Perspective)</h5>
+                            <ul>
+                                <li><strong>Variables:</strong> Production quantities (x₁, x₂, ...)</li>
+                                <li><strong>Objective:</strong> Minimize production cost</li>
+                                <li><strong>Constraints:</strong> Meet demand requirements</li>
+                                <li><strong>Question:</strong> "How much to produce?"</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="interpretation-card">
+                            <h5>💼 Dual Problem (Consumer's Perspective)</h5>
+                            <ul>
+                                <li><strong>Variables:</strong> Shadow prices (y₁, y₂, ...)</li>
+                                <li><strong>Objective:</strong> Maximize value of resources</li>
+                                <li><strong>Constraints:</strong> Don't exceed production costs</li>
+                                <li><strong>Question:</strong> "What are resources worth?"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="shadow-price-analysis">
+                        <h5>📊 Shadow Price Analysis</h5>
+                        <p>Shadow price y*ᵢ represents the <strong>marginal value</strong> of resource i:</p>
+                        <div class="formula-display">
+                            $$y_i^* = \frac{\partial z^*}{\partial b_i}$$
+                        </div>
+                        <ul>
+                            <li><strong>Positive shadow price:</strong> Resource is scarce and valuable</li>
+                            <li><strong>Zero shadow price:</strong> Resource is abundant (non-binding constraint)</li>
+                            <li><strong>Range of validity:</strong> Shadow prices valid only within certain ranges</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="advanced-applications">
+                    <h4>🚀 Advanced Duality Applications</h4>
+                    
+                    <div class="application-examples">
+                        <div class="example-card">
+                            <h5>🤖 Support Vector Machines (SVM)</h5>
+                            <div class="formula-display">
+                                <strong>Primal:</strong> 
+                                $$\min_{\mathbf{w},b,\boldsymbol{\xi}} \frac{1}{2}\|\mathbf{w}\|^2 + C\sum_{i=1}^n \xi_i$$
+                                $$\text{s.t. } y_i(\mathbf{w}^T\mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0$$
+                            </div>
+                            <div class="formula-display">
+                                <strong>Dual:</strong>
+                                $$\max_{\boldsymbol{\alpha}} \sum_{i=1}^n \alpha_i - \frac{1}{2}\sum_{i,j=1}^n \alpha_i\alpha_j y_i y_j \mathbf{x}_i^T\mathbf{x}_j$$
+                                $$\text{s.t. } \sum_{i=1}^n \alpha_i y_i = 0, \quad 0 \leq \alpha_i \leq C$$
+                            </div>
+                            <p><strong>Advantage:</strong> Dual depends only on inner products → Kernel trick!</p>
+                        </div>
+                        
+                        <div class="example-card">
+                            <h5>📈 Portfolio Optimization</h5>
+                            <div class="formula-display">
+                                <strong>Primal:</strong> 
+                                $$\min_{\mathbf{x}} \mathbf{x}^T\Sigma\mathbf{x}$$
+                                $$\text{s.t. } \boldsymbol{\mu}^T\mathbf{x} = r, \quad \mathbf{1}^T\mathbf{x} = 1, \quad \mathbf{x} \geq \mathbf{0}$$
+                            </div>
+                            <div class="formula-display">
+                                <strong>Dual:</strong>
+                                $$\max_{\lambda,\nu} -\frac{1}{2}(\lambda\boldsymbol{\mu} + \nu\mathbf{1})^T\Sigma^{-1}(\lambda\boldsymbol{\mu} + \nu\mathbf{1}) + \lambda r + \nu$$
+                            </div>
+                            <p><strong>Interpretation:</strong> λ = marginal utility of return, ν = marginal cost of budget constraint</p>
+                        </div>
+                        
+                        <div class="example-card">
+                            <h5>⚡ Network Flow</h5>
+                            <div class="formula-display">
+                                <strong>Min-Cost Flow Primal:</strong>
+                                $$\min \sum_{(i,j)} c_{ij}x_{ij}$$
+                                $$\text{s.t. } \sum_j x_{ij} - \sum_j x_{ji} = b_i \quad \forall i$$
+                            </div>
+                            <div class="formula-display">
+                                <strong>Dual (Node Potentials):</strong>
+                                $$\max \sum_i b_i \pi_i$$
+                                $$\text{s.t. } \pi_i - \pi_j \leq c_{ij} \quad \forall (i,j)$$
+                            </div>
+                            <p><strong>Interpretation:</strong> πᵢ = potential at node i, reduced cost = cᵢⱼ - πᵢ + πⱼ</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="computational-aspects">
+                    <h4>🔧 Computational Aspects of Duality</h4>
+                    
+                    <div class="algorithm-grid">
+                        <div class="algorithm-card">
+                            <h5>🔄 Dual Simplex Method</h5>
+                            <ul>
+                                <li><strong>Strategy:</strong> Maintain dual feasibility, achieve primal feasibility</li>
+                                <li><strong>Advantage:</strong> Excellent for reoptimization after constraint changes</li>
+                                <li><strong>Applications:</strong> Branch-and-bound, sensitivity analysis</li>
+                                <li><strong>Complexity:</strong> Same as primal simplex in practice</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="algorithm-card">
+                            <h5>⚡ Interior Point Methods</h5>
+                            <ul>
+                                <li><strong>Strategy:</strong> Solve primal and dual simultaneously</li>
+                                <li><strong>Barrier function:</strong> -μ∑ln(xⱼ) - μ∑ln(yᵢ)</li>
+                                <li><strong>Complexity:</strong> Polynomial time O(n³L)</li>
+                                <li><strong>Advantage:</strong> Better for very large problems</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="algorithm-card">
+                            <h5>🎯 Lagrangian Duality</h5>
+                            <ul>
+                                <li><strong>Lagrangian:</strong> L(x,λ,μ) = f(x) + λᵀ(Ax-b) + μᵀ(-x)</li>
+                                <li><strong>Dual function:</strong> g(λ,μ) = inf_{x} L(x,λ,μ)</li>
+                                <li><strong>Dual problem:</strong> max g(λ,μ) s.t. λ≥0, μ≥0</li>
+                                <li><strong>Applications:</strong> Nonlinear programming, convex optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sensitivity-analysis">
+                    <h4>📊 Sensitivity Analysis via Duality</h4>
+                    
+                    <div class="sensitivity-content">
+                        <h5>🎯 Parameter Changes and Optimal Value</h5>
+                        <div class="formula-display">
+                            $$\frac{\partial z^*}{\partial b_i} = y_i^*, \quad \frac{\partial z^*}{\partial c_j} = x_j^*$$
+                        </div>
+                        
+                        <h5>📈 Right-Hand-Side Sensitivity</h5>
+                        <p>For changes Δb in the right-hand side:</p>
+                        <div class="formula-display">
+                            $$z^*(b + \Delta b) \approx z^*(b) + (\mathbf{y}^*)^T\Delta b$$
+                        </div>
+                        <p><strong>Valid range:</strong> As long as new solution remains optimal basis</p>
+                        
+                        <h5>💰 Cost Coefficient Sensitivity</h5>
+                        <p>For changes Δc in objective coefficients:</p>
+                        <div class="formula-display">
+                            $$z^*(c + \Delta c) \approx z^*(c) + (\mathbf{x}^*)^T\Delta c$$
+                        </div>
+                        
+                        <h5>🔄 Adding New Variables/Constraints</h5>
+                        <ul>
+                            <li><strong>New variable:</strong> Check reduced cost = cⱼ - (𝐀ⱼ)ᵀ𝐲*</li>
+                            <li><strong>New constraint:</strong> Check violation in current optimal solution</li>
+                            <li><strong>Dual solution provides immediate insight</strong> without resolving</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             
             <div class="formula">

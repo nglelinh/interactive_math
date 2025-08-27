@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚛️ Quantum Cryptography & Post-Quantum Security</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #e0e6ed;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(224, 230, 237, 0.3);
+        }
+        
+        .quantum-panel {
+            background: rgba(99, 102, 241, 0.1);
+            border: 2px solid #6366f1;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .bb84-panel {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .post-quantum-panel {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .security-analysis {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .qubit-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .qubit {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .qubit.zero {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: 2px solid #2563eb;
+        }
+        
+        .qubit.one {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border: 2px solid #f87171;
+        }
+        
+        .qubit.superposition {
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border: 2px solid #8b5cf6;
+            animation: quantum-glow 2s infinite alternate;
+        }
+        
+        @keyframes quantum-glow {
+            0% { box-shadow: 0 0 5px rgba(168, 85, 247, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.8); }
+        }
+        
+        .polarization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 500px;
+        }
+        
+        .photon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 5px auto;
+            transition: all 0.3s ease;
+        }
+        
+        .photon.horizontal {
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border: 2px solid #22c55e;
+        }
+        
+        .photon.vertical {
+            background: linear-gradient(0deg, #3b82f6, #2563eb);
+            border: 2px solid #3b82f6;
+        }
+        
+        .photon.diagonal {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            border: 2px solid #f59e0b;
+        }
+        
+        .photon.antidiagonal {
+            background: linear-gradient(-45deg, #ef4444, #dc2626);
+            border: 2px solid #ef4444;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group select, .control-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-bb84 {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            width: 100%;
+        }
+        
+        .btn-shor {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            width: 100%;
+        }
+        
+        .btn-grover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            width: 100%;
+        }
+        
+        .btn-lattice {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            width: 100%;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .protocol-step {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .step-number {
+            background: #6366f1;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .algorithm-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .algorithm-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .algorithm-card.classical {
+            border-color: #6b7280;
+        }
+        
+        .algorithm-card.quantum {
+            border-color: #6366f1;
+        }
+        
+        .algorithm-card.post-quantum {
+            border-color: #f59e0b;
+        }
+        
+        .algorithm-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .complexity-chart {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 300px;
+        }
+        
+        .key-exchange-visual {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .participant {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 10px;
+            min-width: 150px;
+            flex: 1;
+        }
+        
+        .participant.alice {
+            border-left: 4px solid #22c55e;
+        }
+        
+        .participant.bob {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .participant.eve {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .transmission-arrow {
+            font-size: 24px;
+            color: #6366f1;
+            margin: 0 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .security-meter {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 25px;
+            margin: 10px 0;
+        }
+        
+        .security-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .security-quantum {
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+        
+        .security-classical {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        
+        .security-broken {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        .threat-timeline {
+            margin: 20px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .timeline-year {
+            background: #6366f1;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .timeline-year.past {
+            background: #6b7280;
+        }
+        
+        .timeline-year.near {
+            background: #f59e0b;
+        }
+        
+        .timeline-year.future {
+            background: #ef4444;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .key-exchange-visual {
+                flex-direction: column;
+            }
+            
+            .transmission-arrow {
+                transform: rotate(90deg);
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚛️ Quantum Cryptography & Post-Quantum Security</h1>
+        
+        <div class="intro">
+            <h2>Quantum Computing vs Classical Cryptography</h2>
+            <p><strong>Quantum cryptography</strong> leverages quantum mechanical properties like superposition and entanglement to create unbreakable communication channels. However, quantum computers also threaten classical cryptographic systems.</p>
+            <p><strong>Post-quantum cryptography</strong> develops new mathematical foundations resistant to both classical and quantum attacks, preparing for the quantum computing era.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>⚛️ Quantum Mathematical Foundations</h3>
+            <p><strong>Qubit State:</strong> |ψ⟩ = α|0⟩ + β|1⟩ where |α|² + |β|² = 1</p>
+            <p><strong>No-Cloning Theorem:</strong> ∀|ψ⟩: ∄U such that U|ψ⟩|0⟩ = |ψ⟩|ψ⟩</p>
+            <p><strong>Quantum Entanglement:</strong> |ψ⟩ = (1/√2)(|00⟩ + |11⟩)</p>
+            <p><strong>Uncertainty Principle:</strong> ΔxΔp ≥ ℏ/2</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="bb84-panel">
+                <h3>🔐 BB84 Quantum Key Distribution</h3>
+                
+                <div class="control-group">
+                    <label>Key Length:</label>
+                    <input type="range" id="keyLength" min="8" max="32" value="16" onchange="generateBB84Protocol()">
+                    <span id="keyLengthValue">16 bits</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Error Rate (%):</label>
+                    <input type="range" id="errorRate" min="0" max="25" step="0.5" value="5" onchange="generateBB84Protocol()">
+                    <span id="errorRateValue">5%</span>
+                </div>
+                
+                <button class="btn btn-bb84" onclick="generateBB84Protocol()">🚀 Generate BB84 Exchange</button>
+                
+                <div class="protocol-step">
+                    <h4>📡 Step 1: Alice's Random Bits & Bases</h4>
+                    <div id="aliceBits">Click generate to see Alice's random bits</div>
+                    <div id="aliceBases">Random basis selection for each bit</div>
+                </div>
+                
+                <div class="protocol-step">
+                    <h4>📡 Step 2: Photon Transmission</h4>
+                    <div class="polarization-grid" id="photonTransmission">
+                        <!-- Photons will be generated here -->
+                    </div>
+                </div>
+                
+                <div class="protocol-step">
+                    <h4>📡 Step 3: Bob's Measurement Bases</h4>
+                    <div id="bobBases">Bob's random basis choices</div>
+                    <div id="bobMeasurements">Measurement results</div>
+                </div>
+                
+                <div class="protocol-step">
+                    <h4>📡 Step 4: Basis Reconciliation</h4>
+                    <div id="basisComparison">Matching bases identification</div>
+                    <div id="siftedKey">Final sifted key</div>
+                </div>
+                
+                <div class="protocol-step">
+                    <h4>🔍 Step 5: Eavesdropping Detection</h4>
+                    <div id="errorAnalysis">Error rate analysis for security</div>
+                </div>
+            </div>
+            
+            <div class="quantum-panel">
+                <h3>💻 Quantum Algorithm Simulator</h3>
+                
+                <div class="control-group">
+                    <label>Algorithm:</label>
+                    <select id="quantumAlgorithm" onchange="updateQuantumDemo()">
+                        <option value="shor">Shor's Algorithm (Factoring)</option>
+                        <option value="grover">Grover's Search</option>
+                        <option value="deutsch">Deutsch-Jozsa</option>
+                        <option value="simon">Simon's Algorithm</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Input Size:</label>
+                    <input type="range" id="inputSize" min="4" max="16" value="8" onchange="updateQuantumDemo()">
+                    <span id="inputSizeValue">8 bits</span>
+                </div>
+                
+                <div id="algorithmDemo">
+                    <h4>🔢 Shor's Algorithm: Integer Factorization</h4>
+                    <div class="math-formula">
+                        <p><strong>Target:</strong> Factor N = <span id="targetNumber">15</span></p>
+                        <p><strong>Quantum Speedup:</strong> O((log N)³) vs O(e^(1.9(log N)^1/3(log log N)^2/3))</p>
+                    </div>
+                    
+                    <div class="qubit-visual" id="qubitVisualization">
+                        <!-- Qubits will be displayed here -->
+                    </div>
+                    
+                    <button class="btn btn-shor" onclick="runShorAlgorithm()">⚡ Run Shor's Algorithm</button>
+                    
+                    <div id="shorResults" style="display: none;">
+                        <h5>🎯 Factorization Results</h5>
+                        <div id="factorResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="three-column">
+            <div class="post-quantum-panel">
+                <h3>🛡️ Post-Quantum Algorithms</h3>
+                
+                <div class="algorithm-comparison">
+                    <div class="algorithm-card classical">
+                        <h4>RSA-2048</h4>
+                        <p>Classical: ~10^25 years</p>
+                        <p>Quantum: ~10 hours</p>
+                        <div class="security-meter">
+                            <div class="security-fill security-broken" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="algorithm-card classical">
+                        <h4>ECC-256</h4>
+                        <p>Classical: ~10^18 years</p>
+                        <p>Quantum: ~6 months</p>
+                        <div class="security-meter">
+                            <div class="security-fill security-broken" style="width: 15%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="algorithm-card post-quantum">
+                        <h4>CRYSTALS-Kyber</h4>
+                        <p>Classical: Secure</p>
+                        <p>Quantum: Secure</p>
+                        <div class="security-meter">
+                            <div class="security-fill security-quantum" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="algorithm-card post-quantum">
+                        <h4>CRYSTALS-Dilithium</h4>
+                        <p>Classical: Secure</p>
+                        <p>Quantum: Secure</p>
+                        <div class="security-meter">
+                            <div class="security-fill security-quantum" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Lattice Dimension:</label>
+                    <input type="range" id="latticeDimension" min="128" max="1024" step="128" value="512" onchange="updateLatticeDemo()">
+                    <span id="latticeValue">512</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Security Level:</label>
+                    <select id="securityLevel" onchange="updateLatticeDemo()">
+                        <option value="128">128-bit (NIST Level 1)</option>
+                        <option value="192">192-bit (NIST Level 3)</option>
+                        <option value="256">256-bit (NIST Level 5)</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-lattice" onclick="demonstrateLatticeAlgorithm()">🔬 Demonstrate Lattice Crypto</button>
+                
+                <div id="latticeDemo" style="display: none;">
+                    <h4>🔢 Lattice-Based Cryptography</h4>
+                    <div class="math-formula">
+                        <p><strong>Learning With Errors:</strong> b = ⟨a,s⟩ + e (mod q)</p>
+                        <p><strong>Key Size:</strong> <span id="keySize">1024 bytes</span></p>
+                        <p><strong>Security Assumption:</strong> Shortest Vector Problem (SVP)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="security-analysis">
+                <h3>⏰ Quantum Threat Timeline</h3>
+                
+                <div class="threat-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year past">2019</div>
+                        <div>Google claims quantum supremacy with 53-qubit Sycamore</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-year past">2021</div>
+                        <div>IBM 127-qubit Eagle processor</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-year near">2025</div>
+                        <div>1000+ qubit systems expected</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-year near">2030</div>
+                        <div>Cryptographically relevant quantum computers possible</div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-year future">2035</div>
+                        <div>RSA-2048 potentially breakable</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Quantum Computer Qubits:</label>
+                    <input type="range" id="quantumQubits" min="50" max="10000" step="50" value="1000" onchange="updateThreatAnalysis()">
+                    <span id="qubitCount">1000 qubits</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Error Rate (%):</label>
+                    <input type="range" id="quantumError" min="0.001" max="1" step="0.001" value="0.1" onchange="updateThreatAnalysis()">
+                    <span id="errorPercent">0.1%</span>
+                </div>
+                
+                <div id="threatAnalysis">
+                    <h4>🎯 Cryptographic Vulnerability</h4>
+                    <div class="protocol-step">
+                        <strong>RSA-1024:</strong> <span id="rsa1024Threat">BROKEN</span>
+                    </div>
+                    <div class="protocol-step">
+                        <strong>RSA-2048:</strong> <span id="rsa2048Threat">Vulnerable</span>
+                    </div>
+                    <div class="protocol-step">
+                        <strong>ECC-256:</strong> <span id="ecc256Threat">Vulnerable</span>
+                    </div>
+                    <div class="protocol-step">
+                        <strong>AES-256:</strong> <span id="aes256Threat">Reduced to AES-128</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📊 Complexity Comparison</h3>
+                
+                <div class="complexity-chart">
+                    <canvas id="complexityChart"></canvas>
+                </div>
+                
+                <div class="control-group">
+                    <label>Problem Size (bits):</label>
+                    <input type="range" id="problemSize" min="256" max="4096" step="256" value="2048" onchange="updateComplexityChart()">
+                    <span id="problemSizeValue">2048 bits</span>
+                </div>
+                
+                <div class="algorithm-comparison">
+                    <div class="algorithm-card classical">
+                        <h4>Classical Factoring</h4>
+                        <div id="classicalTime">~10^25 years</div>
+                        <div>Number Field Sieve</div>
+                    </div>
+                    
+                    <div class="algorithm-card quantum">
+                        <h4>Shor's Algorithm</h4>
+                        <div id="quantumTime">~10 hours</div>
+                        <div>Polynomial time</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="runComplexityComparison()" style="width: 100%;">⚡ Compare Algorithms</button>
+                
+                <div id="comparisonResults" style="display: none;">
+                    <h4>📈 Performance Analysis</h4>
+                    <div id="speedupFactor"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🌌 Quantum Entanglement Demo</h3>
+                
+                <div class="key-exchange-visual">
+                    <div class="participant alice">
+                        <h4>👩‍🔬 Alice</h4>
+                        <div class="qubit-visual">
+                            <div class="qubit superposition" id="aliceQubit">|ψ⟩</div>
+                        </div>
+                        <div id="aliceMeasurement">Unmeasured</div>
+                    </div>
+                    
+                    <div class="transmission-arrow">⚛️</div>
+                    
+                    <div class="participant bob">
+                        <h4>👨‍🔬 Bob</h4>
+                        <div class="qubit-visual">
+                            <div class="qubit superposition" id="bobQubit">|ψ⟩</div>
+                        </div>
+                        <div id="bobMeasurement">Unmeasured</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Entangled State:</label>
+                    <select id="entangledState" onchange="updateEntanglement()">
+                        <option value="bell">Bell State: (|00⟩ + |11⟩)/√2</option>
+                        <option value="phi-plus">|Φ+⟩: (|00⟩ + |11⟩)/√2</option>
+                        <option value="phi-minus">|Φ-⟩: (|00⟩ - |11⟩)/√2</option>
+                        <option value="psi-plus">|Ψ+⟩: (|01⟩ + |10⟩)/√2</option>
+                        <option value="psi-minus">|Ψ-⟩: (|01⟩ - |10⟩)/√2</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Measurement Basis:</label>
+                    <select id="measurementBasis">
+                        <option value="computational">Computational (Z)</option>
+                        <option value="hadamard">Hadamard (X)</option>
+                        <option value="diagonal">Diagonal (Y)</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="measureAlice()" style="width: 48%;">📏 Measure Alice</button>
+                <button class="btn" onclick="measureBob()" style="width: 48%;">📏 Measure Bob</button>
+                
+                <div id="entanglementResults">
+                    <h4>🔬 Measurement Correlation</h4>
+                    <div id="correlationAnalysis">Measure both qubits to see correlation</div>
+                </div>
+                
+                <button class="btn" onclick="resetEntanglement()" style="width: 100%; margin-top: 10px;">🔄 Reset Entanglement</button>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🔮 Quantum Random Number Generator</h3>
+                
+                <div class="control-group">
+                    <label>Number of Qubits:</label>
+                    <input type="range" id="randomQubits" min="1" max="16" value="8" onchange="updateRandomGenerator()">
+                    <span id="randomQubitCount">8 qubits</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Output Format:</label>
+                    <select id="outputFormat">
+                        <option value="binary">Binary</option>
+                        <option value="decimal">Decimal</option>
+                        <option value="hex">Hexadecimal</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="generateQuantumRandom()" style="width: 100%;">🎲 Generate Quantum Random</button>
+                
+                <div class="qubit-visual" id="randomQubits">
+                    <!-- Random qubits will be displayed here -->
+                </div>
+                
+                <div id="randomOutput">
+                    <h4>🔢 Random Output</h4>
+                    <div id="randomResult">Click generate to get quantum random numbers</div>
+                </div>
+                
+                <div id="entropyAnalysis">
+                    <h4>📊 Entropy Analysis</h4>
+                    <div>True randomness from quantum superposition collapse</div>
+                    <div class="security-meter">
+                        <div class="security-fill security-quantum" style="width: 100%;"></div>
+                    </div>
+                    <div>Shannon Entropy: <span id="shannonEntropy">Perfect</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let complexityChart = null;
+        let bb84Data = {};
+        let entangledPair = { alice: null, bob: null, measured: false };
+        
+        // Initialize
+        initializeCharts();
+        generateBB84Protocol();
+        updateQuantumDemo();
+        updateThreatAnalysis();
+        updateEntanglement();
+        
+        function generateBB84Protocol() {
+            const keyLength = parseInt(document.getElementById('keyLength').value);
+            const errorRate = parseFloat(document.getElementById('errorRate').value);
+            
+            document.getElementById('keyLengthValue').textContent = keyLength + ' bits';
+            document.getElementById('errorRateValue').textContent = errorRate + '%';
+            
+            // Step 1: Alice generates random bits and bases
+            const aliceBits = [];
+            const aliceBases = [];
+            for (let i = 0; i < keyLength; i++) {
+                aliceBits.push(Math.random() < 0.5 ? 0 : 1);
+                aliceBases.push(Math.random() < 0.5 ? '+' : 'x'); // + = rectilinear, x = diagonal
+            }
+            
+            document.getElementById('aliceBits').innerHTML = 
+                '<strong>Bits:</strong> ' + aliceBits.map(b => b.toString()).join(' ') + '<br>' +
+                '<strong>Encoding:</strong> ' + aliceBits.map((b, i) => aliceBases[i] + b).join(' ');
+            
+            document.getElementById('aliceBases').innerHTML = 
+                '<strong>Bases:</strong> ' + aliceBases.join(' ') + ' (+ = ↔/↕, x = ↗/↖)';
+            
+            // Step 2: Generate photon visualization
+            generatePhotonTransmission(aliceBits, aliceBases);
+            
+            // Step 3: Bob's random bases and measurements
+            const bobBases = [];
+            const bobMeasurements = [];
+            for (let i = 0; i < keyLength; i++) {
+                bobBases.push(Math.random() < 0.5 ? '+' : 'x');
+                // Simulate measurement with error
+                let measurement = aliceBits[i];
+                if (aliceBases[i] !== bobBases[i]) {
+                    measurement = Math.random() < 0.5 ? 0 : 1; // Random if wrong basis
+                } else if (Math.random() < errorRate / 100) {
+                    measurement = 1 - measurement; // Error
+                }
+                bobMeasurements.push(measurement);
+            }
+            
+            document.getElementById('bobBases').innerHTML = 
+                '<strong>Bases:</strong> ' + bobBases.join(' ');
+            document.getElementById('bobMeasurements').innerHTML = 
+                '<strong>Results:</strong> ' + bobMeasurements.map(b => b.toString()).join(' ');
+            
+            // Step 4: Basis reconciliation
+            const matchingBases = [];
+            const siftedKey = [];
+            for (let i = 0; i < keyLength; i++) {
+                if (aliceBases[i] === bobBases[i]) {
+                    matchingBases.push(i);
+                    siftedKey.push(bobMeasurements[i]);
+                }
+            }
+            
+            document.getElementById('basisComparison').innerHTML = 
+                '<strong>Matching positions:</strong> ' + matchingBases.join(', ');
+            document.getElementById('siftedKey').innerHTML = 
+                '<strong>Sifted key:</strong> ' + siftedKey.join('') + 
+                ` (${siftedKey.length}/${keyLength} bits preserved)`;
+            
+            // Step 5: Error analysis
+            let errors = 0;
+            for (let i = 0; i < keyLength; i++) {
+                if (aliceBases[i] === bobBases[i] && aliceBits[i] !== bobMeasurements[i]) {
+                    errors++;
+                }
+            }
+            
+            const observedErrorRate = (errors / Math.max(matchingBases.length, 1)) * 100;
+            const securityThreshold = 11; // Typical threshold
+            
+            document.getElementById('errorAnalysis').innerHTML = 
+                `<strong>Observed error rate:</strong> ${observedErrorRate.toFixed(1)}%<br>` +
+                `<strong>Security status:</strong> ${observedErrorRate < securityThreshold ? 
+                    '✅ Secure (no eavesdropping detected)' : 
+                    '⚠️ Possible eavesdropping (abort protocol)'}`;
+            
+            bb84Data = { aliceBits, aliceBases, bobBases, bobMeasurements, siftedKey };
+        }
+        
+        function generatePhotonTransmission(bits, bases) {
+            const container = document.getElementById('photonTransmission');
+            container.innerHTML = '';
+            
+            bits.forEach((bit, index) => {
+                const photon = document.createElement('div');
+                photon.className = 'photon';
+                
+                // Determine polarization based on bit and basis
+                if (bases[index] === '+') {
+                    photon.className += bit === 0 ? ' horizontal' : ' vertical';
+                    photon.textContent = bit === 0 ? '↔' : '↕';
+                } else {
+                    photon.className += bit === 0 ? ' diagonal' : ' antidiagonal';
+                    photon.textContent = bit === 0 ? '↗' : '↖';
+                }
+                
+                photon.title = `Bit ${bit}, Basis ${bases[index]}, Polarization ${photon.textContent}`;
+                container.appendChild(photon);
+            });
+        }
+        
+        function updateQuantumDemo() {
+            const algorithm = document.getElementById('quantumAlgorithm').value;
+            const inputSize = parseInt(document.getElementById('inputSize').value);
+            
+            document.getElementById('inputSizeValue').textContent = inputSize + ' bits';
+            
+            if (algorithm === 'shor') {
+                // Generate a number to factor
+                const maxNumber = Math.pow(2, Math.min(inputSize, 10)); // Limit for demo
+                const targetNumber = generateSemiprime(maxNumber);
+                document.getElementById('targetNumber').textContent = targetNumber;
+                
+                generateQubitVisualization(inputSize);
+            }
+        }
+        
+        function generateSemiprime(max) {
+            const primes = [3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+            const p1 = primes[Math.floor(Math.random() * primes.length)];
+            const p2 = primes[Math.floor(Math.random() * primes.length)];
+            const product = p1 * p2;
+            return product < max ? product : 15; // Default to 15 if too large
+        }
+        
+        function generateQubitVisualization(numQubits) {
+            const container = document.getElementById('qubitVisualization');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < Math.min(numQubits, 16); i++) {
+                const qubit = document.createElement('div');
+                qubit.className = 'qubit superposition';
+                qubit.textContent = '|+⟩';
+                qubit.title = `Qubit ${i} in superposition`;
+                container.appendChild(qubit);
+            }
+        }
+        
+        function runShorAlgorithm() {
+            const targetNumber = parseInt(document.getElementById('targetNumber').textContent);
+            const factors = findFactors(targetNumber);
+            
+            // Simulate quantum computation with delay
+            const resultsDiv = document.getElementById('shorResults');
+            resultsDiv.style.display = 'block';
+            
+            document.getElementById('factorResults').innerHTML = 
+                `<strong>Input:</strong> ${targetNumber}<br>` +
+                `<strong>Factors found:</strong> ${factors[0]} × ${factors[1]} = ${targetNumber}<br>` +
+                `<strong>Quantum speedup:</strong> Exponential advantage over classical methods<br>` +
+                `<strong>Time complexity:</strong> O((log N)³) on quantum computer`;
+        }
+        
+        function findFactors(n) {
+            for (let i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) {
+                    return [i, n / i];
+                }
+            }
+            return [1, n];
+        }
+        
+        function updateLatticeDemo() {
+            const dimension = parseInt(document.getElementById('latticeDimension').value);
+            const securityLevel = parseInt(document.getElementById('securityLevel').value);
+            
+            document.getElementById('latticeValue').textContent = dimension;
+            
+            // Estimate key sizes based on security level and dimension
+            const keySize = Math.ceil((dimension * securityLevel) / 8); // Rough estimate
+            document.getElementById('keySize').textContent = keySize + ' bytes';
+        }
+        
+        function demonstrateLatticeAlgorithm() {
+            const demo = document.getElementById('latticeDemo');
+            demo.style.display = 'block';
+            
+            // Simulate lattice key generation
+            setTimeout(() => {
+                alert('Lattice-based key pair generated!\n\n' +
+                      'Public key: Matrix A and vector b = As + e\n' +
+                      'Private key: Secret vector s\n' +
+                      'Security: Based on Learning With Errors (LWE) problem');
+            }, 500);
+        }
+        
+        function updateThreatAnalysis() {
+            const qubits = parseInt(document.getElementById('quantumQubits').value);
+            const errorRate = parseFloat(document.getElementById('quantumError').value);
+            
+            document.getElementById('qubitCount').textContent = qubits + ' qubits';
+            document.getElementById('errorPercent').textContent = errorRate + '%';
+            
+            // Rough estimates for cryptographic vulnerability
+            const logicalQubits = qubits * (1 - errorRate / 100) * 0.1; // Very rough estimate
+            
+            document.getElementById('rsa1024Threat').textContent = 
+                logicalQubits > 100 ? 'BROKEN' : 'Vulnerable';
+            document.getElementById('rsa2048Threat').textContent = 
+                logicalQubits > 1000 ? 'BROKEN' : 'Vulnerable';
+            document.getElementById('ecc256Threat').textContent = 
+                logicalQubits > 500 ? 'BROKEN' : 'Vulnerable';
+            document.getElementById('aes256Threat').textContent = 
+                logicalQubits > 2000 ? 'Reduced to AES-128' : 'Secure';
+        }
+        
+        function updateEntanglement() {
+            const state = document.getElementById('entangledState').value;
+            
+            entangledPair = { alice: null, bob: null, measured: false };
+            
+            document.getElementById('aliceQubit').className = 'qubit superposition';
+            document.getElementById('aliceQubit').textContent = '|ψ⟩';
+            document.getElementById('bobQubit').className = 'qubit superposition';
+            document.getElementById('bobQubit').textContent = '|ψ⟩';
+            
+            document.getElementById('aliceMeasurement').textContent = 'Unmeasured';
+            document.getElementById('bobMeasurement').textContent = 'Unmeasured';
+            document.getElementById('correlationAnalysis').textContent = 'Measure both qubits to see correlation';
+        }
+        
+        function measureAlice() {
+            if (entangledPair.measured) return;
+            
+            entangledPair.alice = Math.random() < 0.5 ? 0 : 1;
+            entangledPair.measured = true;
+            
+            const aliceQubit = document.getElementById('aliceQubit');
+            aliceQubit.className = entangledPair.alice === 0 ? 'qubit zero' : 'qubit one';
+            aliceQubit.textContent = entangledPair.alice === 0 ? '|0⟩' : '|1⟩';
+            
+            document.getElementById('aliceMeasurement').textContent = 
+                `Measured: ${entangledPair.alice}`;
+            
+            // For Bell state, Bob's measurement is correlated
+            const state = document.getElementById('entangledState').value;
+            if (state === 'bell' || state === 'phi-plus') {
+                entangledPair.bob = entangledPair.alice; // Perfect correlation
+            } else if (state === 'phi-minus') {
+                entangledPair.bob = entangledPair.alice; // Still correlated for this measurement
+            } else {
+                entangledPair.bob = 1 - entangledPair.alice; // Anti-correlated
+            }
+        }
+        
+        function measureBob() {
+            if (!entangledPair.measured) {
+                measureAlice(); // Alice must be measured first for correlation
+            }
+            
+            const bobQubit = document.getElementById('bobQubit');
+            bobQubit.className = entangledPair.bob === 0 ? 'qubit zero' : 'qubit one';
+            bobQubit.textContent = entangledPair.bob === 0 ? '|0⟩' : '|1⟩';
+            
+            document.getElementById('bobMeasurement').textContent = 
+                `Measured: ${entangledPair.bob}`;
+            
+            // Show correlation analysis
+            const correlation = entangledPair.alice === entangledPair.bob ? 'Perfect correlation' : 'Anti-correlation';
+            document.getElementById('correlationAnalysis').innerHTML = 
+                `<strong>Alice:</strong> ${entangledPair.alice}<br>` +
+                `<strong>Bob:</strong> ${entangledPair.bob}<br>` +
+                `<strong>Correlation:</strong> ${correlation}<br>` +
+                `<em>Instantaneous correlation regardless of distance!</em>`;
+        }
+        
+        function resetEntanglement() {
+            updateEntanglement();
+        }
+        
+        function updateRandomGenerator() {
+            const qubits = parseInt(document.getElementById('randomQubits').value);
+            document.getElementById('randomQubitCount').textContent = qubits + ' qubits';
+        }
+        
+        function generateQuantumRandom() {
+            const qubits = parseInt(document.getElementById('randomQubits').value);
+            const format = document.getElementById('outputFormat').value;
+            
+            // Generate truly random bits (simulated quantum collapse)
+            const randomBits = [];
+            for (let i = 0; i < qubits; i++) {
+                randomBits.push(Math.random() < 0.5 ? 0 : 1);
+            }
+            
+            // Update qubit visualization
+            const container = document.getElementById('randomQubits');
+            container.innerHTML = '';
+            
+            randomBits.forEach((bit, index) => {
+                const qubit = document.createElement('div');
+                qubit.className = bit === 0 ? 'qubit zero' : 'qubit one';
+                qubit.textContent = bit === 0 ? '|0⟩' : '|1⟩';
+                qubit.title = `Qubit ${index}: ${bit}`;
+                container.appendChild(qubit);
+            });
+            
+            // Convert to requested format
+            let output = '';
+            const binaryString = randomBits.join('');
+            const decimal = parseInt(binaryString, 2);
+            
+            switch (format) {
+                case 'binary':
+                    output = binaryString;
+                    break;
+                case 'decimal':
+                    output = decimal.toString();
+                    break;
+                case 'hex':
+                    output = decimal.toString(16).toUpperCase();
+                    break;
+            }
+            
+            document.getElementById('randomResult').innerHTML = 
+                `<strong>Binary:</strong> ${binaryString}<br>` +
+                `<strong>Decimal:</strong> ${decimal}<br>` +
+                `<strong>Hex:</strong> ${decimal.toString(16).toUpperCase()}<br>` +
+                `<strong>Output (${format}):</strong> ${output}`;
+        }
+        
+        function updateComplexityChart() {
+            const problemSize = parseInt(document.getElementById('problemSize').value);
+            document.getElementById('problemSizeValue').textContent = problemSize + ' bits';
+            
+            // Update time estimates
+            const classicalYears = Math.pow(10, problemSize / 100); // Very rough estimate
+            const quantumHours = Math.pow(problemSize, 3) / 1000; // Polynomial
+            
+            document.getElementById('classicalTime').textContent = 
+                classicalYears > 1e15 ? '~10^' + Math.floor(Math.log10(classicalYears)) + ' years' : 
+                classicalYears.toFixed(0) + ' years';
+            
+            document.getElementById('quantumTime').textContent = 
+                quantumHours < 1 ? (quantumHours * 60).toFixed(0) + ' minutes' :
+                quantumHours < 24 ? quantumHours.toFixed(1) + ' hours' :
+                (quantumHours / 24).toFixed(1) + ' days';
+            
+            if (complexityChart) {
+                updateComplexityChartData();
+            }
+        }
+        
+        function runComplexityComparison() {
+            const problemSize = parseInt(document.getElementById('problemSize').value);
+            const classicalTime = Math.pow(2, problemSize / 10);
+            const quantumTime = Math.pow(problemSize, 3);
+            const speedup = classicalTime / quantumTime;
+            
+            document.getElementById('comparisonResults').style.display = 'block';
+            document.getElementById('speedupFactor').innerHTML = 
+                `<strong>Quantum speedup:</strong> ${speedup.toExponential(2)}x faster<br>` +
+                `<strong>Classical complexity:</strong> Exponential<br>` +
+                `<strong>Quantum complexity:</strong> Polynomial`;
+        }
+        
+        function initializeCharts() {
+            const ctx = document.getElementById('complexityChart').getContext('2d');
+            complexityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Classical (exponential)',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Quantum (polynomial)',
+                        data: [],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Time (log scale)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Problem Size (bits)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateComplexityChartData();
+        }
+        
+        function updateComplexityChartData() {
+            const labels = [];
+            const classicalData = [];
+            const quantumData = [];
+            
+            for (let size = 256; size <= 4096; size += 256) {
+                labels.push(size);
+                classicalData.push(Math.pow(2, size / 100)); // Exponential
+                quantumData.push(Math.pow(size, 3)); // Polynomial
+            }
+            
+            complexityChart.data.labels = labels;
+            complexityChart.data.datasets[0].data = classicalData;
+            complexityChart.data.datasets[1].data = quantumData;
+            complexityChart.update();
+        }
+        
+        // Initialize MathJax
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

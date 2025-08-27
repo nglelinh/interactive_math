@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Analysis - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.8em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #b3e5fc;
+            margin-bottom: 40px;
+            font-size: 1.3em;
+            font-weight: 300;
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .topic-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(79, 195, 247, 0.3);
+            border-color: #4fc3f7;
+        }
+        
+        .topic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            transition: width 0.3s ease;
+        }
+        
+        .topic-card:hover::before {
+            width: 8px;
+        }
+        
+        .card-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #4fc3f7;
+            text-align: center;
+        }
+        
+        .card-description {
+            text-align: center;
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .card-difficulty {
+            text-align: center;
+            font-size: 0.9em;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px auto;
+            font-weight: 600;
+        }
+        
+        .beginner {
+            background: rgba(76, 175, 80, 0.3);
+            color: #81c784;
+            border: 1px solid #81c784;
+        }
+        
+        .intermediate {
+            background: rgba(255, 183, 77, 0.3);
+            color: #ffb74d;
+            border: 1px solid #ffb74d;
+        }
+        
+        .advanced {
+            background: rgba(244, 67, 54, 0.3);
+            color: #e57373;
+            border: 1px solid #e57373;
+        }
+        
+        .series-section {
+            background: rgba(255, 183, 77, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #ffb74d;
+        }
+        
+        .series-title {
+            color: #ffb74d;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .series-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .navigation-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .nav-button {
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .topics-grid {
+                grid-template-columns: 1fr;
+            }
+            .series-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Complex Analysis</h1>
+        <p class="subtitle">Interactive mathematical explorations of complex numbers, functions, and their applications</p>
+        
+        <div class="navigation-section">
+            <a href="../index.html" class="nav-button">🏠 Back to Main Index</a>
+        </div>
+        
+        <div class="series-section">
+            <h2 class="series-title">🎵 Featured Series: Complex Numbers in Audio Processing</h2>
+            <p style="text-align: center; margin-bottom: 20px;">
+                A comprehensive two-part journey through the mathematical foundations of modern audio technology
+            </p>
+            <div class="series-cards">
+                <div class="topic-card" onclick="openIllustration('complex_numbers_audio_fundamentals.html')">
+                    <div class="card-icon">🎵</div>
+                    <div class="card-title">Part 1: Fundamentals</div>
+                    <div class="card-description">
+                        Complex sinusoids, Fourier transforms, signal construction, and DFT analysis. 
+                        Learn the mathematical foundations that power all digital audio processing.
+                    </div>
+                    <div class="card-difficulty beginner">Beginner Friendly</div>
+                </div>
+                
+                <div class="topic-card" onclick="openIllustration('complex_numbers_audio_advanced.html')">
+                    <div class="card-icon">🎛️</div>
+                    <div class="card-title">Part 2: Advanced Applications</div>
+                    <div class="card-description">
+                        Digital filters, spectrograms, time-frequency analysis, and spectral effects. 
+                        Professional audio processing techniques used in industry.
+                    </div>
+                    <div class="card-difficulty intermediate">Intermediate</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 style="color: #81c784; text-align: center; margin: 40px 0 30px 0;">All Complex Analysis Topics</h2>
+        
+        <div class="topics-grid">
+            <div class="topic-card" onclick="openIllustration('complex_numbers_fundamentals.html')">
+                <div class="card-icon">🔢</div>
+                <div class="card-title">Complex Numbers Fundamentals</div>
+                <div class="card-description">
+                    Interactive exploration of the complex plane, arithmetic operations, and geometric interpretations. Perfect starting point for complex analysis.
+                </div>
+                <div class="card-difficulty beginner">Beginner</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('analytic_functions.html')">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Analytic Functions</div>
+                <div class="card-description">
+                    Deep dive into differentiability, Cauchy-Riemann equations, and the beautiful theory of analytic functions.
+                </div>
+                <div class="card-difficulty intermediate">Intermediate</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('complex_functions_visualization.html')">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Complex Functions Visualization</div>
+                <div class="card-description">
+                    Visualizing complex functions with domain coloring and 3D plots. Mathematical artistry meets rigorous analysis.
+                </div>
+                <div class="card-difficulty intermediate">Intermediate</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('conformal_mappings.html')">
+                <div class="card-icon">🗺️</div>
+                <div class="card-title">Conformal Mappings</div>
+                <div class="card-description">
+                    Explore angle-preserving transformations and their applications in physics, engineering, and geometry.
+                </div>
+                <div class="card-difficulty advanced">Advanced</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('contour_integration.html')">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">Contour Integration</div>
+                <div class="card-description">
+                    Master the powerful techniques of complex integration along curves in the complex plane.
+                </div>
+                <div class="card-difficulty advanced">Advanced</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('power_series_laurent.html')">
+                <div class="card-icon">∞</div>
+                <div class="card-title">Power Series & Laurent Series</div>
+                <div class="card-description">
+                    Infinite series representations of complex functions and their convergence properties.
+                </div>
+                <div class="card-difficulty advanced">Advanced</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('riemann_surfaces.html')">
+                <div class="card-icon">🌐</div>
+                <div class="card-title">Riemann Surfaces</div>
+                <div class="card-description">
+                    Advanced geometric structures that resolve multi-valued complex functions into single-valued ones.
+                </div>
+                <div class="card-difficulty advanced">Advanced</div>
+            </div>
+            
+            <div class="topic-card" onclick="openIllustration('complex_integration_applications.html')">
+                <div class="card-icon">🔬</div>
+                <div class="card-title">Integration Applications</div>
+                <div class="card-description">
+                    Real-world applications of complex integration techniques in physics, engineering, and mathematics.
+                </div>
+                <div class="card-difficulty advanced">Advanced</div>
+            </div>
+        </div>
+        
+        <div class="navigation-section">
+            <h3>🎓 Learning Path Recommendations</h3>
+            <p style="margin-bottom: 20px;">
+                <strong>New to Complex Analysis?</strong> Start with Complex Numbers Fundamentals → Audio Processing Part 1 → Complex Functions Visualization
+            </p>
+            <p style="margin-bottom: 20px;">
+                <strong>Engineering/Audio Focus?</strong> Audio Processing Parts 1 & 2 → Analytic Functions → Conformal Mappings
+            </p>
+            <p style="margin-bottom: 20px;">
+                <strong>Mathematical Theory Focus?</strong> Fundamentals → Analytic Functions → Contour Integration → Power Series → Riemann Surfaces
+            </p>
+            <a href="../index.html" class="nav-button">🏠 Return to Main Index</a>
+        </div>
+    </div>
+
+    <script>
+        function openIllustration(filename) {
+            window.open(filename, '_blank');
+        }
+    </script>
+</body>
+</html>

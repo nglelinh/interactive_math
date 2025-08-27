@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Programming - Advanced Mathematical Foundation</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    // Custom vector and matrix notation
+                    vb: ['\\mathbf{#1}', 1],           // vector bold
+                    mb: ['\\mathbf{#1}', 1],           // matrix bold
+                    
+                    // Custom differential operators
+                    diff: ['\\mathrm{d}'],
+                    
+                    // Custom sets notation
+                    R: ['\\mathbb{R}'],
+                    N: ['\\mathbb{N}'],
+                    Z: ['\\mathbb{Z}'],
+                    C: ['\\mathbb{C}'],
+                    
+                    // Custom optimization notation
+                    minimize: ['\\text{minimize}'],
+                    maximize: ['\\text{maximize}'],
+                    st: ['\\text{subject to}'],
+                    
+                    // Custom signal processing
+                    FFT: ['\\text{FFT}'],
+                    IFFT: ['\\text{IFFT}'],
+                    DFT: ['\\text{DFT}'],
+                    IDFT: ['\\text{IDFT}']
+                }
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1,
+                minScale: 0.5,
+                mtextInheritFont: false,
+                merrorInheritFont: true,
+                mathmlSpacing: false,
+                skipAttributes: {},
+                exFactor: 0.5,
+                displayAlign: 'center',
+                displayIndent: '0'
+            },
+            startup: {
+                ready: () => {
+                    console.log('MathJax is loaded and ready.');
+                    MathJax.startup.defaultReady();
+                }
+            },
+            options: {
+                enableMenu: true,
+                menuOptions: {
+                    settings: {
+                        zoom: 'DoubleClick'
+                    }
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            font-weight: 700;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 500px;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .content-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: fit-content;
+        }
+
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .introduction {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #FFD700;
+        }
+
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 25px 35px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .theorem-box {
+            background: rgba(255, 100, 100, 0.1);
+            border: 2px solid #ff6464;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .theorem-box::before {
+            content: "🎯";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 1.2em;
+        }
+
+        .example-box {
+            background: rgba(100, 255, 100, 0.1);
+            border-left: 4px solid #64ff64;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .algorithm-box {
+            background: rgba(0, 150, 255, 0.1);
+            border: 2px solid #0096ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #00d4ff;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-number {
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .canvas-container {
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        canvas {
+            border-radius: 8px;
+            display: block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #00FFFF;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 8px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00d4ff, #ff6b6b);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .parameter-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: center;
+            color: #00d4ff;
+            margin-top: 5px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .app-card {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #2ecc71;
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .comparison-table {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, #ff6b6b, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        .matrix-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .sensitivity-panel {
+            background: rgba(255, 100, 255, 0.1);
+            border: 2px solid #ff64ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .complexity-analysis {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid #ffa500;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .lesson-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-button {
+                margin: 2px 0;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .applications-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📐 Linear Programming - Advanced Mathematical Foundation</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('overview')">🎯 Tổng Quan</button>
+            <button class="nav-button" onclick="showSection('theory')">📚 Lý Thuyết</button>
+            <button class="nav-button" onclick="showSection('simplex')">⚙️ Simplex Algorithm</button>
+            <button class="nav-button" onclick="showSection('duality')">🔄 Duality Theory</button>
+            <button class="nav-button" onclick="showSection('advanced')">🚀 Nâng Cao</button>
+            <button class="nav-button" onclick="showSection('interactive')">🎮 Tương Tác</button>
+        </div>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="overview" class="lesson-section active">
+            <div class="introduction">
+                <h2>🎯 Giới Thiệu Linear Programming</h2>
+                <p><strong>Linear Programming (LP)</strong> là một trong những công cụ toán học mạnh nhất trong tối ưu hóa, được ứng dụng rộng rãi từ kinh tế, kỹ thuật đến AI và machine learning.</p>
+                <p>🏆 <strong>Lịch sử:</strong> Được phát triển bởi George Dantzig (1947) - thuật toán Simplex. Ứng dụng đầu tiên trong Thế chiến II cho logistics quân sự.</p>
+                <p>🌟 <strong>Tầm quan trọng:</strong> Nền tảng cho nhiều thuật toán AI hiện đại, optimization trong deep learning, và resource allocation trong cloud computing.</p>
+            </div>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h3>💼 Ứng Dụng Thực Tế</h3>
+                    <ul>
+                        <li><strong>🏭 Production Planning:</strong> Tối ưu hóa sản xuất tại Tesla, Toyota</li>
+                        <li><strong>📊 Portfolio Optimization:</strong> Quản lý đầu tư tại Goldman Sachs</li>
+                        <li><strong>🚚 Logistics:</strong> Route optimization tại Amazon, FedEx</li>
+                        <li><strong>🎮 Game Theory:</strong> Strategy optimization trong AI</li>
+                        <li><strong>☁️ Cloud Computing:</strong> Resource allocation tại AWS, Google Cloud</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h3>🧠 Connection với AI/ML</h3>
+                    <ul>
+                        <li><strong>🔍 Support Vector Machines:</strong> SVM formulation</li>
+                        <li><strong>🎯 Neural Networks:</strong> Weight optimization constraints</li>
+                        <li><strong>📈 Reinforcement Learning:</strong> Policy optimization</li>
+                        <li><strong>🗜️ Compressed Sensing:</strong> L1 regularization</li>
+                        <li><strong>📊 Data Science:</strong> Feature selection, dimensionality reduction</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h3>🎯 Định Nghĩa Cơ Bản</h3>
+                <p><strong>Linear Programming</strong> là bài toán tối ưu hóa một hàm tuyến tính trên một tập hợp được định nghĩa bởi các ràng buộc tuyến tính.</p>
+                
+                <div class="formula-box">
+                    <h4>Standard Form</h4>
+                    $$\begin{align}
+                    \text{minimize} \quad & \mathbf{c}^T\mathbf{x} \\
+                    \text{subject to} \quad & \mathbf{A}\mathbf{x} \leq \mathbf{b} \\
+                    & \mathbf{x} \geq \mathbf{0}
+                    \end{align}$$
+                </div>
+
+                <p><strong>Trong đó:</strong></p>
+                <ul>
+                    <li><strong>$\mathbf{x} \in \mathbb{R}^n$:</strong> Vector quyết định (decision variables)</li>
+                    <li><strong>$\mathbf{c} \in \mathbb{R}^n$:</strong> Vector hệ số objective function</li>
+                    <li><strong>$\mathbf{A} \in \mathbb{R}^{m \times n}$:</strong> Ma trận ràng buộc</li>
+                    <li><strong>$\mathbf{b} \in \mathbb{R}^m$:</strong> Vector ràng buộc phải</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- THEORY SECTION -->
+        <div id="theory" class="lesson-section">
+            <div class="theory-section">
+                <h2 style="color: #4CAF50; margin: 0 0 20px 0;">� Mathematical Foundation</h2>
+            
+            <h3>1. Định Nghĩa và Thuật Ngữ</h3>
+            <div class="grid-layout">
+                <div>
+                    <h4>📊 Feasible Region (Miền khả thi):</h4>
+                    <p>Tập hợp tất cả các điểm x thỏa mãn:</p>
+                    <div class="formula-box">
+                        <div class="formula-label">Miền khả thi</div>
+                        <div class="math-environment">
+                            $$S = \{\mathbf{x} \in \mathbb{R}^n : \mathbf{A}\mathbf{x} \leq \mathbf{b}, \mathbf{x} \geq \mathbf{0}\}$$
+                        </div>
+                        <div class="sub-formula">Tập hợp tất cả các điểm thỏa mãn ràng buộc</div>
+                    </div>
+                </div>
+                <div>
+                    <h4>🎯 Objective Function (Hàm mục tiêu):</h4>
+                    <p>Hàm tuyến tính cần tối ưu:</p>
+                    <div class="formula-box">
+                        <div class="formula-label">Hàm mục tiêu</div>
+                        <div class="math-environment">
+                            $$f(\mathbf{x}) = \mathbf{c}^T\mathbf{x} = \sum_{i=1}^{n} c_i x_i$$
+                        </div>
+                        <div class="sub-formula">Hàm tuyến tính cần tối ưu</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>🏆 Định Lý Cơ Bản của Linear Programming</h4>
+                <p><strong>Fundamental Theorem:</strong> Nếu bài toán LP có nghiệm tối ưu, thì tồn tại ít nhất một nghiệm tối ưu tại một extreme point (đỉnh) của feasible region.</p>
+            </div>
+
+            <div class="proof-box">
+                <h4>📋 Chứng Minh Ý Tưởng:</h4>
+                <p>Miền khả thi S là convex polytope. Hàm mục tiêu tuyến tính đạt maximum/minimum tại boundary của convex set, cụ thể tại extreme points.</p>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">⚙️ Thuật Toán Simplex - Comprehensive Guide</h2>
+            
+            <div class="theory-section">
+                <h3>2.1. 🎯 Simplex Method - Mathematical Foundation</h3>
+                <p><strong>Simplex Algorithm</strong> được phát triển bởi George Dantzig (1947) là một trong những thuật toán quan trọng nhất trong lịch sử toán học ứng dụng. Đây là nền tảng cho hầu hết các solver LP hiện đại.</p>
+                
+                <div class="theorem-box">
+                    <h4>🏗️ Ý Tưởng Cơ Bản</h4>
+                    <p><strong>Fundamental Theorem of Linear Programming:</strong> Nếu LP có nghiệm tối ưu hữu hạn, thì tồn tại ít nhất một nghiệm tối ưu tại vertex (extreme point) của feasible region.</p>
+                    
+                    <div class="formula-box">
+                        <strong>Vertex Property:</strong> Một điểm $\mathbf{x} \in \mathbb{R}^n$ là vertex của feasible region nếu và chỉ nếu:
+                        $$\mathbf{x} = \text{intersection của } n \text{ linearly independent constraints}$$
+                    </div>
+                    
+                    <p><strong>Strategy:</strong> Thay vì kiểm tra vô số điểm trong feasible region, Simplex chỉ kiểm tra các vertices và di chuyển từ vertex này sang vertex kế cận tốt hơn.</p>
+                </div>
+
+                <div class="algorithm-box">
+                    <h4>🔄 Simplex Algorithm - Detailed Steps</h4>
+                    
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>
+                            <strong>Phase I: Find Initial Basic Feasible Solution</strong>
+                            <ul>
+                                <li>Convert to standard form: $\min \mathbf{c}^T\mathbf{x}$ s.t. $\mathbf{A}\mathbf{x} = \mathbf{b}, \mathbf{x} \geq \mathbf{0}$</li>
+                                <li>Add slack/surplus variables để tạo identity matrix</li>
+                                <li>Nếu cần, solve auxiliary problem để tìm feasible starting point</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>
+                            <strong>Phase II: Optimality Test</strong>
+                            <p>Tính <strong>reduced costs</strong> cho tất cả non-basic variables:</p>
+                            <div class="formula-box">
+                                $$\bar{c}_j = c_j - \mathbf{c}_B^T \mathbf{B}^{-1} \mathbf{A}_j$$
+                            </div>
+                            <p><strong>Optimal condition:</strong> Nếu $\bar{c}_j \geq 0$ ∀ non-basic $j$ → OPTIMAL!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>
+                            <strong>Entering Variable Selection</strong>
+                            <ul>
+                                <li><strong>Dantzig's Rule:</strong> Chọn $k$ với $\bar{c}_k = \min_j \{\bar{c}_j : \bar{c}_j < 0\}$</li>
+                                <li><strong>Bland's Rule:</strong> Chọn smallest index với $\bar{c}_j < 0$ (prevents cycling)</li>
+                                <li><strong>Steepest Edge:</strong> Maximize improvement rate</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>
+                            <strong>Leaving Variable Selection - Minimum Ratio Test</strong>
+                            <p>Compute <strong>pivot column</strong>: $\mathbf{d} = \mathbf{B}^{-1}\mathbf{A}_k$</p>
+                            <div class="formula-box">
+                                $$\theta^* = \min_{i: d_i > 0} \frac{(\mathbf{B}^{-1}\mathbf{b})_i}{d_i}$$
+                            </div>
+                            <p>Row achieving this minimum leaves the basis (prevents infeasibility)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div>
+                            <strong>Pivot Operation - Gaussian Elimination</strong>
+                            <ul>
+                                <li>Update basis: Replace leaving variable with entering variable</li>
+                                <li>Update tableau using elementary row operations</li>
+                                <li>New basic solution: Move to adjacent vertex</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">6</div>
+                        <div>
+                            <strong>Iteration & Termination</strong>
+                            <ul>
+                                <li><strong>If unbounded:</strong> $\bar{c}_k < 0$ và $\mathbf{d} \leq \mathbf{0}$ → Problem unbounded</li>
+                                <li><strong>If optimal:</strong> All $\bar{c}_j \geq 0$ → Current solution optimal</li>
+                                <li><strong>Otherwise:</strong> Return to Step 2 with new basic solution</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>📊 Simplex Tableau Structure & Mathematics</h4>
+                    
+                    <div class="formula-box">
+                        <strong>Standard Tableau Format:</strong>
+                        $$\begin{array}{c|cccc|c}
+                        \text{Basic Var} & x_1 & x_2 & \cdots & x_n & \text{RHS} \\
+                        \hline
+                        x_{B_1} & a_{11} & a_{12} & \cdots & a_{1n} & b_1 \\
+                        x_{B_2} & a_{21} & a_{22} & \cdots & a_{2n} & b_2 \\
+                        \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+                        x_{B_m} & a_{m1} & a_{m2} & \cdots & a_{mn} & b_m \\
+                        \hline
+                        z & \bar{c}_1 & \bar{c}_2 & \cdots & \bar{c}_n & z^*
+                        \end{array}$$
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>🔑 Key Mathematical Relationships</h4>
+                        <ul>
+                            <li><strong>Basic Solution:</strong> $\mathbf{x}_B = \mathbf{B}^{-1}\mathbf{b}$, $\mathbf{x}_N = \mathbf{0}$</li>
+                            <li><strong>Objective Value:</strong> $z = \mathbf{c}_B^T \mathbf{B}^{-1} \mathbf{b}$</li>
+                            <li><strong>Reduced Costs:</strong> $\bar{\mathbf{c}}_N = \mathbf{c}_N - \mathbf{c}_B^T \mathbf{B}^{-1} \mathbf{N}$</li>
+                            <li><strong>Pivot Column:</strong> $\mathbf{d} = \mathbf{B}^{-1}\mathbf{A}_k$ (direction of movement)</li>
+                            <li><strong>Step Size:</strong> $\theta^* = \min\{b_i/d_i : d_i > 0\}$</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="example-box" style="background: rgba(255, 193, 7, 0.1);">
+                    <h4>💡 Worked Example: Complete Simplex Solution</h4>
+                    <p><strong>Problem:</strong> Maximize $z = 3x_1 + 2x_2$ subject to:</p>
+                    <div class="formula-box">
+                        $$\begin{align}
+                        x_1 + x_2 &\leq 4 \\
+                        2x_1 + x_2 &\leq 7 \\
+                        x_1, x_2 &\geq 0
+                        \end{align}$$
+                    </div>
+
+                    <div class="step-by-step">
+                        <h5>Step 1: Convert to Standard Form</h5>
+                        <p>Minimize $-3x_1 - 2x_2$ (note the sign change for maximization)</p>
+                        <div class="formula-box">
+                            $$\begin{align}
+                            x_1 + x_2 + s_1 &= 4 \\
+                            2x_1 + x_2 + s_2 &= 7 \\
+                            x_1, x_2, s_1, s_2 &\geq 0
+                            \end{align}$$
+                        </div>
+
+                        <h5>Step 2: Initial Tableau</h5>
+                        <table style="margin: 0 auto; color: white; border: 1px solid #fff;">
+                            <tr><th>Basis</th><th>x₁</th><th>x₂</th><th>s₁</th><th>s₂</th><th>RHS</th></tr>
+                            <tr><td>s₁</td><td>1</td><td>1</td><td>1</td><td>0</td><td>4</td></tr>
+                            <tr><td>s₂</td><td>2</td><td>1</td><td>0</td><td>1</td><td>7</td></tr>
+                            <tr style="border-top: 2px solid #fff;"><td>z</td><td>-3</td><td>-2</td><td>0</td><td>0</td><td>0</td></tr>
+                        </table>
+                        <p><strong>Current solution:</strong> $(0, 0, 4, 7)$, $z = 0$</p>
+
+                        <h5>Step 3: Iteration 1</h5>
+                        <p><strong>Entering variable:</strong> $x_1$ (most negative reduced cost: -3)</p>
+                        <p><strong>Minimum ratio test:</strong> $\min\{4/1, 7/2\} = \min\{4, 3.5\} = 3.5$</p>
+                        <p><strong>Leaving variable:</strong> $s_2$ (row 2)</p>
+
+                        <h5>Step 4: After Pivot Operation</h5>
+                        <table style="margin: 0 auto; color: white; border: 1px solid #fff;">
+                            <tr><th>Basis</th><th>x₁</th><th>x₂</th><th>s₁</th><th>s₂</th><th>RHS</th></tr>
+                            <tr><td>s₁</td><td>0</td><td>1/2</td><td>1</td><td>-1/2</td><td>1/2</td></tr>
+                            <tr><td>x₁</td><td>1</td><td>1/2</td><td>0</td><td>1/2</td><td>7/2</td></tr>
+                            <tr style="border-top: 2px solid #fff;"><td>z</td><td>0</td><td>-1/2</td><td>0</td><td>3/2</td><td>21/2</td></tr>
+                        </table>
+                        <p><strong>Current solution:</strong> $(7/2, 0, 1/2, 0)$, $z = 21/2 = 10.5$</p>
+
+                        <h5>Step 5: Iteration 2</h5>
+                        <p><strong>Entering variable:</strong> $x_2$ (reduced cost: -1/2 < 0)</p>
+                        <p><strong>Minimum ratio test:</strong> $\min\{(1/2)/(1/2), (7/2)/(1/2)\} = \min\{1, 7\} = 1$</p>
+                        <p><strong>Leaving variable:</strong> $s_1$ (row 1)</p>
+
+                        <h5>Step 6: Final Tableau</h5>
+                        <table style="margin: 0 auto; color: white; border: 1px solid #fff;">
+                            <tr><th>Basis</th><th>x₁</th><th>x₂</th><th>s₁</th><th>s₂</th><th>RHS</th></tr>
+                            <tr><td>x₂</td><td>0</td><td>1</td><td>2</td><td>-1</td><td>1</td></tr>
+                            <tr><td>x₁</td><td>1</td><td>0</td><td>-1</td><td>1</td><td>3</td></tr>
+                            <tr style="border-top: 2px solid #fff;"><td>z</td><td>0</td><td>0</td><td>1</td><td>1</td><td>11</td></tr>
+                        </table>
+                        <p><strong>Optimal solution:</strong> $(x_1^*, x_2^*) = (3, 1)$, $z^* = 11$</p>
+                        <p><strong>All reduced costs ≥ 0 → OPTIMAL!</strong></p>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h4>🎯 Computational Complexity & Efficiency</h4>
+                    <ul>
+                        <li><strong>Worst Case:</strong> Exponential time O(2ⁿ) - Klee-Minty examples</li>
+                        <li><strong>Average Case:</strong> Polynomial time - Empirically very efficient</li>
+                        <li><strong>Smoothed Analysis:</strong> Polynomial expected time (Spielman & Teng, 2001)</li>
+                        <li><strong>Practical Performance:</strong> Typically converges in 2m to 3m iterations</li>
+                    </ul>
+                    
+                    <div class="formula-box">
+                        <strong>Practical Rule:</strong> Number of iterations ≈ $1.5m$ to $3m$ where $m$ = number of constraints
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h4>🚀 Advanced Simplex Variants</h4>
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h5>🔄 Revised Simplex</h5>
+                            <ul>
+                                <li>Maintains $\mathbf{B}^{-1}$ explicitly</li>
+                                <li>More numerically stable</li>
+                                <li>Standard in commercial solvers</li>
+                            </ul>
+                        </div>
+                        <div class="example-box">
+                            <h5>🎯 Dual Simplex</h5>
+                            <ul>
+                                <li>Maintains dual feasibility</li>
+                                <li>Excellent for sensitivity analysis</li>
+                                <li>Used in branch-and-bound</li>
+                            </ul>
+                        </div>
+                        <div class="example-box">
+                            <h5>⚡ Primal-Dual</h5>
+                            <ul>
+                                <li>Interior point methods</li>
+                                <li>Polynomial time complexity</li>
+                                <li>Better for very large problems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-section">
+                    <h3>2.2. 🎮 Advanced Simplex Examples & Case Studies</h3>
+                    
+                    <div class="example-box" style="background: rgba(46, 204, 113, 0.1);">
+                        <h4>🏭 Production Planning Example</h4>
+                        <p><strong>Scenario:</strong> Một nhà máy sản xuất 3 sản phẩm A, B, C với 4 resources bị hạn chế.</p>
+                        
+                        <div class="formula-box">
+                            <strong>Decision Variables:</strong><br>
+                            $x_1, x_2, x_3$ = số lượng sản phẩm A, B, C<br><br>
+                            
+                            <strong>Objective:</strong> Maximize profit<br>
+                            $$\max z = 40x_1 + 30x_2 + 50x_3$$
+                            
+                            <strong>Constraints:</strong><br>
+                            $$\begin{align}
+                            \text{Labor hours: } \quad 2x_1 + x_2 + 3x_3 &\leq 120 \\
+                            \text{Raw material: } \quad x_1 + 2x_2 + x_3 &\leq 80 \\
+                            \text{Machine time: } \quad 3x_1 + 2x_2 + 2x_3 &\leq 150 \\
+                            \text{Storage: } \quad x_1 + x_2 + x_3 &\leq 60 \\
+                            x_1, x_2, x_3 &\geq 0
+                            \end{align}$$
+                        </div>
+
+                        <div class="step-by-step">
+                            <h5>🔧 Simplex Solution Process</h5>
+                            
+                            <h6>Step 1: Standard Form Conversion</h6>
+                            <div class="formula-box">
+                                Minimize $-40x_1 - 30x_2 - 50x_3$ subject to:<br>
+                                $$\begin{align}
+                                2x_1 + x_2 + 3x_3 + s_1 &= 120 \\
+                                x_1 + 2x_2 + x_3 + s_2 &= 80 \\
+                                3x_1 + 2x_2 + 2x_3 + s_3 &= 150 \\
+                                x_1 + x_2 + x_3 + s_4 &= 60 \\
+                                x_1, x_2, x_3, s_1, s_2, s_3, s_4 &\geq 0
+                                \end{align}$$
+                            </div>
+
+                            <h6>Step 2: Initial Simplex Tableau</h6>
+                            <table style="margin: 0 auto; color: white; border: 1px solid #fff; font-size: 0.9em;">
+                                <tr><th>Basis</th><th>x₁</th><th>x₂</th><th>x₃</th><th>s₁</th><th>s₂</th><th>s₃</th><th>s₄</th><th>RHS</th></tr>
+                                <tr><td>s₁</td><td>2</td><td>1</td><td>3</td><td>1</td><td>0</td><td>0</td><td>0</td><td>120</td></tr>
+                                <tr><td>s₂</td><td>1</td><td>2</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td><td>80</td></tr>
+                                <tr><td>s₃</td><td>3</td><td>2</td><td>2</td><td>0</td><td>0</td><td>1</td><td>0</td><td>150</td></tr>
+                                <tr><td>s₄</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>60</td></tr>
+                                <tr style="border-top: 2px solid #fff;"><td>z</td><td>-40</td><td>-30</td><td>-50</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                            </table>
+
+                            <h6>Step 3: Iteration Analysis</h6>
+                            <ul>
+                                <li><strong>Entering variable:</strong> $x_3$ (most negative: -50)</li>
+                                <li><strong>Ratio test:</strong> min{120/3, 80/1, 150/2, 60/1} = min{40, 80, 75, 60} = 40</li>
+                                <li><strong>Leaving variable:</strong> $s_1$ (achieves minimum ratio)</li>
+                                <li><strong>Pivot element:</strong> Row 1, Column 3 (value = 3)</li>
+                            </ul>
+
+                            <h6>Step 4: After Pivot Operation</h6>
+                            <p><strong>New basic solution:</strong> $x_3 = 40$, $s_2 = 40$, $s_3 = 70$, $s_4 = 20$</p>
+                            <p><strong>Objective value:</strong> $z = 50 \times 40 = 2000$</p>
+                            <p><em>Continue iterations until all reduced costs ≥ 0...</em></p>
+                        </div>
+
+                        <div class="formula-box" style="background: rgba(46, 204, 113, 0.2);">
+                            <strong>📊 Final Optimal Solution:</strong><br>
+                            $(x_1^*, x_2^*, x_3^*) = (20, 0, 30)$<br>
+                            <strong>Maximum Profit:</strong> $z^* = 40(20) + 30(0) + 50(30) = 2300$<br>
+                            <strong>Business Interpretation:</strong> Produce 20 units of A, 0 units of B, 30 units of C
+                        </div>
+                    </div>
+
+                    <div class="example-box" style="background: rgba(52, 152, 219, 0.1);">
+                        <h4>📈 Investment Portfolio Optimization</h4>
+                        <p><strong>Scenario:</strong> Đầu tư $1,000,000 vào 4 asset classes với risk constraints.</p>
+                        
+                        <div class="formula-box">
+                            <strong>Variables:</strong> $x_1, x_2, x_3, x_4$ = investment amounts in Stocks, Bonds, Gold, Cash<br><br>
+                            
+                            <strong>Objective:</strong> Maximize expected return<br>
+                            $$\max z = 0.12x_1 + 0.08x_2 + 0.06x_3 + 0.03x_4$$
+                            
+                            <strong>Constraints:</strong><br>
+                            $$\begin{align}
+                            \text{Budget: } \quad x_1 + x_2 + x_3 + x_4 &= 1,000,000 \\
+                            \text{Max stocks: } \quad x_1 &\leq 500,000 \\
+                            \text{Min bonds: } \quad x_2 &\geq 200,000 \\
+                            \text{Liquidity: } \quad x_3 + x_4 &\geq 100,000 \\
+                            x_1, x_2, x_3, x_4 &\geq 0
+                            \end{align}$$
+                        </div>
+
+                        <div class="algorithm-box">
+                            <h5>🎯 Simplex Implementation Strategy</h5>
+                            <ol>
+                                <li><strong>Convert inequalities:</strong> Add slack/surplus variables</li>
+                                <li><strong>Handle equality constraint:</strong> Use as pivot equation</li>
+                                <li><strong>Two-phase method:</strong> Find initial feasible solution first</li>
+                                <li><strong>Sensitivity analysis:</strong> How changes in expected returns affect optimal portfolio</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="theorem-box">
+                        <h4>🔧 Implementation Considerations</h4>
+                        
+                        <div class="grid-layout">
+                            <div class="example-box">
+                                <h5>💾 Numerical Stability</h5>
+                                <ul>
+                                    <li><strong>Pivoting strategies:</strong> Partial pivoting for numerical accuracy</li>
+                                    <li><strong>Scaling:</strong> Normalize constraints to avoid round-off errors</li>
+                                    <li><strong>Basis updates:</strong> LU factorization for efficiency</li>
+                                    <li><strong>Degeneracy handling:</strong> Bland's rule to prevent cycling</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="example-box">
+                                <h5>⚡ Computational Optimization</h5>
+                                <ul>
+                                    <li><strong>Sparse matrix techniques:</strong> Exploit problem structure</li>
+                                    <li><strong>Revised simplex:</strong> Work with basis inverse directly</li>
+                                    <li><strong>Crash procedures:</strong> Find good starting basis</li>
+                                    <li><strong>Dual simplex:</strong> Maintain dual feasibility</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="example-box">
+                                <h5>🎛️ Modern Enhancements</h5>
+                                <ul>
+                                    <li><strong>Presolving:</strong> Problem size reduction techniques</li>
+                                    <li><strong>Cut generation:</strong> Add valid inequalities</li>
+                                    <li><strong>Parallel processing:</strong> Distribute pivot operations</li>
+                                    <li><strong>GPU acceleration:</strong> Massive parallel linear algebra</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-box" style="background: rgba(155, 89, 182, 0.1);">
+                        <h4>🏆 Simplex in Practice: Industry Applications</h4>
+                        
+                        <div class="grid-layout">
+                            <div class="application-card">
+                                <h5>✈️ Airline Crew Scheduling</h5>
+                                <ul>
+                                    <li><strong>Variables:</strong> 10,000+ crew assignments</li>
+                                    <li><strong>Constraints:</strong> FAA regulations, labor contracts</li>
+                                    <li><strong>Objective:</strong> Minimize crew costs</li>
+                                    <li><strong>Solution time:</strong> Minutes for daily schedules</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="application-card">
+                                <h5>🏭 Supply Chain Optimization</h5>
+                                <ul>
+                                    <li><strong>Variables:</strong> Production, transportation, inventory</li>
+                                    <li><strong>Constraints:</strong> Capacity, demand, flow balance</li>
+                                    <li><strong>Objective:</strong> Minimize total cost</li>
+                                    <li><strong>Impact:</strong> 5-15% cost reduction typical</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="application-card">
+                                <h5>💡 Power Grid Management</h5>
+                                <ul>
+                                    <li><strong>Variables:</strong> Generator outputs, power flows</li>
+                                    <li><strong>Constraints:</strong> Kirchhoff's laws, capacity limits</li>
+                                    <li><strong>Objective:</strong> Minimize generation cost</li>
+                                    <li><strong>Real-time:</strong> Solutions every 5-15 minutes</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="application-card">
+                                <h5>📱 Telecommunications Network</h5>
+                                <ul>
+                                    <li><strong>Variables:</strong> Routing paths, bandwidth allocation</li>
+                                    <li><strong>Constraints:</strong> Capacity, QoS requirements</li>
+                                    <li><strong>Objective:</strong> Maximize network utilization</li>
+                                    <li><strong>Scale:</strong> Millions of variables in practice</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <h3 style="color: #2c3e50;">📊 Interactive Linear Programming Visualization</h3>
+            <canvas id="lpCanvas" width="800" height="500"></canvas>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>Coefficient c₁:</label>
+                    <input type="range" id="c1Slider" min="-5" max="5" step="0.1" value="1">
+                    <div class="parameter-display" id="c1Display">c₁ = 1.0</div>
+                </div>
+                <div class="control-group">
+                    <label>Coefficient c₂:</label>
+                    <input type="range" id="c2Slider" min="-5" max="5" step="0.1" value="1">
+                    <div class="parameter-display" id="c2Display">c₂ = 1.0</div>
+                </div>
+                <div class="control-group">
+                    <label>Constraint 1 (a₁₁x₁ + a₁₂x₂ ≤ b₁):</label>
+                    <input type="range" id="a11Slider" min="0.1" max="3" step="0.1" value="1">
+                    <div class="parameter-display" id="constraintDisplay">x₁ + x₂ ≤ 4</div>
+                </div>
+                <div class="control-group">
+                    <button onclick="solveSimplex()">🎯 Solve with Simplex</button>
+                    <button onclick="showDualProblem()">🔄 Show Dual Problem</button>
+                    <button onclick="animateSimplex()">🎬 Animate Simplex Steps</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">🔄 Duality Theory</h2>
+            
+            <h3>3. Lý Thuyết Đối Ngẫu (Duality)</h3>
+            <p>Mọi bài toán LP (Primal) đều có một bài toán đối ngẫu (Dual) tương ứng.</p>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h4>📈 Primal Problem:</h4>
+                    <div class="formula-box">
+                        <div class="math-environment">
+                            $$\text{minimize}_{\mathbf{x}} \mathbf{c}^T\mathbf{x}$$
+                            $$\text{subject to} \quad \mathbf{A}\mathbf{x} \geq \mathbf{b}, \quad \mathbf{x} \geq \mathbf{0}$$
+                        </div>
+                    </div>
+                </div>
+                <div class="example-box">
+                    <h4>📉 Dual Problem:</h4>
+                    <div class="formula-box">
+                        <div class="math-environment">
+                            $$\text{maximize}_{\mathbf{y}} \mathbf{b}^T\mathbf{y}$$
+                            $$\text{subject to} \quad \mathbf{A}^T\mathbf{y} \leq \mathbf{c}, \quad \mathbf{y} \geq \mathbf{0}$$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>⚖️ Strong Duality Theorem:</h4>
+                <p>Nếu Primal và Dual đều feasible, thì: <span class="highlight">c<sup>T</sup>x* = b<sup>T</sup>y*</span></p>
+                <p>Trong đó x* và y* là nghiệm tối ưu của Primal và Dual.</p>
+            </div>
+
+            <div class="comparison-table">
+                <table>
+                    <tr>
+                        <th>Primal Constraint</th>
+                        <th>Dual Variable</th>
+                        <th>Interpretation</th>
+                    </tr>
+                    <tr>
+                        <td>aᵢ<sup>T</sup>x ≤ bᵢ</td>
+                        <td>yᵢ ≥ 0</td>
+                        <td>Shadow price of resource i</td>
+                    </tr>
+                    <tr>
+                        <td>aᵢ<sup>T</sup>x = bᵢ</td>
+                        <td>yᵢ unrestricted</td>
+                        <td>Dual variable free</td>
+                    </tr>
+                    <tr>
+                        <td>aᵢ<sup>T</sup>x ≥ bᵢ</td>
+                        <td>yᵢ ≤ 0</td>
+                        <td>Penalty for exceeding</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">📊 Sensitivity Analysis</h2>
+            
+            <h3>4. Phân Tích Độ Nhạy</h3>
+            <p>Nghiên cứu ảnh hưởng của thay đổi parameters lên nghiệm tối ưu.</p>
+
+            <div class="example-box">
+                <h4>🔍 Shadow Prices (Giá bóng):</h4>
+                <p>Shadow price của constraint thứ i là đạo hàm của optimal value theo bᵢ:</p>
+                <div class="formula-box">
+                    λᵢ = ∂z*/∂bᵢ = yᵢ*<br/>
+                    <small>Trong đó yᵢ* là dual variable tối ưu</small>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>📈 Range of Optimality:</h4>
+                <p>Khoảng giá trị của objective coefficients mà optimal basis không thay đổi:</p>
+                <div class="formula-box">
+                    cⱼ ∈ [cⱼ - θⱼ⁻, cⱼ + θⱼ⁺]
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">🚀 Advanced Topics</h2>
+            
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h4>🎯 Interior Point Methods:</h4>
+                    <ul>
+                        <li><strong>Barrier Method:</strong> f(x) - μ∑ln(xᵢ)</li>
+                        <li><strong>Path-following:</strong> Central path theory</li>
+                        <li><strong>Complexity:</strong> Polynomial time O(n³L)</li>
+                        <li><strong>Applications:</strong> Large-scale LP problems</li>
+                    </ul>
+                </div>
+                <div class="example-box">
+                    <h4>🔧 Cutting Plane Methods:</h4>
+                    <ul>
+                        <li><strong>Gomory Cuts:</strong> Integer LP solutions</li>
+                        <li><strong>Branch-and-Cut:</strong> Hybrid approaches</li>
+                        <li><strong>Valid Inequalities:</strong> Strengthen formulations</li>
+                        <li><strong>Facet-defining:</strong> Strongest cuts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="applications-grid">
+            <div class="app-card">
+                <h3>🏭 Production Planning</h3>
+                <ul>
+                    <li><strong>Manufacturing:</strong> Resource allocation, scheduling</li>
+                    <li><strong>Supply Chain:</strong> Distribution networks</li>
+                    <li><strong>Inventory:</strong> Multi-period planning</li>
+                    <li><strong>Workforce:</strong> Staff scheduling optimization</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>💰 Finance & Portfolio</h3>
+                <ul>
+                    <li><strong>Portfolio Optimization:</strong> Markowitz model</li>
+                    <li><strong>Asset Allocation:</strong> Risk-return tradeoff</li>
+                    <li><strong>Capital Budgeting:</strong> Project selection</li>
+                    <li><strong>Trading:</strong> Arbitrage opportunities</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>🚛 Transportation & Logistics</h3>
+                <ul>
+                    <li><strong>Transportation Problem:</strong> Cost minimization</li>
+                    <li><strong>Network Flow:</strong> Max flow, min cost flow</li>
+                    <li><strong>Vehicle Routing:</strong> Delivery optimization</li>
+                    <li><strong>Facility Location:</strong> Warehouse placement</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>🤖 Machine Learning Applications</h3>
+                <ul>
+                    <li><strong>SVM:</strong> Support Vector Machines as QP</li>
+                    <li><strong>LASSO:</strong> L1-regularized regression</li>
+                    <li><strong>Neural Networks:</strong> Weight constraints</li>
+                    <li><strong>Boosting:</strong> AdaBoost as LP</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>⚡ Engineering Systems</h3>
+                <ul>
+                    <li><strong>Power Systems:</strong> Economic dispatch</li>
+                    <li><strong>Control Theory:</strong> Linear-quadratic control</li>
+                    <li><strong>Signal Processing:</strong> Filter design</li>
+                    <li><strong>Communications:</strong> Resource allocation</li>
+                </ul>
+            </div>
+        </div>
+        </div>
+
+        <!-- SIMPLEX SECTION -->
+        <div id="simplex" class="lesson-section">
+            <div style="background: rgba(255, 0, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                <h2 style="color: #ff6b6b;">⚙️ SIMPLEX ALGORITHM SECTION - LOADED ✅</h2>
+            </div>
+            <div class="theory-section">
+                <h2 style="color: #ff6b6b; margin: 0 0 20px 0;">⚙️ Simplex Algorithm Deep Dive</h2>
+
+                <div class="algorithm-box">
+                    <h3>🎯 Core Idea</h3>
+                    <p>Simplex algorithm di chuyển từ vertex này sang vertex khác của feasible region, mỗi bước cải thiện (hoặc giữ nguyên) objective function.</p>
+                    
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>
+                            <strong>Start:</strong> Tìm initial basic feasible solution (vertex)
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>
+                            <strong>Optimality Test:</strong> Kiểm tra reduced costs
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>
+                            <strong>Pivot:</strong> Chọn entering và leaving variables
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>
+                            <strong>Update:</strong> Gaussian elimination, move to new vertex
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div>
+                            <strong>Repeat:</strong> Until optimal or unbounded
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h3>📊 Simplex Tableau Mathematics</h3>
+                    
+                    <div class="matrix-display">
+                        <h4>Standard Tableau Format:</h4>
+                        $$\begin{array}{c|cccc|c}
+                        & x_1 & x_2 & \cdots & x_n & \text{RHS} \\
+                        \hline
+                        x_{B_1} & a_{11} & a_{12} & \cdots & a_{1n} & b_1 \\
+                        x_{B_2} & a_{21} & a_{22} & \cdots & a_{2n} & b_2 \\
+                        \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+                        x_{B_m} & a_{m1} & a_{m2} & \cdots & a_{mn} & b_m \\
+                        \hline
+                        z & c_1 & c_2 & \cdots & c_n & z^*
+                        \end{array}$$
+                    </div>
+
+                    <div class="formula-box">
+                        <h4>Key Equations:</h4>
+                        <p><strong>Reduced Cost:</strong> $\bar{c}_j = c_j - \mathbf{c}_B^T \mathbf{B}^{-1} \mathbf{A}_j$</p>
+                        <p><strong>Current Solution:</strong> $\mathbf{x}_B = \mathbf{B}^{-1}\mathbf{b}$</p>
+                        <p><strong>Objective Value:</strong> $z = \mathbf{c}_B^T \mathbf{B}^{-1} \mathbf{b}$</p>
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🔍 Pivot Selection Rules</h3>
+                    
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>📈 Entering Variable (Column)</h4>
+                            <p><strong>Dantzig's Rule:</strong> Chọn $j$ với $\bar{c}_j < 0$ có trị tuyệt đối lớn nhất</p>
+                            <p><strong>Bland's Rule:</strong> Chọn index nhỏ nhất với $\bar{c}_j < 0$ (anti-cycling)</p>
+                            <p><strong>Steepest Edge:</strong> Cải tiến objective function nhiều nhất</p>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>📉 Leaving Variable (Row)</h4>
+                            <p><strong>Minimum Ratio Test:</strong></p>
+                            <div class="formula-box">
+                                $$\theta^* = \min_{i: a_{ik} > 0} \frac{b_i}{a_{ik}}$$
+                            </div>
+                            <p>Row đạt minimum này sẽ leave basis.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sensitivity-panel">
+                    <h3>📊 Sensitivity Analysis</h3>
+                    <p>Phân tích độ nhạy cho biết nghiệm tối ưu thay đổi như thế nào khi parameters thay đổi.</p>
+                    
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>🎯 Objective Coefficients</h4>
+                            <p>Khi $c_j$ thay đổi thành $c_j + \Delta c_j$:</p>
+                            <div class="formula-box">
+                                $$\bar{c}_j^{new} = \bar{c}_j + \Delta c_j$$
+                            </div>
+                            <p>Nghiệm vẫn optimal nếu $\bar{c}_j^{new} \geq 0$ cho tất cả non-basic variables.</p>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>📋 Right-hand Side</h4>
+                            <p>Khi $b_i$ thay đổi thành $b_i + \Delta b_i$:</p>
+                            <div class="formula-box">
+                                $$\mathbf{x}_B^{new} = \mathbf{B}^{-1}(\mathbf{b} + \Delta\mathbf{b})$$
+                            </div>
+                            <p>Solution vẫn feasible nếu $\mathbf{x}_B^{new} \geq \mathbf{0}$.</p>
+                        </div>
+                    </div>
+
+                    <div class="theorem-box">
+                        <h4>💰 Shadow Prices</h4>
+                        <p><strong>Shadow price</strong> của constraint $i$ là đạo hàm của optimal value theo $b_i$:</p>
+                        <div class="formula-box">
+                            $$\pi_i = \frac{\partial z^*}{\partial b_i} = (\mathbf{B}^{-1})_i^T \mathbf{c}_B$$
+                        </div>
+                        <p>Đây chính là optimal dual variables!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DUALITY SECTION -->
+        <div id="duality" class="lesson-section">
+            <div style="background: rgba(0, 255, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                <h2 style="color: #4CAF50;">🔄 DUALITY THEORY SECTION - LOADED ✅</h2>
+            </div>
+            <div class="theory-section">
+                <h2 style="color: #9b59b6; margin: 0 0 20px 0;">🔄 Duality Theory Advanced</h2>
+
+                <div class="theorem-box">
+                    <h3>⚖️ Comprehensive Duality</h3>
+                    <p>Mọi LP problem (Primal) đều có một LP problem đối ngẫu (Dual) tương ứng với mối quan hệ toán học sâu sắc.</p>
+                    
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>📈 Primal Problem</h4>
+                            <div class="formula-box">
+                                $$\begin{align}
+                                \text{minimize} \quad & \mathbf{c}^T\mathbf{x} \\
+                                \text{subject to} \quad & \mathbf{A}\mathbf{x} \geq \mathbf{b} \\
+                                & \mathbf{x} \geq \mathbf{0}
+                                \end{align}$$
+                            </div>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>📉 Dual Problem</h4>
+                            <div class="formula-box">
+                                $$\begin{align}
+                                \text{maximize} \quad & \mathbf{b}^T\mathbf{y} \\
+                                \text{subject to} \quad & \mathbf{A}^T\mathbf{y} \leq \mathbf{c} \\
+                                & \mathbf{y} \geq \mathbf{0}
+                                \end{align}$$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🔍 Duality Rules</h3>
+                    <p>Quy tắc chuyển đổi từ Primal sang Dual:</p>
+                    
+                    <div class="comparison-table">
+                        <table>
+                            <tr>
+                                <th>Primal</th>
+                                <th>⟷</th>
+                                <th>Dual</th>
+                                <th>Interpretation</th>
+                            </tr>
+                            <tr>
+                                <td>$x_j \geq 0$</td>
+                                <td>⟷</td>
+                                <td>$\sum_i a_{ij}y_i \leq c_j$</td>
+                                <td>Non-negative variable ↔ Inequality constraint</td>
+                            </tr>
+                            <tr>
+                                <td>$x_j$ free</td>
+                                <td>⟷</td>
+                                <td>$\sum_i a_{ij}y_i = c_j$</td>
+                                <td>Free variable ↔ Equality constraint</td>
+                            </tr>
+                            <tr>
+                                <td>$\sum_j a_{ij}x_j \geq b_i$</td>
+                                <td>⟷</td>
+                                <td>$y_i \geq 0$</td>
+                                <td>Inequality constraint ↔ Non-negative variable</td>
+                            </tr>
+                            <tr>
+                                <td>$\sum_j a_{ij}x_j = b_i$</td>
+                                <td>⟷</td>
+                                <td>$y_i$ free</td>
+                                <td>Equality constraint ↔ Free variable</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="theorem-box">
+                    <h3>🎯 Fundamental Duality Theorems</h3>
+                    
+                    <div class="algorithm-box">
+                        <h4>1️⃣ Weak Duality Theorem</h4>
+                        <p>Nếu $\mathbf{x}$ là feasible cho Primal và $\mathbf{y}$ là feasible cho Dual, thì:</p>
+                        <div class="formula-box">
+                            $$\mathbf{c}^T\mathbf{x} \geq \mathbf{b}^T\mathbf{y}$$
+                        </div>
+                        <p><strong>Ý nghĩa:</strong> Dual cung cấp lower bound cho Primal (minimization).</p>
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>2️⃣ Strong Duality Theorem</h4>
+                        <p>Nếu Primal có optimal solution $\mathbf{x}^*$, thì Dual cũng có optimal solution $\mathbf{y}^*$ và:</p>
+                        <div class="formula-box">
+                            $$\mathbf{c}^T\mathbf{x}^* = \mathbf{b}^T\mathbf{y}^*$$
+                        </div>
+                        <p><strong>Ý nghĩa:</strong> Không có duality gap tại optimal!</p>
+                    </div>
+
+                    <div class="algorithm-box">
+                        <h4>3️⃣ Complementary Slackness</h4>
+                        <p>Tại optimal solutions $(\mathbf{x}^*, \mathbf{y}^*)$:</p>
+                        <div class="formula-box">
+                            $$\begin{align}
+                            x_j^* \cdot (\mathbf{c}_j - \mathbf{A}_j^T\mathbf{y}^*) &= 0 \quad \forall j \\
+                            y_i^* \cdot (\mathbf{A}_i\mathbf{x}^* - b_i) &= 0 \quad \forall i
+                            \end{align}$$
+                        </div>
+                        <p><strong>Ý nghĩa:</strong> Tại tối ưu, hoặc biến = 0 hoặc constraint là active.</p>
+                    </div>
+                            x_j^* > 0 &\Rightarrow \sum_i a_{ij}y_i^* = c_j \\
+                            \sum_i a_{ij}y_i^* < c_j &\Rightarrow x_j^* = 0 \\
+                            y_i^* > 0 &\Rightarrow \sum_j a_{ij}x_j^* = b_i \\
+                            \sum_j a_{ij}x_j^* > b_i &\Rightarrow y_i^* = 0
+                            \end{align}$$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sensitivity-panel">
+                    <h3>💡 Economic Interpretation</h3>
+                    
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>🏭 Production Planning</h4>
+                            <p><strong>Primal:</strong> Minimize cost of production</p>
+                            <ul>
+                                <li>$x_j$: Amount of product $j$ to produce</li>
+                                <li>$c_j$: Unit cost of product $j$</li>
+                                <li>$a_{ij}$: Amount of resource $i$ needed for product $j$</li>
+                                <li>$b_i$: Available amount of resource $i$</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>💰 Resource Pricing</h4>
+                            <p><strong>Dual:</strong> Maximize revenue from selling resources</p>
+                            <ul>
+                                <li>$y_i$: Price per unit of resource $i$ (shadow price)</li>
+                                <li>$\mathbf{b}^T\mathbf{y}$: Total revenue from selling all resources</li>
+                                <li>Constraint: Revenue per unit ≤ Cost per unit</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="theorem-box">
+                        <h4>📊 Management Insights</h4>
+                        <p><strong>Shadow prices</strong> $y_i^*$ cho biết:</p>
+                        <ul>
+                            <li>Giá trị của 1 đơn vị resource $i$ thêm vào</li>
+                            <li>Tối đa có thể trả để tăng $b_i$ lên 1 đơn vị</li>
+                            <li>Tốc độ thay đổi optimal value theo $b_i$</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADVANCED SECTION -->
+        <div id="advanced" class="lesson-section">
+            <div style="background: rgba(0, 0, 255, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                <h2 style="color: #2196F3;">🚀 ADVANCED TOPICS SECTION - LOADED ✅</h2>
+            </div>
+            <div class="theory-section">
+                <h2 style="color: #e67e22; margin: 0 0 20px 0;">🚀 Advanced Topics</h2>
+
+                <div class="algorithm-box">
+                    <h3>🌐 Integer Linear Programming (ILP)</h3>
+                    <p>Mở rộng LP với ràng buộc integer trên một số hoặc tất cả variables:</p>
+                    
+                    <div class="formula-box">
+                        $$\begin{align}
+                        \text{minimize} \quad & \mathbf{c}^T\mathbf{x} \\
+                        \text{subject to} \quad & \mathbf{A}\mathbf{x} \geq \mathbf{b} \\
+                        & x_j \in \mathbb{Z}, \quad j \in J \\
+                        & \mathbf{x} \geq \mathbf{0}
+                        \end{align}$$
+                    </div>
+
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>🔢 Types of ILP</h4>
+                            <ul>
+                                <li><strong>Pure ILP:</strong> Tất cả variables integer</li>
+                                <li><strong>Mixed ILP (MILP):</strong> Một số variables integer</li>
+                                <li><strong>Binary ILP:</strong> Variables ∈ {0,1}</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>⚡ Complexity</h4>
+                            <ul>
+                                <li><strong>LP:</strong> Polynomial time solvable</li>
+                                <li><strong>ILP:</strong> NP-hard in general</li>
+                                <li><strong>Methods:</strong> Branch & Bound, Cutting Planes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🔄 Stochastic Programming</h3>
+                    <p>LP với uncertainty trong data - parameters là random variables:</p>
+                    
+                    <div class="formula-box">
+                        $$\begin{align}
+                        \text{minimize} \quad & \mathbb{E}[\mathbf{c}^T\mathbf{x} + Q(\mathbf{x}, \boldsymbol{\xi})] \\
+                        \text{subject to} \quad & \mathbf{A}\mathbf{x} = \mathbf{b} \\
+                        & \mathbf{x} \geq \mathbf{0}
+                        \end{align}$$
+                    </div>
+
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>📊 Two-Stage Models</h4>
+                            <p><strong>Stage 1:</strong> Decide $\mathbf{x}$ before uncertainty revealed</p>
+                            <p><strong>Stage 2:</strong> Observe $\boldsymbol{\xi}$, solve recourse problem</p>
+                            <p><strong>Applications:</strong> Portfolio optimization, supply chain</p>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>🎯 Chance Constraints</h4>
+                            <div class="formula-box">
+                                $$P(\mathbf{A}(\boldsymbol{\xi})\mathbf{x} \geq \mathbf{b}(\boldsymbol{\xi})) \geq 1-\alpha$$
+                            </div>
+                            <p>Constraints satisfied with probability ≥ $1-\alpha$</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="algorithm-box">
+                    <h3>🏃‍♂️ Online Linear Programming</h3>
+                    <p>LP problems where constraints arrive over time:</p>
+                    
+                    <div class="grid-layout">
+                        <div class="example-box">
+                            <h4>⚡ Setting</h4>
+                            <ul>
+                                <li>Variables $\mathbf{x}$ decided incrementally</li>
+                                <li>Constraints $\mathbf{a}_t^T\mathbf{x} \leq b_t$ arrive at time $t$</li>
+                                <li>Goal: Minimize regret vs. offline optimal</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>📈 Applications</h4>
+                            <ul>
+                                <li><strong>Ad allocation:</strong> Google AdWords</li>
+                                <li><strong>Cloud computing:</strong> Resource allocation</li>
+                                <li><strong>Trading:</strong> Portfolio rebalancing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="complexity-analysis">
+                    <h3>🔬 Cutting-Edge Research</h3>
+                    
+                    <div class="grid-layout">
+                        <div class="algorithm-box">
+                            <h4>🤖 ML-Enhanced LP</h4>
+                            <ul>
+                                <li><strong>Learning to Optimize:</strong> NN predict good starting points</li>
+                                <li><strong>Warm Starts:</strong> Transfer knowledge between similar instances</li>
+                                <li><strong>Adaptive Algorithms:</strong> Learn problem structure online</li>
+                            </ul>
+                        </div>
+
+                        <div class="algorithm-box">
+                            <h4>⚡ High-Performance Computing</h4>
+                            <ul>
+                                <li><strong>Parallel Simplex:</strong> GPU acceleration</li>
+                                <li><strong>Distributed LP:</strong> Large-scale problems across clusters</li>
+                                <li><strong>Quantum LP:</strong> Early research on quantum algorithms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="lesson-section">
+            <div style="background: rgba(255, 255, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+                <h2 style="color: #FFD700;">🎮 INTERACTIVE SECTION - LOADED ✅</h2>
+            </div>
+            <div class="main-layout">
+                <div class="content-area">
+                    <h2>🎮 Interactive LP Visualization</h2>
+                    <p>Khám phá các khái niệm LP thông qua visualization tương tác!</p>
+                    
+                    <div class="canvas-container">
+                        <canvas id="lpCanvas" width="800" height="500"></canvas>
+                    </div>
+
+                    <div class="controls">
+                        <div class="control-group">
+                            <label>Objective c₁:</label>
+                            <input type="range" id="c1Slider" min="-5" max="5" step="0.1" value="1">
+                            <div class="parameter-display" id="c1Display">c₁ = 1.0</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Objective c₂:</label>
+                            <input type="range" id="c2Slider" min="-5" max="5" step="0.1" value="1">
+                            <div class="parameter-display" id="c2Display">c₂ = 1.0</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Constraint 1 (x₁ + x₂ ≤ b₁):</label>
+                            <input type="range" id="b1Slider" min="1" max="8" step="0.5" value="4">
+                            <div class="parameter-display" id="b1Display">b₁ = 4.0</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Constraint 2 (2x₁ - x₂ ≤ b₂):</label>
+                            <input type="range" id="b2Slider" min="0" max="6" step="0.5" value="2">
+                            <div class="parameter-display" id="b2Display">b₂ = 2.0</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 20px 0;">
+                        <button onclick="solveSimplex()">🎯 Solve with Simplex</button>
+                        <button onclick="showDualProblem()">🔄 Show Dual</button>
+                        <button onclick="animateSimplex()">🎬 Animate Steps</button>
+                        <button onclick="sensitivityAnalysis()">📊 Sensitivity</button>
+                        <button onclick="resetVisualization()">🔄 Reset</button>
+                    </div>
+                </div>
+
+                <div class="visualization-area">
+                    <h3>📊 Results Panel</h3>
+                    <div id="resultsPanel" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <div class="parameter-display" id="optimalValue">Optimal Value: -</div>
+                        <div class="parameter-display" id="optimalPoint">Optimal Point: -</div>
+                        <div class="parameter-display" id="shadowPrices">Shadow Prices: -</div>
+                        <div class="parameter-display" id="iterations">Iterations: -</div>
+                    </div>
+
+                    <h3>💡 Problem Info</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;">
+                        <div class="formula-box">
+                            <h4>Current Problem:</h4>
+                            <div id="currentProblem">
+                                minimize: c₁x₁ + c₂x₂<br>
+                                subject to:<br>
+                                x₁ + x₂ ≤ b₁<br>
+                                2x₁ - x₂ ≤ b₂<br>
+                                x₁, x₂ ≥ 0
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>🔄 Dual Problem</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;">
+                        <div class="formula-box" id="dualProblem">
+                            maximize: b₁y₁ + b₂y₂<br>
+                            subject to:<br>
+                            y₁ + 2y₂ ≤ c₁<br>
+                            y₁ - y₂ ≤ c₂<br>
+                            y₁, y₂ ≥ 0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="applications-grid">
+                <div class="app-card">
+                    <h3>🏭 Manufacturing & Production</h3>
+                    <ul>
+                        <li><strong>Tesla:</strong> Battery production optimization</li>
+                        <li><strong>Boeing:</strong> Aircraft assembly scheduling</li>
+                        <li><strong>Coca-Cola:</strong> Distribution network optimization</li>
+                        <li><strong>Intel:</strong> Chip fabrication planning</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h3>💰 Finance & Investment</h3>
+                    <ul>
+                        <li><strong>BlackRock:</strong> Portfolio optimization</li>
+                        <li><strong>JPMorgan:</strong> Risk management</li>
+                        <li><strong>Goldman Sachs:</strong> Trading strategies</li>
+                        <li><strong>Vanguard:</strong> Asset allocation</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h3>🚚 Logistics & Transportation</h3>
+                    <ul>
+                        <li><strong>Amazon:</strong> Warehouse optimization</li>
+                        <li><strong>FedEx:</strong> Route planning</li>
+                        <li><strong>Uber:</strong> Driver-rider matching</li>
+                        <li><strong>Airlines:</strong> Crew scheduling</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h3>🤖 Technology & AI</h3>
+                    <ul>
+                        <li><strong>Google:</strong> Ad auction optimization</li>
+                        <li><strong>Facebook:</strong> News feed ranking</li>
+                        <li><strong>Netflix:</strong> Content recommendation</li>
+                        <li><strong>AWS:</strong> Resource allocation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Navigation functionality
+            function showSection(sectionId) {
+                document.querySelectorAll('.lesson-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-button').forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                document.getElementById(sectionId).classList.add('active');
+                event.target.classList.add('active');
+                
+                // Re-render MathJax for the new section
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([document.getElementById(sectionId)]).then(() => {
+                        console.log('MathJax re-rendered for section:', sectionId);
+                    }).catch((err) => console.log('MathJax error:', err));
+                }
+            }
+
+            // Canvas and visualization variables
+            const canvas = document.getElementById('lpCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let c1 = 1, c2 = 1;
+            let b1 = 4, b2 = 2;
+            let optimalPoint = null;
+            let optimalValue = null;
+            let shadowPrices = [0, 0];
+            let iterationCount = 0;
+
+            // Update parameters from sliders
+            function updateParameters() {
+                c1 = parseFloat(document.getElementById('c1Slider').value);
+                c2 = parseFloat(document.getElementById('c2Slider').value);
+                b1 = parseFloat(document.getElementById('b1Slider').value);
+                b2 = parseFloat(document.getElementById('b2Slider').value);
+                
+                // Update displays
+                document.getElementById('c1Display').textContent = `c₁ = ${c1.toFixed(1)}`;
+                document.getElementById('c2Display').textContent = `c₂ = ${c2.toFixed(1)}`;
+                document.getElementById('b1Display').textContent = `b₁ = ${b1.toFixed(1)}`;
+                document.getElementById('b2Display').textContent = `b₂ = ${b2.toFixed(1)}`;
+                
+                // Update problem display
+                updateProblemDisplay();
+                
+                // Redraw
+                drawLP();
+            }
+
+            // Update problem display
+            function updateProblemDisplay() {
+                document.getElementById('currentProblem').innerHTML = `
+                    minimize: ${c1.toFixed(1)}x₁ + ${c2.toFixed(1)}x₂<br>
+                    subject to:<br>
+                    x₁ + x₂ ≤ ${b1.toFixed(1)}<br>
+                    2x₁ - x₂ ≤ ${b2.toFixed(1)}<br>
+                    x₁, x₂ ≥ 0
+                `;
+                
+                document.getElementById('dualProblem').innerHTML = `
+                    maximize: ${b1.toFixed(1)}y₁ + ${b2.toFixed(1)}y₂<br>
+                    subject to:<br>
+                    y₁ + 2y₂ ≤ ${c1.toFixed(1)}<br>
+                    y₁ - y₂ ≤ ${c2.toFixed(1)}<br>
+                    y₁, y₂ ≥ 0
+                `;
+            }
+
+            // Main drawing function
+            function drawLP() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw grid
+                drawGrid();
+                
+                // Draw constraints
+                drawConstraints();
+                
+                // Draw feasible region
+                drawFeasibleRegion();
+                
+                // Draw objective function contours
+                drawObjectiveContours();
+                
+                // Draw optimal point
+                if (optimalPoint) {
+                    drawOptimalPoint();
+                }
+                
+                // Draw labels
+                drawLabels();
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 0.5;
+                
+                const scale = 60;
+                for (let i = 0; i <= canvas.width; i += scale) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
+                    ctx.stroke();
+                }
+                
+                for (let j = 0; j <= canvas.height; j += scale) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, j);
+                    ctx.lineTo(canvas.width, j);
+                    ctx.stroke();
+                }
+                
+                // Axes
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(60, canvas.height - 60);
+                ctx.lineTo(canvas.width - 20, canvas.height - 60);
+                ctx.moveTo(60, canvas.height - 60);
+                ctx.lineTo(60, 20);
+                ctx.stroke();
+            }
+
+            function drawConstraints() {
+                const colors = ['#e74c3c', '#2ecc71', '#3498db'];
+                const constraints = [
+                    {a1: 1, a2: 1, b: b1, label: 'x₁ + x₂ ≤ ' + b1.toFixed(1)},
+                    {a1: 2, a2: -1, b: b2, label: '2x₁ - x₂ ≤ ' + b2.toFixed(1)},
+                    {a1: 1, a2: 0, b: 0, label: 'x₁ ≥ 0'},
+                    {a1: 0, a2: 1, b: 0, label: 'x₂ ≥ 0'}
+                ];
+                
+                constraints.forEach((constraint, i) => {
+                    if (i >= 2) return; // Skip non-negativity for line drawing
+                    
+                    ctx.strokeStyle = colors[i % colors.length];
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    
+                    // Find two points on the line
+                    const x1 = 0;
+                    const y1 = (constraint.b - constraint.a1 * x1) / constraint.a2;
+                    const x2 = 10;
+                    const y2 = (constraint.b - constraint.a1 * x2) / constraint.a2;
+                    
+                    const px1 = 60 + x1 * 60;
+                    const py1 = canvas.height - 60 - y1 * 60;
+                    const px2 = 60 + x2 * 60;
+                    const py2 = canvas.height - 60 - y2 * 60;
+                    
+                    ctx.moveTo(px1, py1);
+                    ctx.lineTo(px2, py2);
+                    ctx.stroke();
+                    
+                    // Label
+                    ctx.fillStyle = colors[i % colors.length];
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText(constraint.label, px2 - 100, py2 - 10);
+                });
+            }
+
+            function drawFeasibleRegion() {
+                // Find vertices of feasible region
+                const vertices = findFeasibleVertices();
+                
+                if (vertices.length === 0) return;
+                
+                ctx.fillStyle = 'rgba(52, 152, 219, 0.2)';
+                ctx.beginPath();
+                
+                vertices.forEach((vertex, i) => {
+                    const x = 60 + vertex[0] * 60;
+                    const y = canvas.height - 60 - vertex[1] * 60;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            function drawObjectiveContours() {
+                if (Math.abs(c1) < 0.01 && Math.abs(c2) < 0.01) return;
+                
+                ctx.strokeStyle = '#9b59b6';
+                ctx.lineWidth = 2;
+                
+                for (let level = 0; level <= 10; level += 2) {
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    
+                    // c1*x1 + c2*x2 = level
+                    const x1 = 0;
+                    const y1 = (level - c1 * x1) / c2;
+                    const x2 = 10;
+                    const y2 = (level - c1 * x2) / c2;
+                    
+                    const px1 = 60 + x1 * 60;
+                    const py1 = canvas.height - 60 - y1 * 60;
+                    const px2 = 60 + x2 * 60;
+                    const py2 = canvas.height - 60 - y2 * 60;
+                    
+                    ctx.moveTo(px1, py1);
+                    ctx.lineTo(px2, py2);
+                    ctx.stroke();
+                }
+                
+                ctx.setLineDash([]);
+            }
+
+            function drawOptimalPoint() {
+                if (!optimalPoint) return;
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.strokeStyle = '#c0392b';
+                ctx.lineWidth = 3;
+                
+                const x = 60 + optimalPoint[0] * 60;
+                const y = canvas.height - 60 - optimalPoint[1] * 60;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Label
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(`Optimal: (${optimalPoint[0].toFixed(2)}, ${optimalPoint[1].toFixed(2)})`, x + 15, y - 10);
+            }
+
+            function drawLabels() {
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '14px Arial';
+                
+                // Axis labels
+                ctx.fillText('x₁', canvas.width - 30, canvas.height - 40);
+                ctx.fillText('x₂', 45, 25);
+                
+                // Scale labels
+                for (let i = 1; i <= 10; i++) {
+                    ctx.fillText(i.toString(), 60 + i * 60 - 5, canvas.height - 45);
+                }
+                for (let i = 1; i <= 7; i++) {
+                    ctx.fillText(i.toString(), 45, canvas.height - 60 - i * 60 + 5);
+                }
+                
+                // Objective function
+                ctx.font = 'bold 16px Arial';
+                ctx.fillStyle = '#9b59b6';
+                ctx.fillText(`Objective: ${c1.toFixed(1)}x₁ + ${c2.toFixed(1)}x₂`, 20, 30);
+            }
+
+            function findFeasibleVertices() {
+                // Calculate intersection points and check feasibility
+                const vertices = [];
+                
+                // Intersection of x1 + x2 = b1 and 2x1 - x2 = b2
+                const x1 = (b1 + b2) / 3;
+                const x2 = (2 * b1 - b2) / 3;
+                if (x1 >= 0 && x2 >= 0) vertices.push([x1, x2]);
+                
+                // Intersection with axes
+                if (b1 >= 0) vertices.push([0, b1]); // x1=0, x1+x2=b1
+                if (b2 >= 0) vertices.push([b2/2, 0]); // x2=0, 2x1-x2=b2
+                vertices.push([0, 0]); // Origin
+                if (b1 >= 0) vertices.push([b1, 0]); // x2=0, x1+x2=b1
+                
+                // Filter valid vertices
+                return vertices.filter(v => {
+                    return v[0] >= 0 && v[1] >= 0 && 
+                           v[0] + v[1] <= b1 + 0.01 && 
+                           2*v[0] - v[1] <= b2 + 0.01;
+                });
+            }
+
+            function solveSimplex() {
+                const vertices = findFeasibleVertices();
+                if (vertices.length === 0) {
+                    alert('No feasible solution!');
+                    return;
+                }
+                
+                let bestValue = Infinity;
+                let bestPoint = null;
+                iterationCount = vertices.length; // Simplified
+                
+                vertices.forEach(vertex => {
+                    const value = c1 * vertex[0] + c2 * vertex[1];
+                    if (value < bestValue) {
+                        bestValue = value;
+                        bestPoint = vertex;
+                    }
+                });
+                
+                optimalPoint = bestPoint;
+                optimalValue = bestValue;
+                
+                // Calculate shadow prices (simplified)
+                if (optimalPoint[0] > 0.01 && optimalPoint[1] > 0.01) {
+                    // Both constraints active
+                    shadowPrices = [c1 + c2, c1 - c2]; // Simplified calculation
+                }
+                
+                updateResultsDisplay();
+                drawLP();
+            }
+
+            function updateResultsDisplay() {
+                document.getElementById('optimalValue').textContent = 
+                    `Optimal Value: ${optimalValue ? optimalValue.toFixed(3) : '-'}`;
+                document.getElementById('optimalPoint').textContent = 
+                    `Optimal Point: ${optimalPoint ? `(${optimalPoint[0].toFixed(2)}, ${optimalPoint[1].toFixed(2)})` : '-'}`;
+                document.getElementById('shadowPrices').textContent = 
+                    `Shadow Prices: (${shadowPrices[0].toFixed(2)}, ${shadowPrices[1].toFixed(2)})`;
+                document.getElementById('iterations').textContent = 
+                    `Iterations: ${iterationCount}`;
+            }
+
+            function showDualProblem() {
+                alert(`Dual Problem:\nmaximize: ${b1.toFixed(1)}y₁ + ${b2.toFixed(1)}y₂\nsubject to:\ny₁ + 2y₂ ≤ ${c1.toFixed(1)}\ny₁ - y₂ ≤ ${c2.toFixed(1)}\ny₁, y₂ ≥ 0\n\nOptimal dual solution: (${shadowPrices[0].toFixed(3)}, ${shadowPrices[1].toFixed(3)})`);
+            }
+
+            function animateSimplex() {
+                const vertices = findFeasibleVertices();
+                if (vertices.length === 0) return;
+                
+                let currentVertex = 0;
+                const animate = () => {
+                    optimalPoint = vertices[currentVertex];
+                    const currentValue = c1 * optimalPoint[0] + c2 * optimalPoint[1];
+                    optimalValue = currentValue;
+                    updateResultsDisplay();
+                    drawLP();
+                    
+                    currentVertex = (currentVertex + 1) % vertices.length;
+                    
+                    if (currentVertex !== 0) {
+                        setTimeout(animate, 1500);
+                    } else {
+                        setTimeout(() => solveSimplex(), 1000);
+                    }
+                };
+                
+                animate();
+            }
+
+            function sensitivityAnalysis() {
+                const analysis = `
+Sensitivity Analysis:
+- Current optimal value: ${optimalValue ? optimalValue.toFixed(3) : 'N/A'}
+- Shadow price of constraint 1: ${shadowPrices[0].toFixed(3)}
+- Shadow price of constraint 2: ${shadowPrices[1].toFixed(3)}
+
+Interpretation:
+- Increasing b₁ by 1 unit → objective changes by ${shadowPrices[0].toFixed(3)}
+- Increasing b₂ by 1 unit → objective changes by ${shadowPrices[1].toFixed(3)}
+                `;
+                alert(analysis);
+            }
+
+            function resetVisualization() {
+                optimalPoint = null;
+                optimalValue = null;
+                shadowPrices = [0, 0];
+                iterationCount = 0;
+                updateResultsDisplay();
+                drawLP();
+            }
+
+            // Event listeners
+            if (canvas) {
+                document.getElementById('c1Slider').addEventListener('input', updateParameters);
+                document.getElementById('c2Slider').addEventListener('input', updateParameters);
+                document.getElementById('b1Slider').addEventListener('input', updateParameters);
+                document.getElementById('b2Slider').addEventListener('input', updateParameters);
+                
+                // Initialize
+                updateParameters();
+            }
+
+            // MathJax configuration
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                },
+                svg: {
+                    fontCache: 'global'
+                }
+            };
+        </script>
+    </body>
+</html>

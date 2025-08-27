@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Neural Networks - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.active {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .layer-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .layer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        .layer-item.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-left-color: #ffd700;
+        }
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .complexity-info {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+        select, input[type="range"] {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .node-features {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .message-flow {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .step-number.active {
+            background: #ffd700;
+            color: #000;
+        }
+        .aggregation-viz {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại Graph Theory Hub</a>
+        
+        <h1>🧠 Graph Neural Networks</h1>
+        
+        <div class="info-panel">
+            <h2>🚀 Deep Learning meets Graph Theory</h2>
+            <p>
+                <strong>Graph Neural Networks (GNNs)</strong> là một paradigm mạnh mẽ trong deep learning, 
+                được thiết kế để xử lý dữ liệu có cấu trúc graph. GNNs kết hợp sức mạnh của neural networks 
+                với khả năng biểu diễn relationships và structures phức tạp của graphs.
+            </p>
+            
+            <div class="math-formula">
+                <h4>🔬 Core Mathematical Framework</h4>
+                <p><strong>Message Passing:</strong> \(m_{ij}^{(l)} = M_l(h_i^{(l)}, h_j^{(l)}, e_{ij})\)</p>
+                <p><strong>Aggregation:</strong> \(m_i^{(l)} = \text{AGG}_l(\{m_{ij}^{(l)} : j \in \mathcal{N}(i)\})\)</p>
+                <p><strong>Update:</strong> \(h_i^{(l+1)} = U_l(h_i^{(l)}, m_i^{(l)})\)</p>
+                <p><strong>Graph-level:</strong> \(h_G = \text{READOUT}(\{h_i^{(L)} : i \in V\})\)</p>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="visualization-panel">
+                <h3>Interactive GNN Visualization</h3>
+                <canvas id="gnnCanvas" width="750" height="500"></canvas>
+                
+                <div class="aggregation-viz" id="aggregationViz">
+                    <h4>🔄 Message Aggregation</h4>
+                    <div id="aggregationContent">
+                        Select a node to see message aggregation...
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>🏗️ GNN Architecture</h3>
+                    <button id="gcnBtn" class="active" onclick="selectArchitecture('gcn')">GCN</button>
+                    <button id="graphsageBtn" onclick="selectArchitecture('graphsage')">GraphSAGE</button>
+                    <button id="gatBtn" onclick="selectArchitecture('gat')">GAT</button>
+                    <button id="ginBtn" onclick="selectArchitecture('gin')">GIN</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚙️ Network Parameters</h3>
+                    <label>Layers: <input type="range" id="layersSlider" min="1" max="5" value="3"></label>
+                    <span id="layersValue">3</span><br>
+                    <label>Hidden Dim: <input type="range" id="hiddenDimSlider" min="8" max="64" value="16"></label>
+                    <span id="hiddenDimValue">16</span><br>
+                    <label>Learning Rate: <input type="range" id="lrSlider" min="0.001" max="0.1" value="0.01" step="0.001"></label>
+                    <span id="lrValue">0.01</span>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🎮 Training Controls</h3>
+                    <button onclick="initializeNetwork()">🔄 Initialize</button>
+                    <button onclick="runForwardPass()">➡️ Forward Pass</button>
+                    <button onclick="trainStep()">📈 Train Step</button>
+                    <button onclick="runFullTraining()">🚀 Full Training</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>📊 Task Type</h3>
+                    <button onclick="setTask('node_classification')">Node Classification</button>
+                    <button onclick="setTask('graph_classification')">Graph Classification</button>
+                    <button onclick="setTask('link_prediction')">Link Prediction</button>
+                </div>
+                
+                <div class="layer-panel" id="layerPanel">
+                    <h4>🔍 Network Layers</h4>
+                    <div id="layersContent">
+                        <div class="step-indicator">
+                            <div class="step-number">1</div>
+                            <span>Input Layer: Node features</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="node-features" id="nodeFeatures">
+                    <h4>📋 Node Features</h4>
+                    <div id="featuresContent">Click a node to see features...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>🏗️ GNN Architectures Comparison</h2>
+            <table class="comparison-table">
+                <tr>
+                    <th>Architecture</th>
+                    <th>Key Innovation</th>
+                    <th>Aggregation</th>
+                    <th>Complexity</th>
+                    <th>Best For</th>
+                </tr>
+                <tr>
+                    <td><strong>GCN</strong></td>
+                    <td>Spectral convolution</td>
+                    <td>Mean aggregation</td>
+                    <td>\(O(|E| \cdot d)\)</td>
+                    <td>Semi-supervised node classification</td>
+                </tr>
+                <tr>
+                    <td><strong>GraphSAGE</strong></td>
+                    <td>Sampling + inductive</td>
+                    <td>Various (mean, LSTM, pool)</td>
+                    <td>\(O(|V| \cdot S \cdot d)\)</td>
+                    <td>Large graphs, inductive learning</td>
+                </tr>
+                <tr>
+                    <td><strong>GAT</strong></td>
+                    <td>Attention mechanism</td>
+                    <td>Weighted attention</td>
+                    <td>\(O(|E| \cdot d + |V| \cdot d^2)\)</td>
+                    <td>Heterogeneous graphs</td>
+                </tr>
+                <tr>
+                    <td><strong>GIN</strong></td>
+                    <td>Theoretical guarantees</td>
+                    <td>Sum aggregation</td>
+                    <td>\(O(|E| \cdot d)\)</td>
+                    <td>Graph classification</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="message-flow">
+            <h2>🔄 Message Passing Framework</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="complexity-info">
+                    <h4>1️⃣ Message Generation</h4>
+                    <p><strong>Formula:</strong> \(m_{ij} = M(h_i, h_j, e_{ij})\)</p>
+                    <p>Create messages between connected nodes based on their features and edge attributes.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>2️⃣ Message Aggregation</h4>
+                    <p><strong>Formula:</strong> \(m_i = \text{AGG}(\{m_{ij}\})\)</p>
+                    <p>Combine messages from all neighbors using functions like sum, mean, max, or attention.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>3️⃣ Node Update</h4>
+                    <p><strong>Formula:</strong> \(h_i' = U(h_i, m_i)\)</p>
+                    <p>Update node representations using current features and aggregated messages.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>4️⃣ Readout (Optional)</h4>
+                    <p><strong>Formula:</strong> \(h_G = \text{READOUT}(\{h_i\})\)</p>
+                    <p>Create graph-level representation for graph classification tasks.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>🌟 Real-World Applications</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="complexity-info">
+                    <h4>🧬 Drug Discovery</h4>
+                    <p>Molecular property prediction, drug-target interaction, ADMET prediction using molecular graphs.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🏷️ Social Media</h4>
+                    <p>User behavior prediction, fake news detection, recommendation systems using social graphs.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🗺️ Transportation</h4>
+                    <p>Traffic prediction, route optimization, autonomous vehicle planning using road networks.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>💰 Finance</h4>
+                    <p>Fraud detection, credit scoring, algorithmic trading using transaction and relationship graphs.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🧠 Neuroscience</h4>
+                    <p>Brain network analysis, disease prediction, cognitive function modeling using connectomes.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🏭 Materials Science</h4>
+                    <p>Crystal structure prediction, catalyst design, material property optimization.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Graph Neural Network Implementation
+        class GraphNeuralNetwork {
+            constructor() {
+                this.nodes = [];
+                this.edges = [];
+                this.architecture = 'gcn';
+                this.numLayers = 3;
+                this.hiddenDim = 16;
+                this.learningRate = 0.01;
+                this.currentTask = 'node_classification';
+                this.nodeFeatures = {};
+                this.nodeLabels = {};
+                this.layerOutputs = {};
+                this.weights = {};
+                this.training = false;
+                this.currentLayer = 0;
+                this.selectedNode = null;
+                
+                this.initializeGraph();
+                this.initializeNetwork();
+            }
+            
+            initializeGraph() {
+                // Create a sample graph for demonstration
+                this.nodes = [
+                    {id: 0, x: 150, y: 150, label: 'A', class: 0},
+                    {id: 1, x: 350, y: 100, label: 'B', class: 0},
+                    {id: 2, x: 550, y: 150, label: 'C', class: 1},
+                    {id: 3, x: 250, y: 250, label: 'D', class: 0},
+                    {id: 4, x: 450, y: 200, label: 'E', class: 1},
+                    {id: 5, x: 150, y: 350, label: 'F', class: 1},
+                    {id: 6, x: 350, y: 300, label: 'G', class: 1},
+                    {id: 7, x: 550, y: 350, label: 'H', class: 2},
+                    {id: 8, x: 650, y: 250, label: 'I', class: 2}
+                ];
+                
+                this.edges = [
+                    {from: 0, to: 1}, {from: 0, to: 3},
+                    {from: 1, to: 2}, {from: 1, to: 3}, {from: 1, to: 4},
+                    {from: 2, to: 4}, {from: 2, to: 8},
+                    {from: 3, to: 4}, {from: 3, to: 6}, {from: 3, to: 5},
+                    {from: 4, to: 6}, {from: 4, to: 7},
+                    {from: 5, to: 6},
+                    {from: 6, to: 7},
+                    {from: 7, to: 8}
+                ];
+                
+                this.buildAdjacencyMatrix();
+                this.initializeFeatures();
+            }
+            
+            buildAdjacencyMatrix() {
+                const n = this.nodes.length;
+                this.adjacencyMatrix = Array(n).fill().map(() => Array(n).fill(0));
+                this.adjacencyList = Array(n).fill().map(() => []);
+                
+                this.edges.forEach(edge => {
+                    this.adjacencyMatrix[edge.from][edge.to] = 1;
+                    this.adjacencyMatrix[edge.to][edge.from] = 1;
+                    this.adjacencyList[edge.from].push(edge.to);
+                    this.adjacencyList[edge.to].push(edge.from);
+                });
+            }
+            
+            initializeFeatures() {
+                // Initialize random node features
+                this.nodes.forEach(node => {
+                    this.nodeFeatures[node.id] = Array(4).fill().map(() => Math.random() * 2 - 1);
+                    this.nodeLabels[node.id] = node.class;
+                });
+            }
+            
+            initializeNetwork() {
+                this.weights = {};
+                this.layerOutputs = {};
+                
+                // Initialize weights for each layer
+                for (let layer = 0; layer < this.numLayers; layer++) {
+                    const inputDim = layer === 0 ? 4 : this.hiddenDim;
+                    const outputDim = layer === this.numLayers - 1 ? 3 : this.hiddenDim;
+                    
+                    this.weights[layer] = {
+                        W: this.randomMatrix(inputDim, outputDim),
+                        b: Array(outputDim).fill().map(() => Math.random() * 0.1)
+                    };
+                }
+                
+                // Initialize layer outputs
+                this.nodes.forEach(node => {
+                    this.layerOutputs[node.id] = {};
+                    this.layerOutputs[node.id][0] = [...this.nodeFeatures[node.id]];
+                });
+                
+                this.updateLayerPanel();
+            }
+            
+            randomMatrix(rows, cols) {
+                return Array(rows).fill().map(() => 
+                    Array(cols).fill().map(() => (Math.random() * 2 - 1) * Math.sqrt(2 / rows))
+                );
+            }
+            
+            async runForwardPass() {
+                this.currentLayer = 0;
+                
+                for (let layer = 1; layer <= this.numLayers; layer++) {
+                    this.currentLayer = layer;
+                    
+                    await this.forwardLayer(layer);
+                    this.updateLayerPanel();
+                    drawGNN();
+                    
+                    await this.delay(1000);
+                }
+            }
+            
+            async forwardLayer(layer) {
+                const prevLayer = layer - 1;
+                
+                this.nodes.forEach(node => {
+                    const nodeId = node.id;
+                    
+                    // Message passing based on architecture
+                    let aggregatedMessage;
+                    
+                    switch (this.architecture) {
+                        case 'gcn':
+                            aggregatedMessage = this.gcnAggregation(nodeId, prevLayer);
+                            break;
+                        case 'graphsage':
+                            aggregatedMessage = this.graphsageAggregation(nodeId, prevLayer);
+                            break;
+                        case 'gat':
+                            aggregatedMessage = this.gatAggregation(nodeId, prevLayer);
+                            break;
+                        case 'gin':
+                            aggregatedMessage = this.ginAggregation(nodeId, prevLayer);
+                            break;
+                    }
+                    
+                    // Apply linear transformation
+                    const output = this.matrixVectorMultiply(
+                        this.weights[prevLayer].W,
+                        aggregatedMessage
+                    );
+                    
+                    // Add bias
+                    output.forEach((val, i) => {
+                        output[i] = val + this.weights[prevLayer].b[i];
+                    });
+                    
+                    // Apply activation (ReLU)
+                    if (layer < this.numLayers) {
+                        output.forEach((val, i) => {
+                            output[i] = Math.max(0, val);
+                        });
+                    }
+                    
+                    this.layerOutputs[nodeId][layer] = output;
+                });
+            }
+            
+            gcnAggregation(nodeId, layer) {
+                const neighbors = this.adjacencyList[nodeId];
+                const selfAndNeighbors = [nodeId, ...neighbors];
+                
+                // Mean aggregation with self-loop
+                const aggregated = Array(this.layerOutputs[nodeId][layer].length).fill(0);
+                
+                selfAndNeighbors.forEach(neighborId => {
+                    const features = this.layerOutputs[neighborId][layer];
+                    features.forEach((val, i) => {
+                        aggregated[i] += val;
+                    });
+                });
+                
+                // Normalize by degree
+                const normalization = Math.sqrt(selfAndNeighbors.length);
+                aggregated.forEach((val, i) => {
+                    aggregated[i] = val / normalization;
+                });
+                
+                return aggregated;
+            }
+            
+            graphsageAggregation(nodeId, layer) {
+                const neighbors = this.adjacencyList[nodeId];
+                
+                if (neighbors.length === 0) {
+                    return this.layerOutputs[nodeId][layer];
+                }
+                
+                // Mean aggregation of neighbors
+                const aggregated = Array(this.layerOutputs[nodeId][layer].length).fill(0);
+                
+                neighbors.forEach(neighborId => {
+                    const features = this.layerOutputs[neighborId][layer];
+                    features.forEach((val, i) => {
+                        aggregated[i] += val;
+                    });
+                });
+                
+                aggregated.forEach((val, i) => {
+                    aggregated[i] = val / neighbors.length;
+                });
+                
+                // Concatenate with self features
+                const selfFeatures = this.layerOutputs[nodeId][layer];
+                return [...selfFeatures, ...aggregated];
+            }
+            
+            gatAggregation(nodeId, layer) {
+                const neighbors = this.adjacencyList[nodeId];
+                const selfFeatures = this.layerOutputs[nodeId][layer];
+                
+                if (neighbors.length === 0) {
+                    return selfFeatures;
+                }
+                
+                // Compute attention weights (simplified)
+                const attentionWeights = [];
+                let weightSum = 0;
+                
+                neighbors.forEach(neighborId => {
+                    const neighborFeatures = this.layerOutputs[neighborId][layer];
+                    // Simplified attention: dot product
+                    let attention = 0;
+                    selfFeatures.forEach((val, i) => {
+                        attention += val * neighborFeatures[i];
+                    });
+                    attention = Math.exp(attention);
+                    attentionWeights.push(attention);
+                    weightSum += attention;
+                });
+                
+                // Normalize weights
+                attentionWeights.forEach((weight, i) => {
+                    attentionWeights[i] = weight / weightSum;
+                });
+                
+                // Weighted aggregation
+                const aggregated = Array(selfFeatures.length).fill(0);
+                neighbors.forEach((neighborId, i) => {
+                    const features = this.layerOutputs[neighborId][layer];
+                    const weight = attentionWeights[i];
+                    features.forEach((val, j) => {
+                        aggregated[j] += val * weight;
+                    });
+                });
+                
+                return aggregated;
+            }
+            
+            ginAggregation(nodeId, layer) {
+                const neighbors = this.adjacencyList[nodeId];
+                const selfFeatures = this.layerOutputs[nodeId][layer];
+                
+                // Sum aggregation
+                const aggregated = [...selfFeatures];
+                
+                neighbors.forEach(neighborId => {
+                    const features = this.layerOutputs[neighborId][layer];
+                    features.forEach((val, i) => {
+                        aggregated[i] += val;
+                    });
+                });
+                
+                // Apply epsilon (learnable parameter, simplified as 0)
+                return aggregated;
+            }
+            
+            matrixVectorMultiply(matrix, vector) {
+                const result = Array(matrix.length).fill(0);
+                
+                matrix.forEach((row, i) => {
+                    row.forEach((val, j) => {
+                        if (j < vector.length) {
+                            result[i] += val * vector[j];
+                        }
+                    });
+                });
+                
+                return result;
+            }
+            
+            async trainStep() {
+                // Simplified training step
+                await this.runForwardPass();
+                
+                // Compute loss (simplified)
+                let loss = 0;
+                this.nodes.forEach(node => {
+                    const predicted = this.layerOutputs[node.id][this.numLayers];
+                    const target = this.nodeLabels[node.id];
+                    
+                    // Cross-entropy loss (simplified)
+                    const maxVal = Math.max(...predicted);
+                    const expSum = predicted.reduce((sum, val) => sum + Math.exp(val - maxVal), 0);
+                    const logSoftmax = predicted.map(val => val - maxVal - Math.log(expSum));
+                    loss -= logSoftmax[target];
+                });
+                
+                console.log('Training loss:', loss / this.nodes.length);
+                
+                // Backward pass (simplified - just add noise to weights)
+                Object.keys(this.weights).forEach(layer => {
+                    this.weights[layer].W.forEach((row, i) => {
+                        row.forEach((val, j) => {
+                            this.weights[layer].W[i][j] += (Math.random() * 2 - 1) * this.learningRate * 0.1;
+                        });
+                    });
+                });
+            }
+            
+            async runFullTraining() {
+                this.training = true;
+                
+                for (let epoch = 0; epoch < 10; epoch++) {
+                    await this.trainStep();
+                    
+                    if (!this.training) break;
+                    
+                    await this.delay(500);
+                }
+                
+                this.training = false;
+            }
+            
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+            
+            updateLayerPanel() {
+                const layersContent = document.getElementById('layersContent');
+                layersContent.innerHTML = '';
+                
+                for (let layer = 0; layer <= this.numLayers; layer++) {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'step-indicator';
+                    
+                    const stepNumber = document.createElement('div');
+                    stepNumber.className = `step-number ${layer === this.currentLayer ? 'active' : ''}`;
+                    stepNumber.textContent = layer + 1;
+                    
+                    const stepText = document.createElement('span');
+                    if (layer === 0) {
+                        stepText.textContent = 'Input Layer: Node features';
+                    } else if (layer === this.numLayers) {
+                        stepText.textContent = 'Output Layer: Predictions';
+                    } else {
+                        stepText.textContent = `Hidden Layer ${layer}: ${this.architecture.toUpperCase()}`;
+                    }
+                    
+                    stepDiv.appendChild(stepNumber);
+                    stepDiv.appendChild(stepText);
+                    layersContent.appendChild(stepDiv);
+                }
+            }
+            
+            showNodeFeatures(nodeId) {
+                this.selectedNode = nodeId;
+                const featuresContent = document.getElementById('featuresContent');
+                const node = this.nodes.find(n => n.id === nodeId);
+                
+                let content = `<strong>Node ${node.label} (ID: ${nodeId})</strong><br>`;
+                content += `Class: ${this.nodeLabels[nodeId]}<br><br>`;
+                
+                for (let layer = 0; layer <= Math.min(this.currentLayer, this.numLayers); layer++) {
+                    if (this.layerOutputs[nodeId][layer]) {
+                        content += `Layer ${layer}: [`;
+                        content += this.layerOutputs[nodeId][layer].map(val => val.toFixed(3)).join(', ');
+                        content += `]<br>`;
+                    }
+                }
+                
+                featuresContent.innerHTML = content;
+                
+                // Show aggregation for current layer
+                if (this.currentLayer > 0) {
+                    this.showAggregation(nodeId);
+                }
+            }
+            
+            showAggregation(nodeId) {
+                const aggregationContent = document.getElementById('aggregationContent');
+                const neighbors = this.adjacencyList[nodeId];
+                const node = this.nodes.find(n => n.id === nodeId);
+                
+                let content = `<strong>Node ${node.label} Aggregation (Layer ${this.currentLayer})</strong><br>`;
+                content += `Architecture: ${this.architecture.toUpperCase()}<br>`;
+                content += `Neighbors: ${neighbors.map(id => this.nodes.find(n => n.id === id).label).join(', ')}<br><br>`;
+                
+                content += 'Messages from neighbors:<br>';
+                neighbors.forEach(neighborId => {
+                    const neighborNode = this.nodes.find(n => n.id === neighborId);
+                    const features = this.layerOutputs[neighborId][this.currentLayer - 1];
+                    if (features) {
+                        content += `${neighborNode.label}: [${features.map(val => val.toFixed(2)).join(', ')}]<br>`;
+                    }
+                });
+                
+                aggregationContent.innerHTML = content;
+            }
+        }
+        
+        // Visualization
+        const canvas = document.getElementById('gnnCanvas');
+        const ctx = canvas.getContext('2d');
+        const gnn = new GraphNeuralNetwork();
+        
+        const classColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+        
+        function drawGNN() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw edges
+            gnn.edges.forEach(edge => {
+                const from = gnn.nodes[edge.from];
+                const to = gnn.nodes[edge.to];
+                
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw message flow animation
+                if (gnn.currentLayer > 0) {
+                    const progress = (Date.now() % 2000) / 2000;
+                    const msgX = from.x + (to.x - from.x) * progress;
+                    const msgY = from.y + (to.y - from.y) * progress;
+                    
+                    ctx.beginPath();
+                    ctx.arc(msgX, msgY, 3, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fill();
+                }
+            });
+            
+            // Draw nodes
+            gnn.nodes.forEach(node => {
+                const isSelected = gnn.selectedNode === node.id;
+                const nodeSize = isSelected ? 25 : 20;
+                
+                // Get current layer output for visualization
+                let nodeColor = classColors[node.class];
+                if (gnn.layerOutputs[node.id] && gnn.layerOutputs[node.id][gnn.currentLayer]) {
+                    const output = gnn.layerOutputs[node.id][gnn.currentLayer];
+                    const intensity = Math.min(1, Math.abs(output.reduce((sum, val) => sum + val, 0)) / output.length);
+                    nodeColor = `rgba(255, 215, 0, ${0.3 + intensity * 0.7})`;
+                }
+                
+                // Draw node
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
+                ctx.fillStyle = nodeColor;
+                ctx.fill();
+                ctx.strokeStyle = isSelected ? '#ffd700' : '#ffffff';
+                ctx.lineWidth = isSelected ? 3 : 2;
+                ctx.stroke();
+                
+                // Draw label
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(node.label, node.x, node.y + 5);
+                
+                // Draw layer indicator
+                ctx.fillStyle = '#ffd700';
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText(`L${gnn.currentLayer}`, node.x, node.y - nodeSize - 8);
+            });
+        }
+        
+        function selectArchitecture(arch) {
+            gnn.architecture = arch;
+            
+            // Update button states
+            document.querySelectorAll('.control-group button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(arch + 'Btn').classList.add('active');
+            
+            gnn.initializeNetwork();
+            drawGNN();
+        }
+        
+        function initializeNetwork() {
+            gnn.initializeNetwork();
+            gnn.currentLayer = 0;
+            drawGNN();
+        }
+        
+        function runForwardPass() {
+            gnn.runForwardPass();
+        }
+        
+        function trainStep() {
+            gnn.trainStep();
+        }
+        
+        function runFullTraining() {
+            gnn.runFullTraining();
+        }
+        
+        function setTask(task) {
+            gnn.currentTask = task;
+            console.log('Task set to:', task);
+        }
+        
+        // Event listeners
+        document.getElementById('layersSlider').addEventListener('input', function() {
+            gnn.numLayers = parseInt(this.value);
+            document.getElementById('layersValue').textContent = this.value;
+            gnn.initializeNetwork();
+        });
+        
+        document.getElementById('hiddenDimSlider').addEventListener('input', function() {
+            gnn.hiddenDim = parseInt(this.value);
+            document.getElementById('hiddenDimValue').textContent = this.value;
+            gnn.initializeNetwork();
+        });
+        
+        document.getElementById('lrSlider').addEventListener('input', function() {
+            gnn.learningRate = parseFloat(this.value);
+            document.getElementById('lrValue').textContent = this.value;
+        });
+        
+        // Canvas click handling
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Find clicked node
+            gnn.nodes.forEach(node => {
+                const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+                if (distance <= 25) {
+                    gnn.showNodeFeatures(node.id);
+                    drawGNN();
+                }
+            });
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            drawGNN();
+            
+            // Configure MathJax
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['\\(', '\\)']],
+                    displayMath: [['\\[', '\\]']]
+                }
+            };
+        });
+    </script>
+</body>
+</html>

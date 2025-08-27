@@ -1,52 +1,233 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vector và Vector Space - Minh họa tương tác</title>
+    <title>Vector Spaces - Theory and Interactive Visualization</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        * {
+            box-sizing: border-box;
         }
-        .container {
+        
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .nav-tab {
+            padding: 10px 25px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            background: #555;
+        }
+        
+        .nav-tab.active {
+            background: #667eea;
+            color: #fff;
+        }
+        
+        .section {
+            display: none;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .theory-content {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
+            padding: 40px;
         }
-        h1 {
+        
+        .theory-header {
             text-align: center;
-            margin-bottom: 30px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
         }
-        .controls {
+        
+        .theory-header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .theory-header p {
+            font-size: 1.2em;
+            color: #aaa;
+            margin: 0;
+        }
+        
+        .theory-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .theory-section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section h3 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+        
+        .definition {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .definition h4 {
+            color: #667eea;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .example {
+            background: rgba(118, 75, 162, 0.1);
+            border: 1px solid #764ba2;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example h4 {
+            color: #764ba2;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .theorem {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .theorem h4 {
+            color: #e74c3c;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .properties-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin: 30px 0;
         }
+        
+        .property-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .property-card h4 {
+            color: #667eea;
+            margin: 0 0 15px 0;
+        }
+        
+        .canvas-container {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .controls {
+            width: 350px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-left: 1px solid #444;
+            overflow-y: auto;
+        }
+        
         .control-group {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
+        .control-group h3 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+            font-size: 16px;
+        }
+        
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
+        
         input[type="range"] {
             width: 100%;
             margin-bottom: 10px;
         }
+        
         input[type="number"] {
             width: 60px;
             padding: 5px;
@@ -55,261 +236,455 @@
             background: rgba(255, 255, 255, 0.9);
             color: #333;
         }
-        .canvas-container {
-            text-align: center;
-            margin: 20px 0;
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 3px;
+            transition: transform 0.2s;
+            font-size: 12px;
         }
-        canvas {
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.95);
+        
+        button:hover {
+            transform: scale(1.05);
         }
-        .info {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
+        
         .vector-info {
             font-family: 'Courier New', monospace;
             background: rgba(0, 0, 0, 0.3);
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
+            font-size: 14px;
         }
-        button {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-            transition: transform 0.2s;
+        
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px solid rgba(102, 126, 234, 0.4);
         }
-        button:hover {
-            transform: scale(1.05);
+        
+        .inline-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Times New Roman', serif;
+            display: inline-block;
+            margin: 0 2px;
         }
     </style>
-
-
-
-
-
 </head>
 <body>
-    <div class="container">
-        <h1>🔢 Vector và Vector Space - Nền tảng Đại số Tuyến tính</h1>
-        
-        <div class="info" style="margin-bottom: 20px;">
-            <div style="background: rgba(255, 215, 0, 0.15); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h2>📐 Vector Theory Foundations</h2>
-                <p><strong>Vector:</strong> Một đối tượng toán học có cả độ lớn và hướng, được biểu diễn như một mũi tên từ gốc tọa độ đến một điểm trong không gian.</p>
-                <p><strong>Vector Space (R²):</strong> Tập hợp tất cả vectors 2 chiều với các phép toán cộng vector và nhân scalar.</p>
-                <p><strong>Ý nghĩa hình học:</strong> Vectors mô tả chuyển động, lực, vận tốc, và các đại lượng vật lý có hướng.</p>
-            </div>
-            
-            <div style="background: rgba(33, 150, 243, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h3>🔍 Khái niệm cơ bản:</h3>
-                <ul>
-                    <li><strong>🎯 Position Vector:</strong> Vector từ gốc tọa độ đến một điểm P(x,y)</li>
-                    <li><strong>📏 Magnitude:</strong> Độ dài vector |v| = √(x² + y²)</li>
-                    <li><strong>📐 Direction:</strong> Góc θ = arctan(y/x) với trục Ox</li>
-                    <li><strong>⚖️ Unit Vector:</strong> Vector có độ dài bằng 1</li>
-                </ul>
-            </div>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('theory')">📚 Theory</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 Interactive</button>
         </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <h3>Vector A</h3>
-                <label>X: <span id="vectorA-x">3</span></label>
-                <input type="range" id="vectorA-x-slider" min="-10" max="10" value="3" step="0.1">
-                <label>Y: <span id="vectorA-y">4</span></label>
-                <input type="range" id="vectorA-y-slider" min="-10" max="10" value="4" step="0.1">
+    </div>
+
+    <!-- Theory Section -->
+    <div id="theory" class="section active">
+        <div class="theory-content">
+            <div class="theory-header">
+                <h1>Vector Spaces</h1>
+                <p>Mathematical foundations of vectors and linear algebra</p>
             </div>
-            
-            <div class="control-group">
-                <h3>Vector B</h3>
-                <label>X: <span id="vectorB-x">1</span></label>
-                <input type="range" id="vectorB-x-slider" min="-10" max="10" value="1" step="0.1">
-                <label>Y: <span id="vectorB-y">2</span></label>
-                <input type="range" id="vectorB-y-slider" min="-10" max="10" value="2" step="0.1">
-            </div>
-            
-            <div class="control-group">
-                <h3>Phép toán</h3>
-                <button onclick="setOperation('add')">A + B</button>
-                <button onclick="setOperation('subtract')">A - B</button>
-                <button onclick="setOperation('dot')">A · B (Dot Product)</button>
-                <button onclick="setOperation('cosine')">🎯 Cosine Similarity</button>
-                <button onclick="setOperation('scale')">Scale A</button>
-            </div>
-            
-            <div class="control-group">
-                <h3>Scale Factor</h3>
-                <label>Factor: <span id="scale-factor">2</span></label>
-                <input type="range" id="scale-factor-slider" min="-5" max="5" value="2" step="0.1">
-            </div>
-            
-            <div class="control-group">
-                <h3>🧮 Mathematical Examples</h3>
-                <button onclick="loadMathExample('unit')">📏 Unit Vectors</button>
-                <button onclick="loadMathExample('orthogonal')">⊥ Orthogonal</button>
-                <button onclick="loadMathExample('parallel')">↔ Parallel</button>
-                <button onclick="loadMathExample('basis')">🎯 Basis Vectors</button>
-            </div>
-        </div>
-        
-        <div class="canvas-container">
-            <canvas id="vectorCanvas" width="600" height="400"></canvas>
-        </div>
-        
-        <div class="info">
-            <h3>📊 Thông tin Vector Real-time</h3>
-            <div class="vector-info" id="vector-info">
-                Vector A: [3, 4] | Magnitude: 5.00<br>
-                Vector B: [1, 2] | Magnitude: 2.24<br>
-                Operation: A + B = [4, 6] | Magnitude: 7.21
-            </div>
-            
-            <h3>📐 Dot Product và Geometric Interpretation</h3>
-            <div style="background: rgba(255, 99, 132, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h4>🔢 Mathematical Formula:</h4>
-                <p><strong>A·B = |A||B|cos(θ) = a₁b₁ + a₂b₂</strong></p>
-                <p><strong>Geometric Meaning:</strong> Dot product measures how much two vectors point in the same direction.</p>
+
+            <div class="theory-section">
+                <h2>1. Introduction to Vectors</h2>
                 
-                <div style="background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <h4>📊 Dot Product Values:</h4>
+                <div class="definition">
+                    <h4>Definition: Vector</h4>
+                    <p>A <strong>vector</strong> is a mathematical object that has both magnitude (length) and direction. In 2D space, a vector $\vec{v}$ can be represented as:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$\vec{v} = \begin{pmatrix} x \\ y \end{pmatrix} = x\hat{i} + y\hat{j}$$
+                    </div>
+                    <p>where $x$ and $y$ are the components, and $\hat{i}$, $\hat{j}$ are unit vectors along the x and y axes.</p>
+                </div>
+
+                <div class="example">
+                    <h4>Geometric Interpretation</h4>
                     <ul>
-                        <li><strong>A·B > 0:</strong> Acute angle (θ < 90°) - vectors point in similar directions</li>
-                        <li><strong>A·B = 0:</strong> Right angle (θ = 90°) - vectors are orthogonal (perpendicular)</li>
-                        <li><strong>A·B < 0:</strong> Obtuse angle (θ > 90°) - vectors point in opposite directions</li>
+                        <li><strong>Position Vector:</strong> Represents a point's location from the origin</li>
+                        <li><strong>Displacement Vector:</strong> Represents movement from one point to another</li>
+                        <li><strong>Physical Quantities:</strong> Force, velocity, acceleration are all vectors</li>
                     </ul>
                 </div>
+
+                <h3>Vector Properties</h3>
+                <div class="properties-grid">
+                    <div class="property-card">
+                        <h4>Magnitude (Length)</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$|\vec{v}| = \sqrt{x^2 + y^2}$$
+                        </div>
+                        <p>The Euclidean norm gives the distance from origin to the point (x,y).</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h4>Direction (Angle)</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$\theta = \arctan\left(\frac{y}{x}\right)$$
+                        </div>
+                        <p>The angle measured counterclockwise from the positive x-axis.</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h4>Unit Vector</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$\hat{v} = \frac{\vec{v}}{|\vec{v}|} = \frac{1}{\sqrt{x^2 + y^2}}\begin{pmatrix} x \\ y \end{pmatrix}$$
+                        </div>
+                        <p>A vector with magnitude 1 that points in the same direction as $\vec{v}$.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>2. Vector Operations</h2>
+
+                <h3>Vector Addition</h3>
+                <div class="definition">
+                    <h4>Component-wise Addition</h4>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$\vec{a} + \vec{b} = \begin{pmatrix} a_x \\ a_y \end{pmatrix} + \begin{pmatrix} b_x \\ b_y \end{pmatrix} = \begin{pmatrix} a_x + b_x \\ a_y + b_y \end{pmatrix}$$
+                    </div>
+                    <p><strong>Geometric interpretation:</strong> Place vectors tip-to-tail; the sum goes from the first tail to the final tip.</p>
+                </div>
+
+                <h3>Scalar Multiplication</h3>
+                <div style="text-align: center; margin: 15px 0;">
+                    $$c\vec{v} = c\begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} cx \\ cy \end{pmatrix}$$
+                </div>
+                <p>Scales the vector by factor $c$. If $c > 0$: same direction; if $c < 0$: opposite direction; $|c| > 1$: lengthens; $|c| < 1$: shortens.</p>
+
+                <h3>Dot Product (Inner Product)</h3>
+                <div class="definition">
+                    <h4>Definition and Properties</h4>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$\vec{a} \cdot \vec{b} = a_x b_x + a_y b_y = |\vec{a}||\vec{b}|\cos\theta$$
+                    </div>
+                    <p>where $\theta$ is the angle between the vectors.</p>
+                    
+                    <div class="example">
+                        <h4>Geometric Meaning</h4>
+                        <ul>
+                            <li><strong>$\vec{a} \cdot \vec{b} > 0$:</strong> Acute angle ($\theta < 90°$)</li>
+                            <li><strong>$\vec{a} \cdot \vec{b} = 0$:</strong> Perpendicular ($\theta = 90°$)</li>
+                            <li><strong>$\vec{a} \cdot \vec{b} < 0$:</strong> Obtuse angle ($\theta > 90°$)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Applications of Dot Product</h3>
+                <div class="properties-grid">
+                    <div class="property-card">
+                        <h4>Projection</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$\text{proj}_{\vec{b}}\vec{a} = \frac{\vec{a} \cdot \vec{b}}{|\vec{b}|^2}\vec{b}$$
+                        </div>
+                        <p>Projects vector $\vec{a}$ onto vector $\vec{b}$.</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h4>Cosine Similarity</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$\cos\theta = \frac{\vec{a} \cdot \vec{b}}{|\vec{a}||\vec{b}|}$$
+                        </div>
+                        <p>Measures similarity between vectors (used in ML, NLP).</p>
+                    </div>
+
+                    <div class="property-card">
+                        <h4>Work in Physics</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$W = \vec{F} \cdot \vec{d}$$
+                        </div>
+                        <p>Work done by force $\vec{F}$ over displacement $\vec{d}$.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>3. Vector Space Axioms</h2>
                 
-                <h4>📏 Cosine Similarity:</h4>
-                <p><strong>cos(θ) = (A·B)/(|A||B|)</strong> - normalized dot product ranging from -1 to 1</p>
-                <p><strong>Physical Interpretation:</strong> Projection of one vector onto another, normalized by their magnitudes</p>
+                <div class="theorem">
+                    <h4>Vector Space Definition</h4>
+                    <p>A <strong>vector space</strong> $V$ over a field $F$ (usually $\mathbb{R}$) is a set with two operations:</p>
+                    <ul>
+                        <li><strong>Vector addition:</strong> $\vec{u} + \vec{v} \in V$ for all $\vec{u}, \vec{v} \in V$</li>
+                        <li><strong>Scalar multiplication:</strong> $c\vec{v} \in V$ for all $c \in F, \vec{v} \in V$</li>
+                    </ul>
+                    <p>These operations must satisfy the following axioms:</p>
+                </div>
+
+                <div class="properties-grid">
+                    <div class="property-card">
+                        <h4>Addition Axioms</h4>
+                        <ul style="font-size: 14px;">
+                            <li><strong>Closure:</strong> $\vec{u} + \vec{v} \in V$</li>
+                            <li><strong>Associativity:</strong> $(\vec{u} + \vec{v}) + \vec{w} = \vec{u} + (\vec{v} + \vec{w})$</li>
+                            <li><strong>Commutativity:</strong> $\vec{u} + \vec{v} = \vec{v} + \vec{u}$</li>
+                            <li><strong>Zero vector:</strong> $\exists \vec{0}: \vec{v} + \vec{0} = \vec{v}$</li>
+                            <li><strong>Additive inverse:</strong> $\exists (-\vec{v}): \vec{v} + (-\vec{v}) = \vec{0}$</li>
+                        </ul>
+                    </div>
+
+                    <div class="property-card">
+                        <h4>Scalar Multiplication Axioms</h4>
+                        <ul style="font-size: 14px;">
+                            <li><strong>Closure:</strong> $c\vec{v} \in V$</li>
+                            <li><strong>Associativity:</strong> $c(d\vec{v}) = (cd)\vec{v}$</li>
+                            <li><strong>Identity:</strong> $1\vec{v} = \vec{v}$</li>
+                            <li><strong>Distributivity:</strong> $c(\vec{u} + \vec{v}) = c\vec{u} + c\vec{v}$</li>
+                            <li><strong>Distributivity:</strong> $(c + d)\vec{v} = c\vec{v} + d\vec{v}$</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>4. Linear Independence and Basis</h2>
+
+                <div class="definition">
+                    <h4>Linear Combination</h4>
+                    <p>A <strong>linear combination</strong> of vectors $\vec{v_1}, \vec{v_2}, \ldots, \vec{v_n}$ is:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$c_1\vec{v_1} + c_2\vec{v_2} + \cdots + c_n\vec{v_n}$$
+                    </div>
+                    <p>where $c_1, c_2, \ldots, c_n$ are scalars.</p>
+                </div>
+
+                <div class="definition">
+                    <h4>Linear Independence</h4>
+                    <p>Vectors $\vec{v_1}, \vec{v_2}, \ldots, \vec{v_n}$ are <strong>linearly independent</strong> if:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$c_1\vec{v_1} + c_2\vec{v_2} + \cdots + c_n\vec{v_n} = \vec{0}$$
+                    </div>
+                    <p>implies $c_1 = c_2 = \cdots = c_n = 0$.</p>
+                    <p>Otherwise, they are <strong>linearly dependent</strong>.</p>
+                </div>
+
+                <div class="theorem">
+                    <h4>Basis and Dimension</h4>
+                    <p>A <strong>basis</strong> for vector space $V$ is a set of vectors that are:</p>
+                    <ul>
+                        <li><strong>Linearly independent</strong></li>
+                        <li><strong>Span the entire space</strong> (every vector in $V$ can be written as their linear combination)</li>
+                    </ul>
+                    <p>The <strong>dimension</strong> of $V$ is the number of vectors in any basis.</p>
+                    
+                    <div class="example">
+                        <h4>Standard Basis for $\mathbb{R}^2$</h4>
+                        <div style="text-align: center; margin: 10px 0;">
+                            $$\left\{\begin{pmatrix} 1 \\ 0 \end{pmatrix}, \begin{pmatrix} 0 \\ 1 \end{pmatrix}\right\} = \{\hat{i}, \hat{j}\}$$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>5. Applications in Machine Learning</h2>
+
+                <div class="example">
+                    <h4>Real-World Applications</h4>
+                    <div class="properties-grid">
+                        <div class="property-card">
+                            <h4>Data Representation</h4>
+                            <p>Each data point is a vector in high-dimensional space. Features become vector components.</p>
+                        </div>
+                        
+                        <div class="property-card">
+                            <h4>Similarity Measures</h4>
+                            <p>Cosine similarity for document similarity, recommendation systems, and neural network attention mechanisms.</p>
+                        </div>
+                        
+                        <div class="property-card">
+                            <h4>Principal Component Analysis</h4>
+                            <p>Finding the best basis vectors (principal components) to represent data with reduced dimensions.</p>
+                        </div>
+                        
+                        <div class="property-card">
+                            <h4>Neural Networks</h4>
+                            <p>Weight matrices perform linear transformations on input vectors. Activation functions add non-linearity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Section -->
+    <div id="interactive" class="section">
+        <div class="interactive-container">
+            <div class="canvas-container">
+                <canvas id="canvas" width="600" height="600"></canvas>
+                <div class="vector-info" id="vector-info">
+                    Click and drag to move vectors, or use controls →
+                </div>
             </div>
             
-            <h3>🧮 Vector Space Properties</h3>
-            <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h4>📐 Vector Addition Properties:</h4>
-                <ul>
-                    <li><strong>Commutative:</strong> A + B = B + A</li>
-                    <li><strong>Associative:</strong> (A + B) + C = A + (B + C)</li>
-                    <li><strong>Zero Vector:</strong> A + 0 = A</li>
-                    <li><strong>Inverse:</strong> A + (-A) = 0</li>
-                </ul>
+            <div class="controls">
+                <div class="control-group">
+                    <h3>Vector A</h3>
+                    <label>X: <span id="vectorA-x">3</span></label>
+                    <input type="range" id="vectorA-x-slider" min="-10" max="10" value="3" step="0.1">
+                    <label>Y: <span id="vectorA-y">4</span></label>
+                    <input type="range" id="vectorA-y-slider" min="-10" max="10" value="4" step="0.1">
+                </div>
                 
-                <h4>⚖️ Scalar Multiplication Properties:</h4>
-                <ul>
-                    <li><strong>Distributive:</strong> k(A + B) = kA + kB</li>
-                    <li><strong>Associative:</strong> k(mA) = (km)A</li>
-                    <li><strong>Identity:</strong> 1·A = A</li>
-                    <li><strong>Zero:</strong> 0·A = 0</li>
-                </ul>
-            </div>
-            
-            <h3>🎯 Mathematical Applications</h3>
-            <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h4>🔧 Physics & Engineering:</h4>
-                <ul>
-                    <li><strong>Force Vectors:</strong> F = ma, combining multiple forces</li>
-                    <li><strong>Velocity:</strong> v = displacement/time, velocity addition</li>
-                    <li><strong>Work:</strong> W = F·d (dot product of force and displacement)</li>
-                    <li><strong>Electric Field:</strong> E = kQ/r² direction vectors</li>
-                </ul>
+                <div class="control-group">
+                    <h3>Vector B</h3>
+                    <label>X: <span id="vectorB-x">1</span></label>
+                    <input type="range" id="vectorB-x-slider" min="-10" max="10" value="1" step="0.1">
+                    <label>Y: <span id="vectorB-y">2</span></label>
+                    <input type="range" id="vectorB-y-slider" min="-10" max="10" value="2" step="0.1">
+                </div>
                 
-                <h4>📊 Simple Data Examples:</h4>
-                <ul>
-                    <li><strong>2D Point:</strong> Position vector [x, y] represents location</li>
-                    <li><strong>Grade Vector:</strong> [Math, Science] = [85, 92] represents student performance</li>
-                    <li><strong>RGB Color:</strong> [Red, Green, Blue] = [255, 128, 64] represents color</li>
-                </ul>
-            </div>
-            
-            <h3>🔬 Mathematical Foundation & Definitions:</h3>
-            <div style="background: rgba(33, 150, 243, 0.1); padding: 15px; border-radius: 8px; margin: 10px 0;">
-                <ul>
-                    <li><strong>Vector:</strong> Ordered n-tuple of real numbers: v = (v₁, v₂, ..., vₙ)</li>
-                    <li><strong>Magnitude:</strong> |v| = √(v₁² + v₂² + ... + vₙ²) - Euclidean norm</li>
-                    <li><strong>Unit Vector:</strong> ū = v/|v|, where |ū| = 1</li>
-                    <li><strong>Dot Product:</strong> A·B = Σ(aᵢbᵢ) = |A||B|cos(θ)</li>
-                    <li><strong>Vector Space:</strong> Set closed under vector addition and scalar multiplication</li>
-                    <li><strong>Linear Independence:</strong> No vector can be written as linear combination of others</li>
-                    <li><strong>Basis:</strong> Set of linearly independent vectors that span the space</li>
-                    <li><strong>Orthogonality:</strong> A ⊥ B ⟺ A·B = 0</li>
-                </ul>
-            </div>
-            
-            <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h3>⚡ Mathematical Exercises:</h3>
-                <ol>
-                    <li><strong>Orthogonal Test:</strong> Set A = [3, 4], B = [4, -3] → A·B = 0</li>
-                    <li><strong>Scaling:</strong> Scale A by 2 → |2A| = 2|A| (magnitude scales linearly)</li>
-                    <li><strong>Basis Vectors:</strong> Try A = [1, 0], B = [0, 1] → Standard basis {e₁, e₂}</li>
-                    <li><strong>Parallel Vectors:</strong> A = [2, 3], B = [4, 6] → cos(θ) = 1</li>
-                </ol>
+                <div class="control-group">
+                    <h3>Operations</h3>
+                    <button onclick="setOperation('add')">A + B</button>
+                    <button onclick="setOperation('subtract')">A - B</button>
+                    <button onclick="setOperation('dot')">A · B</button>
+                    <button onclick="setOperation('cosine')">Cosine Similarity</button>
+                    <button onclick="setOperation('scale')">Scale A</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Scale Factor</h3>
+                    <label>Factor: <span id="scale-factor">2</span></label>
+                    <input type="range" id="scale-factor-slider" min="-5" max="5" value="2" step="0.1">
+                </div>
+                
+                <div class="control-group">
+                    <h3>Examples</h3>
+                    <button onclick="loadMathExample('unit')">Unit Vectors</button>
+                    <button onclick="loadMathExample('orthogonal')">Orthogonal</button>
+                    <button onclick="loadMathExample('parallel')">Parallel</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Results Display</h3>
+                    <div class="vector-info" id="results-display">
+                        Vector A: [3.0, 4.0] | Magnitude: 5.0<br>
+                        Vector B: [1.0, 2.0] | Magnitude: 2.2<br>
+                        Operation: A + B = [4.0, 6.0] | Magnitude: 7.2
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('vectorCanvas');
-        const ctx = canvas.getContext('2d');
-        
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Initialize canvas if switching to interactive
+            if (sectionId === 'interactive') {
+                setTimeout(() => {
+                    initializeCanvas();
+                    drawVectors();
+                    updateInfo();
+                }, 100);
+            }
+        }
+
+        // Canvas and vector functionality
+        let canvas, ctx;
         let vectorA = { x: 3, y: 4 };
         let vectorB = { x: 1, y: 2 };
         let currentOperation = 'add';
         let scaleFactor = 2;
         
-        // Setup event listeners
-        document.getElementById('vectorA-x-slider').addEventListener('input', updateVectorA);
-        document.getElementById('vectorA-y-slider').addEventListener('input', updateVectorA);
-        document.getElementById('vectorB-x-slider').addEventListener('input', updateVectorB);
-        document.getElementById('vectorB-y-slider').addEventListener('input', updateVectorB);
-        document.getElementById('scale-factor-slider').addEventListener('input', updateScaleFactor);
-        
-        function updateVectorA() {
-            const xSlider = document.getElementById('vectorA-x-slider');
-            const ySlider = document.getElementById('vectorA-y-slider');
-            vectorA.x = parseFloat(xSlider.value);
-            vectorA.y = parseFloat(ySlider.value);
-            
-            document.getElementById('vectorA-x').textContent = vectorA.x.toFixed(1);
-            document.getElementById('vectorA-y').textContent = vectorA.y.toFixed(1);
-            
-            drawVectors();
-            updateInfo();
+        function initializeCanvas() {
+            canvas = document.getElementById('canvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            setupEventListeners();
         }
         
-        function updateVectorB() {
-            const xSlider = document.getElementById('vectorB-x-slider');
-            const ySlider = document.getElementById('vectorB-y-slider');
-            vectorB.x = parseFloat(xSlider.value);
-            vectorB.y = parseFloat(ySlider.value);
+        function setupEventListeners() {
+            // Slider event listeners
+            const sliders = [
+                'vectorA-x-slider', 'vectorA-y-slider',
+                'vectorB-x-slider', 'vectorB-y-slider',
+                'scale-factor-slider'
+            ];
             
-            document.getElementById('vectorB-x').textContent = vectorB.x.toFixed(1);
-            document.getElementById('vectorB-y').textContent = vectorB.y.toFixed(1);
-            
-            drawVectors();
-            updateInfo();
+            sliders.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', () => {
+                        updateVectors();
+                        drawVectors();
+                        updateInfo();
+                    });
+                }
+            });
         }
         
-        function updateScaleFactor() {
-            const slider = document.getElementById('scale-factor-slider');
-            scaleFactor = parseFloat(slider.value);
-            document.getElementById('scale-factor').textContent = scaleFactor.toFixed(1);
-            drawVectors();
-            updateInfo();
+        function updateVectors() {
+            const vectorAXSlider = document.getElementById('vectorA-x-slider');
+            const vectorAYSlider = document.getElementById('vectorA-y-slider');
+            const vectorBXSlider = document.getElementById('vectorB-x-slider');
+            const vectorBYSlider = document.getElementById('vectorB-y-slider');
+            const scaleSlider = document.getElementById('scale-factor-slider');
+            
+            if (vectorAXSlider && vectorAYSlider) {
+                vectorA.x = parseFloat(vectorAXSlider.value);
+                vectorA.y = parseFloat(vectorAYSlider.value);
+                
+                const xSpan = document.getElementById('vectorA-x');
+                const ySpan = document.getElementById('vectorA-y');
+                if (xSpan) xSpan.textContent = vectorA.x.toFixed(1);
+                if (ySpan) ySpan.textContent = vectorA.y.toFixed(1);
+            }
+            
+            if (vectorBXSlider && vectorBYSlider) {
+                vectorB.x = parseFloat(vectorBXSlider.value);
+                vectorB.y = parseFloat(vectorBYSlider.value);
+                
+                const xSpan = document.getElementById('vectorB-x');
+                const ySpan = document.getElementById('vectorB-y');
+                if (xSpan) xSpan.textContent = vectorB.x.toFixed(1);
+                if (ySpan) ySpan.textContent = vectorB.y.toFixed(1);
+            }
+            
+            if (scaleSlider) {
+                scaleFactor = parseFloat(scaleSlider.value);
+                const scaleSpan = document.getElementById('scale-factor');
+                if (scaleSpan) scaleSpan.textContent = scaleFactor.toFixed(1);
+            }
         }
         
         function setOperation(operation) {
             currentOperation = operation;
-            drawVectors();
-            updateInfo();
+            if (canvas) {
+                drawVectors();
+                updateInfo();
+            }
         }
         
         function magnitude(vector) {
@@ -336,27 +711,63 @@
                     return { x: vectorA.x - vectorB.x, y: vectorA.y - vectorB.y };
                 case 'scale':
                     return { x: vectorA.x * scaleFactor, y: vectorA.y * scaleFactor };
-                case 'dot':
-                    return null; // Dot product is a scalar
-                case 'cosine':
-                    return null; // Cosine similarity is a scalar
                 default:
                     return { x: vectorA.x + vectorB.x, y: vectorA.y + vectorB.y };
             }
         }
         
+        function drawVector(start, end, color, label) {
+            if (!ctx) return;
+            
+            const scale = 20;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            const startX = centerX + start.x * scale;
+            const startY = centerY - start.y * scale;
+            const endX = centerX + end.x * scale;
+            const endY = centerY - end.y * scale;
+            
+            // Draw vector line
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            
+            // Draw arrow head
+            const angle = Math.atan2(endY - startY, endX - startX);
+            const arrowLength = 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - arrowLength * Math.cos(angle - Math.PI/6), 
+                      endY - arrowLength * Math.sin(angle - Math.PI/6));
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - arrowLength * Math.cos(angle + Math.PI/6), 
+                      endY - arrowLength * Math.sin(angle + Math.PI/6));
+            ctx.stroke();
+            
+            // Draw label
+            ctx.fillStyle = color;
+            ctx.font = '14px Arial';
+            ctx.fillText(label, endX + 5, endY - 5);
+        }
+        
         function drawVectors() {
+            if (!canvas || !ctx) return;
+            
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Set up coordinate system
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const scale = 20;
             
             // Draw grid
             ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 0.5;
             for (let i = 0; i <= canvas.width; i += scale) {
                 ctx.beginPath();
                 ctx.moveTo(i, 0);
@@ -382,51 +793,126 @@
             ctx.lineTo(centerX, canvas.height);
             ctx.stroke();
             
-            // Draw Vector A
-            const startX = centerX;
-            const startY = centerY;
-            const endAX = centerX + vectorA.x * scale;
-            const endAY = centerY - vectorA.y * scale;
+            // Draw axes labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.fillText('X', canvas.width - 20, centerY - 10);
+            ctx.fillText('Y', centerX + 10, 15);
+            ctx.fillText('(0,0)', centerX + 5, centerY + 15);
             
-            ctx.strokeStyle = '#ff6b6b';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endAX, endAY);
-            ctx.stroke();
+            // Draw original vectors
+            drawVector({x: 0, y: 0}, vectorA, '#667eea', 'A');
+            drawVector({x: 0, y: 0}, vectorB, '#764ba2', 'B');
             
-            // Arrow head for Vector A
-            const angle = Math.atan2(-vectorA.y, vectorA.x);
-            const arrowLength = 10;
-            ctx.beginPath();
-            ctx.moveTo(endAX, endAY);
-            ctx.lineTo(endAX - arrowLength * Math.cos(angle - Math.PI/6), 
-                      endAY - arrowLength * Math.sin(angle - Math.PI/6));
-            ctx.moveTo(endAX, endAY);
-            ctx.lineTo(endAX - arrowLength * Math.cos(angle + Math.PI/6), 
-                      endAY - arrowLength * Math.sin(angle + Math.PI/6));
-            ctx.stroke();
+            // Draw result based on operation
+            if (currentOperation === 'add' || currentOperation === 'subtract' || currentOperation === 'scale') {
+                const result = getResultVector();
+                drawVector({x: 0, y: 0}, result, '#e74c3c', 'Result');
+            }
             
-            // Draw Vector B
-            const endBX = centerX + vectorB.x * scale;
-            const endBY = centerY - vectorB.y * scale;
+            // Draw vector addition visualization
+            if (currentOperation === 'add') {
+                drawVector(vectorA, {x: vectorA.x + vectorB.x, y: vectorA.y + vectorB.y}, '#764ba2', '');
+            }
+        }
+        
+        function updateInfo() {
+            const magA = magnitude(vectorA);
+            const magB = magnitude(vectorB);
+            const dot = dotProduct(vectorA, vectorB);
+            const cosine = cosineSimilarity(vectorA, vectorB);
             
-            ctx.strokeStyle = '#4ecdc4';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.lineTo(endBX, endBY);
-            ctx.stroke();
+            let resultText = '';
+            switch(currentOperation) {
+                case 'add':
+                    const sum = getResultVector();
+                    const magSum = magnitude(sum);
+                    resultText = `A + B = [${sum.x.toFixed(1)}, ${sum.y.toFixed(1)}] | Magnitude: ${magSum.toFixed(2)}`;
+                    break;
+                case 'subtract':
+                    const diff = getResultVector();
+                    const magDiff = magnitude(diff);
+                    resultText = `A - B = [${diff.x.toFixed(1)}, ${diff.y.toFixed(1)}] | Magnitude: ${magDiff.toFixed(2)}`;
+                    break;
+                case 'dot':
+                    resultText = `A · B = ${dot.toFixed(2)} (scalar)`;
+                    break;
+                case 'cosine':
+                    resultText = `cos(θ) = ${cosine.toFixed(3)} | θ = ${(Math.acos(cosine) * 180 / Math.PI).toFixed(1)}°`;
+                    break;
+                case 'scale':
+                    const scaled = getResultVector();
+                    const magScaled = magnitude(scaled);
+                    resultText = `${scaleFactor}A = [${scaled.x.toFixed(1)}, ${scaled.y.toFixed(1)}] | Magnitude: ${magScaled.toFixed(2)}`;
+                    break;
+            }
             
-            // Arrow head for Vector B
-            const angleB = Math.atan2(-vectorB.y, vectorB.x);
-            ctx.beginPath();
-            ctx.moveTo(endBX, endBY);
-            ctx.lineTo(endBX - arrowLength * Math.cos(angleB - Math.PI/6), 
-                      endBY - arrowLength * Math.sin(angleB - Math.PI/6));
-            ctx.moveTo(endBX, endBY);
-            ctx.lineTo(endBX - arrowLength * Math.cos(angleB + Math.PI/6), 
-                      endBY - arrowLength * Math.sin(angleB + Math.PI/6));
+            const infoText = `Vector A: [${vectorA.x.toFixed(1)}, ${vectorA.y.toFixed(1)}] | Magnitude: ${magA.toFixed(2)}<br>` +
+                            `Vector B: [${vectorB.x.toFixed(1)}, ${vectorB.y.toFixed(1)}] | Magnitude: ${magB.toFixed(2)}<br>` +
+                            `Operation: ${resultText}`;
+            
+            const resultsDisplay = document.getElementById('results-display');
+            if (resultsDisplay) {
+                resultsDisplay.innerHTML = infoText;
+            }
+        }
+        
+        function loadMathExample(type) {
+            switch(type) {
+                case 'unit':
+                    vectorA = { x: 1, y: 0 };
+                    vectorB = { x: 0, y: 1 };
+                    break;
+                case 'orthogonal':
+                    vectorA = { x: 3, y: 4 };
+                    vectorB = { x: 4, y: -3 };
+                    break;
+                case 'parallel':
+                    vectorA = { x: 2, y: 3 };
+                    vectorB = { x: 4, y: 6 };
+                    break;
+                case 'basis':
+                    vectorA = { x: 1, y: 0 };
+                    vectorB = { x: 0, y: 1 };
+                    break;
+            }
+            
+            // Update sliders and displays
+            const sliders = [
+                ['vectorA-x-slider', 'vectorA-x', vectorA.x],
+                ['vectorA-y-slider', 'vectorA-y', vectorA.y],
+                ['vectorB-x-slider', 'vectorB-x', vectorB.x],
+                ['vectorB-y-slider', 'vectorB-y', vectorB.y]
+            ];
+            
+            sliders.forEach(([sliderId, spanId, value]) => {
+                const slider = document.getElementById(sliderId);
+                const span = document.getElementById(spanId);
+                if (slider) slider.value = value;
+                if (span) span.textContent = value.toFixed(1);
+            });
+            
+            if (canvas) {
+                drawVectors();
+                updateInfo();
+            }
+        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize if starting in interactive section
+            const interactiveSection = document.getElementById('interactive');
+            if (interactiveSection && interactiveSection.classList.contains('active')) {
+                setTimeout(() => {
+                    initializeCanvas();
+                    drawVectors();
+                    updateInfo();
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
             ctx.stroke();
             
             // Draw angle arc for cosine similarity

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Duality in Linear Programming Interactive Demo</title>
+  <title>Đối Ngẫu trong Linear Programming - Demo Tương Tác</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body { margin: 0; overflow: hidden; background: #222; font-family: Arial, sans-serif; }
     #container {
@@ -146,55 +148,55 @@
     </div>
     
     <div id="info">
-      <h3>Linear Programming Duality</h3>
+      <h3>🔄 Đối Ngẫu trong Linear Programming</h3>
       
       <div class="problem-section primal">
-        <h4>Primal Problem</h4>
-        <div>Maximize: <span id="primalObjective" class="constraint">c₁x₁ + c₂x₂</span></div>
-        <div>Subject to:</div>
+        <h4>📈 Bài Toán Gốc (Primal)</h4>
+        <div>Tối đa hóa: <span id="primalObjective" class="constraint">c₁x₁ + c₂x₂</span></div>
+        <div>Ràng buộc:</div>
         <div id="primalConstraints" class="constraint">
           a₁₁x₁ + a₁₂x₂ ≤ b₁<br>
           a₂₁x₁ + a₂₂x₂ ≤ b₂<br>
           x₁, x₂ ≥ 0
         </div>
-        <div>Optimal Value: <span id="primalValue" class="value-display">0.00</span></div>
-        <div>Optimal Point: (<span id="primalX">0.00</span>, <span id="primalY">0.00</span>)</div>
+        <div>Giá trị tối ưu: <span id="primalValue" class="value-display">0.00</span></div>
+        <div>Điểm tối ưu: (<span id="primalX">0.00</span>, <span id="primalY">0.00</span>)</div>
       </div>
 
       <div class="problem-section dual">
-        <h4>Dual Problem</h4>
-        <div>Minimize: <span id="dualObjective" class="constraint">b₁y₁ + b₂y₂</span></div>
-        <div>Subject to:</div>
+        <h4>📉 Bài Toán Đối Ngẫu (Dual)</h4>
+        <div>Tối thiểu hóa: <span id="dualObjective" class="constraint">b₁y₁ + b₂y₂</span></div>
+        <div>Ràng buộc:</div>
         <div id="dualConstraints" class="constraint">
           a₁₁y₁ + a₂₁y₂ ≥ c₁<br>
           a₁₂y₁ + a₂₂y₂ ≥ c₂<br>
           y₁, y₂ ≥ 0
         </div>
-        <div>Optimal Value: <span id="dualValue" class="value-display">0.00</span></div>
-        <div>Optimal Point: (<span id="dualX">0.00</span>, <span id="dualY">0.00</span>)</div>
+        <div>Giá trị tối ưu: <span id="dualValue" class="value-display">0.00</span></div>
+        <div>Điểm tối ưu: (<span id="dualX">0.00</span>, <span id="dualY">0.00</span>)</div>
       </div>
 
       <div class="problem-section solution">
-        <h4>Duality Results</h4>
-        <div>Duality Gap: <span id="dualityGap" class="gap">0.00</span></div>
-        <div>Status: <span id="dualityStatus" class="optimal">Optimal</span></div>
-        <div>Strong Duality: <span id="strongDuality">Yes</span></div>
-        <div>Complementary Slackness: <span id="compSlackness">Satisfied</span></div>
+        <h4>🎯 Kết Quả Đối Ngẫu</h4>
+        <div>Khoảng cách đối ngẫu: <span id="dualityGap" class="gap">0.00</span></div>
+        <div>Trạng thái: <span id="dualityStatus" class="optimal">Tối ưu</span></div>
+        <div>Đối ngẫu mạnh: <span id="strongDuality">Có</span></div>
+        <div>Điều kiện bù: <span id="compSlackness">Thỏa mãn</span></div>
       </div>
 
       <div class="control-group">
-        <label>Example Problems:</label>
+        <label>Ví dụ bài toán:</label>
         <select id="problemSelect">
-          <option value="standard">Standard Example</option>
-          <option value="manufacturing">Manufacturing Problem</option>
-          <option value="diet">Diet Problem</option>
-          <option value="transportation">Transportation</option>
-          <option value="portfolio">Portfolio Optimization</option>
+          <option value="standard">Ví dụ chuẩn</option>
+          <option value="manufacturing">Bài toán sản xuất</option>
+          <option value="diet">Bài toán dinh dưỡng</option>
+          <option value="transportation">Vận tải</option>
+          <option value="portfolio">Tối ưu danh mục</option>
         </select>
       </div>
 
       <div class="control-group">
-        <label>Objective Coefficients:</label>
+        <label>Hệ số hàm mục tiêu:</label>
         <div>
           c₁: <input type="number" id="c1" value="3" step="0.1" min="-10" max="10">
           c₂: <input type="number" id="c2" value="2" step="0.1" min="-10" max="10">
@@ -202,7 +204,7 @@
       </div>
 
       <div class="control-group">
-        <label>Constraint Matrix A:</label>
+        <label>Ma trận ràng buộc A:</label>
         <table>
           <tr>
             <th>a₁₁</th>
@@ -228,25 +230,25 @@
       </div>
 
       <div class="control-group">
-        <button id="solveBtn">Solve Both Problems</button>
-        <button id="resetBtn">Reset to Default</button>
+        <button id="solveBtn">Giải cả hai bài toán</button>
+        <button id="resetBtn">Khôi phục mặc định</button>
       </div>
 
       <div class="control-group">
-        <input type="checkbox" id="showFeasible" checked> Show Feasible Region
-        <input type="checkbox" id="showObjective" checked> Show Objective Lines
-        <input type="checkbox" id="showDual" checked> Show Dual Interpretation
+        <input type="checkbox" id="showFeasible" checked> Hiện miền khả thi
+        <input type="checkbox" id="showObjective" checked> Hiện đường mục tiêu
+        <input type="checkbox" id="showDual" checked> Hiện giải thích đối ngẫu
       </div>
 
       <div class="problem-section">
-        <h4>Duality Theory</h4>
-        <div><strong>Weak Duality:</strong> Primal ≤ Dual</div>
-        <div><strong>Strong Duality:</strong> Primal = Dual (if optimal)</div>
-        <div><strong>Complementary Slackness:</strong></div>
-        <div>• If x*ⱼ > 0, then dual constraint j is tight</div>
-        <div>• If dual constraint j is slack, then x*ⱼ = 0</div>
-        <div>• If y*ᵢ > 0, then primal constraint i is tight</div>
-        <div>• If primal constraint i is slack, then y*ᵢ = 0</div>
+        <h4>📚 Lý Thuyết Đối Ngẫu</h4>
+        <div><strong>Đối ngẫu yếu:</strong> Primal ≤ Dual</div>
+        <div><strong>Đối ngẫu mạnh:</strong> Primal = Dual (nếu tối ưu)</div>
+        <div><strong>Điều kiện bù (Complementary Slackness):</strong></div>
+        <div>• Nếu x*ⱼ > 0, thì ràng buộc dual j là chặt</div>
+        <div>• Nếu ràng buộc dual j lỏng, thì x*ⱼ = 0</div>
+        <div>• Nếu y*ᵢ > 0, thì ràng buộc primal i là chặt</div>
+        <div>• Nếu ràng buộc primal i lỏng, thì y*ᵢ = 0</div>
       </div>
     </div>
   </div>
@@ -270,31 +272,31 @@
         c1: 3, c2: 2,
         a11: 1, a12: 2, b1: 6,
         a21: 2, a22: 1, b2: 8,
-        name: "Standard Example"
+        name: "Ví dụ chuẩn"
       },
       manufacturing: {
         c1: 40, c2: 30,
         a11: 1, a12: 1, b1: 12,
         a21: 2, a22: 1, b2: 16,
-        name: "Manufacturing (profit per unit)"
+        name: "Sản xuất (lợi nhuận/đơn vị)"
       },
       diet: {
         c1: 2, c2: 3,
         a11: 3, a12: 1, b1: 6,
         a21: 1, a22: 2, b2: 4,
-        name: "Diet Problem (minimize cost)"
+        name: "Dinh dưỡng (tối thiểu chi phí)"
       },
       transportation: {
         c1: 5, c2: 3,
         a11: 1, a12: 0, b1: 10,
         a21: 0, a22: 1, b2: 15,
-        name: "Transportation"
+        name: "Vận tải"
       },
       portfolio: {
         c1: 0.12, c2: 0.08,
         a11: 1, a12: 1, b1: 1,
         a21: 0.6, a22: 0.4, b2: 0.5,
-        name: "Portfolio (return vs risk)"
+        name: "Danh mục (lợi nhuận vs rủi ro)"
       }
     };
 
@@ -629,15 +631,15 @@
       document.getElementById('dualityGap').textContent = gap.toFixed(6);
       
       if (gap < 1e-6) {
-        document.getElementById('dualityStatus').textContent = 'Optimal';
+        document.getElementById('dualityStatus').textContent = 'Tối ưu';
         document.getElementById('dualityStatus').className = 'optimal';
-        document.getElementById('strongDuality').textContent = 'Yes';
-        document.getElementById('compSlackness').textContent = 'Satisfied';
+        document.getElementById('strongDuality').textContent = 'Có';
+        document.getElementById('compSlackness').textContent = 'Thỏa mãn';
       } else {
-        document.getElementById('dualityStatus').textContent = 'Suboptimal';
+        document.getElementById('dualityStatus').textContent = 'Chưa tối ưu';
         document.getElementById('dualityStatus').className = 'gap';
-        document.getElementById('strongDuality').textContent = 'No';
-        document.getElementById('compSlackness').textContent = 'Check required';
+        document.getElementById('strongDuality').textContent = 'Không';
+        document.getElementById('compSlackness').textContent = 'Cần kiểm tra';
       }
     }
 

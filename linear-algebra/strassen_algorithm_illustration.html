@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strassen's Algorithm for Matrix Multiplication</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -646,6 +648,13 @@
         }
 
         function updatePerformanceChart() {
+            // Check if Plotly is loaded
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly is not loaded yet. Retrying in 100ms...');
+                setTimeout(updatePerformanceChart, 100);
+                return;
+            }
+
             const sizes = [2, 4, 8, 16, 32];
             const strassenData = sizes.map(n => Math.pow(n, 2.807));
             const standardData = sizes.map(n => n * n * n);
@@ -697,9 +706,27 @@
             document.getElementById('speed-value').textContent = this.value + 'x';
         });
 
-        // Initialize
-        initializeMatrices();
-        updatePerformanceChart();
+        // Initialize when DOM and Plotly are ready
+        function initialize() {
+            initializeMatrices();
+            if (typeof Plotly !== 'undefined') {
+                updatePerformanceChart();
+            } else {
+                console.log('Plotly not loaded, skipping performance chart');
+                setTimeout(() => {
+                    if (typeof Plotly !== 'undefined') {
+                        updatePerformanceChart();
+                    }
+                }, 500);
+            }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
     </script>
 </body>
 </html> 

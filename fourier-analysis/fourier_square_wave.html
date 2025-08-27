@@ -1,117 +1,408 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Fourier Epicycles</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      font-family: sans-serif;
-    }
-    canvas {
-      display: block;
-      margin: auto;
-      background-color: #000;
-    }
-    #controls {
-      margin: 10px;
-    }
-  </style>
-
-
-
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sóng Vuông - Chuỗi Fourier</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            -webkit-appearance: none;
+        }
+        
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #000;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .wave-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #2196f3;
+            text-align: center;
+        }
+        
+        .info-card h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+    </style>
 </head>
 <body>
-  <h2>Fourier Epicycles - Square Wave</h2>
-  <div id="controls">
-    Terms: <input type="range" id="termsSlider" min="1" max="50" value="5" />
-    <span id="termLabel">5</span>
-  </div>
-  <canvas id="canvas" width="900" height="500"></canvas>
+    <div class="main-container">
+        <div class="header">
+            <h1>Sóng Vuông - Chuỗi Fourier</h1>
+            <p>Minh họa tương tác về biểu diễn sóng vuông bằng epicycles Fourier</p>
+        </div>
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Sóng Vuông</h3>
+                    <p><strong>Định nghĩa:</strong> Sóng vuông là hàm tuần hoàn có giá trị hằng số trong mỗi nửa chu kỳ:</p>
+                    $$f(x) = \begin{cases} 
+                    1 & \text{nếu } 0 < x < \pi \\ 
+                    -1 & \text{nếu } -\pi < x < 0 
+                    \end{cases}$$
+                    
+                    <div class="concept-box">
+                        <h4>Chuỗi Fourier của Sóng Vuông:</h4>
+                        $$f(x) = \frac{4}{\pi} \sum_{n=1,3,5,...}^{\infty} \frac{\sin(nx)}{n}$$
+                        $$= \frac{4}{\pi} \left[ \sin(x) + \frac{\sin(3x)}{3} + \frac{\sin(5x)}{5} + \frac{\sin(7x)}{7} + \ldots \right]$$
+                    </div>
+                </div>
 
-    const termsSlider = document.getElementById("termsSlider");
-    const termLabel = document.getElementById("termLabel");
+                <div class="math-content">
+                    <h3>2. Đặc Điểm Quan Trọng</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Chỉ có Harmonics Lẻ:</h4>
+                        <p>Do tính đối xứng của sóng vuông, chỉ có các thành phần tần số lẻ (n = 1, 3, 5, 7, ...):</p>
+                        $$b_n = \begin{cases} 
+                        \frac{4}{n\pi} & \text{nếu } n \text{ lẻ} \\ 
+                        0 & \text{nếu } n \text{ chẵn} 
+                        \end{cases}$$
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Không có thành phần Cosine:</h4>
+                        <p>Vì sóng vuông là hàm lẻ: $f(-x) = -f(x)$, nên tất cả hệ số $a_n = 0$</p>
+                    </div>
+                </div>
 
-    let time = 0;
-    let path = [];
+                <div class="math-content">
+                    <h3>3. Hiện Tượng Gibbs</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Overshoot tại các điểm gián đoạn:</h4>
+                        <p>Khi số hạng tăng lên, xuất hiện "overshoot" khoảng 9% tại các cạnh:</p>
+                        <ul>
+                            <li><strong>Nguyên nhân:</strong> Chuỗi Fourier hội tụ chậm tại điểm gián đoạn</li>
+                            <li><strong>Giá trị overshoot:</strong> $\approx 1.179$ (thay vì 1.0)</li>
+                            <li><strong>Tỷ lệ:</strong> $\frac{1}{\pi}\int_0^{\pi} \frac{\sin(t)}{t} dt \approx 0.589$</li>
+                        </ul>
+                    </div>
+                </div>
 
-    function drawCircle(x, y, radius) {
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
+                <div class="math-content">
+                    <h3>4. Ứng Dụng Thực Tế</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Trong Điện Tử:</h4>
+                        <ul>
+                            <li><strong>Digital Clock:</strong> Tín hiệu xung nhịp</li>
+                            <li><strong>PWM:</strong> Điều khiển động cơ</li>
+                            <li><strong>Audio:</strong> Tạo âm thanh 8-bit</li>
+                            <li><strong>RF:</strong> Modulation kỹ thuật số</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-    function drawLine(x1, y1, x2, y2) {
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>🔄 <strong>Epicycles:</strong> Quan sát chỉ các vòng tròn harmonic lẻ</li>
+                        <li>📊 <strong>Điều chỉnh số hạng:</strong> Xem sự cải thiện xấp xỉ</li>
+                        <li>⚡ <strong>Hiện tượng Gibbs:</strong> Quan sát overshoot tại các cạnh</li>
+                        <li>🎯 <strong>Tần số cơ bản:</strong> Harmonic đầu tiên có biên độ lớn nhất</li>
+                    </ul>
+                    
+                    <div class="controls">
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Số hạng chuỗi Fourier (chỉ harmonics lẻ):</label>
+                                <input type="range" id="termsSlider" min="1" max="25" value="5">
+                                <div class="value-display" id="termLabel">5</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas" width="900" height="500"></canvas>
+                    
+                    <div class="wave-info">
+                        <div class="info-card">
+                            <h4>Loại Sóng</h4>
+                            <p>Sóng Vuông (Square Wave)</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Công Thức</h4>
+                            <p>f(x) = (4/π)∑[sin(nx)/n], n lẻ</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Harmonics Hiện Tại</h4>
+                            <p id="currentTerms">N = 5 (lẻ)</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Đặc Điểm</h4>
+                            <p>Chỉ harmonics lẻ, hiện tượng Gibbs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function fourierEpicycles(x, y, time, terms) {
-      for (let i = 0; i < terms; i++) {
-        const n = 2 * i + 1;
-        const radius = 75 * (4 / (n * Math.PI));
-        const prevX = x;
-        const prevY = y;
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const termsSlider = document.getElementById("termsSlider");
+        const termLabel = document.getElementById("termLabel");
 
-        x += radius * Math.cos(n * time);
-        y += radius * Math.sin(n * time);
+        let time = 0;
+        let path = [];
 
-        ctx.strokeStyle = "rgba(255,255,255,0.5)";
-        drawCircle(prevX, prevY, radius);
+        function drawCircle(x, y, radius) {
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
 
-        ctx.strokeStyle = "#0f0";
-        drawLine(prevX, prevY, x, y);
-      }
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
 
-      return { x, y };
-    }
+        function fourierEpicycles(x, y, time, terms) {
+            for (let i = 0; i < terms; i++) {
+                const n = 2 * i + 1; // Only odd harmonics
+                const radius = 75 * (4 / (n * Math.PI));
+                const prevX = x;
+                const prevY = y;
 
-    function animate() {
-      requestAnimationFrame(animate);
+                x += radius * Math.cos(n * time);
+                y += radius * Math.sin(n * time);
 
-      const terms = parseInt(termsSlider.value);
-      termLabel.textContent = terms;
+                ctx.strokeStyle = "rgba(255,255,255,0.5)";
+                drawCircle(prevX, prevY, radius);
 
-      ctx.fillStyle = "rgba(0,0,0,0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = "#0f0";
+                drawLine(prevX, prevY, x, y);
+            }
 
-      let originX = 200;
-      let originY = canvas.height / 2;
+            return { x, y };
+        }
 
-      ctx.lineWidth = 1;
+        function updateInfo() {
+            const terms = parseInt(termsSlider.value);
+            termLabel.textContent = terms;
+            document.getElementById('currentTerms').textContent = `N = ${terms} (lẻ)`;
+        }
 
-      const { x, y } = fourierEpicycles(originX, originY, time, terms);
+        function animate() {
+            requestAnimationFrame(animate);
 
-      path.unshift({ x: 400, y: y });
+            const terms = parseInt(termsSlider.value);
+            updateInfo();
 
-      drawLine(x, y, 400, y); // line to waveform
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.beginPath();
-      ctx.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length; i++) {
-        ctx.lineTo(path[i].x + i, path[i].y);
-      }
-      ctx.strokeStyle = "#00f";
-      ctx.stroke();
+            let originX = 200;
+            let originY = canvas.height / 2;
 
-      time += 0.02;
+            ctx.lineWidth = 1;
 
-      if (path.length > 500) path.pop();
-    }
+            const { x, y } = fourierEpicycles(originX, originY, time, terms);
 
-    animate();
-  </script>
+            path.unshift({ x: 400, y: y });
+
+            drawLine(x, y, 400, y); // line to waveform
+
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].x + i, path[i].y);
+            }
+            ctx.strokeStyle = "#00f";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            time += 0.02;
+
+            if (path.length > 500) path.pop();
+        }
+
+        // Event listeners
+        termsSlider.addEventListener('input', updateInfo);
+        
+        // Initialize
+        updateInfo();
+        animate();
+    </script>
 </body>
 </html>
-

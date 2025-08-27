@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Network Analysis - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.active {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+        .metric-item.highlighted {
+            background: rgba(255, 215, 0, 0.2);
+            border-left-color: #ffd700;
+        }
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .complexity-info {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #667eea;
+        }
+        select, input[type="range"] {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .community-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .color-legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid white;
+        }
+        .influence-simulation {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .simulation-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại Graph Theory Hub</a>
+        
+        <h1>👥 Social Network Analysis</h1>
+        
+        <div class="info-panel">
+            <h2>🌐 Analyzing Social Networks with Graph Theory</h2>
+            <p>
+                <strong>Social Network Analysis (SNA)</strong> là ứng dụng của graph theory để hiểu cấu trúc và dynamics của mạng xã hội.
+                Chúng ta sẽ khám phá <strong>centrality measures</strong> (độ quan trọng của nodes), 
+                <strong>community detection</strong> (phát hiện nhóm), và <strong>influence propagation</strong> (lan truyền ảnh hưởng).
+            </p>
+            
+            <div class="math-formula">
+                <h4>📐 Mathematical Foundation</h4>
+                <p><strong>Graph Representation:</strong> \(G = (V, E)\) where \(V\) = users, \(E\) = relationships</p>
+                <p><strong>Adjacency Matrix:</strong> \(A_{ij} = 1\) if there's a connection between users \(i\) and \(j\)</p>
+                <p><strong>Degree Centrality:</strong> \(C_D(v) = \frac{deg(v)}{|V|-1}\)</p>
+                <p><strong>Betweenness Centrality:</strong> \(C_B(v) = \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}\)</p>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="visualization-panel">
+                <h3>Interactive Social Network</h3>
+                <canvas id="networkCanvas" width="750" height="500"></canvas>
+                
+                <div class="community-colors" id="communityLegend">
+                    <div class="color-legend">
+                        <div class="color-box" style="background: #ff6b6b;"></div>
+                        <span>Community 1</span>
+                    </div>
+                    <div class="color-legend">
+                        <div class="color-box" style="background: #4ecdc4;"></div>
+                        <span>Community 2</span>
+                    </div>
+                    <div class="color-legend">
+                        <div class="color-box" style="background: #45b7d1;"></div>
+                        <span>Community 3</span>
+                    </div>
+                    <div class="color-legend">
+                        <div class="color-box" style="background: #96ceb4;"></div>
+                        <span>Community 4</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>🔍 Analysis Type</h3>
+                    <button id="centralityBtn" class="active" onclick="selectAnalysis('centrality')">Centrality</button>
+                    <button id="communityBtn" onclick="selectAnalysis('community')">Communities</button>
+                    <button id="influenceBtn" onclick="selectAnalysis('influence')">Influence</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>📊 Centrality Measures</h3>
+                    <button onclick="calculateCentrality('degree')">Degree</button>
+                    <button onclick="calculateCentrality('betweenness')">Betweenness</button>
+                    <button onclick="calculateCentrality('closeness')">Closeness</button>
+                    <button onclick="calculateCentrality('eigenvector')">Eigenvector</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🎮 Network Controls</h3>
+                    <button onclick="generateSocialNetwork()">🎲 Generate Network</button>
+                    <button onclick="addInfluencer()">⭐ Add Influencer</button>
+                    <button onclick="detectCommunities()">🔍 Detect Communities</button>
+                    <button onclick="resetNetwork()">🔄 Reset</button>
+                </div>
+                
+                <div class="influence-simulation" id="influencePanel" style="display: none;">
+                    <h4>🌊 Influence Propagation</h4>
+                    <div class="simulation-controls">
+                        <label>Spread Rate: <input type="range" id="spreadRate" min="0.1" max="1" value="0.3" step="0.1"></label>
+                    </div>
+                    <div class="simulation-controls">
+                        <button onclick="startInfluenceSpread()">▶️ Start Spread</button>
+                        <button onclick="pauseInfluenceSpread()">⏸️ Pause</button>
+                        <button onclick="resetInfluenceSpread()">🔄 Reset</button>
+                    </div>
+                    <div id="influenceStats"></div>
+                </div>
+                
+                <div class="metrics-panel" id="metricsPanel">
+                    <h4>📋 Node Metrics</h4>
+                    <div id="metricsContent">Click on analysis type to see metrics...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>🧮 Centrality Measures Comparison</h2>
+            <table class="comparison-table">
+                <tr>
+                    <th>Centrality Type</th>
+                    <th>Formula</th>
+                    <th>Interpretation</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td><strong>Degree</strong></td>
+                    <td>\(\frac{deg(v)}{|V|-1}\)</td>
+                    <td>Local connectivity</td>
+                    <td>Popular users, social hubs</td>
+                </tr>
+                <tr>
+                    <td><strong>Betweenness</strong></td>
+                    <td>\(\sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}}\)</td>
+                    <td>Bridge between communities</td>
+                    <td>Information brokers, gatekeepers</td>
+                </tr>
+                <tr>
+                    <td><strong>Closeness</strong></td>
+                    <td>\(\frac{|V|-1}{\sum_{u \neq v} d(v,u)}\)</td>
+                    <td>Global reachability</td>
+                    <td>Information spreaders, influencers</td>
+                </tr>
+                <tr>
+                    <td><strong>Eigenvector</strong></td>
+                    <td>\(\lambda x_v = \sum_{u} A_{vu} x_u\)</td>
+                    <td>Connected to important nodes</td>
+                    <td>Prestige, authority ranking</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="info-panel">
+            <h2>🌟 Real-World Applications</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div class="complexity-info">
+                    <h4>📱 Social Media Analytics</h4>
+                    <p>Identify influencers, detect fake accounts, analyze information spread patterns on platforms like Twitter, Facebook, Instagram.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🏥 Epidemiology</h4>
+                    <p>Track disease spread, identify super-spreaders, design intervention strategies for pandemic control.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🎯 Marketing & Advertising</h4>
+                    <p>Target key influencers, optimize viral marketing campaigns, understand customer relationship networks.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🔒 Cybersecurity</h4>
+                    <p>Detect botnet structures, analyze attack propagation, identify critical network vulnerabilities.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🏢 Organizational Analysis</h4>
+                    <p>Understand communication patterns, identify key employees, optimize team structures and information flow.</p>
+                </div>
+                <div class="complexity-info">
+                    <h4>🧬 Bioinformatics</h4>
+                    <p>Analyze protein interaction networks, gene regulatory networks, and metabolic pathways.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Social Network Analysis Implementation
+        class SocialNetwork {
+            constructor() {
+                this.nodes = [];
+                this.edges = [];
+                this.communities = [];
+                this.centralities = {};
+                this.influenceState = {};
+                this.generateSampleNetwork();
+            }
+            
+            generateSampleNetwork() {
+                // Create a sample social network with realistic structure
+                this.nodes = [
+                    {id: 0, x: 150, y: 150, label: 'Alice', type: 'regular'},
+                    {id: 1, x: 350, y: 100, label: 'Bob', type: 'regular'},
+                    {id: 2, x: 550, y: 150, label: 'Carol', type: 'regular'},
+                    {id: 3, x: 250, y: 250, label: 'David', type: 'regular'},
+                    {id: 4, x: 450, y: 200, label: 'Eve', type: 'regular'},
+                    {id: 5, x: 150, y: 350, label: 'Frank', type: 'regular'},
+                    {id: 6, x: 350, y: 300, label: 'Grace', type: 'regular'},
+                    {id: 7, x: 550, y: 350, label: 'Henry', type: 'regular'},
+                    {id: 8, x: 350, y: 400, label: 'Ivy', type: 'regular'},
+                    {id: 9, x: 650, y: 250, label: 'Jack', type: 'regular'}
+                ];
+                
+                this.edges = [
+                    {from: 0, to: 1}, {from: 0, to: 3}, {from: 0, to: 5},
+                    {from: 1, to: 2}, {from: 1, to: 3}, {from: 1, to: 4},
+                    {from: 2, to: 4}, {from: 2, to: 9},
+                    {from: 3, to: 4}, {from: 3, to: 6}, {from: 3, to: 5},
+                    {from: 4, to: 6}, {from: 4, to: 7},
+                    {from: 5, to: 6}, {from: 5, to: 8},
+                    {from: 6, to: 7}, {from: 6, to: 8},
+                    {from: 7, to: 8}, {from: 7, to: 9},
+                    {from: 8, to: 9}
+                ];
+                
+                this.buildAdjacencyMatrix();
+                this.resetInfluenceState();
+            }
+            
+            generateRandomNetwork() {
+                this.nodes = [];
+                this.edges = [];
+                
+                const numNodes = 12 + Math.floor(Math.random() * 8);
+                const names = ['Alice', 'Bob', 'Carol', 'David', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack', 'Kate', 'Liam', 'Maya', 'Noah', 'Olivia', 'Paul', 'Quinn', 'Ruby', 'Sam', 'Tina'];
+                
+                // Generate nodes
+                for (let i = 0; i < numNodes; i++) {
+                    this.nodes.push({
+                        id: i,
+                        x: 100 + Math.random() * 550,
+                        y: 100 + Math.random() * 350,
+                        label: names[i % names.length],
+                        type: 'regular'
+                    });
+                }
+                
+                // Generate edges with preferential attachment (scale-free network)
+                const edgeSet = new Set();
+                const targetEdges = Math.floor(numNodes * 1.8);
+                
+                for (let i = 0; i < targetEdges; i++) {
+                    let from, to;
+                    do {
+                        from = Math.floor(Math.random() * numNodes);
+                        to = Math.floor(Math.random() * numNodes);
+                    } while (from === to || edgeSet.has(`${Math.min(from,to)}-${Math.max(from,to)}`));
+                    
+                    edgeSet.add(`${Math.min(from,to)}-${Math.max(from,to)}`);
+                    this.edges.push({from: from, to: to});
+                }
+                
+                this.buildAdjacencyMatrix();
+                this.resetInfluenceState();
+            }
+            
+            buildAdjacencyMatrix() {
+                const n = this.nodes.length;
+                this.adjacencyMatrix = Array(n).fill().map(() => Array(n).fill(0));
+                this.adjacencyList = Array(n).fill().map(() => []);
+                
+                this.edges.forEach(edge => {
+                    this.adjacencyMatrix[edge.from][edge.to] = 1;
+                    this.adjacencyMatrix[edge.to][edge.from] = 1;
+                    this.adjacencyList[edge.from].push(edge.to);
+                    this.adjacencyList[edge.to].push(edge.from);
+                });
+            }
+            
+            addInfluencer() {
+                // Add a highly connected node (influencer)
+                const newId = this.nodes.length;
+                this.nodes.push({
+                    id: newId,
+                    x: 350 + (Math.random() - 0.5) * 200,
+                    y: 250 + (Math.random() - 0.5) * 200,
+                    label: `Influencer${newId}`,
+                    type: 'influencer'
+                });
+                
+                // Connect to multiple existing nodes
+                const numConnections = Math.min(5, Math.floor(this.nodes.length * 0.4));
+                const targetNodes = [];
+                
+                while (targetNodes.length < numConnections) {
+                    const target = Math.floor(Math.random() * (this.nodes.length - 1));
+                    if (!targetNodes.includes(target)) {
+                        targetNodes.push(target);
+                        this.edges.push({from: newId, to: target});
+                    }
+                }
+                
+                this.buildAdjacencyMatrix();
+                this.resetInfluenceState();
+            }
+            
+            resetInfluenceState() {
+                this.influenceState = {};
+                this.nodes.forEach(node => {
+                    this.influenceState[node.id] = {
+                        state: 'susceptible', // susceptible, infected, recovered
+                        timeInfected: 0,
+                        influenceSource: null
+                    };
+                });
+            }
+        }
+        
+        class SocialNetworkAnalyzer {
+            constructor(network) {
+                this.network = network;
+                this.currentAnalysis = 'centrality';
+                this.influenceSimulation = null;
+            }
+            
+            calculateDegreeCentrality() {
+                const centralities = {};
+                const n = this.network.nodes.length;
+                
+                this.network.nodes.forEach(node => {
+                    const degree = this.network.adjacencyList[node.id].length;
+                    centralities[node.id] = n > 1 ? degree / (n - 1) : 0;
+                });
+                
+                return centralities;
+            }
+            
+            calculateBetweennessCentrality() {
+                const centralities = {};
+                const n = this.network.nodes.length;
+                
+                // Initialize
+                this.network.nodes.forEach(node => {
+                    centralities[node.id] = 0;
+                });
+                
+                // For each pair of nodes
+                for (let s = 0; s < n; s++) {
+                    for (let t = s + 1; t < n; t++) {
+                        const paths = this.getAllShortestPaths(s, t);
+                        if (paths.length === 0) continue;
+                        
+                        paths.forEach(path => {
+                            // Count intermediate nodes in path
+                            for (let i = 1; i < path.length - 1; i++) {
+                                centralities[path[i]] += 1 / paths.length;
+                            }
+                        });
+                    }
+                }
+                
+                // Normalize
+                const normalization = n > 2 ? ((n - 1) * (n - 2) / 2) : 1;
+                Object.keys(centralities).forEach(nodeId => {
+                    centralities[nodeId] /= normalization;
+                });
+                
+                return centralities;
+            }
+            
+            calculateClosenessCentrality() {
+                const centralities = {};
+                
+                this.network.nodes.forEach(node => {
+                    const distances = this.dijkstraDistances(node.id);
+                    const totalDistance = Object.values(distances).reduce((sum, d) => sum + (d === Infinity ? 0 : d), 0);
+                    const reachableNodes = Object.values(distances).filter(d => d !== Infinity && d > 0).length;
+                    
+                    centralities[node.id] = reachableNodes > 0 ? reachableNodes / totalDistance : 0;
+                });
+                
+                return centralities;
+            }
+            
+            calculateEigenvectorCentrality() {
+                const n = this.network.nodes.length;
+                let x = Array(n).fill(1 / Math.sqrt(n)); // Initial vector
+                const maxIterations = 100;
+                const tolerance = 1e-6;
+                
+                for (let iter = 0; iter < maxIterations; iter++) {
+                    const newX = Array(n).fill(0);
+                    
+                    // Matrix-vector multiplication
+                    for (let i = 0; i < n; i++) {
+                        for (let j = 0; j < n; j++) {
+                            newX[i] += this.network.adjacencyMatrix[i][j] * x[j];
+                        }
+                    }
+                    
+                    // Normalize
+                    const norm = Math.sqrt(newX.reduce((sum, val) => sum + val * val, 0));
+                    if (norm > 0) {
+                        newX.forEach((val, i) => newX[i] = val / norm);
+                    }
+                    
+                    // Check convergence
+                    const diff = newX.reduce((sum, val, i) => sum + Math.abs(val - x[i]), 0);
+                    x = newX;
+                    
+                    if (diff < tolerance) break;
+                }
+                
+                const centralities = {};
+                this.network.nodes.forEach((node, i) => {
+                    centralities[node.id] = Math.abs(x[i]);
+                });
+                
+                return centralities;
+            }
+            
+            dijkstraDistances(source) {
+                const distances = {};
+                const visited = new Set();
+                const pq = [{node: source, distance: 0}];
+                
+                // Initialize distances
+                this.network.nodes.forEach(node => {
+                    distances[node.id] = Infinity;
+                });
+                distances[source] = 0;
+                
+                while (pq.length > 0) {
+                    pq.sort((a, b) => a.distance - b.distance);
+                    const current = pq.shift();
+                    
+                    if (visited.has(current.node)) continue;
+                    visited.add(current.node);
+                    
+                    this.network.adjacencyList[current.node].forEach(neighbor => {
+                        if (!visited.has(neighbor)) {
+                            const newDist = distances[current.node] + 1;
+                            if (newDist < distances[neighbor]) {
+                                distances[neighbor] = newDist;
+                                pq.push({node: neighbor, distance: newDist});
+                            }
+                        }
+                    });
+                }
+                
+                return distances;
+            }
+            
+            getAllShortestPaths(source, target) {
+                // BFS to find all shortest paths
+                const queue = [{node: source, path: [source]}];
+                const visited = {};
+                const paths = [];
+                let shortestLength = Infinity;
+                
+                while (queue.length > 0) {
+                    const current = queue.shift();
+                    const node = current.node;
+                    const path = current.path;
+                    
+                    if (path.length > shortestLength) continue;
+                    
+                    if (node === target) {
+                        if (path.length < shortestLength) {
+                            shortestLength = path.length;
+                            paths.length = 0; // Clear previous longer paths
+                        }
+                        if (path.length === shortestLength) {
+                            paths.push([...path]);
+                        }
+                        continue;
+                    }
+                    
+                    if (visited[node] && visited[node] < path.length) continue;
+                    visited[node] = path.length;
+                    
+                    this.network.adjacencyList[node].forEach(neighbor => {
+                        if (!path.includes(neighbor)) {
+                            queue.push({
+                                node: neighbor,
+                                path: [...path, neighbor]
+                            });
+                        }
+                    });
+                }
+                
+                return paths;
+            }
+            
+            detectCommunities() {
+                // Simple community detection using modularity optimization
+                const n = this.network.nodes.length;
+                const communities = {};
+                
+                // Initialize each node as its own community
+                this.network.nodes.forEach(node => {
+                    communities[node.id] = node.id;
+                });
+                
+                let improved = true;
+                while (improved) {
+                    improved = false;
+                    
+                    for (const node of this.network.nodes) {
+                        const currentCommunity = communities[node.id];
+                        let bestCommunity = currentCommunity;
+                        let bestModularity = this.calculateModularity(communities);
+                        
+                        // Try moving to neighbors' communities
+                        const neighborCommunities = new Set();
+                        this.network.adjacencyList[node.id].forEach(neighbor => {
+                            neighborCommunities.add(communities[neighbor]);
+                        });
+                        
+                        for (const community of neighborCommunities) {
+                            if (community !== currentCommunity) {
+                                communities[node.id] = community;
+                                const modularity = this.calculateModularity(communities);
+                                
+                                if (modularity > bestModularity) {
+                                    bestModularity = modularity;
+                                    bestCommunity = community;
+                                    improved = true;
+                                }
+                            }
+                        }
+                        
+                        communities[node.id] = bestCommunity;
+                    }
+                }
+                
+                return communities;
+            }
+            
+            calculateModularity(communities) {
+                const m = this.network.edges.length;
+                if (m === 0) return 0;
+                
+                let modularity = 0;
+                
+                for (let i = 0; i < this.network.nodes.length; i++) {
+                    for (let j = 0; j < this.network.nodes.length; j++) {
+                        if (communities[i] === communities[j]) {
+                            const A_ij = this.network.adjacencyMatrix[i][j];
+                            const k_i = this.network.adjacencyList[i].length;
+                            const k_j = this.network.adjacencyList[j].length;
+                            
+                            modularity += A_ij - (k_i * k_j) / (2 * m);
+                        }
+                    }
+                }
+                
+                return modularity / (2 * m);
+            }
+            
+            startInfluenceSpread(seedNodes = [0]) {
+                this.network.resetInfluenceState();
+                
+                // Initialize seed nodes
+                seedNodes.forEach(nodeId => {
+                    this.network.influenceState[nodeId].state = 'infected';
+                    this.network.influenceState[nodeId].timeInfected = 0;
+                });
+                
+                // Start simulation
+                this.influenceSimulation = setInterval(() => {
+                    this.updateInfluenceSpread();
+                }, 1000);
+            }
+            
+            updateInfluenceSpread() {
+                const spreadRate = parseFloat(document.getElementById('spreadRate').value);
+                let newInfections = 0;
+                
+                this.network.nodes.forEach(node => {
+                    const state = this.network.influenceState[node.id];
+                    
+                    if (state.state === 'susceptible') {
+                        // Check if any infected neighbors can influence this node
+                        let infectionProbability = 0;
+                        this.network.adjacencyList[node.id].forEach(neighborId => {
+                            const neighborState = this.network.influenceState[neighborId];
+                            if (neighborState.state === 'infected') {
+                                infectionProbability += spreadRate;
+                            }
+                        });
+                        
+                        if (Math.random() < infectionProbability) {
+                            state.state = 'infected';
+                            state.timeInfected = 0;
+                            newInfections++;
+                        }
+                    } else if (state.state === 'infected') {
+                        state.timeInfected++;
+                        
+                        // Recovery after some time (SIR model)
+                        if (state.timeInfected > 3 && Math.random() < 0.3) {
+                            state.state = 'recovered';
+                        }
+                    }
+                });
+                
+                this.updateInfluenceStats();
+                drawNetwork();
+                
+                // Stop if no more infections possible
+                if (newInfections === 0 && !this.hasActiveInfections()) {
+                    this.pauseInfluenceSpread();
+                }
+            }
+            
+            hasActiveInfections() {
+                return this.network.nodes.some(node => 
+                    this.network.influenceState[node.id].state === 'infected'
+                );
+            }
+            
+            updateInfluenceStats() {
+                const stats = {
+                    susceptible: 0,
+                    infected: 0,
+                    recovered: 0
+                };
+                
+                this.network.nodes.forEach(node => {
+                    stats[this.network.influenceState[node.id].state]++;
+                });
+                
+                const statsDiv = document.getElementById('influenceStats');
+                statsDiv.innerHTML = `
+                    <div>Susceptible: ${stats.susceptible}</div>
+                    <div>Infected: ${stats.infected}</div>
+                    <div>Recovered: ${stats.recovered}</div>
+                `;
+            }
+            
+            pauseInfluenceSpread() {
+                if (this.influenceSimulation) {
+                    clearInterval(this.influenceSimulation);
+                    this.influenceSimulation = null;
+                }
+            }
+        }
+        
+        // Visualization
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        const network = new SocialNetwork();
+        const analyzer = new SocialNetworkAnalyzer(network);
+        
+        let currentCentrality = {};
+        let currentCommunities = {};
+        let currentAnalysis = 'centrality';
+        
+        const communityColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+        
+        function drawNetwork() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw edges
+            network.edges.forEach(edge => {
+                const from = network.nodes[edge.from];
+                const to = network.nodes[edge.to];
+                
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+            
+            // Draw nodes
+            network.nodes.forEach(node => {
+                let nodeColor = '#667eea';
+                let nodeSize = 15;
+                
+                // Color based on current analysis
+                if (currentAnalysis === 'centrality' && currentCentrality[node.id] !== undefined) {
+                    const centralityValue = currentCentrality[node.id];
+                    const intensity = Math.min(1, centralityValue * 2);
+                    nodeSize = 10 + intensity * 15;
+                    nodeColor = `rgb(${255 * intensity}, ${215 * intensity}, 0)`;
+                } else if (currentAnalysis === 'community' && currentCommunities[node.id] !== undefined) {
+                    const communityId = currentCommunities[node.id];
+                    const uniqueCommunities = [...new Set(Object.values(currentCommunities))];
+                    const colorIndex = uniqueCommunities.indexOf(communityId);
+                    nodeColor = communityColors[colorIndex % communityColors.length];
+                } else if (currentAnalysis === 'influence') {
+                    const state = network.influenceState[node.id];
+                    switch (state.state) {
+                        case 'susceptible': nodeColor = '#667eea'; break;
+                        case 'infected': nodeColor = '#ff6b6b'; break;
+                        case 'recovered': nodeColor = '#96ceb4'; break;
+                    }
+                }
+                
+                // Special styling for influencers
+                if (node.type === 'influencer') {
+                    nodeSize += 5;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, nodeSize + 3, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#ffd700';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                
+                // Draw node
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, nodeSize, 0, 2 * Math.PI);
+                ctx.fillStyle = nodeColor;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw label
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(node.label, node.x, node.y - nodeSize - 8);
+                
+                // Draw centrality value
+                if (currentAnalysis === 'centrality' && currentCentrality[node.id] !== undefined) {
+                    ctx.fillStyle = '#ffd700';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.fillText(currentCentrality[node.id].toFixed(2), node.x, node.y + nodeSize + 15);
+                }
+            });
+        }
+        
+        function selectAnalysis(analysisType) {
+            currentAnalysis = analysisType;
+            
+            // Update button states
+            document.querySelectorAll('.control-group button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(analysisType + 'Btn').classList.add('active');
+            
+            // Show/hide panels
+            const influencePanel = document.getElementById('influencePanel');
+            influencePanel.style.display = analysisType === 'influence' ? 'block' : 'none';
+            
+            // Reset analysis
+            currentCentrality = {};
+            currentCommunities = {};
+            
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function calculateCentrality(type) {
+            switch (type) {
+                case 'degree':
+                    currentCentrality = analyzer.calculateDegreeCentrality();
+                    break;
+                case 'betweenness':
+                    currentCentrality = analyzer.calculateBetweennessCentrality();
+                    break;
+                case 'closeness':
+                    currentCentrality = analyzer.calculateClosenessCentrality();
+                    break;
+                case 'eigenvector':
+                    currentCentrality = analyzer.calculateEigenvectorCentrality();
+                    break;
+            }
+            
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function detectCommunities() {
+            currentCommunities = analyzer.detectCommunities();
+            currentAnalysis = 'community';
+            
+            document.getElementById('communityBtn').classList.add('active');
+            document.getElementById('centralityBtn').classList.remove('active');
+            document.getElementById('influenceBtn').classList.remove('active');
+            
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function updateMetricsPanel() {
+            const metricsContent = document.getElementById('metricsContent');
+            let content = '';
+            
+            if (currentAnalysis === 'centrality' && Object.keys(currentCentrality).length > 0) {
+                content = '<h5>Centrality Rankings</h5>';
+                const sortedNodes = Object.entries(currentCentrality)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10);
+                
+                sortedNodes.forEach(([nodeId, value], index) => {
+                    const node = network.nodes.find(n => n.id == nodeId);
+                    content += `
+                        <div class="metric-item ${index < 3 ? 'highlighted' : ''}">
+                            <span>${index + 1}. ${node.label}</span>
+                            <span>${value.toFixed(3)}</span>
+                        </div>
+                    `;
+                });
+            } else if (currentAnalysis === 'community' && Object.keys(currentCommunities).length > 0) {
+                content = '<h5>Community Structure</h5>';
+                const communityCounts = {};
+                Object.values(currentCommunities).forEach(comm => {
+                    communityCounts[comm] = (communityCounts[comm] || 0) + 1;
+                });
+                
+                Object.entries(communityCounts).forEach(([commId, count], index) => {
+                    const members = Object.entries(currentCommunities)
+                        .filter(([nodeId, comm]) => comm == commId)
+                        .map(([nodeId]) => network.nodes.find(n => n.id == nodeId).label);
+                    
+                    content += `
+                        <div class="metric-item">
+                            <span style="color: ${communityColors[index % communityColors.length]}">
+                                Community ${parseInt(commId) + 1} (${count} members)
+                            </span>
+                        </div>
+                        <div style="margin-left: 15px; font-size: 0.9em; color: #ccc;">
+                            ${members.join(', ')}
+                        </div>
+                    `;
+                });
+            } else if (currentAnalysis === 'influence') {
+                content = '<h5>Influence Propagation</h5>';
+                content += '<p>Click "Start Spread" to simulate information or influence spreading through the network.</p>';
+                content += '<p>Uses SIR model: Susceptible → Infected → Recovered</p>';
+            } else {
+                content = 'Select an analysis type to see metrics...';
+            }
+            
+            metricsContent.innerHTML = content;
+        }
+        
+        function generateSocialNetwork() {
+            network.generateRandomNetwork();
+            analyzer.network = network;
+            currentCentrality = {};
+            currentCommunities = {};
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function addInfluencer() {
+            network.addInfluencer();
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function resetNetwork() {
+            network.generateSampleNetwork();
+            analyzer.network = network;
+            currentCentrality = {};
+            currentCommunities = {};
+            analyzer.pauseInfluenceSpread();
+            updateMetricsPanel();
+            drawNetwork();
+        }
+        
+        function startInfluenceSpread() {
+            analyzer.startInfluenceSpread([0]); // Start from first node
+            currentAnalysis = 'influence';
+            selectAnalysis('influence');
+        }
+        
+        function pauseInfluenceSpread() {
+            analyzer.pauseInfluenceSpread();
+        }
+        
+        function resetInfluenceSpread() {
+            analyzer.pauseInfluenceSpread();
+            network.resetInfluenceState();
+            analyzer.updateInfluenceStats();
+            drawNetwork();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMetricsPanel();
+            drawNetwork();
+            
+            // Configure MathJax
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['\\(', '\\)']],
+                    displayMath: [['\\[', '\\]']]
+                }
+            };
+        });
+        
+        // Canvas click handling for node selection
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Find clicked node
+            network.nodes.forEach(node => {
+                const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
+                if (distance <= 20) {
+                    if (currentAnalysis === 'influence') {
+                        // Start influence spread from clicked node
+                        analyzer.startInfluenceSpread([node.id]);
+                    }
+                    
+                    // Highlight node in metrics
+                    console.log('Clicked node:', node.label, 'ID:', node.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Minh Họa Tương Tác Đạo Hàm</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -101,86 +103,327 @@
     .legend-item {
       margin: 3px 0;
     }
+    
+    .formula-box {
+      background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+      padding: 25px 35px;
+      border-radius: 15px;
+      font-family: 'KaTeX_Main', 'Times New Roman', serif;
+      font-size: 20px;
+      line-height: 1.8;
+      text-align: center;
+      margin: 25px 0;
+      border: 2px solid rgba(100, 200, 255, 0.4);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+    }
+
+    .formula-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d4ff, #7c4dff, #ff6b6b, #4ecdc4);
+      opacity: 0.8;
+    }
+
+    .formula-box .main-formula {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    }
+
+    .formula-box .sub-formula {
+      font-size: 16px;
+      color: #b8e6ff;
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .formula-box .formula-label {
+      font-size: 14px;
+      color: #ffeb3b;
+      font-weight: 600;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .inline-formula {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: 'Times New Roman', serif;
+      font-size: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-block;
+      margin: 0 2px;
+      color: #e8f4fd;
+    }
   </style>
-
-
-
-
-
 </head>
 <body>
-  <h2 style="font-size: 3.2em; font-weight: 900; text-shadow: 4px 4px 8px rgba(0,0,0,0.8); margin-bottom: 40px; letter-spacing: 1px;">📐 Đạo Hàm - Lý Thuyết Toán Học & Giải Thích Hình Học</h2>
+  <h2 style="font-size: 3.2em; font-weight: 900; text-shadow: 4px 4px 8px rgba(0,0,0,0.8); margin-bottom: 40px; letter-spacing: 1px;">📐 Đạo Hàm - Lý Thuyết & Minh Họa Tương Tác</h2>
   
-  <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 10px; margin: 20px auto; max-width: 800px; text-align: left;">
-    <h3 style="font-size: 2.2em; font-weight: 800; text-shadow: 3px 3px 6px rgba(0,0,0,0.7); color: #FFD700;">🔍 Nền Tảng Toán Học</h3>
-    <p><strong>Định nghĩa:</strong> Đạo hàm f'(x) = lim[h→0] [f(x+h) - f(x)]/h biểu diễn tốc độ thay đổi tức thời</p>
-    <p><strong>Ý Nghĩa Hình Học:</strong> Độ dốc của đường tiếp tuyến với đường cong tại điểm (x, f(x))</p>
-    <p><strong>Giải Thích Vật Lý:</strong> Vận tốc là đạo hàm của vị trí, gia tốc là đạo hàm của vận tốc</p>
-  </div>
+  <!-- ===========================================
+       PHẦN LÝ THUYẾT (THEORY SECTION)
+       =========================================== -->
   
-  <div class="controls">
-    <label for="functionSelect">Chọn Hàm:</label>
-    <select id="functionSelect">
-      <option value="sin">f(x) = sin(x) → f'(x) = cos(x)</option>
-      <option value="cos">f(x) = cos(x) → f'(x) = -sin(x)</option>
-      <option value="polynomial">f(x) = x² → f'(x) = 2x</option>
-      <option value="cubic">f(x) = x³ → f'(x) = 3x²</option>
-      <option value="exp">f(x) = eˣ → f'(x) = eˣ</option>
-      <option value="ln">f(x) = ln(x) → f'(x) = 1/x</option>
-      <option value="sqrt">f(x) = √x → f'(x) = 1/(2√x)</option>
-      <option value="tan">f(x) = tan(x) → f'(x) = sec²(x)</option>
-      <option value="rational">f(x) = 1/x → f'(x) = -1/x²</option>
-      <option value="quartic">f(x) = x⁴ → f'(x) = 4x³</option>
-    </select>
-  </div>
-  
-  <div class="view-controls">
-    <label><input type="radio" name="viewMode" value="single" checked> Chế Độ Đơn</label>
-    <label><input type="radio" name="viewMode" value="split"> Chế Độ Tách (Hàm & Đạo Hàm)</label>
-  </div>
-  
-  <div class="controls">
-    <label>x = </label>
-    <input type="range" id="xSlider" min="-628" max="628" value="0" step="1">
-    <span id="xValueDisplay">0.00</span>
-    <button id="playPauseBtn">▶ Chơi</button>
-    <button id="resetBtn">Khởi Động Lại</button>
-  </div>
-  
-  <canvas id="canvas" width="900" height="600"></canvas>
-  
-  <div style="background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; margin: 20px auto; max-width: 1000px; text-align: left;">
-    <h3 style="color: #0ff;">📚 Quy Tắc Đạo Hàm & Lý Thuyết Toán Học</h3>
+  <div style="background: linear-gradient(145deg, rgba(25, 25, 60, 0.9), rgba(15, 15, 40, 0.7)); padding: 30px; border-radius: 15px; margin: 30px auto; max-width: 1000px; text-align: left; border: 2px solid rgba(100, 200, 255, 0.4);">
+    <h2 style="color: #00d4ff; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">📖 LÝ THUYẾT VỀ ĐẠO HÀM</h2>
     
+    <!-- Lịch sử Đạo hàm -->
+    <div style="background: rgba(255, 215, 0, 0.1); padding: 25px; border-radius: 15px; margin-bottom: 30px; border-left: 5px solid #FFD700;">
+      <h3 style="color: #FFD700; font-size: 2.2em; margin-bottom: 20px; text-align: center;">📚 Lịch Sử Phát Triển Đạo Hàm</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+          <h4 style="color: #00d4ff; margin-bottom: 15px;">🧠 Newton vs Leibniz (1660s-1670s)</h4>
+          <p><strong>Isaac Newton (1643-1727):</strong> Phát triển "method of fluxions" khi nghiên cứu chuyển động. Gọi đạo hàm là "fluxion" - tốc độ thay đổi.</p>
+          <p><strong>Gottfried Leibniz (1646-1716):</strong> Phát triển ký hiệu dy/dx và khái niệm vi phân. Tranh cãi về quyền ưu tiên kéo dài suốt đời.</p>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+          <h4 style="color: #ff6b6b; margin-bottom: 15px;">⚡ Cuộc Cách Mạng Toán Học</h4>
+          <p><strong>Pierre Fermat (1601-1665):</strong> Đặt nền móng với phương pháp tìm cực trị bằng "adequality".</p>
+          <p><strong>Rene Descartes (1596-1650):</strong> Phương pháp tìm tiếp tuyến bằng hình học giải tích.</p>
+        </div>
+      </div>
+
+      <div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <h4 style="color: #4caf50; margin-bottom: 15px;">🌟 Phát Triển Hiện Đại</h4>
+        <ul style="color: #ffffff; line-height: 1.8;">
+          <li><strong>Augustin-Louis Cauchy (1789-1857):</strong> Đưa ra định nghĩa nghiêm ngặt của giới hạn và đạo hàm</li>
+          <li><strong>Karl Weierstrass (1815-1897):</strong> Phát triển lý thuyết epsilon-delta cho sự liên tục và đạo hàm</li>
+          <li><strong>Thế kỷ 20:</strong> Tổng quát hóa thành đạo hàm riêng, đạo hàm theo hướng, và vi phân</li>
+        </ul>
+      </div>
+
+      <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px;">
+        <p style="font-style: italic; color: #FFD700; font-size: 1.2em;">"Phép tính vi phân là một trong những thành tựu vĩ đại nhất của trí tuệ con người" - G.W. Leibniz</p>
+      </div>
+    </div>
+    
+    <div class="formula-container">
+      <div class="formula-title">Định Nghĩa Đạo Hàm</div>
+      <div class="math-environment">
+        $$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$$
+      </div>
+      <div class="formula-description">Tốc độ thay đổi tức thời của hàm số</div>
+    </div>
+
+    <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 25px 0;">
+      <h3 style="font-size: 1.8em; font-weight: 800; color: #FFD700; margin-bottom: 15px;">🔍 Ý Nghĩa Toán Học</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <p><strong>Ý Nghĩa Hình Học:</strong> Độ dốc của đường tiếp tuyến với đường cong tại điểm $(x, f(x))$</p>
+          <p><strong>Ý Nghĩa Vật Lý:</strong> Vận tốc là đạo hàm của vị trí, gia tốc là đạo hàm của vận tốc</p>
+        </div>
+        <div>
+          <p><strong>Ý Nghĩa Kinh Tế:</strong> Tốc độ thay đổi biên của các đại lượng kinh tế</p>
+          <p><strong>Ứng Dụng:</strong> Tối ưu hóa, phân tích xu hướng, mô hình hóa</p>
+        </div>
+      </div>
+    </div>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
       <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px;">
         <h4 style="color: #ffd700;">⚡ Quy Tắc Cơ Bản</h4>
-        <ul style="font-size: 14px; line-height: 1.6;">
-          <li><strong>Quy tắc Lũy thừa:</strong> d/dx[xⁿ] = n·xⁿ⁻¹</li>
-          <li><strong>Quy tắc Tổng:</strong> d/dx[f + g] = f' + g'</li>
-          <li><strong>Quy tắc Tích:</strong> d/dx[fg] = f'g + fg'</li>
-          <li><strong>Quy tắc Dây chuyền:</strong> d/dx[f(g(x))] = f'(g(x))·g'(x)</li>
-        </ul>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Lũy thừa</div>
+          <div class="math-environment">$$\frac{d}{dx}[x^n] = n \cdot x^{n-1}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Tổng</div>
+          <div class="math-environment">$$\frac{d}{dx}[f + g] = f' + g'$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Tích</div>
+          <div class="math-environment">$$\frac{d}{dx}[fg] = f'g + fg'$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Dây chuyền</div>
+          <div class="math-environment">$$\frac{d}{dx}[f(g(x))] = f'(g(x)) \cdot g'(x)$$</div>
+        </div>
       </div>
       
       <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px;">
         <h4 style="color: #007bff;">📐 Hàm Lượng Giác</h4>
-        <ul style="font-size: 14px; line-height: 1.6;">
-          <li><strong>sin(x):</strong> d/dx[sin(x)] = cos(x)</li>
-          <li><strong>cos(x):</strong> d/dx[cos(x)] = -sin(x)</li>
-          <li><strong>tan(x):</strong> d/dx[tan(x)] = sec²(x)</li>
-          <li><strong>sec(x):</strong> d/dx[sec(x)] = sec(x)tan(x)</li>
-        </ul>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Sin</div>
+          <div class="math-environment">$$\frac{d}{dx}[\sin(x)] = \cos(x)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Cos</div>
+          <div class="math-environment">$$\frac{d}{dx}[\cos(x)] = -\sin(x)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Tan</div>
+          <div class="math-environment">$$\frac{d}{dx}[\tan(x)] = \sec^2(x)$$</div>
+        </div>
       </div>
       
       <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;">
         <h4 style="color: #28a745;">🔢 Hàm Mũ & Logarithm</h4>
-        <ul style="font-size: 14px; line-height: 1.6;">
-          <li><strong>eˣ:</strong> d/dx[eˣ] = eˣ</li>
-          <li><strong>aˣ:</strong> d/dx[aˣ] = aˣ ln(a)</li>
-          <li><strong>ln(x):</strong> d/dx[ln(x)] = 1/x</li>
-          <li><strong>log_a(x):</strong> d/dx[log_a(x)] = 1/(x ln(a))</li>
-        </ul>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm $e^x$</div>
+          <div class="math-environment">$$\frac{d}{dx}[e^x] = e^x$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm $a^x$</div>
+          <div class="math-environment">$$\frac{d}{dx}[a^x] = a^x \ln(a)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Logarithm tự nhiên</div>
+          <div class="math-environment">$$\frac{d}{dx}[\ln(x)] = \frac{1}{x}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Log cơ số a</div>
+          <div class="math-environment">$$\frac{d}{dx}[\log_a(x)] = \frac{1}{x \ln(a)}$$</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="background: rgba(220, 53, 69, 0.1); padding: 20px; border-radius: 8px; margin-top: 20px;">
+      <h4 style="color: #dc3545; font-size: 1.6em; margin-bottom: 15px;">🎯 Ứng Dụng Thực Tiễn</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div>
+          <h5 style="color: #ff6b6b; font-size: 1.3em;">Vật Lý:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>Vận tốc = $\frac{dx}{dt}$ (đạo hàm của vị trí)</li>
+            <li>Gia tốc = $\frac{dv}{dt}$ (đạo hàm của vận tốc)</li>
+            <li>Trường điện = $-\frac{dV}{dx}$ (gradient âm của thế năng)</li>
+            <li>Công suất = $\frac{dW}{dt}$ (đạo hàm của công)</li>
+          </ul>
+        </div>
+        <div>
+          <h5 style="color: #4ecdc4; font-size: 1.3em;">Kinh Tế:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>Chi phí biên = $\frac{dC}{dq}$ (đạo hàm của hàm chi phí)</li>
+            <li>Doanh thu biên = $\frac{dR}{dq}$ (đạo hàm của doanh thu)</li>
+            <li>Đàn hồi liên quan đến đạo hàm của cầu</li>
+            <li>Tối ưu hóa lợi nhuận và chi phí</li>
+          </ul>
+        </div>
+        <div>
+          <h5 style="color: #7c4dff; font-size: 1.3em;">Hình Học & Kỹ Thuật:</h5>
+          <ul style="font-size: 14px; line-height: 1.6;">
+            <li>Độ dốc của đường tiếp tuyến tại bất kỳ điểm nào</li>
+            <li>Tốc độ thay đổi của diện tích hoặc thể tích</li>
+            <li>Phân tích độ cong và tính lõm</li>
+            <li>Thiết kế đường cong tối ưu</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===========================================
+       PHẦN MINH HỌA TƯƠNG TÁC (INTERACTIVE ILLUSTRATION)
+       =========================================== -->
+  
+  <div style="background: linear-gradient(145deg, rgba(15, 40, 15, 0.9), rgba(25, 60, 25, 0.7)); padding: 30px; border-radius: 15px; margin: 30px auto; border: 2px solid rgba(76, 175, 80, 0.4);">
+    <h2 style="color: #4caf50; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">🎮 MINH HỌA TƯƠNG TÁC</h2>
+    
+    <div style="text-align: center; margin-bottom: 20px; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px;">
+      <p style="font-size: 18px; color: #81c784; margin: 0;">Khám phá trực quan các khái niệm đạo hàm thông qua biểu diễn đồ thị động và tương tác</p>
+    </div>
+
+    <div class="controls">
+      <label for="functionSelect">Chọn Hàm:</label>
+      <select id="functionSelect">
+        <option value="sin">f(x) = sin(x) → f'(x) = cos(x)</option>
+        <option value="cos">f(x) = cos(x) → f'(x) = -sin(x)</option>
+        <option value="polynomial">f(x) = x² → f'(x) = 2x</option>
+        <option value="cubic">f(x) = x³ → f'(x) = 3x²</option>
+        <option value="exp">f(x) = eˣ → f'(x) = eˣ</option>
+        <option value="ln">f(x) = ln(x) → f'(x) = 1/x</option>
+        <option value="sqrt">f(x) = √x → f'(x) = 1/(2√x)</option>
+        <option value="tan">f(x) = tan(x) → f'(x) = sec²(x)</option>
+        <option value="rational">f(x) = 1/x → f'(x) = -1/x²</option>
+        <option value="quartic">f(x) = x⁴ → f'(x) = 4x³</option>
+      </select>
+    </div>
+    
+    <div class="view-controls">
+      <label><input type="radio" name="viewMode" value="single" checked> Chế Độ Đơn</label>
+      <label><input type="radio" name="viewMode" value="split"> Chế Độ Tách (Hàm & Đạo Hàm)</label>
+    </div>
+    
+    <div class="controls">
+      <label>x = </label>
+      <input type="range" id="xSlider" min="-628" max="628" value="0" step="1">
+      <span id="xValueDisplay">0.00</span>
+      <button id="playPauseBtn">▶ Chơi</button>
+      <button id="resetBtn">Khởi Động Lại</button>
+    </div>
+    
+    <canvas id="canvas" width="900" height="600"></canvas>
+  </div>
+
+  <div style="background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; margin: 20px auto; max-width: 1000px; text-align: left;">
+    <h3 style="color: #0ff;">📚 Tổng Kết & Ghi Nhớ</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+      <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #ffd700;">⚡ Quy Tắc Cơ Bản</h4>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Lũy thừa</div>
+          <div class="math-environment">$$\frac{d}{dx}[x^n] = n \cdot x^{n-1}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Tổng</div>
+          <div class="math-environment">$$\frac{d}{dx}[f + g] = f' + g'$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Tích</div>
+          <div class="math-environment">$$\frac{d}{dx}[fg] = f'g + fg'$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Quy tắc Dây chuyền</div>
+          <div class="math-environment">$$\frac{d}{dx}[f(g(x))] = f'(g(x)) \cdot g'(x)$$</div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #007bff;">📐 Hàm Lượng Giác</h4>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Sin</div>
+          <div class="math-environment">$$\frac{d}{dx}[\sin(x)] = \cos(x)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Cos</div>
+          <div class="math-environment">$$\frac{d}{dx}[\cos(x)] = -\sin(x)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Tan</div>
+          <div class="math-environment">$$\frac{d}{dx}[\tan(x)] = \sec^2(x)$$</div>
+        </div>
+      </div>
+      
+      <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;">
+        <h4 style="color: #28a745;">🔢 Hàm Mũ & Logarithm</h4>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm $e^x$</div>
+          <div class="math-environment">$$\frac{d}{dx}[e^x] = e^x$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm $a^x$</div>
+          <div class="math-environment">$$\frac{d}{dx}[a^x] = a^x \ln(a)$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Logarithm tự nhiên</div>
+          <div class="math-environment">$$\frac{d}{dx}[\ln(x)] = \frac{1}{x}$$</div>
+        </div>
+        <div class="formula-container">
+          <div class="formula-title">Đạo hàm Log cơ số a</div>
+          <div class="math-environment">$$\frac{d}{dx}[\log_a(x)] = \frac{1}{x \ln(a)}$$</div>
+        </div>
       </div>
     </div>
     
@@ -190,16 +433,16 @@
         <div>
           <h5>Vật Lý:</h5>
           <ul style="font-size: 13px;">
-            <li>Vận tốc = dx/dt (đạo hàm của vị trí)</li>
-            <li>Gia tốc = dv/dt (đạo hàm của vận tốc)</li>
-            <li>Trường điện = -dV/dx (gradient âm của thế năng)</li>
+            <li>Vận tốc = $\frac{dx}{dt}$ (đạo hàm của vị trí)</li>
+            <li>Gia tốc = $\frac{dv}{dt}$ (đạo hàm của vận tốc)</li>
+            <li>Trường điện = $-\frac{dV}{dx}$ (gradient âm của thế năng)</li>
           </ul>
         </div>
         <div>
           <h5>Kinh Tế:</h5>
           <ul style="font-size: 13px;">
-            <li>Chi phí biên = dC/dq (đạo hàm của hàm chi phí)</li>
-            <li>Doanh thu biên = dR/dq (đạo hàm của doanh thu)</li>
+            <li>Chi phí biên = $\frac{dC}{dq}$ (đạo hàm của hàm chi phí)</li>
+            <li>Doanh thu biên = $\frac{dR}{dq}$ (đạo hàm của doanh thu)</li>
             <li>Đàn hồi liên quan đến đạo hàm của cầu</li>
           </ul>
         </div>

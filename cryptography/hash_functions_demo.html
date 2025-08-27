@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧮 Hash Functions & SHA - Cryptographic Demo</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #38bdf8;
+        }
+        
+        .control-group input, .control-group textarea, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #0ea5e9;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .control-group textarea {
+            min-height: 80px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .result-panel {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid #38bdf8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .hash-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #38bdf8;
+            word-break: break-all;
+        }
+        
+        .avalanche-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .hash-comparison {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .different-bit {
+            background: #ef4444;
+            color: white;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        
+        .performance-chart {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            .avalanche-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Hash Functions & SHA</h1>
+        <div style="text-align: center; color: #bae6fd; font-size: 1.2em; margin-bottom: 30px;">
+            Cryptographic hash functions: the foundation of digital integrity and blockchain technology
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🔧 Hash Function Demo</h3>
+                
+                <div class="control-group">
+                    <label>Hash Algorithm:</label>
+                    <select id="hashAlgorithm" onchange="updateHash()">
+                        <option value="sha256">SHA-256</option>
+                        <option value="sha1">SHA-1 (deprecated)</option>
+                        <option value="md5">MD5 (broken)</option>
+                        <option value="simple">Simple Hash (demo)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Input Message:</label>
+                    <textarea id="inputMessage" oninput="updateHash()" placeholder="Enter your message here...">Hello, World!</textarea>
+                </div>
+                
+                <button class="btn" onclick="generateRandomMessage()">🎲 Random Message</button>
+                <button class="btn" onclick="clearMessage()">🗑️ Clear</button>
+                
+                <div class="result-panel">
+                    <h4>📊 Hash Output:</h4>
+                    <div id="hashOutput" class="hash-display">Enter a message to see hash</div>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>📈 Hash Properties:</h4>
+                    <div id="hashProperties">
+                        <p>• <strong>Length:</strong> <span id="hashLength">-</span> bits</p>
+                        <p>• <strong>Hex Length:</strong> <span id="hexLength">-</span> characters</p>
+                        <p>• <strong>Security:</strong> <span id="securityLevel">-</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⚡ Avalanche Effect Demo</h3>
+                
+                <div class="control-group">
+                    <label>Original Message:</label>
+                    <input type="text" id="originalMsg" value="The quick brown fox" oninput="demonstrateAvalanche()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Modified Message:</label>
+                    <input type="text" id="modifiedMsg" value="The quick brown fox." oninput="demonstrateAvalanche()">
+                </div>
+                
+                <button class="btn" onclick="introduceTypo()">🐛 Introduce Typo</button>
+                <button class="btn" onclick="changeCase()">🔄 Change Case</button>
+                
+                <div class="avalanche-demo">
+                    <div class="hash-comparison">
+                        <h5>Original Hash:</h5>
+                        <div id="originalHash">...</div>
+                    </div>
+                    
+                    <div class="hash-comparison">
+                        <h5>Modified Hash:</h5>
+                        <div id="modifiedHash">...</div>
+                    </div>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>📊 Avalanche Analysis:</h4>
+                    <div id="avalancheStats">
+                        <p>• <strong>Bits Changed:</strong> <span id="bitsChanged">-</span></p>
+                        <p>• <strong>Change Percentage:</strong> <span id="changePercentage">-</span>%</p>
+                        <p>• <strong>Good Avalanche:</strong> <span id="avalancheQuality">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🎯 Collision Resistance Demo</h3>
+                
+                <div class="control-group">
+                    <label>Hash Bit Length (for demo):</label>
+                    <select id="collisionBits" onchange="updateCollisionDemo()">
+                        <option value="8">8 bits (256 possible hashes)</option>
+                        <option value="16">16 bits (65K possible hashes)</option>
+                        <option value="24">24 bits (16M possible hashes)</option>
+                        <option value="32">32 bits (4B possible hashes)</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="findCollision()">🔍 Find Collision</button>
+                <button class="btn btn-danger" onclick="stopCollisionSearch()">⏹️ Stop Search</button>
+                
+                <div class="result-panel">
+                    <h4>💥 Collision Search Results:</h4>
+                    <div id="collisionResults">Click "Find Collision" to start brute force search</div>
+                </div>
+                
+                <div class="performance-chart">
+                    <h5>Search Progress:</h5>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar" style="width: 0%;"></div>
+                    </div>
+                    <p>Attempts: <span id="attemptCount">0</span></p>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⛓️ Blockchain Hash Chain</h3>
+                
+                <div class="control-group">
+                    <label>Block Data:</label>
+                    <input type="text" id="blockData" value="Genesis Block" placeholder="Enter block data">
+                </div>
+                
+                <button class="btn" onclick="addBlock()">➕ Add Block</button>
+                <button class="btn" onclick="tamperBlock()">🔧 Tamper with Block 1</button>
+                <button class="btn btn-danger" onclick="resetChain()">🔄 Reset Chain</button>
+                
+                <div class="result-panel">
+                    <h4>⛓️ Blockchain:</h4>
+                    <div id="blockchainDisplay" style="max-height: 300px; overflow-y: auto;">
+                        <p>Add blocks to see the chain</p>
+                    </div>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>🔒 Chain Integrity:</h4>
+                    <div id="chainIntegrity">Chain is empty</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel" style="margin-top: 20px;">
+            <h3>🎓 Cryptographic Hash Properties</h3>
+            
+            <div class="demo-grid">
+                <div class="result-panel">
+                    <h4>✅ Required Properties:</h4>
+                    <p>• <strong>Deterministic:</strong> Same input → Same output</p>
+                    <p>• <strong>Fixed Output:</strong> Any input → Fixed-size hash</p>
+                    <p>• <strong>Fast Computation:</strong> Efficient to compute</p>
+                    <p>• <strong>Avalanche Effect:</strong> Small change → Big difference</p>
+                    <p>• <strong>One-way:</strong> Easy to hash, hard to reverse</p>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>🛡️ Security Properties:</h4>
+                    <p>• <strong>Pre-image Resistance:</strong> Given h, hard to find m where hash(m) = h</p>
+                    <p>• <strong>Second Pre-image:</strong> Given m₁, hard to find m₂ where hash(m₁) = hash(m₂)</p>
+                    <p>• <strong>Collision Resistance:</strong> Hard to find any m₁ ≠ m₂ where hash(m₁) = hash(m₂)</p>
+                </div>
+            </div>
+            
+            <div class="result-panel">
+                <h4>🌍 Real-World Applications:</h4>
+                <div class="demo-grid">
+                    <div>
+                        <p>• <strong>Bitcoin:</strong> SHA-256 for proof-of-work</p>
+                        <p>• <strong>Git:</strong> SHA-1 for commit hashes</p>
+                        <p>• <strong>Password Storage:</strong> Salted hashes</p>
+                        <p>• <strong>Digital Signatures:</strong> Message integrity</p>
+                    </div>
+                    <div>
+                        <p>• <strong>Merkle Trees:</strong> Efficient verification</p>
+                        <p>• <strong>HMAC:</strong> Message authentication</p>
+                        <p>• <strong>Key Derivation:</strong> Password-based keys</p>
+                        <p>• <strong>Checksums:</strong> Data integrity verification</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let blockchain = [];
+        let collisionSearch = false;
+        
+        // Simple hash implementations for demo
+        function simpleHash(str, bits = 32) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+            
+            // Truncate to specified bits
+            const mask = (1 << bits) - 1;
+            return (hash & mask).toString(16).padStart(Math.ceil(bits / 4), '0');
+        }
+        
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        async function sha1(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        function md5Hash(str) {
+            // Simplified MD5 for demo (not cryptographically secure)
+            return simpleHash(str + 'md5salt', 128);
+        }
+        
+        async function updateHash() {
+            const algorithm = document.getElementById('hashAlgorithm').value;
+            const message = document.getElementById('inputMessage').value;
+            let hash = '';
+            let bitLength = 0;
+            let security = '';
+            
+            try {
+                switch (algorithm) {
+                    case 'sha256':
+                        hash = await sha256(message);
+                        bitLength = 256;
+                        security = '✅ Very Strong (recommended)';
+                        break;
+                    case 'sha1':
+                        hash = await sha1(message);
+                        bitLength = 160;
+                        security = '⚠️ Weak (deprecated)';
+                        break;
+                    case 'md5':
+                        hash = md5Hash(message);
+                        bitLength = 128;
+                        security = '❌ Broken (do not use)';
+                        break;
+                    case 'simple':
+                        hash = simpleHash(message);
+                        bitLength = 32;
+                        security = '❌ Demo only (not cryptographic)';
+                        break;
+                }
+                
+                document.getElementById('hashOutput').textContent = hash;
+                document.getElementById('hashLength').textContent = bitLength;
+                document.getElementById('hexLength').textContent = hash.length;
+                document.getElementById('securityLevel').textContent = security;
+                
+            } catch (error) {
+                document.getElementById('hashOutput').textContent = 'Error computing hash';
+            }
+        }
+        
+        function generateRandomMessage() {
+            const words = ['crypto', 'hash', 'blockchain', 'bitcoin', 'ethereum', 'security', 'algorithm', 'digital', 'signature', 'merkle'];
+            const randomWords = [];
+            for (let i = 0; i < 3; i++) {
+                randomWords.push(words[Math.floor(Math.random() * words.length)]);
+            }
+            document.getElementById('inputMessage').value = randomWords.join(' ') + ' ' + Math.floor(Math.random() * 1000);
+            updateHash();
+        }
+        
+        function clearMessage() {
+            document.getElementById('inputMessage').value = '';
+            updateHash();
+        }
+        
+        async function demonstrateAvalanche() {
+            const original = document.getElementById('originalMsg').value;
+            const modified = document.getElementById('modifiedMsg').value;
+            
+            const originalHash = await sha256(original);
+            const modifiedHash = await sha256(modified);
+            
+            document.getElementById('originalHash').textContent = originalHash;
+            document.getElementById('modifiedHash').textContent = modifiedHash;
+            
+            // Calculate bit differences
+            const bitsChanged = calculateBitDifferences(originalHash, modifiedHash);
+            const totalBits = originalHash.length * 4; // 4 bits per hex char
+            const changePercentage = ((bitsChanged / totalBits) * 100).toFixed(1);
+            
+            document.getElementById('bitsChanged').textContent = `${bitsChanged}/${totalBits}`;
+            document.getElementById('changePercentage').textContent = changePercentage;
+            document.getElementById('avalancheQuality').textContent = 
+                changePercentage > 40 ? '✅ Excellent' : 
+                changePercentage > 25 ? '✅ Good' : 
+                '⚠️ Poor';
+            
+            // Highlight differences visually
+            highlightDifferences('originalHash', originalHash, modifiedHash);
+            highlightDifferences('modifiedHash', modifiedHash, originalHash);
+        }
+        
+        function calculateBitDifferences(hash1, hash2) {
+            let differences = 0;
+            
+            for (let i = 0; i < Math.min(hash1.length, hash2.length); i++) {
+                const val1 = parseInt(hash1[i], 16);
+                const val2 = parseInt(hash2[i], 16);
+                const xor = val1 ^ val2;
+                
+                // Count set bits in XOR result
+                let temp = xor;
+                while (temp) {
+                    differences += temp & 1;
+                    temp >>= 1;
+                }
+            }
+            
+            return differences;
+        }
+        
+        function highlightDifferences(elementId, hash1, hash2) {
+            let html = '';
+            
+            for (let i = 0; i < hash1.length; i++) {
+                if (i < hash2.length && hash1[i] !== hash2[i]) {
+                    html += `<span class="different-bit">${hash1[i]}</span>`;
+                } else {
+                    html += hash1[i];
+                }
+            }
+            
+            document.getElementById(elementId).innerHTML = html;
+        }
+        
+        function introduceTypo() {
+            const original = document.getElementById('originalMsg').value;
+            let modified = original;
+            
+            if (modified.length > 0) {
+                const pos = Math.floor(Math.random() * modified.length);
+                const chars = 'abcdefghijklmnopqrstuvwxyz';
+                const newChar = chars[Math.floor(Math.random() * chars.length)];
+                modified = modified.substring(0, pos) + newChar + modified.substring(pos + 1);
+            }
+            
+            document.getElementById('modifiedMsg').value = modified;
+            demonstrateAvalanche();
+        }
+        
+        function changeCase() {
+            const original = document.getElementById('originalMsg').value;
+            const modified = original.split('').map(char => 
+                char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase()
+            ).join('');
+            
+            document.getElementById('modifiedMsg').value = modified;
+            demonstrateAvalanche();
+        }
+        
+        async function findCollision() {
+            if (collisionSearch) return;
+            
+            collisionSearch = true;
+            const bits = parseInt(document.getElementById('collisionBits').value);
+            const maxAttempts = Math.min(1000000, Math.pow(2, bits)); // Limit attempts
+            
+            let attempts = 0;
+            const hashes = new Map();
+            
+            document.getElementById('collisionResults').innerHTML = 'Searching for collision...';
+            
+            const searchInterval = setInterval(async () => {
+                if (!collisionSearch) {
+                    clearInterval(searchInterval);
+                    return;
+                }
+                
+                for (let i = 0; i < 1000 && attempts < maxAttempts; i++) {
+                    const message = `message_${attempts}`;
+                    const hash = simpleHash(message, bits);
+                    
+                    if (hashes.has(hash)) {
+                        // Collision found!
+                        clearInterval(searchInterval);
+                        collisionSearch = false;
+                        
+                        document.getElementById('collisionResults').innerHTML = `
+                            <div class="hash-display">
+                                <p><strong>💥 COLLISION FOUND!</strong></p>
+                                <p><strong>Message 1:</strong> ${hashes.get(hash)}</p>
+                                <p><strong>Message 2:</strong> ${message}</p>
+                                <p><strong>Same Hash:</strong> ${hash}</p>
+                                <p><strong>Attempts:</strong> ${attempts}</p>
+                                <p><strong>Expected:</strong> ~${Math.sqrt(Math.pow(2, bits)).toFixed(0)} (birthday paradox)</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    hashes.set(hash, message);
+                    attempts++;
+                }
+                
+                // Update progress
+                const progress = (attempts / maxAttempts) * 100;
+                document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
+                document.getElementById('attemptCount').textContent = attempts;
+                
+                if (attempts >= maxAttempts) {
+                    clearInterval(searchInterval);
+                    collisionSearch = false;
+                    document.getElementById('collisionResults').innerHTML = `
+                        <p>No collision found after ${attempts} attempts.</p>
+                        <p>Try a smaller bit length for better chance of collision.</p>
+                    `;
+                }
+            }, 10);
+        }
+        
+        function stopCollisionSearch() {
+            collisionSearch = false;
+            document.getElementById('collisionResults').innerHTML = 'Collision search stopped.';
+        }
+        
+        function updateCollisionDemo() {
+            const bits = parseInt(document.getElementById('collisionBits').value);
+            const possibleHashes = Math.pow(2, bits);
+            const birthdayBound = Math.sqrt(possibleHashes);
+            
+            document.getElementById('collisionResults').innerHTML = `
+                <p><strong>Hash space:</strong> 2^${bits} = ${possibleHashes.toLocaleString()} possible hashes</p>
+                <p><strong>Birthday bound:</strong> ~${birthdayBound.toFixed(0)} attempts expected for 50% collision chance</p>
+                <p>Click "Find Collision" to start brute force search</p>
+            `;
+        }
+        
+        async function addBlock() {
+            const data = document.getElementById('blockData').value;
+            const prevHash = blockchain.length > 0 ? blockchain[blockchain.length - 1].hash : '0'.repeat(64);
+            const blockContent = `${blockchain.length}|${prevHash}|${data}|${Date.now()}`;
+            const hash = await sha256(blockContent);
+            
+            const block = {
+                index: blockchain.length,
+                data: data,
+                prevHash: prevHash,
+                hash: hash,
+                timestamp: Date.now(),
+                content: blockContent
+            };
+            
+            blockchain.push(block);
+            updateBlockchainDisplay();
+            document.getElementById('blockData').value = `Block ${blockchain.length}`;
+        }
+        
+        async function tamperBlock() {
+            if (blockchain.length < 2) {
+                alert('Need at least 2 blocks to demonstrate tampering');
+                return;
+            }
+            
+            // Tamper with the first block's data
+            blockchain[0].data = 'TAMPERED DATA';
+            blockchain[0].content = `${blockchain[0].index}|${blockchain[0].prevHash}|${blockchain[0].data}|${blockchain[0].timestamp}`;
+            // Don't update the hash - this simulates tampering
+            
+            updateBlockchainDisplay();
+        }
+        
+        function resetChain() {
+            blockchain = [];
+            updateBlockchainDisplay();
+            document.getElementById('blockData').value = 'Genesis Block';
+        }
+        
+        async function updateBlockchainDisplay() {
+            let html = '';
+            let chainValid = true;
+            
+            for (let i = 0; i < blockchain.length; i++) {
+                const block = blockchain[i];
+                const expectedHash = await sha256(block.content);
+                const isValid = expectedHash === block.hash;
+                const prevHashValid = i === 0 || block.prevHash === blockchain[i-1].hash;
+                
+                if (!isValid || !prevHashValid) chainValid = false;
+                
+                html += `
+                    <div class="result-panel" style="margin: 10px 0; border-color: ${isValid && prevHashValid ? '#38bdf8' : '#ef4444'};">
+                        <h5>Block ${block.index} ${isValid && prevHashValid ? '✅' : '❌'}</h5>
+                        <p><strong>Data:</strong> ${block.data}</p>
+                        <p><strong>Previous Hash:</strong> ${block.prevHash.substring(0, 16)}...</p>
+                        <p><strong>Hash:</strong> ${block.hash.substring(0, 16)}...</p>
+                        ${!isValid ? '<p style="color: #ef4444;"><strong>⚠️ HASH MISMATCH!</strong></p>' : ''}
+                        ${!prevHashValid ? '<p style="color: #ef4444;"><strong>⚠️ CHAIN BROKEN!</strong></p>' : ''}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('blockchainDisplay').innerHTML = html || '<p>Chain is empty</p>';
+            
+            document.getElementById('chainIntegrity').innerHTML = blockchain.length === 0 ? 
+                'Chain is empty' :
+                chainValid ? 
+                    '✅ Chain integrity verified - all blocks are valid' :
+                    '❌ Chain integrity compromised - tampering detected!';
+        }
+        
+        // Initialize
+        window.onload = function() {
+            updateHash();
+            demonstrateAvalanche();
+            updateCollisionDemo();
+            
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -4,7 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parallel Computing in Machine Learning</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript'        // Global variables
+        let currentParallelism = 'data';
+        let numWorkers = 4;
+        let datasetSize = 1000; // MB
+        let modelComplexity = 5; // 1-10 scale
+        let isSimulationRunning = false;
+        
+        // Performance constants
+        const PERFORMANCE_CONSTANTS = {
+            // Network parameters (typical values for InfiniBand)
+            LATENCY_ALPHA: 1e-6, // 1 microsecond
+            BANDWIDTH_BETA: 1e-10, // 10 GB/s bandwidth
+            
+            // Model parameters (estimated for typical deep learning models)
+            MODEL_SIZE_MB: {
+                1: 10,    // Small CNN
+                2: 25,    // ResNet-18
+                3: 50,    // ResNet-50
+                4: 100,   // ResNet-101
+                5: 200,   // Large CNN
+                6: 500,   // Small Transformer
+                7: 1000,  // BERT-Base
+                8: 2000,  // BERT-Large
+                9: 5000,  // GPT-2
+                10: 15000 // GPT-3 175B (distributed)
+            },
+            
+            // Computation parameters
+            FLOPS_PER_SAMPLE: {
+                1: 1e6,   // 1 MFLOP
+                2: 5e6,   // 5 MFLOP
+                3: 1e7,   // 10 MFLOP
+                4: 5e7,   // 50 MFLOP
+                5: 1e8,   // 100 MFLOP
+                6: 5e8,   // 500 MFLOP
+                7: 1e9,   // 1 GFLOP
+                8: 5e9,   // 5 GFLOP
+                9: 1e10,  // 10 GFLOP
+                10: 5e10  // 50 GFLOP
+            },
+            
+            // Hardware parameters
+            GPU_COMPUTE_POWER: 15e12, // 15 TFLOPS (typical for V100)
+            GPU_MEMORY_GB: 32,        // 32 GB HBM
+            CPU_CORES: 40,            // 40 core CPU
+            
+            // Parallel overhead factors
+            SYNC_OVERHEAD: 0.05,      // 5% synchronization overhead
+            COMMUNICATION_EFFICIENCY: 0.8, // 80% communication efficiency
+        };le', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -129,9 +193,52 @@
             font-weight: bold;
             margin: 5px;
         }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .theory-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #FF6B6B;
+        }
+
+        .algorithm-box {
+            background: rgba(46, 125, 50, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .complexity-analysis {
+            background: rgba(63, 81, 181, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #3F51B5;
+        }
+
+        .scalability-laws {
+            background: rgba(156, 39, 176, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #9C27B0;
         }
         .worker-grid {
             display: grid;
@@ -185,15 +292,32 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Parallel Computing in Machine Learning</h1>
+        <h1>🚀 Parallel Computing trong Machine Learning</h1>
         
-        <div class="info-panel">
-            <h3>📚 Giới thiệu về Parallel Computing</h3>
+        <div class="theory-section">
+            <h3>📚 Lý thuyết Parallel Computing</h3>
             <p>
-                <strong>Parallel computing</strong> trong machine learning sử dụng nhiều đơn vị xử lý (CPUs, GPUs, TPUs) 
-                hoặc nhiều máy để tăng tốc độ training và inference. Điều này trở nên quan trọng khi datasets 
-                và models ngày càng lớn.
+                <strong>Parallel computing</strong> trong machine learning sử dụng nhiều đơn vị xử lý để phân phối 
+                workload, giảm thời gian training và xử lý datasets lớn. Có ba paradigms chính:
             </p>
+            
+            <div class="formula-box">
+                <strong>1. Data Parallelism:</strong><br>
+                Mỗi worker xử lý một phần của dataset:<br>
+                $$\mathcal{D} = \bigcup_{i=1}^{p} \mathcal{D}_i, \quad \mathcal{D}_i \cap \mathcal{D}_j = \emptyset \text{ for } i \neq j$$
+                
+                Gradient tổng được tính bằng:<br>
+                $$\nabla L(\theta) = \frac{1}{|\mathcal{D}|} \sum_{i=1}^{p} |\mathcal{D}_i| \nabla L_{\mathcal{D}_i}(\theta)$$
+            </div>
+            
+            <div class="formula-box">
+                <strong>2. Model Parallelism:</strong><br>
+                Model được phân chia qua các workers:<br>
+                $$f(x; \theta) = f_p(f_{p-1}(\ldots f_2(f_1(x; \theta_1); \theta_2) \ldots; \theta_{p-1}); \theta_p)$$
+                
+                Pipeline parallelism với $k$ micro-batches:<br>
+                $$T_{pipeline} = \frac{k + p - 1}{k} \cdot T_{sequential}$$
+            </div>
         </div>
 
         <div class="controls">
@@ -234,17 +358,32 @@
         <div class="parallelism-comparison">
             <div class="parallelism-card">
                 <h4>🔄 Data Parallelism</h4>
+                <div class="algorithm-box">
+                    <strong>Algorithm: Synchronous SGD</strong><br>
+                    1. Broadcast model $\theta_t$ to all workers<br>
+                    2. Each worker $i$ computes: $g_i = \nabla L_{\mathcal{D}_i}(\theta_t)$<br>
+                    3. AllReduce: $\bar{g} = \frac{1}{p}\sum_{i=1}^p g_i$<br>
+                    4. Update: $\theta_{t+1} = \theta_t - \alpha \bar{g}$
+                </div>
                 <p><strong>Ưu điểm:</strong></p>
                 <ul>
-                    <li>Dễ implement</li>
-                    <li>Hiệu quả cho deep learning</li>
-                    <li>Scales tốt với data</li>
+                    <li>✅ Dễ implement với frameworks hiện tại</li>
+                    <li>✅ Hiệu quả cho deep learning</li>
+                    <li>✅ Linear scaling với data size</li>
+                    <li>✅ Convergence guarantees giống sequential</li>
                 </ul>
                 <p><strong>Nhược điểm:</strong></p>
                 <ul>
-                    <li>Memory overhead</li>
-                    <li>Communication cost</li>
+                    <li>❌ Memory replication cho mỗi worker</li>
+                    <li>❌ Communication bottleneck với large models</li>
+                    <li>❌ Synchronization overhead</li>
                 </ul>
+                <div class="formula-box">
+                    <strong>Communication Cost:</strong><br>
+                    $C_{data} = O(|\theta| \cdot \log p)$ (AllReduce)<br>
+                    <strong>Memory per Worker:</strong><br>
+                    $M_{worker} = |\theta| + |\mathcal{D}_i|$
+                </div>
                 <div class="worker-grid" id="data-workers">
                     <!-- Workers will be added here -->
                 </div>
@@ -252,17 +391,33 @@
             
             <div class="parallelism-card">
                 <h4>🏗️ Model Parallelism</h4>
+                <div class="algorithm-box">
+                    <strong>Algorithm: Layer-wise Parallelism</strong><br>
+                    1. Partition model: $f = f_p \circ f_{p-1} \circ \ldots \circ f_1$<br>
+                    2. Forward: $h_i = f_i(h_{i-1})$, send to worker $i+1$<br>
+                    3. Backward: $\frac{\partial L}{\partial h_{i-1}} = \frac{\partial L}{\partial h_i} \frac{\partial f_i}{\partial h_{i-1}}$<br>
+                    4. Update local parameters: $\theta_i \leftarrow \theta_i - \alpha \nabla_{\theta_i} L$
+                </div>
                 <p><strong>Ưu điểm:</strong></p>
                 <ul>
-                    <li>Xử lý models lớn</li>
-                    <li>Memory efficient</li>
-                    <li>Phù hợp cho LLMs</li>
+                    <li>✅ Xử lý được models rất lớn (> GPU memory)</li>
+                    <li>✅ Memory distributed across workers</li>
+                    <li>✅ Phù hợp cho Large Language Models</li>
+                    <li>✅ No gradient communication</li>
                 </ul>
                 <p><strong>Nhược điểm:</strong></p>
                 <ul>
-                    <li>Communication overhead cao</li>
-                    <li>Load balancing khó</li>
+                    <li>❌ High communication overhead (activations)</li>
+                    <li>❌ Load balancing challenges</li>
+                    <li>❌ Pipeline bubbles reduce efficiency</li>
+                    <li>❌ Complex implementation</li>
                 </ul>
+                <div class="formula-box">
+                    <strong>Pipeline Efficiency:</strong><br>
+                    $E_{pipeline} = \frac{k}{k + p - 1}$ (k micro-batches)<br>
+                    <strong>Activation Memory:</strong><br>
+                    $M_{activation} = O(b \cdot h \cdot L/p)$ (per worker)
+                </div>
                 <div class="worker-grid" id="model-workers">
                     <!-- Workers will be added here -->
                 </div>
@@ -270,64 +425,170 @@
             
             <div class="parallelism-card">
                 <h4>🔀 Hybrid Parallelism</h4>
+                <div class="algorithm-box">
+                    <strong>Algorithm: 3D Parallelism</strong><br>
+                    1. <strong>Data Parallel (DP):</strong> Split batch across $d$ workers<br>
+                    2. <strong>Tensor Parallel (TP):</strong> Split layers across $t$ workers<br>
+                    3. <strong>Pipeline Parallel (PP):</strong> Split model across $p$ workers<br>
+                    Total workers: $N = d \times t \times p$
+                </div>
                 <p><strong>Ưu điểm:</strong></p>
                 <ul>
-                    <li>Kết hợp ưu điểm cả hai</li>
-                    <li>Scales cực lớn</li>
-                    <li>Phù hợp cho GPT-3</li>
+                    <li>✅ Scales to thousands of GPUs (GPT-3: 1024 GPUs)</li>
+                    <li>✅ Optimal memory và compute utilization</li>
+                    <li>✅ Flexible resource allocation</li>
+                    <li>✅ Best throughput for large models</li>
                 </ul>
                 <p><strong>Nhược điểm:</strong></p>
                 <ul>
-                    <li>Phức tạp implement</li>
-                    <li>Debugging khó</li>
+                    <li>❌ Extremely complex implementation</li>
+                    <li>❌ Debugging và profiling khó khăn</li>
+                    <li>❌ Requires expert tuning</li>
+                    <li>❌ Framework dependencies</li>
                 </ul>
+                <div class="formula-box">
+                    <strong>Total Communication:</strong><br>
+                    $C_{total} = C_{DP} + C_{TP} + C_{PP}$<br>
+                    <strong>Memory per GPU:</strong><br>
+                    $M_{gpu} = \frac{|\theta|}{t \times p} + \frac{|\text{batch}|}{d}$
+                </div>
                 <div class="worker-grid" id="hybrid-workers">
                     <!-- Workers will be added here -->
                 </div>
             </div>
         </div>
 
-        <div class="performance-metrics">
-            <h3>📊 Performance Metrics</h3>
-            <div class="metrics-grid">
-                <div class="metric-item">
-                    <strong>Speedup:</strong><br>
-                    <span id="speedup-value">1.0</span>
+        <div class="theory-section">
+            <h3>🔧 Mathematical Framework & Performance Analysis</h3>
+            
+            <div class="scalability-laws">
+                <h4>📏 Scalability Laws</h4>
+                <div class="formula-box">
+                    <strong>Amdahl's Law (Fixed Problem Size):</strong><br>
+                    $$S_p = \frac{1}{(1-P) + \frac{P}{p}}$$
+                    where $P$ is the parallel fraction, $p$ is number of processors<br><br>
+                    
+                    <strong>Gustafson's Law (Scaled Problem Size):</strong><br>
+                    $$S_p = p + (1-p) \cdot s$$
+                    where $s$ is the serial fraction of scaled problem<br><br>
+                    
+                    <strong>Weak Scaling Efficiency:</strong><br>
+                    $$E_{weak} = \frac{T_1}{T_p} \text{ (constant work per processor)}$$
+                    
+                    <strong>Strong Scaling Efficiency:</strong><br>
+                    $$E_{strong} = \frac{T_1}{p \cdot T_p} \text{ (fixed total work)}$$
                 </div>
-                <div class="metric-item">
-                    <strong>Efficiency:</strong><br>
-                    <span id="efficiency-value">100%</span>
+            </div>
+            
+            <div class="complexity-analysis">
+                <h4>⚡ Communication Complexity</h4>
+                <div class="comparison-grid">
+                    <div class="formula-box">
+                        <strong>AllReduce (Ring):</strong><br>
+                        Latency: $\alpha \cdot \log p$<br>
+                        Bandwidth: $\beta \cdot \frac{2(p-1)}{p} \cdot M$<br>
+                        Total: $2(p-1) \cdot (\alpha + \beta M/p)$
+                    </div>
+                    <div class="formula-box">
+                        <strong>AllGather:</strong><br>
+                        Latency: $\alpha \cdot \log p$<br>
+                        Bandwidth: $\beta \cdot \frac{(p-1)}{p} \cdot M$<br>
+                        Total: $(p-1) \cdot (\alpha + \beta M/p)$
+                    </div>
+                    <div class="formula-box">
+                        <strong>Broadcast:</strong><br>
+                        Latency: $\alpha \cdot \log p$<br>
+                        Bandwidth: $\beta \cdot M$<br>
+                        Total: $\log p \cdot \alpha + \beta M$
+                    </div>
+                    <div class="formula-box">
+                        <strong>Point-to-Point:</strong><br>
+                        Latency: $\alpha$<br>
+                        Bandwidth: $\beta \cdot M$<br>
+                        Total: $\alpha + \beta M$
+                    </div>
                 </div>
-                <div class="metric-item">
-                    <strong>Communication Overhead:</strong><br>
-                    <span id="comm-overhead">0%</span>
+            </div>
+            
+            <div class="algorithm-box">
+                <h4>🎯 Performance Optimization Strategies</h4>
+                <div class="formula-box">
+                    <strong>1. Gradient Compression:</strong><br>
+                    Communication cost reduction: $C_{compressed} = C_{original} \cdot r$ where $r$ is compression ratio<br><br>
+                    
+                    <strong>2. Gradient Accumulation:</strong><br>
+                    Effective batch size: $B_{eff} = B_{local} \cdot A \cdot p$ where $A$ is accumulation steps<br><br>
+                    
+                    <strong>3. Asynchronous Updates:</strong><br>
+                    Convergence rate with staleness $\tau$: $O(\frac{1}{\sqrt{T}} + \frac{\tau^2}{T})$<br><br>
+                    
+                    <strong>4. Mixed Precision Training:</strong><br>
+                    Memory reduction: $\sim 2\times$, Communication reduction: $\sim 2\times$<br>
+                    Convergence: $O(\frac{1}{\sqrt{T}})$ maintained with loss scaling
                 </div>
-                <div class="metric-item">
-                    <strong>Memory Usage:</strong><br>
-                    <span id="memory-usage">0 MB</span>
-                </div>
-                <div class="metric-item">
-                    <strong>Training Time:</strong><br>
-                    <span id="training-time">0s</span>
-                </div>
-                <div class="metric-item">
-                    <strong>Throughput:</strong><br>
-                    <span id="throughput">0 samples/s</span>
+            </div>
+            
+            <div class="complexity-analysis">
+                <h4>🧮 Training Time Analysis</h4>
+                <div class="formula-box">
+                    <strong>Total Training Time:</strong><br>
+                    $$T_{total} = T_{compute} + T_{communication} + T_{synchronization}$$
+                    
+                    <strong>Per-Iteration Breakdown:</strong><br>
+                    $$T_{iter} = T_{forward} + T_{backward} + T_{allreduce} + T_{update}$$
+                    
+                    <strong>Memory-Constrained Batch Size:</strong><br>
+                    $$B_{max} = \frac{M_{available} - M_{model} - M_{optimizer}}{M_{activation\_per\_sample}}$$
+                    
+                    <strong>Communication-Computation Overlap:</strong><br>
+                    $$T_{overlapped} = \max(T_{compute}, T_{communication})$$
                 </div>
             </div>
         </div>
 
-        <div class="info-panel">
-            <h3>🔧 Mathematical Framework</h3>
-            <div style="font-family: 'Courier New', monospace; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; margin: 10px 0;">
-                <strong>Data Parallelism:</strong><br>
-                ∇L_global(θ) = (1/K) Σᵏ₌₁ ∇L_Dₖ(θ)<br><br>
-                <strong>Speedup:</strong><br>
-                S_p = T₁ / T_p<br><br>
-                <strong>Efficiency:</strong><br>
-                E_p = S_p / p = T₁ / (p × T_p)<br><br>
-                <strong>Amdahl's Law:</strong><br>
-                S_p = 1 / ((1-P) + P/p)
+        <div class="performance-metrics">
+            <h3>📊 Real-time Performance Metrics</h3>
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <strong>Speedup (S):</strong><br>
+                    <span id="speedup-value">1.0</span><br>
+                    <small>$S = T_1 / T_p$</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Efficiency (E):</strong><br>
+                    <span id="efficiency-value">100%</span><br>
+                    <small>$E = S / p$</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Communication Overhead:</strong><br>
+                    <span id="comm-overhead">0%</span><br>
+                    <small>$C_{overhead} = T_{comm} / T_{total}$</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Memory per Worker:</strong><br>
+                    <span id="memory-usage">0 MB</span><br>
+                    <small>Model + Data + Gradients</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Training Time:</strong><br>
+                    <span id="training-time">0s</span><br>
+                    <small>Per Epoch</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Throughput:</strong><br>
+                    <span id="throughput">0 samples/s</span><br>
+                    <small>Effective Processing Rate</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Communication Volume:</strong><br>
+                    <span id="comm-volume">0 MB/s</span><br>
+                    <small>Data Transfer Rate</small>
+                </div>
+                <div class="metric-item">
+                    <strong>Pipeline Efficiency:</strong><br>
+                    <span id="pipeline-efficiency">N/A</span><br>
+                    <small>For Model Parallelism</small>
+                </div>
             </div>
         </div>
     </div>
@@ -347,9 +608,41 @@
             time: [],
             throughput: []
         };
+        
+        // Performance constants
+        const PERFORMANCE_CONSTANTS = {
+            // Network parameters (typical values for InfiniBand)
+            LATENCY_ALPHA: 1e-6, // 1 microsecond
+            BANDWIDTH_BETA: 1e-10, // 10 GB/s bandwidth
+            
+            // Model parameters (estimated for typical deep learning models)
+            MODEL_SIZE_MB: {
+                1: 10, 2: 25, 3: 50, 4: 100, 5: 200,
+                6: 500, 7: 1000, 8: 2000, 9: 5000, 10: 15000
+            },
+            
+            // Computation parameters (FLOPS per sample)
+            FLOPS_PER_SAMPLE: {
+                1: 1e6, 2: 5e6, 3: 1e7, 4: 5e7, 5: 1e8,
+                6: 5e8, 7: 1e9, 8: 5e9, 9: 1e10, 10: 5e10
+            },
+            
+            // Hardware parameters
+            GPU_COMPUTE_POWER: 15e12, // 15 TFLOPS (V100)
+            GPU_MEMORY_GB: 32,        // 32 GB HBM
+            SYNC_OVERHEAD: 0.05,      // 5% synchronization overhead
+            COMMUNICATION_EFFICIENCY: 0.8, // 80% communication efficiency
+        };
 
         // Initialize visualizations
         function initializePlots() {
+            // Check if Plotly is loaded
+            if (typeof Plotly === 'undefined') {
+                console.error('Plotly is not loaded yet. Retrying in 100ms...');
+                setTimeout(initializePlots, 100);
+                return;
+            }
+
             // Architecture plot
             const architectureData = [{
                 x: [0, 1, 2, 3],
@@ -424,35 +717,108 @@
             });
         }
 
-        // Calculate performance metrics
+        // Calculate comprehensive performance metrics
         function calculateMetrics() {
-            const baseTime = datasetSize * modelComplexity / 100; // Base time for single worker
-            const parallelTime = baseTime / numWorkers + (currentParallelism === 'data' ? 0.1 : 0.3) * numWorkers;
+            const constants = PERFORMANCE_CONSTANTS;
+            const modelSizeMB = constants.MODEL_SIZE_MB[modelComplexity];
+            const flopsPerSample = constants.FLOPS_PER_SAMPLE[modelComplexity];
+            const batchSize = Math.floor(datasetSize / 10); // Assume 10 batches per epoch
             
-            const speedup = baseTime / parallelTime;
-            const efficiency = speedup / numWorkers;
-            const communicationOverhead = (currentParallelism === 'data' ? 0.1 : 0.3) * numWorkers / parallelTime;
-            const memoryUsage = currentParallelism === 'data' ? numWorkers * modelComplexity * 100 : modelComplexity * 100;
-            const throughput = datasetSize / parallelTime;
+            // Single worker baseline
+            const singleWorkerCompute = (batchSize * flopsPerSample) / constants.GPU_COMPUTE_POWER;
+            const singleWorkerMemory = modelSizeMB + (batchSize * 0.1); // 0.1 MB per sample
+            
+            let parallelCompute, communicationTime, memoryPerWorker, pipelineEfficiency = 1.0;
+            
+            if (currentParallelism === 'data') {
+                // Data Parallelism calculations
+                const samplesPerWorker = Math.ceil(batchSize / numWorkers);
+                parallelCompute = (samplesPerWorker * flopsPerSample) / constants.GPU_COMPUTE_POWER;
+                
+                // AllReduce communication for gradients
+                const gradientSizeMB = modelSizeMB * 0.5; // Assume FP16 gradients
+                communicationTime = constants.LATENCY_ALPHA * Math.log2(numWorkers) + 
+                                  constants.BANDWIDTH_BETA * gradientSizeMB * (2 * (numWorkers - 1) / numWorkers);
+                
+                memoryPerWorker = modelSizeMB + (samplesPerWorker * 0.1);
+                
+            } else if (currentParallelism === 'model') {
+                // Model Parallelism calculations
+                const layersPerWorker = Math.ceil(10 / numWorkers); // Assume 10 layers
+                parallelCompute = (batchSize * flopsPerSample / 10 * layersPerWorker) / constants.GPU_COMPUTE_POWER;
+                
+                // Activation communication between pipeline stages
+                const activationSizeMB = batchSize * 0.01; // 0.01 MB per sample activation
+                communicationTime = constants.LATENCY_ALPHA + constants.BANDWIDTH_BETA * activationSizeMB;
+                
+                // Pipeline efficiency with micro-batching
+                const microBatches = Math.max(4, numWorkers);
+                pipelineEfficiency = microBatches / (microBatches + numWorkers - 1);
+                
+                memoryPerWorker = modelSizeMB / numWorkers + (batchSize * 0.1);
+                
+            } else { // hybrid
+                // Hybrid Parallelism (simplified 2D: data + model)
+                const dataParallel = Math.ceil(Math.sqrt(numWorkers));
+                const modelParallel = Math.ceil(numWorkers / dataParallel);
+                
+                const samplesPerWorker = Math.ceil(batchSize / dataParallel);
+                const layersPerWorker = Math.ceil(10 / modelParallel);
+                
+                parallelCompute = (samplesPerWorker * flopsPerSample / 10 * layersPerWorker) / constants.GPU_COMPUTE_POWER;
+                
+                // Combined communication overhead
+                const gradientCommTime = constants.LATENCY_ALPHA * Math.log2(dataParallel) + 
+                                       constants.BANDWIDTH_BETA * (modelSizeMB / modelParallel) * (2 * (dataParallel - 1) / dataParallel);
+                const activationCommTime = constants.LATENCY_ALPHA + constants.BANDWIDTH_BETA * (samplesPerWorker * 0.01);
+                
+                communicationTime = Math.max(gradientCommTime, activationCommTime);
+                memoryPerWorker = modelSizeMB / modelParallel + (samplesPerWorker * 0.1);
+            }
+            
+            // Add synchronization overhead
+            const syncTime = parallelCompute * constants.SYNC_OVERHEAD;
+            const totalParallelTime = (parallelCompute + communicationTime + syncTime) / pipelineEfficiency;
+            
+            // Apply Amdahl's law (assume 90% parallelizable)
+            const parallelFraction = 0.9;
+            const amdahlSpeedup = 1 / ((1 - parallelFraction) + parallelFraction / numWorkers);
+            const actualSpeedup = Math.min(singleWorkerCompute / totalParallelTime, amdahlSpeedup);
+            
+            const efficiency = actualSpeedup / numWorkers;
+            const communicationOverhead = communicationTime / totalParallelTime;
+            const throughput = (batchSize / totalParallelTime) * constants.COMMUNICATION_EFFICIENCY;
+            const communicationVolume = (communicationTime > 0) ? 
+                (currentParallelism === 'data' ? modelSizeMB : batchSize * 0.01) / communicationTime : 0;
             
             return {
-                speedup: speedup,
+                speedup: actualSpeedup,
                 efficiency: efficiency,
                 communication: communicationOverhead,
-                memory: memoryUsage,
-                time: parallelTime,
-                throughput: throughput
+                memory: memoryPerWorker,
+                time: totalParallelTime,
+                throughput: throughput,
+                communicationVolume: communicationVolume,
+                pipelineEfficiency: pipelineEfficiency,
+                singleWorkerTime: singleWorkerCompute
             };
         }
 
-        // Update displays
+        // Update displays with enhanced metrics
         function updateDisplays(metrics) {
             document.getElementById('speedup-value').textContent = metrics.speedup.toFixed(2);
             document.getElementById('efficiency-value').textContent = (metrics.efficiency * 100).toFixed(1) + '%';
             document.getElementById('comm-overhead').textContent = (metrics.communication * 100).toFixed(1) + '%';
             document.getElementById('memory-usage').textContent = Math.round(metrics.memory) + ' MB';
-            document.getElementById('training-time').textContent = metrics.time.toFixed(1) + 's';
+            document.getElementById('training-time').textContent = metrics.time.toFixed(3) + 's';
             document.getElementById('throughput').textContent = Math.round(metrics.throughput) + ' samples/s';
+            document.getElementById('comm-volume').textContent = metrics.communicationVolume.toFixed(1) + ' MB/s';
+            
+            if (currentParallelism === 'model' || currentParallelism === 'hybrid') {
+                document.getElementById('pipeline-efficiency').textContent = (metrics.pipelineEfficiency * 100).toFixed(1) + '%';
+            } else {
+                document.getElementById('pipeline-efficiency').textContent = 'N/A';
+            }
         }
 
         // Simulate parallel processing
@@ -599,10 +965,26 @@
             updatePerformancePlot();
         });
 
-        // Initialize
-        initializePlots();
-        createWorkers();
-        updatePerformancePlot();
+        // Initialize when DOM and Plotly are ready
+        function initialize() {
+            if (typeof Plotly === 'undefined') {
+                console.log('Waiting for Plotly to load...');
+                setTimeout(initialize, 100);
+                return;
+            }
+            
+            console.log('Initializing application...');
+            initializePlots();
+            createWorkers();
+            updatePerformancePlot();
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initialize);
+        } else {
+            initialize();
+        }
     </script>
 </body>
 </html> 

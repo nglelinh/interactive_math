@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tensors - Complete Mathematical Foundation</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools']},
+                macros: {
+                    R: ['\\mathbb{R}'],
+                    N: ['\\mathbb{N}'],
+                    Z: ['\\mathbb{Z}'],
+                    C: ['\\mathbb{C}'],
+                    tensor: ['\\mathcal{T}'],
+                    Tensor: ['\\mathcal{T}']
+                }
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1,
+                minScale: 0.5
+            }
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+        }
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .theory-section {
+            background: rgba(102, 126, 234, 0.2);
+            border-left: 4px solid #667eea;
+        }
+        .example-section {
+            background: rgba(118, 75, 162, 0.2);
+            border-left: 4px solid #764ba2;
+        }
+        .interactive-section {
+            background: rgba(240, 147, 251, 0.2);
+            border-left: 4px solid #f093fb;
+        }
+        h2 {
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #FFA500;
+            margin-bottom: 15px;
+        }
+        .formula-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #FFD700;
+        }
+        .definition-box {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+        }
+        .theorem-box {
+            background: rgba(118, 75, 162, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #764ba2;
+        }
+        .application-box {
+            background: rgba(240, 147, 251, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #f093fb;
+        }
+        .tensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .tensor-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        .tensor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .interactive-demo {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .tensor-visualization {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .tensor-display {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 200px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .math-operations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .operation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .code-example {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            border-left: 4px solid #FFD700;
+        }
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .app-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .app-card h4 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background: rgba(102, 126, 234, 0.3);
+            font-weight: bold;
+        }
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        @media (max-width: 768px) {
+            .tensor-grid {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Tensors: From Mathematical Foundation to AI Applications</h1>
+        
+        <div class="section theory-section">
+            <h2>📚 Understanding Tensors: Intuitive to Rigorous</h2>
+            
+            <div class="definition-box">
+                <h3>🎯 What is a Tensor? (Intuitive Understanding)</h3>
+                <p>Think of tensors as <strong>generalized containers for numbers</strong>:</p>
+                <ul>
+                    <li>📏 <strong>Scalar (Rank-0):</strong> A single number - temperature, speed</li>
+                    <li>📈 <strong>Vector (Rank-1):</strong> A list of numbers - velocity, force</li>
+                    <li>🔲 <strong>Matrix (Rank-2):</strong> A table of numbers - rotation, transformation</li>
+                    <li>🧊 <strong>3D Tensor (Rank-3):</strong> A cube of numbers - RGB image, video frame</li>
+                    <li>🌐 <strong>Higher Tensors:</strong> Multi-dimensional arrays - batch of images, time series</li>
+                </ul>
+                
+                <h4>🔬 Formal Mathematical Definition</h4>
+                <p>A <strong>tensor</strong> of type $(r,s)$ is a multilinear map:</p>
+                <div class="formula-box">
+                    $$\mathcal{T}: \underbrace{V^* \times \cdots \times V^*}_{r \text{ contravariant}} \times \underbrace{V \times \cdots \times V}_{s \text{ covariant}} \rightarrow \mathbb{R}$$
+                </div>
+                <p>where $V$ is a vector space and $V^*$ is its dual space.</p>
+                
+                <h4>🔢 Component Representation</h4>
+                <p>In a coordinate system with basis $\{e_i\}$ and dual basis $\{e^j\}$:</p>
+                <div class="formula-box">
+                    $$\mathcal{T} = T^{i_1 \cdots i_r}_{j_1 \cdots j_s} \, e_{i_1} \otimes \cdots \otimes e_{i_r} \otimes e^{j_1} \otimes \cdots \otimes e^{j_s}$$
+                </div>
+                
+                <div class="application-box">
+                    <h4>🌟 Why Tensors Matter</h4>
+                    <p><strong>Coordinate Independence:</strong> Tensors describe physical/mathematical quantities that exist independently of our choice of coordinate system. The components change when we change coordinates, but the tensor itself remains the same - just like how a vector's components change when we rotate axes, but the vector itself doesn't change.</p>
+                </div>
+            </div>
+
+            <div class="tensor-grid">
+                <div class="tensor-card">
+                    <h4>📊 Rank-0 Tensor (Scalar)</h4>
+                    <p><strong>Intuition:</strong> Just a single number - temperature, mass, energy</p>
+                    <div class="formula-box">
+                        $$T = 5 \in \mathbb{R}$$
+                    </div>
+                    <p><strong>Components:</strong> 1 number</p>
+                    <p><strong>Transformation:</strong> Invariant under coordinate change</p>
+                    <p><strong>Example:</strong> Temperature at a point: 25°C</p>
+                </div>
+
+                <div class="tensor-card">
+                    <h4>📈 Rank-1 Tensor (Vector)</h4>
+                    <p><strong>Intuition:</strong> A list of numbers with direction - velocity, force, displacement</p>
+                    <div class="formula-box">
+                        $$\mathbf{v} = v^i e_i = \begin{bmatrix} v^1 \\ v^2 \\ v^3 \end{bmatrix}$$
+                    </div>
+                    <p><strong>Components:</strong> $n$ numbers</p>
+                    <p><strong>Transformation:</strong> $v'^i = \frac{\partial x'^i}{\partial x^j} v^j$</p>
+                    <p><strong>Example:</strong> Velocity vector: [3, 4, 0] m/s in x, y, z directions</p>
+                </div>
+
+                <div class="tensor-card">
+                    <h4>🔲 Rank-2 Tensor (Matrix)</h4>
+                    <p><strong>Intuition:</strong> A table of numbers - linear transformations, correlations</p>
+                    <div class="formula-box">
+                        $$\mathbf{M} = M^{ij} e_i \otimes e_j = \begin{bmatrix} 
+                        M^{11} & M^{12} \\ 
+                        M^{21} & M^{22} 
+                        \end{bmatrix}$$
+                    </div>
+                    <p><strong>Components:</strong> $n^2$ numbers</p>
+                    <p><strong>Transformation:</strong> $M'^{ij} = \frac{\partial x'^i}{\partial x^k} \frac{\partial x'^j}{\partial x^l} M^{kl}$</p>
+                    <p><strong>Examples:</strong> Rotation matrix, stress tensor, covariance matrix</p>
+                </div>
+
+                <div class="tensor-card">
+                    <h4>🧊 Rank-3 Tensor</h4>
+                    <p><strong>Intuition:</strong> A cube of numbers - RGB images, video frames</p>
+                    <div class="formula-box">
+                        $$\mathcal{T} = T^{ijk} e_i \otimes e_j \otimes e_k$$
+                    </div>
+                    <p><strong>Components:</strong> $n^3$ numbers</p>
+                    <p><strong>Shape:</strong> [height, width, channels] for images</p>
+                    <p><strong>Examples:</strong> RGB image (224×224×3), MRI scan, color video frame</p>
+                </div>
+
+                <div class="tensor-card">
+                    <h4>🌐 Rank-4+ Tensors</h4>
+                    <p><strong>Intuition:</strong> Multi-dimensional data structures</p>
+                    <div class="formula-box">
+                        $$\mathcal{T} = T^{i_1i_2\cdots i_n} e_{i_1} \otimes e_{i_2} \otimes \cdots \otimes e_{i_n}$$
+                    </div>
+                    <p><strong>Components:</strong> $n^k$ numbers for rank-k</p>
+                    <p><strong>Shape:</strong> [batch, height, width, channels] for image batches</p>
+                    <p><strong>Examples:</strong> Video (time×height×width×channels), batch processing in ML</p>
+                </div>
+
+                <div class="tensor-card">
+                    <h4>🔧 Tensor Rank vs Matrix Rank</h4>
+                    <p><strong>⚠️ Important Distinction:</strong></p>
+                    <p>• <strong>Tensor Rank:</strong> Number of dimensions/indices</p>
+                    <p>• <strong>Matrix Rank:</strong> Number of linearly independent rows/columns</p>
+                    <p>• A 3×3 matrix has <em>tensor rank 2</em> but <em>matrix rank ≤ 3</em></p>
+                    <p>• Don't confuse these concepts!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section interactive-section">
+            <h2>🎮 Interactive Tensor Operations & Visualization</h2>
+            
+            <div class="interactive-demo">
+                <h3>🔧 Tensor Builder & Visualizer</h3>
+                <p><strong>Experiment with different tensor shapes and see how they grow!</strong></p>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Tensor Rank (Number of Dimensions):</label>
+                        <input type="range" id="tensorRank" min="0" max="4" value="2" step="1">
+                        <span id="rankDisplay">Rank: 2</span>
+                        <small>0=Scalar, 1=Vector, 2=Matrix, 3=3D, 4=4D</small>
+                    </div>
+                    <div class="control-group">
+                        <label>Dimension Size (Size of each dimension):</label>
+                        <input type="range" id="tensorDim" min="2" max="5" value="3" step="1">
+                        <span id="dimDisplay">Dim: 3</span>
+                        <small>How many elements in each direction</small>
+                    </div>
+                    <div class="control-group">
+                        <button onclick="generateRandomTensor()">🎲 Random Tensor</button>
+                        <button onclick="generateZeroTensor()">⚪ Zero Tensor</button>
+                        <button onclick="generateIdentityTensor()">🆔 Identity Tensor</button>
+                        <button onclick="generateSpecialTensor()">✨ Special Patterns</button>
+                    </div>
+                </div>
+                
+                <div class="tensor-visualization">
+                    <div class="tensor-display" id="tensorDisplay">
+                        <h4>Current Tensor Visualization:</h4>
+                        <div id="tensorContent">Generate a tensor to see its structure</div>
+                    </div>
+                    <div class="tensor-display" id="tensorInfo">
+                        <h4>Tensor Properties & Analysis:</h4>
+                        <div id="tensorProperties">Shape, size, and mathematical properties will appear here</div>
+                    </div>
+                </div>
+
+                <div class="tensor-display" id="memoryAnalysis">
+                    <h4>📊 Memory & Complexity Analysis:</h4>
+                    <div id="memoryInfo">Memory usage and computational complexity information</div>
+                </div>
+            </div>
+
+            <div class="math-operations">
+                <div class="operation-card">
+                    <h4>➕ Tensor Addition</h4>
+                    <p><strong>Rule:</strong> Element-wise addition of tensors with identical shape</p>
+                    <div class="formula-box">
+                        $$(\mathcal{A} + \mathcal{B})_{i_1 i_2 \cdots i_k} = \mathcal{A}_{i_1 i_2 \cdots i_k} + \mathcal{B}_{i_1 i_2 \cdots i_k}$$
+                    </div>
+                    <p><strong>Example:</strong> Adding two RGB images pixel by pixel</p>
+                    <button onclick="demonstrateAddition()">🔍 Demo Addition</button>
+                </div>
+
+                <div class="operation-card">
+                    <h4>✖️ Tensor Product (Outer Product)</h4>
+                    <p><strong>Rule:</strong> Creates higher-rank tensor from lower-rank tensors</p>
+                    <div class="formula-box">
+                        $$(\mathbf{a} \otimes \mathbf{b})_{ij} = a_i b_j$$
+                        $$\text{rank}(\mathbf{a} \otimes \mathbf{b}) = \text{rank}(\mathbf{a}) + \text{rank}(\mathbf{b})$$
+                    </div>
+                    <p><strong>Example:</strong> Creating a 3×3 matrix from two 3D vectors</p>
+                    <button onclick="demonstrateProduct()">🔍 Demo Product</button>
+                </div>
+
+                <div class="operation-card">
+                    <h4>🔄 Tensor Contraction</h4>
+                    <p><strong>Rule:</strong> Summation over paired indices (generalized trace)</p>
+                    <div class="formula-box">
+                        $$C_{ij} = \sum_{k} A_{ikj} \text{ (contract over index k)}$$
+                    </div>
+                    <p><strong>Example:</strong> Matrix multiplication is tensor contraction</p>
+                    <button onclick="demonstrateContraction()">🔍 Demo Contraction</button>
+                </div>
+
+                <div class="operation-card">
+                    <h4>🔀 Tensor Transpose</h4>
+                    <p><strong>Rule:</strong> Permutation of tensor indices</p>
+                    <div class="formula-box">
+                        $$\mathcal{B}_{ji} = \mathcal{A}_{ij} \text{ (transpose)}$$
+                        $$\mathcal{C}_{ikj} = \mathcal{A}_{ijk} \text{ (permute indices)}$$
+                    </div>
+                    <p><strong>Example:</strong> Switching height and width dimensions in images</p>
+                    <button onclick="demonstrateTranspose()">🔍 Demo Transpose</button>
+                </div>
+
+                <div class="operation-card">
+                    <h4>📏 Tensor Norm</h4>
+                    <p><strong>Rule:</strong> Measure of tensor "size" or "magnitude"</p>
+                    <div class="formula-box">
+                        $$\|\mathcal{T}\|_F = \sqrt{\sum_{i_1,\ldots,i_k} |T_{i_1\cdots i_k}|^2}$$
+                    </div>
+                    <p><strong>Example:</strong> Total energy in an image or signal</p>
+                    <button onclick="demonstrateNorm()">🔍 Demo Norm</button>
+                </div>
+
+                <div class="operation-card">
+                    <h4>🎯 Einstein Summation</h4>
+                    <p><strong>Rule:</strong> Compact notation for tensor operations</p>
+                    <div class="formula-box">
+                        $$C_{ij} = A_{ik} B_{kj} \text{ (repeated index k is summed)}$$
+                    </div>
+                    <p><strong>Example:</strong> Matrix multiplication, neural network layers</p>
+                    <button onclick="demonstrateEinstein()">🔍 Demo Einstein</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section theory-section">
+            <h2>🧮 Tensor Calculus & Einstein Notation Mastery</h2>
+            
+            <div class="theorem-box">
+                <h3>📐 Einstein Summation Convention (The Game Changer)</h3>
+                <p><strong>Core Rule:</strong> When an index appears twice (once upper, once lower), sum over all values:</p>
+                <div class="formula-box">
+                    $$A^i B_i = \sum_{i=1}^n A^i B_i \quad \text{(implicit summation)}$$
+                    $$C^{ij} = A^{ik} B_k^j \quad \text{means} \quad C^{ij} = \sum_{k=1}^n A^{ik} B_k^j$$
+                </div>
+                
+                <div class="application-box">
+                    <h4>🎯 Why Einstein Notation is Powerful</h4>
+                    <p>• <strong>Compact:</strong> No need to write summation symbols</p>
+                    <p>• <strong>Clear:</strong> Shows which indices are free vs summed</p>
+                    <p>• <strong>Universal:</strong> Works for any tensor operation</p>
+                    <p>• <strong>Computational:</strong> Direct translation to code</p>
+                </div>
+                
+                <h4>🔗 Common Operations in Einstein Notation</h4>
+                <table>
+                    <tr><th>Operation</th><th>Standard Notation</th><th>Einstein Notation</th><th>Meaning</th></tr>
+                    <tr><td>Vector dot product</td><td>$\mathbf{a} \cdot \mathbf{b} = \sum_i a_i b_i$</td><td>$a^i b_i$</td><td>Contract all indices</td></tr>
+                    <tr><td>Matrix-vector multiply</td><td>$(\mathbf{A}\mathbf{v})_i = \sum_j A_{ij} v_j$</td><td>$A_i^j v_j$</td><td>Contract column with vector</td></tr>
+                    <tr><td>Matrix multiply</td><td>$(\mathbf{AB})_{ij} = \sum_k A_{ik} B_{kj}$</td><td>$A_i^k B_k^j$</td><td>Contract inner dimensions</td></tr>
+                    <tr><td>Trace</td><td>$\text{tr}(\mathbf{A}) = \sum_i A_{ii}$</td><td>$A_i^i$</td><td>Contract diagonal</td></tr>
+                    <tr><td>Quadratic form</td><td>$\mathbf{x}^T \mathbf{A} \mathbf{x} = \sum_{ij} x_i A_{ij} x_j$</td><td>$x^i A_{ij} x^j$</td><td>Bilinear form</td></tr>
+                </table>
+            </div>
+
+            <div class="definition-box">
+                <h3>🎯 Tensor Derivatives & Vector Calculus</h3>
+                
+                <h4>📊 Gradient (∇) - The Slope Field</h4>
+                <div class="formula-box">
+                    $$\nabla f = \frac{\partial f}{\partial x^i} e_i = \left[\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right]$$
+                </div>
+                <p><strong>Intuition:</strong> Points in direction of steepest increase</p>
+                
+                <h4>🌊 Divergence (∇·) - The Source Strength</h4>
+                <div class="formula-box">
+                    $$\nabla \cdot \mathbf{F} = \frac{\partial F^i}{\partial x^i} = \frac{\partial F_x}{\partial x} + \frac{\partial F_y}{\partial y} + \frac{\partial F_z}{\partial z}$$
+                </div>
+                <p><strong>Intuition:</strong> Measures how much vector field "spreads out" from a point</p>
+                
+                <h4>🌀 Curl (∇×) - The Rotation Strength</h4>
+                <div class="formula-box">
+                    $$(\nabla \times \mathbf{F})^i = \epsilon^{ijk} \frac{\partial F_k}{\partial x^j}$$
+                </div>
+                <p><strong>Intuition:</strong> Measures local rotation in the vector field</p>
+                
+                <h4>🎛️ Hessian Matrix - The Curvature Detector</h4>
+                <div class="formula-box">
+                    $$H_{ij}(f) = \frac{\partial^2 f}{\partial x^i \partial x^j} = \begin{bmatrix}
+                    \frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\
+                    \frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2}
+                    \end{bmatrix}$$
+                </div>
+                <p><strong>Intuition:</strong> Tells us about local curvature - concave up/down, saddle points</p>
+            </div>
+
+            <div class="application-box">
+                <h3>🔬 Advanced Tensor Concepts</h3>
+                
+                <h4>🎭 Tensor Index Notation Rules</h4>
+                <ul>
+                    <li><strong>Free indices:</strong> Appear once, range over all values</li>
+                    <li><strong>Dummy indices:</strong> Appear twice, are summed over</li>
+                    <li><strong>Upper indices:</strong> Contravariant (like vectors)</li>
+                    <li><strong>Lower indices:</strong> Covariant (like gradients)</li>
+                </ul>
+                
+                <h4>🔄 Index Gymnastics Examples</h4>
+                <div class="formula-box">
+                    $$A^i_{\ j} B^j_{\ k} = C^i_{\ k} \quad \text{(matrix multiplication)}$$
+                    $$g_{ij} v^i v^j = \|\mathbf{v}\|^2 \quad \text{(norm squared)}$$
+                    $$\epsilon_{ijk} A^j B^k = (\mathbf{A} \times \mathbf{B})^i \quad \text{(cross product)}$$
+                </div>
+            </div>
+        </div>
+
+        <div class="section example-section">
+            <h2>🤖 Deep Learning Applications</h2>
+            
+            <div class="applications-grid">
+                <div class="app-card">
+                    <h4>🧠 Neural Network Tensors</h4>
+                    <p><strong>Weight Tensor:</strong> $W \in \mathbb{R}^{n_{in} \times n_{out}}$ - The learnable parameters</p>
+                    <p><strong>Input Batch:</strong> $X \in \mathbb{R}^{batch \times features}$ - Multiple examples processed together</p>
+                    <p><strong>Forward Pass:</strong> $Y = XW + b$ - Linear transformation</p>
+                    <p><strong>Shape Evolution:</strong> [32, 784] → [32, 128] → [32, 10] (MNIST example)</p>
+                    <div class="code-example">
+# PyTorch Example - Fully Connected Layer
+import torch
+import torch.nn as nn
+
+# Input: batch of 32 MNIST images (flattened to 784 pixels)
+X = torch.randn(32, 784)  # [batch_size, input_features]
+layer = nn.Linear(784, 10)  # 784 → 10 (for 10 digit classes)
+
+# Forward pass
+Y = layer(X)  # Result: [32, 10] - logits for each class
+print(f"Input shape: {X.shape}")   # torch.Size([32, 784])
+print(f"Output shape: {Y.shape}")  # torch.Size([32, 10])
+
+# Weight tensor shape
+print(f"Weight shape: {layer.weight.shape}")  # [10, 784]
+print(f"Bias shape: {layer.bias.shape}")      # [10]
+                    </div>
+                </div>
+
+                <div class="app-card">
+                    <h4>🖼️ Convolutional Neural Networks (CNNs)</h4>
+                    <p><strong>Image Tensor:</strong> $I \in \mathbb{R}^{H \times W \times C}$ - Height × Width × Channels</p>
+                    <p><strong>Filter Tensor:</strong> $K \in \mathbb{R}^{k_h \times k_w \times C_{in} \times C_{out}}$ - Learnable filters</p>
+                    <p><strong>Convolution:</strong> $(I * K)_{i,j,c} = \sum_{p,q,d} I_{i+p, j+q, d} \cdot K_{p,q,d,c}$</p>
+                    <p><strong>Feature Maps:</strong> Each filter learns different patterns (edges, textures, objects)</p>
+                    <div class="code-example">
+# TensorFlow/Keras Example - CNN for Image Classification
+import tensorflow as tf
+
+# Input: batch of RGB images [batch, height, width, channels]
+input_tensor = tf.random.normal([32, 224, 224, 3])
+print(f"Input shape: {input_tensor.shape}")  # (32, 224, 224, 3)
+
+# Convolution layer: 64 filters of size 3×3
+conv_layer = tf.keras.layers.Conv2D(
+    filters=64,      # Number of output feature maps
+    kernel_size=3,   # 3×3 spatial filter
+    padding='same',  # Keep spatial dimensions
+    activation='relu'
+)
+
+output = conv_layer(input_tensor)
+print(f"Output shape: {output.shape}")  # (32, 224, 224, 64)
+
+# Each of 64 filters learned different 3×3×3 patterns
+print(f"Filter shape: {conv_layer.kernel.shape}")  # (3, 3, 3, 64)
+                    </div>
+                </div>
+
+                <div class="app-card">
+                    <h4>🔄 Recurrent Neural Networks (RNNs)</h4>
+                    <p><strong>Sequence Tensor:</strong> $X \in \mathbb{R}^{T \times B \times F}$ - Time × Batch × Features</p>
+                    <p><strong>Hidden State:</strong> $H \in \mathbb{R}^{B \times H}$ - Memory that persists across time</p>
+                    <p><strong>RNN Update:</strong> $h_t = \tanh(W_{xh} x_t + W_{hh} h_{t-1} + b)$</p>
+                    <p><strong>Applications:</strong> Language modeling, speech recognition, time series</p>
+                    <div class="code-example">
+# PyTorch LSTM Example - Sequence Processing
+import torch.nn as nn
+
+# LSTM for processing sequences of word embeddings
+lstm = nn.LSTM(
+    input_size=100,   # Word embedding dimension
+    hidden_size=50,   # Hidden state dimension
+    num_layers=2,     # Stack 2 LSTM layers
+    batch_first=True, # Input shape: [batch, seq, features]
+    dropout=0.1       # Regularization
+)
+
+# Input: batch of 32 sentences, each 20 words, 100-dim embeddings
+x = torch.randn(32, 20, 100)  # [batch, sequence_length, features]
+print(f"Input shape: {x.shape}")  # torch.Size([32, 20, 100])
+
+# Process sequence
+output, (hidden, cell) = lstm(x)
+print(f"Output shape: {output.shape}")  # torch.Size([32, 20, 50])
+print(f"Hidden shape: {hidden.shape}")  # torch.Size([2, 32, 50])
+print(f"Cell shape: {cell.shape}")      # torch.Size([2, 32, 50])
+                    </div>
+                </div>
+
+                <div class="app-card">
+                    <h4>🎯 Attention Mechanisms</h4>
+                    <p><strong>Query/Key/Value:</strong> $Q, K, V \in \mathbb{R}^{n \times d}$</p>
+                    <p><strong>Attention Scores:</strong> $A = \text{softmax}\left(\frac{QK^T}{\sqrt{d}}\right)$</p>
+                    <p><strong>Attention Output:</strong> $\text{Attention}(Q,K,V) = AV$</p>
+                    <div class="code-example">
+# Multi-Head Attention
+def scaled_dot_product_attention(Q, K, V):
+    d_k = Q.size(-1)
+    scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
+    attention_weights = F.softmax(scores, dim=-1)
+    return torch.matmul(attention_weights, V)
+                    </div>
+                </div>
+
+                <div class="app-card">
+                    <h4>🌐 Transformer Architecture</h4>
+                    <p><strong>Input Embeddings:</strong> $E \in \mathbb{R}^{n \times d_{model}}$</p>
+                    <p><strong>Multi-Head Attention:</strong> Multiple parallel attention heads</p>
+                    <p><strong>Position Encoding:</strong> $PE_{pos,2i} = \sin(pos/10000^{2i/d})$</p>
+                    <div class="code-example">
+# Transformer Block
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, num_heads):
+        super().__init__()
+        self.attention = nn.MultiheadAttention(d_model, num_heads)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.ff = nn.Sequential(
+            nn.Linear(d_model, 4 * d_model),
+            nn.ReLU(),
+            nn.Linear(4 * d_model, d_model)
+        )
+                    </code>
+                </div>
+
+                <div class="app-card">
+                    <h4>🎮 Tensor Decomposition</h4>
+                    <p><strong>CP Decomposition:</strong> $\mathcal{T} \approx \sum_{r=1}^R \mathbf{a}_r \otimes \mathbf{b}_r \otimes \mathbf{c}_r$</p>
+                    <p><strong>Tucker Decomposition:</strong> $\mathcal{T} = \mathcal{G} \times_1 \mathbf{A} \times_2 \mathbf{B} \times_3 \mathbf{C}$</p>
+                    <p><strong>Applications:</strong> Model compression, feature extraction</p>
+                    <div class="code-example">
+# Tensor decomposition for model compression
+import tensorly as tl
+from tensorly.decomposition import parafac
+
+# Decompose weight tensor
+weights = model.conv1.weight.data  # [out_ch, in_ch, h, w]
+factors = parafac(weights, rank=16)  # Compress with rank-16
+# Reconstruct compressed tensor
+compressed_weights = tl.cp_to_tensor(factors)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section theory-section">
+            <h2>⚗️ Advanced Tensor Concepts</h2>
+            
+            <div class="theorem-box">
+                <h3>🎭 Tensor Symmetries</h3>
+                
+                <h4>Symmetric Tensors</h4>
+                <div class="formula-box">
+                    $$T_{ij} = T_{ji} \quad \text{(symmetric 2-tensor)}$$
+                    $$T_{ijk} = T_{ikj} = T_{jik} = T_{jki} = T_{kij} = T_{kji} \quad \text{(fully symmetric 3-tensor)}$$
+                </div>
+                
+                <h4>Antisymmetric Tensors</h4>
+                <div class="formula-box">
+                    $$T_{ij} = -T_{ji} \quad \text{(antisymmetric 2-tensor)}$$
+                    $$T_{ijk} = -T_{ikj} = -T_{jik} \quad \text{(antisymmetric 3-tensor)}$$
+                </div>
+                
+                <h4>🔧 Symmetrization & Antisymmetrization</h4>
+                <div class="formula-box">
+                    $$T_{(ij)} = \frac{1}{2}(T_{ij} + T_{ji}) \quad \text{(symmetrization)}$$
+                    $$T_{[ij]} = \frac{1}{2}(T_{ij} - T_{ji}) \quad \text{(antisymmetrization)}$$
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <h3>📏 Tensor Norms & Metrics</h3>
+                
+                <h4>Frobenius Norm</h4>
+                <div class="formula-box">
+                    $$\|\mathcal{T}\|_F = \sqrt{\sum_{i_1, i_2, \ldots, i_k} |T_{i_1 i_2 \cdots i_k}|^2}$$
+                </div>
+                
+                <h4>Nuclear Norm (for matrices)</h4>
+                <div class="formula-box">
+                    $$\|M\|_* = \sum_{i} \sigma_i \quad \text{(sum of singular values)}$$
+                </div>
+                
+                <h4>Tensor Rank</h4>
+                <div class="formula-box">
+                    $$\text{rank}(\mathcal{T}) = \min\{R : \mathcal{T} = \sum_{r=1}^R \mathbf{a}_r \otimes \mathbf{b}_r \otimes \cdots \}$$
+                </div>
+            </div>
+        </div>
+
+        <div class="section application-box">
+            <h2>🚀 Real-World Applications</h2>
+            
+            <div class="applications-grid">
+                <div class="app-card">
+                    <h4>🏥 Medical Imaging</h4>
+                    <ul>
+                        <li><strong>MRI Data:</strong> 4D tensors (x, y, z, time)</li>
+                        <li><strong>DTI:</strong> Diffusion tensor imaging</li>
+                        <li><strong>fMRI:</strong> Functional connectivity tensors</li>
+                        <li><strong>Processing:</strong> Tensor decomposition for noise reduction</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h4>📊 Recommendation Systems</h4>
+                    <ul>
+                        <li><strong>User-Item-Context:</strong> 3D tensors</li>
+                        <li><strong>CP Decomposition:</strong> Latent factor models</li>
+                        <li><strong>Tucker Decomposition:</strong> Multi-mode analysis</li>
+                        <li><strong>Applications:</strong> Netflix, Amazon, Spotify</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h4>🌐 Computer Vision</h4>
+                    <ul>
+                        <li><strong>RGB Images:</strong> 3D tensors (H×W×3)</li>
+                        <li><strong>Video Data:</strong> 4D tensors (T×H×W×3)</li>
+                        <li><strong>CNNs:</strong> Convolution operations</li>
+                        <li><strong>Object Detection:</strong> Multi-scale feature tensors</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h4>🗣️ Natural Language Processing</h4>
+                    <ul>
+                        <li><strong>Word Embeddings:</strong> 2D tensors (vocab×dim)</li>
+                        <li><strong>Sequences:</strong> 3D tensors (batch×seq×features)</li>
+                        <li><strong>Attention Maps:</strong> Higher-order tensors</li>
+                        <li><strong>Transformers:</strong> Multi-head attention tensors</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h4>🎵 Signal Processing</h4>
+                    <ul>
+                        <li><strong>Audio Spectrograms:</strong> Time-frequency tensors</li>
+                        <li><strong>Multi-channel Audio:</strong> 3D tensors</li>
+                        <li><strong>Tensor Factorization:</strong> Source separation</li>
+                        <li><strong>Compression:</strong> Low-rank approximations</li>
+                    </ul>
+                </div>
+
+                <div class="app-card">
+                    <h4>🧬 Bioinformatics</h4>
+                    <ul>
+                        <li><strong>Gene Expression:</strong> Multi-condition tensors</li>
+                        <li><strong>Protein Structures:</strong> 3D coordinate tensors</li>
+                        <li><strong>DNA Sequences:</strong> One-hot encoded tensors</li>
+                        <li><strong>Multi-omics:</strong> Integrated data analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section interactive-section">
+            <h2>💻 Practical Implementation Guide</h2>
+            
+            <div class="code-example">
+<strong>🐍 Python/NumPy - Comprehensive Tensor Operations:</strong>
+import numpy as np
+
+# Creating tensors of different ranks
+scalar = 5                                    # 0D tensor (rank-0)
+vector = np.array([1, 2, 3])                # 1D tensor (rank-1)
+matrix = np.array([[1, 2], [3, 4]])         # 2D tensor (rank-2)
+tensor_3d = np.random.randn(2, 3, 4)        # 3D tensor (rank-3)
+tensor_4d = np.random.randn(5, 2, 3, 4)     # 4D tensor (rank-4)
+
+print(f"Shapes: {vector.shape}, {matrix.shape}, {tensor_3d.shape}")
+print(f"Total elements: {tensor_3d.size}, Memory: {tensor_3d.nbytes} bytes")
+
+# Essential tensor operations
+def tensor_operations_demo():
+    # 1. Element-wise operations
+    A = np.random.randn(3, 4)
+    B = np.random.randn(3, 4)
+    C = A + B                    # Addition
+    D = A * B                    # Element-wise multiplication
+    E = np.exp(A)               # Element-wise exponential
+    
+    # 2. Tensor products and contractions
+    v1 = np.array([1, 2, 3])
+    v2 = np.array([4, 5])
+    outer_product = np.outer(v1, v2)          # Tensor product
+    inner_product = np.dot(v1, v1)            # Inner product
+    
+    # 3. Einstein summation (most powerful!)
+    # Matrix multiplication: C_ij = A_ik * B_kj
+    A = np.random.randn(3, 4)
+    B = np.random.randn(4, 5)
+    C = np.einsum('ik,kj->ij', A, B)          # Same as A @ B
+    
+    # Batch matrix multiplication: C_bij = A_bik * B_bkj
+    A_batch = np.random.randn(10, 3, 4)
+    B_batch = np.random.randn(10, 4, 5)
+    C_batch = np.einsum('bij,bjk->bik', A_batch, B_batch)
+    
+    # Trace: tr(A) = A_ii
+    trace = np.einsum('ii->', matrix)
+    
+    # Frobenius norm: ||A||_F = sqrt(A_ij * A_ij)
+    frobenius_norm = np.sqrt(np.einsum('ij,ij->', A, A))
+    
+    return C, C_batch, trace, frobenius_norm
+
+# 4. Advanced tensor manipulations
+def advanced_tensor_ops():
+    # Tensor reshaping and transposition
+    T = np.random.randn(2, 3, 4, 5)
+    
+    # Reshape: flatten to matrix
+    T_flat = T.reshape(-1, T.shape[-1])      # [24, 5]
+    
+    # Transpose: swap axes
+    T_transposed = np.transpose(T, (3, 1, 0, 2))  # [5, 3, 2, 4]
+    
+    # Tensor slicing and indexing
+    slice_2d = T[0, :, :, 1]                 # Extract 2D slice
+    diagonal = T[0, :, :, 0][np.arange(3), np.arange(3)]  # Diagonal
+    
+    return T_flat, T_transposed, slice_2d
+
+# Run demonstrations
+tensor_operations_demo()
+advanced_tensor_ops()
+            </div>
+
+            <div class="code-example">
+<strong>🔥 PyTorch - Deep Learning Tensor Operations:</strong>
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# GPU acceleration (if available)
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
+# Creating tensors with automatic differentiation
+def pytorch_tensor_demo():
+    # Tensors with gradients for backpropagation
+    x = torch.randn(32, 784, requires_grad=True, device=device)
+    W = torch.randn(784, 10, requires_grad=True, device=device)
+    b = torch.randn(10, requires_grad=True, device=device)
+    
+    # Forward pass
+    y = torch.matmul(x, W) + b               # Linear layer
+    y = F.relu(y)                            # Activation function
+    loss = torch.sum(y ** 2)                 # Simple loss
+    
+    # Backward pass (automatic differentiation)
+    loss.backward()
+    
+    print(f"Input gradient shape: {x.grad.shape}")
+    print(f"Weight gradient shape: {W.grad.shape}")
+    
+    # Advanced tensor operations
+    # 1. Broadcasting
+    x_broadcast = x.unsqueeze(2)             # [32, 784, 1]
+    W_broadcast = W.unsqueeze(0)             # [1, 784, 10]
+    result = x_broadcast * W_broadcast        # [32, 784, 10]
+    
+    # 2. Tensor concatenation and stacking
+    tensors = [torch.randn(10, 20) for _ in range(5)]
+    concatenated = torch.cat(tensors, dim=0)  # [50, 20]
+    stacked = torch.stack(tensors, dim=0)     # [5, 10, 20]
+    
+    # 3. Advanced indexing
+    indices = torch.tensor([0, 2, 4])
+    selected = x[indices]                     # Select specific rows
+    
+    return y, concatenated, stacked
+
+# Custom tensor operations using PyTorch
+class TensorNetwork(nn.Module):
+    """Example of custom tensor operations in neural networks"""
+    def __init__(self, input_dims, output_dims):
+        super().__init__()
+        # Higher-order weight tensor
+        self.weight = nn.Parameter(torch.randn(*input_dims, *output_dims))
+        self.bias = nn.Parameter(torch.zeros(output_dims[-1]))
+        
+    def forward(self, x):
+        # Einstein summation for tensor contraction
+        # x: [batch, i, j, k], weight: [i, j, k, l] -> output: [batch, l]
+        output = torch.einsum('bijk,ijkl->bl', x, self.weight)
+        return output + self.bias
+
+# Tensor decomposition for model compression
+def tensor_decomposition_example():
+    """SVD-based tensor decomposition for compression"""
+    # Large weight matrix
+    W = torch.randn(1000, 1000)
+    
+    # SVD decomposition
+    U, S, V = torch.svd(W)
+    
+    # Keep only top k components for compression
+    k = 100
+    W_compressed = U[:, :k] @ torch.diag(S[:k]) @ V[:, :k].T
+    
+    compression_ratio = (W.numel()) / (U[:, :k].numel() + S[:k].numel() + V[:, :k].numel())
+    print(f"Compression ratio: {compression_ratio:.2f}x")
+    
+    return W_compressed
+
+# Run PyTorch demonstrations
+pytorch_tensor_demo()
+tensor_decomposition_example()
+            </div>
+
+            <div class="code-example">
+<strong>📊 TensorFlow - Production-Ready Tensor Operations:</strong>
+import tensorflow as tf
+import numpy as np
+
+# Enable mixed precision for better performance
+policy = tf.keras.mixed_precision.Policy('mixed_float16')
+tf.keras.mixed_precision.set_global_policy(policy)
+
+@tf.function  # Compile for better performance
+def tensorflow_tensor_demo():
+    """Comprehensive TensorFlow tensor operations"""
+    
+    # 1. Tensor creation and manipulation
+    x = tf.random.normal([32, 224, 224, 3])  # Batch of RGB images
+    
+    # 2. Convolution operations (4D tensors)
+    filters = tf.random.normal([3, 3, 3, 64])  # 3x3 conv, 3->64 channels
+    conv_output = tf.nn.conv2d(x, filters, strides=1, padding='SAME')
+    
+    # 3. Tensor reshaping and manipulation
+    flattened = tf.reshape(conv_output, [32, -1])  # Flatten for dense layer
+    
+    # 4. Advanced tensor operations
+    # Attention mechanism tensors
+    seq_len, d_model = 100, 512
+    Q = tf.random.normal([32, seq_len, d_model])   # Query
+    K = tf.random.normal([32, seq_len, d_model])   # Key  
+    V = tf.random.normal([32, seq_len, d_model])   # Value
+    
+    # Scaled dot-product attention
+    attention_scores = tf.matmul(Q, K, transpose_b=True)
+    attention_scores = attention_scores / tf.sqrt(tf.cast(d_model, tf.float32))
+    attention_weights = tf.nn.softmax(attention_scores)
+    attention_output = tf.matmul(attention_weights, V)
+    
+    return conv_output, attention_output
+
+# Custom tensor operation with gradient
+@tf.custom_gradient
+def custom_tensor_operation(x):
+    """Example of custom operation with custom gradient"""
+    def grad(dy):
+        # Custom gradient computation
+        return 2 * dy  # Example: gradient of x^2
+    
+    return x**2, grad
+
+# Tensor decomposition layer for compression
+class LowRankDense(tf.keras.layers.Layer):
+    """Low-rank approximation of dense layer using tensor decomposition"""
+    
+    def __init__(self, units, rank, **kwargs):
+        super().__init__(**kwargs)
+        self.units = units
+        self.rank = rank
+        
+    def build(self, input_shape):
+        input_dim = input_shape[-1]
+        
+        # Instead of full weight matrix [input_dim, units]
+        # Use two smaller matrices [input_dim, rank] and [rank, units]
+        self.U = self.add_weight(
+            shape=(input_dim, self.rank),
+            initializer='glorot_uniform',
+            trainable=True
+        )
+        self.V = self.add_weight(
+            shape=(self.rank, self.units),
+            initializer='glorot_uniform', 
+            trainable=True
+        )
+        self.bias = self.add_weight(
+            shape=(self.units,),
+            initializer='zeros',
+            trainable=True
+        )
+        
+    def call(self, inputs):
+        # Efficient computation: x @ (U @ V) = (x @ U) @ V
+        intermediate = tf.matmul(inputs, self.U)
+        output = tf.matmul(intermediate, self.V)
+        return output + self.bias
+    
+    def get_compression_ratio(self):
+        input_dim = self.U.shape[0]
+        full_params = input_dim * self.units
+        compressed_params = input_dim * self.rank + self.rank * self.units
+        return full_params / compressed_params
+
+# Usage example
+input_layer = tf.keras.Input(shape=(784,))
+compressed_layer = LowRankDense(units=128, rank=32)(input_layer)
+output_layer = tf.keras.layers.Dense(10)(compressed_layer)
+
+model = tf.keras.Model(inputs=input_layer, outputs=output_layer)
+print(f"Compression ratio: {compressed_layer.get_compression_ratio():.2f}x")
+
+# Run TensorFlow demonstrations
+tensorflow_tensor_demo()
+            </div>
+
+            <div class="application-box">
+                <h3>🎯 Key Takeaways for Practical Tensor Usage</h3>
+                <div class="tensor-grid">
+                    <div class="tensor-card">
+                        <h4>💡 Performance Tips</h4>
+                        <ul>
+                            <li><strong>Use einsum:</strong> More readable and often faster than loops</li>
+                            <li><strong>Vectorization:</strong> Avoid explicit loops whenever possible</li>
+                            <li><strong>Memory layout:</strong> Consider cache-friendly access patterns</li>
+                            <li><strong>GPU acceleration:</strong> Move tensors to GPU for large computations</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tensor-card">
+                        <h4>🔍 Debugging Tensor Code</h4>
+                        <ul>
+                            <li><strong>Shape checking:</strong> Always verify tensor shapes match expectations</li>
+                            <li><strong>Gradient flow:</strong> Use requires_grad=True for backprop debugging</li>
+                            <li><strong>Numerical stability:</strong> Watch for NaN/Inf values</li>
+                            <li><strong>Memory usage:</strong> Monitor GPU memory for large tensors</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tensor-card">
+                        <h4>🚀 Advanced Techniques</h4>
+                        <ul>
+                            <li><strong>Tensor decomposition:</strong> SVD, CP, Tucker for compression</li>
+                            <li><strong>Mixed precision:</strong> Use float16 for faster training</li>
+                            <li><strong>Custom gradients:</strong> Implement domain-specific derivatives</li>
+                            <li><strong>Graph optimization:</strong> Use @tf.function or torch.jit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTensor = null;
+        let tensorRank = 2;
+        let tensorDim = 3;
+
+        // Update displays when sliders change
+        document.getElementById('tensorRank').addEventListener('input', function() {
+            tensorRank = parseInt(this.value);
+            document.getElementById('rankDisplay').textContent = `Rank: ${tensorRank}`;
+            updateTensorDescription();
+        });
+
+        document.getElementById('tensorDim').addEventListener('input', function() {
+            tensorDim = parseInt(this.value);
+            document.getElementById('dimDisplay').textContent = `Dim: ${tensorDim}`;
+            updateTensorDescription();
+        });
+
+        function updateTensorDescription() {
+            const descriptions = {
+                0: "Scalar (single number) - Temperature, mass, energy",
+                1: "Vector (1D array) - Velocity, force, displacement",
+                2: "Matrix (2D array) - Linear transformations, images",
+                3: "3D Tensor (cube) - RGB images, video frames, MRI scans",
+                4: "4D Tensor (hypercube) - Batch of images, video sequences"
+            };
+            
+            const totalElements = Math.pow(tensorDim, tensorRank);
+            const memoryBytes = totalElements * 4; // float32
+            const memoryMB = memoryBytes / (1024 * 1024);
+            
+            // Calculate computational complexity for common operations
+            let addComplexity = totalElements;
+            let multiplyComplexity = tensorRank >= 2 ? Math.pow(tensorDim, 3) : totalElements;
+            
+            document.getElementById('tensorProperties').innerHTML = `
+                <strong>📊 Shape:</strong> ${tensorRank === 0 ? 'scalar' : new Array(tensorRank).fill(tensorDim).join(' × ')}<br>
+                <strong>🔢 Total Elements:</strong> ${totalElements.toLocaleString()}<br>
+                <strong>📝 Description:</strong> ${descriptions[tensorRank]}<br>
+                <strong>🎯 Tensor Rank:</strong> ${tensorRank} (number of indices)<br>
+                <strong>📐 Dimension:</strong> ${tensorDim} (size per index)
+            `;
+            
+            document.getElementById('memoryInfo').innerHTML = `
+                <strong>💾 Memory Usage:</strong><br>
+                • Float32: ${memoryBytes.toLocaleString()} bytes (${memoryMB.toFixed(3)} MB)<br>
+                • Float64: ${(memoryBytes * 2).toLocaleString()} bytes (${(memoryMB * 2).toFixed(3)} MB)<br><br>
+                <strong>⚡ Computational Complexity:</strong><br>
+                • Addition: O(${addComplexity.toLocaleString()})<br>
+                • Matrix Multiplication: O(${multiplyComplexity.toLocaleString()})<br>
+                • Storage Access: ${tensorRank > 3 ? '⚠️ Cache-unfriendly' : '✅ Cache-friendly'}
+            `;
+        }
+
+        function generateRandomTensor() {
+            const shape = new Array(tensorRank).fill(tensorDim);
+            const totalElements = Math.pow(tensorDim, tensorRank);
+            
+            if (totalElements > 125) {
+                document.getElementById('tensorContent').innerHTML = `
+                    <strong>🔢 Tensor Shape: [${shape.join(', ')}]</strong><br>
+                    <strong>📊 Total Elements: ${totalElements.toLocaleString()}</strong><br><br>
+                    <em>⚠️ Tensor too large to display all elements<br>
+                    Use smaller dimensions (≤ 5×5×5) for full visualization</em><br><br>
+                    <strong>Sample values:</strong> Random numbers ∈ [-5, 5]<br>
+                    <strong>Pattern:</strong> Uniformly distributed random
+                `;
+                currentTensor = "large_random_tensor";
+                return;
+            }
+
+            currentTensor = generateTensorRecursive(shape, 0);
+            displayTensor(currentTensor, shape);
+        }
+
+        function generateSpecialTensor() {
+            const patterns = ['ascending', 'checkerboard', 'gaussian', 'sine_wave'];
+            const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+            
+            const shape = new Array(tensorRank).fill(tensorDim);
+            const totalElements = Math.pow(tensorDim, tensorRank);
+            
+            if (totalElements > 125) {
+                document.getElementById('tensorContent').innerHTML = `
+                    <strong>🎨 Special Pattern: ${pattern.replace('_', ' ').toUpperCase()}</strong><br>
+                    <strong>📊 Shape: [${shape.join(', ')}]</strong><br>
+                    <em>⚠️ Too large to display - use smaller dimensions</em>
+                `;
+                return;
+            }
+
+            currentTensor = generateSpecialTensorRecursive(shape, 0, pattern);
+            displayTensor(currentTensor, shape, pattern);
+        }
+
+        function generateSpecialTensorRecursive(shape, depth, pattern, indices = []) {
+            if (depth === shape.length) {
+                switch(pattern) {
+                    case 'ascending':
+                        return indices.reduce((sum, idx, i) => sum + idx * Math.pow(10, i), 1);
+                    case 'checkerboard':
+                        return indices.reduce((sum, idx) => sum + idx) % 2 === 0 ? 1 : -1;
+                    case 'gaussian':
+                        const center = shape.map(s => s/2);
+                        const dist = Math.sqrt(indices.reduce((sum, idx, i) => sum + Math.pow(idx - center[i], 2), 0));
+                        return Math.exp(-dist / 2);
+                    case 'sine_wave':
+                        return Math.sin(indices.reduce((sum, idx) => sum + idx, 0) * Math.PI / 4);
+                    default:
+                        return Math.random() * 10 - 5;
+                }
+            }
+            
+            const result = [];
+            for (let i = 0; i < shape[depth]; i++) {
+                result.push(generateSpecialTensorRecursive(shape, depth + 1, pattern, [...indices, i]));
+            }
+            return result;
+        }
+
+        function generateTensorRecursive(shape, depth) {
+            if (depth === shape.length) {
+                return Math.random() * 10 - 5; // Random number between -5 and 5
+            }
+            
+            const result = [];
+            for (let i = 0; i < shape[depth]; i++) {
+                result.push(generateTensorRecursive(shape, depth + 1));
+            }
+            return result;
+        }
+
+        function generateZeroTensor() {
+            const shape = new Array(tensorRank).fill(tensorDim);
+            currentTensor = generateZeroTensorRecursive(shape, 0);
+            displayTensor(currentTensor, shape, 'zero');
+        }
+
+        function generateZeroTensorRecursive(shape, depth) {
+            if (depth === shape.length) {
+                return 0;
+            }
+            
+            const result = [];
+            for (let i = 0; i < shape[depth]; i++) {
+                result.push(generateZeroTensorRecursive(shape, depth + 1));
+            }
+            return result;
+        }
+
+        function generateIdentityTensor() {
+            if (tensorRank !== 2) {
+                alert("⚠️ Identity tensor is only defined for rank-2 tensors (matrices)!\n\nFor other ranks:\n• Rank-0: Use scalar value 1\n• Rank-1: Use basis vectors\n• Rank-3+: Use Kronecker delta δᵢⱼₖ...");
+                return;
+            }
+            
+            const shape = [tensorDim, tensorDim];
+            currentTensor = [];
+            for (let i = 0; i < tensorDim; i++) {
+                currentTensor[i] = [];
+                for (let j = 0; j < tensorDim; j++) {
+                    currentTensor[i][j] = (i === j) ? 1 : 0;
+                }
+            }
+            displayTensor(currentTensor, shape, 'identity');
+        }
+
+        function displayTensor(tensor, shape, type = 'random') {
+            const typeDescriptions = {
+                'random': 'Random values ∈ [-5, 5]',
+                'zero': 'All zero elements',
+                'identity': 'Identity matrix (1s on diagonal)',
+                'ascending': 'Ascending number pattern',
+                'checkerboard': 'Alternating +1/-1 pattern',
+                'gaussian': 'Gaussian distribution from center',
+                'sine_wave': 'Sine wave pattern'
+            };
+
+            let displayText = `<strong>🎨 Pattern: ${typeDescriptions[type] || 'Custom pattern'}</strong><br>`;
+            displayText += `<strong>📊 Shape: [${shape.join(', ')}]</strong><br><br>`;
+            
+            if (tensorRank === 0) {
+                displayText += `<strong>Scalar Value:</strong> ${tensor.toFixed(3)}`;
+            } else if (tensorRank === 1) {
+                displayText += `<strong>Vector:</strong><br>[${tensor.map(x => x.toFixed(2)).join(', ')}]`;
+            } else if (tensorRank === 2) {
+                displayText += "<strong>Matrix:</strong><br>";
+                displayText += '<div style="font-family: monospace; font-size: 12px;">';
+                for (let i = 0; i < tensor.length; i++) {
+                    displayText += `[${tensor[i].map(x => x.toFixed(2).padStart(6)).join(' ')}]<br>`;
+                }
+                displayText += '</div>';
+            } else if (tensorRank === 3) {
+                displayText += "<strong>3D Tensor (showing first 2D slice):</strong><br>";
+                displayText += '<div style="font-family: monospace; font-size: 11px;">';
+                for (let i = 0; i < tensor[0].length; i++) {
+                    displayText += `[${tensor[0][i].map(x => x.toFixed(1).padStart(5)).join(' ')}]<br>`;
+                }
+                displayText += `<em>... ${tensor.length - 1} more slices</em>`;
+                displayText += '</div>';
+            } else {
+                displayText += `<strong>High-Dimensional Tensor Preview:</strong><br>`;
+                displayText += `<div style="font-family: monospace; font-size: 10px;">`;
+                displayText += `${JSON.stringify(tensor, null, 1).substring(0, 300)}...`;
+                displayText += `</div>`;
+            }
+            
+            document.getElementById('tensorContent').innerHTML = displayText;
+        }
+
+        function demonstrateAddition() {
+            alert("🧮 Tensor Addition Demo:\n\n• Rule: A + B performed element-wise\n• Requirement: Tensors must have identical shape\n• Result: Same shape as input tensors\n\nExample:\n[1, 2] + [3, 4] = [4, 6]\n\n💡 Used in: Neural network gradient updates, image blending");
+        }
+
+        function demonstrateProduct() {
+            alert("🧮 Tensor Product Demo:\n\n• Rule: Outer product A ⊗ B\n• Result rank: rank(A) + rank(B)\n• Result shape: shape(A) + shape(B)\n\nExample:\n[a, b] ⊗ [c, d] = [[ac, ad], [bc, bd]]\n\n💡 Used in: Quantum mechanics, feature interactions");
+        }
+
+        function demonstrateContraction() {
+            alert("🧮 Tensor Contraction Demo:\n\n• Rule: Sum over paired indices\n• Result: Reduces tensor rank by 2\n• Generalization of matrix trace\n\nExample:\nA_ijk → Σ_i A_iik (contract first and last indices)\n\n💡 Used in: Matrix multiplication, Einstein summation");
+        }
+
+        function demonstrateTranspose() {
+            alert("🧮 Tensor Transpose Demo:\n\n• Rule: Permute/swap indices\n• For matrices: A^T_ij = A_ji\n• Generalizes to higher ranks\n\nExample:\nA_ijk → A_ikj (swap last two indices)\n\n💡 Used in: Matrix operations, data reshaping");
+        }
+
+        function demonstrateNorm() {
+            alert("🧮 Tensor Norm Demo:\n\n• Frobenius norm: √(Σ |elements|²)\n• Measures tensor 'magnitude'\n• Always non-negative\n\nExample:\n||[3, 4]|| = √(3² + 4²) = 5\n\n💡 Used in: Regularization, convergence criteria");
+        }
+
+        function demonstrateEinstein() {
+            alert("🧮 Einstein Summation Demo:\n\n• Repeated indices are summed automatically\n• Compact notation for tensor operations\n• No explicit Σ symbols needed\n\nExample:\nA_ik B_kj = C_ij means:\nC_ij = Σ_k A_ik B_kj\n\n💡 Used in: Physics, machine learning, efficient computation");
+        }
+
+        // Initialize
+        updateTensorDescription();
+        generateRandomTensor();
+    </script>
+</body>
+</html>

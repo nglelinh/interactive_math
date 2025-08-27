@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛓️ Blockchain Fundamentals</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #f1f5f9;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .blockchain-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 30px 0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .block {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            border: 2px solid #60a5fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .block:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .block.genesis {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border-color: #34d399;
+        }
+        
+        .block.pending {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+            border-color: #fbbf24;
+        }
+        
+        .block.invalid {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            border-color: #f87171;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .block-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .block-data {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            font-size: 12px;
+        }
+        
+        .hash-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            word-break: break-all;
+        }
+        
+        .chain-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #60a5fa;
+            margin: 10px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(241, 245, 249, 0.3);
+            margin: 20px 0;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group textarea, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .control-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-mine {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            width: 100%;
+        }
+        
+        .btn-validate {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            width: 100%;
+        }
+        
+        .btn-tamper {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            width: 100%;
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            width: 100%;
+        }
+        
+        .mining-panel {
+            background: rgba(30, 64, 175, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .mining-panel.active {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .validation-panel {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .validation-panel.invalid {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: #ef4444;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #f59e0b, #059669);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .merkle-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .merkle-level {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        
+        .merkle-node {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid #60a5fa;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            min-width: 80px;
+            text-align: center;
+            word-break: break-all;
+        }
+        
+        .merkle-node.root {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: #fbbf24;
+        }
+        
+        .consensus-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .stats-panel {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid #8b5cf6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .network-visualization {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .node.leader {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .connection {
+            width: 50px;
+            height: 2px;
+            background: #60a5fa;
+            margin: 0 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .block-header {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⛓️ Blockchain Fundamentals</h1>
+        
+        <div class="intro">
+            <h2>What is a Blockchain?</h2>
+            <p><strong>Blockchain</strong> is a distributed ledger technology that maintains a continuously growing list of records (blocks) that are linked and secured using cryptography. Each block contains a cryptographic hash of the previous block, a timestamp, and transaction data.</p>
+            <p>The mathematical foundations include <strong>hash functions</strong>, <strong>digital signatures</strong>, <strong>Merkle trees</strong>, and <strong>consensus algorithms</strong>.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🧮 Mathematical Foundations</h3>
+            <p><strong>Hash Function:</strong> H(x) → {0,1}ⁿ (typically n=256 for SHA-256)</p>
+            <p><strong>Block Hash:</strong> H(previous_hash ∥ timestamp ∥ merkle_root ∥ nonce)</p>
+            <p><strong>Proof of Work:</strong> Find nonce such that H(block_header) < target</p>
+            <p><strong>Merkle Root:</strong> Binary tree of hashes: Root = H(H(tx₁∥tx₂) ∥ H(tx₃∥tx₄))</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>⚒️ Mining Controls</h3>
+                
+                <div class="control-group">
+                    <label>Transaction Data:</label>
+                    <textarea id="transactionData" placeholder="Enter transaction data (e.g., Alice sends 10 BTC to Bob)">Alice sends 10 BTC to Bob</textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Mining Difficulty:</label>
+                    <select id="difficulty">
+                        <option value="1">Very Easy (1 leading zero)</option>
+                        <option value="2">Easy (2 leading zeros)</option>
+                        <option value="3" selected>Medium (3 leading zeros)</option>
+                        <option value="4">Hard (4 leading zeros)</option>
+                        <option value="5">Very Hard (5 leading zeros)</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-mine" onclick="mineBlock()">⛏️ Mine New Block</button>
+                <button class="btn btn-validate" onclick="validateChain()">✅ Validate Chain</button>
+                <button class="btn btn-tamper" onclick="tamperWithBlock()">🔨 Tamper with Block</button>
+                <button class="btn btn-reset" onclick="resetBlockchain()">🔄 Reset Blockchain</button>
+                
+                <div id="miningInfo" class="mining-panel">
+                    <h4>⛏️ Mining Status</h4>
+                    <div id="miningStatus">Ready to mine...</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="miningProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📊 Blockchain Statistics</h3>
+                
+                <div class="stats-panel">
+                    <p><strong>Chain Length:</strong> <span id="chainLength">1</span> blocks</p>
+                    <p><strong>Total Hash Rate:</strong> <span id="hashRate">0</span> H/s</p>
+                    <p><strong>Last Block Time:</strong> <span id="lastBlockTime">-</span></p>
+                    <p><strong>Chain Validity:</strong> <span id="chainValidity">✅ Valid</span></p>
+                    <p><strong>Total Transactions:</strong> <span id="totalTx">0</span></p>
+                </div>
+                
+                <div class="validation-panel" id="validationPanel">
+                    <h4>🔍 Chain Validation</h4>
+                    <div id="validationDetails">Click 'Validate Chain' to check integrity</div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Block to Inspect:</label>
+                    <select id="blockSelector">
+                        <option value="0">Genesis Block</option>
+                    </select>
+                    <button class="btn" onclick="inspectBlock()" style="width: 100%; margin-top: 10px;">🔍 Inspect Block</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="blockchain-container" id="blockchainDisplay">
+            <h3 style="text-align: center; color: #f59e0b;">📦 Live Blockchain</h3>
+            <div id="chainVisualization"></div>
+        </div>
+        
+        <div class="three-column">
+            <div class="consensus-section">
+                <h3>🤝 Consensus Mechanism</h3>
+                <div class="network-visualization">
+                    <div class="node" id="node1">N1</div>
+                    <div class="connection"></div>
+                    <div class="node leader" id="node2">N2</div>
+                    <div class="connection"></div>
+                    <div class="node" id="node3">N3</div>
+                </div>
+                <p><strong>Proof of Work:</strong> Miners compete to solve computational puzzles</p>
+                <p><strong>Current Leader:</strong> <span id="currentLeader">Node 2</span></p>
+                <button class="btn" onclick="simulateConsensus()">🎲 Simulate Consensus Round</button>
+            </div>
+            
+            <div class="merkle-tree" id="merkleTree">
+                <h3 style="margin-top: 0;">🌳 Merkle Tree</h3>
+                <div id="merkleVisualization">
+                    <div class="merkle-level">
+                        <div class="merkle-node root">Root Hash</div>
+                    </div>
+                    <div class="merkle-level">
+                        <div class="merkle-node">H(1+2)</div>
+                        <div class="merkle-node">H(3+4)</div>
+                    </div>
+                    <div class="merkle-level">
+                        <div class="merkle-node">Tx1</div>
+                        <div class="merkle-node">Tx2</div>
+                        <div class="merkle-node">Tx3</div>
+                        <div class="merkle-node">Tx4</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🔐 Cryptographic Functions</h3>
+                
+                <div class="control-group">
+                    <label>Input Text:</label>
+                    <input type="text" id="hashInput" placeholder="Enter text to hash..." value="Hello Blockchain">
+                </div>
+                
+                <button class="btn" onclick="calculateHash()" style="width: 100%;">🔢 Calculate SHA-256</button>
+                
+                <div class="hash-display" id="hashOutput">
+                    Click calculate to see hash
+                </div>
+                
+                <div class="control-group" style="margin-top: 20px;">
+                    <label>Nonce Finder:</label>
+                    <input type="text" id="targetPrefix" placeholder="Target prefix (e.g., 000)" value="000">
+                    <button class="btn" onclick="findNonce()" style="width: 100%; margin-top: 10px;">🎯 Find Nonce</button>
+                </div>
+                
+                <div id="nonceResult" class="hash-display" style="display: none;">
+                    Nonce finding in progress...
+                </div>
+            </div>
+        </div>
+        
+        <div class="consensus-section">
+            <h3>📜 Block Details Inspector</h3>
+            <div id="blockInspector" class="block-data">
+                Select a block to inspect its details...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Blockchain class implementation
+        class Block {
+            constructor(index, timestamp, data, previousHash = '') {
+                this.index = index;
+                this.timestamp = timestamp;
+                this.data = data;
+                this.previousHash = previousHash;
+                this.nonce = 0;
+                this.hash = this.calculateHash();
+            }
+            
+            calculateHash() {
+                return CryptoJS.SHA256(
+                    this.index + 
+                    this.previousHash + 
+                    this.timestamp + 
+                    JSON.stringify(this.data) + 
+                    this.nonce
+                ).toString();
+            }
+            
+            mineBlock(difficulty) {
+                const target = Array(difficulty + 1).join("0");
+                let attempts = 0;
+                const startTime = Date.now();
+                
+                return new Promise((resolve) => {
+                    const mine = () => {
+                        while (this.hash.substring(0, difficulty) !== target && attempts < 1000) {
+                            this.nonce++;
+                            this.hash = this.calculateHash();
+                            attempts++;
+                        }
+                        
+                        // Update progress
+                        const progress = Math.min((attempts / 10000) * 100, 99);
+                        updateMiningProgress(progress);
+                        
+                        if (this.hash.substring(0, difficulty) === target) {
+                            const endTime = Date.now();
+                            const hashRate = Math.floor(attempts / ((endTime - startTime) / 1000));
+                            resolve({ attempts, hashRate, time: endTime - startTime });
+                        } else {
+                            // Continue mining in next frame
+                            setTimeout(mine, 10);
+                        }
+                    };
+                    mine();
+                });
+            }
+        }
+        
+        class Blockchain {
+            constructor() {
+                this.chain = [this.createGenesisBlock()];
+                this.difficulty = 3;
+                this.pendingTransactions = [];
+                this.miningReward = 100;
+            }
+            
+            createGenesisBlock() {
+                const genesis = new Block(0, Date.now(), "Genesis Block", "0");
+                genesis.hash = genesis.calculateHash();
+                return genesis;
+            }
+            
+            getLatestBlock() {
+                return this.chain[this.chain.length - 1];
+            }
+            
+            async addBlock(newBlock) {
+                newBlock.previousHash = this.getLatestBlock().hash;
+                const miningResult = await newBlock.mineBlock(this.difficulty);
+                this.chain.push(newBlock);
+                return miningResult;
+            }
+            
+            isChainValid() {
+                for (let i = 1; i < this.chain.length; i++) {
+                    const currentBlock = this.chain[i];
+                    const previousBlock = this.chain[i - 1];
+                    
+                    if (currentBlock.hash !== currentBlock.calculateHash()) {
+                        return { valid: false, error: `Block ${i} has invalid hash` };
+                    }
+                    
+                    if (currentBlock.previousHash !== previousBlock.hash) {
+                        return { valid: false, error: `Block ${i} has invalid previous hash` };
+                    }
+                }
+                return { valid: true, error: null };
+            }
+            
+            tamperWithBlock(blockIndex, newData) {
+                if (blockIndex < this.chain.length) {
+                    this.chain[blockIndex].data = newData;
+                    // Don't recalculate hash to simulate tampering
+                }
+            }
+        }
+        
+        // Global blockchain instance
+        let blockchain = new Blockchain();
+        let miningInProgress = false;
+        
+        // Initialize display
+        updateBlockchainDisplay();
+        updateStats();
+        updateBlockSelector();
+        
+        async function mineBlock() {
+            if (miningInProgress) return;
+            
+            const data = document.getElementById('transactionData').value;
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            
+            if (!data.trim()) {
+                alert('Please enter transaction data!');
+                return;
+            }
+            
+            miningInProgress = true;
+            blockchain.difficulty = difficulty;
+            
+            const miningPanel = document.getElementById('miningInfo');
+            miningPanel.classList.add('active');
+            document.getElementById('miningStatus').textContent = 'Mining in progress...';
+            
+            const newBlock = new Block(
+                blockchain.chain.length,
+                Date.now(),
+                data,
+                blockchain.getLatestBlock().hash
+            );
+            
+            try {
+                const result = await blockchain.addBlock(newBlock);
+                
+                document.getElementById('miningStatus').innerHTML = `
+                    ✅ Block mined successfully!<br>
+                    Attempts: ${result.attempts.toLocaleString()}<br>
+                    Hash Rate: ${result.hashRate.toLocaleString()} H/s<br>
+                    Time: ${result.time}ms
+                `;
+                
+                document.getElementById('hashRate').textContent = result.hashRate.toLocaleString();
+                
+                updateBlockchainDisplay();
+                updateStats();
+                updateBlockSelector();
+                
+                // Clear transaction data
+                document.getElementById('transactionData').value = '';
+                
+            } catch (error) {
+                document.getElementById('miningStatus').textContent = '❌ Mining failed: ' + error.message;
+            }
+            
+            miningPanel.classList.remove('active');
+            miningInProgress = false;
+            updateMiningProgress(0);
+        }
+        
+        function updateMiningProgress(progress) {
+            document.getElementById('miningProgress').style.width = progress + '%';
+        }
+        
+        function validateChain() {
+            const result = blockchain.isChainValid();
+            const panel = document.getElementById('validationPanel');
+            const details = document.getElementById('validationDetails');
+            
+            if (result.valid) {
+                panel.className = 'validation-panel';
+                details.innerHTML = '✅ Blockchain is valid!<br>All blocks are properly linked and hashes are correct.';
+                document.getElementById('chainValidity').innerHTML = '✅ Valid';
+            } else {
+                panel.className = 'validation-panel invalid';
+                details.innerHTML = `❌ Blockchain is invalid!<br>${result.error}`;
+                document.getElementById('chainValidity').innerHTML = '❌ Invalid';
+            }
+            
+            // Update block styling
+            updateBlockchainDisplay();
+        }
+        
+        function tamperWithBlock() {
+            if (blockchain.chain.length <= 1) {
+                alert('Need at least one mined block to tamper with!');
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * (blockchain.chain.length - 1)) + 1;
+            const originalData = blockchain.chain[randomIndex].data;
+            blockchain.tamperWithBlock(randomIndex, originalData + ' [TAMPERED]');
+            
+            updateBlockchainDisplay();
+            
+            alert(`Block ${randomIndex} has been tampered with! Click 'Validate Chain' to see the effect.`);
+        }
+        
+        function resetBlockchain() {
+            blockchain = new Blockchain();
+            updateBlockchainDisplay();
+            updateStats();
+            updateBlockSelector();
+            
+            document.getElementById('miningStatus').textContent = 'Ready to mine...';
+            document.getElementById('validationDetails').textContent = "Click 'Validate Chain' to check integrity";
+            document.getElementById('validationPanel').className = 'validation-panel';
+        }
+        
+        function updateBlockchainDisplay() {
+            const container = document.getElementById('chainVisualization');
+            const validation = blockchain.isChainValid();
+            
+            container.innerHTML = '';
+            
+            blockchain.chain.forEach((block, index) => {
+                const blockElement = document.createElement('div');
+                blockElement.className = 'block';
+                
+                if (index === 0) {
+                    blockElement.classList.add('genesis');
+                } else if (!validation.valid && validation.error.includes(`Block ${index}`)) {
+                    blockElement.classList.add('invalid');
+                }
+                
+                blockElement.innerHTML = `
+                    <div class="block-header">
+                        <div><strong>Index:</strong> ${block.index}</div>
+                        <div><strong>Nonce:</strong> ${block.nonce}</div>
+                        <div><strong>Timestamp:</strong> ${new Date(block.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                    <div class="block-data">
+                        <strong>Data:</strong> ${block.data}<br>
+                        <strong>Previous Hash:</strong><br>
+                        <div class="hash-display">${block.previousHash}</div>
+                        <strong>Current Hash:</strong><br>
+                        <div class="hash-display">${block.hash}</div>
+                    </div>
+                `;
+                
+                container.appendChild(blockElement);
+                
+                if (index < blockchain.chain.length - 1) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'chain-arrow';
+                    arrow.textContent = '⬇️';
+                    container.appendChild(arrow);
+                }
+            });
+        }
+        
+        function updateStats() {
+            document.getElementById('chainLength').textContent = blockchain.chain.length;
+            document.getElementById('totalTx').textContent = blockchain.chain.length - 1; // Exclude genesis
+            
+            if (blockchain.chain.length > 1) {
+                const lastBlock = blockchain.getLatestBlock();
+                document.getElementById('lastBlockTime').textContent = 
+                    new Date(lastBlock.timestamp).toLocaleString();
+            }
+        }
+        
+        function updateBlockSelector() {
+            const selector = document.getElementById('blockSelector');
+            selector.innerHTML = '';
+            
+            blockchain.chain.forEach((block, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = index === 0 ? 'Genesis Block' : `Block ${index}`;
+                selector.appendChild(option);
+            });
+        }
+        
+        function inspectBlock() {
+            const index = parseInt(document.getElementById('blockSelector').value);
+            const block = blockchain.chain[index];
+            
+            if (!block) return;
+            
+            const inspector = document.getElementById('blockInspector');
+            inspector.innerHTML = `
+                <h4>📦 Block ${block.index} Details</h4>
+                <p><strong>Index:</strong> ${block.index}</p>
+                <p><strong>Timestamp:</strong> ${new Date(block.timestamp).toLocaleString()}</p>
+                <p><strong>Data:</strong> ${block.data}</p>
+                <p><strong>Previous Hash:</strong><br><code>${block.previousHash}</code></p>
+                <p><strong>Current Hash:</strong><br><code>${block.hash}</code></p>
+                <p><strong>Nonce:</strong> ${block.nonce}</p>
+                <p><strong>Hash Valid:</strong> ${block.hash === block.calculateHash() ? '✅ Yes' : '❌ No'}</p>
+                <p><strong>Difficulty Met:</strong> ${block.hash.startsWith('0'.repeat(blockchain.difficulty)) ? '✅ Yes' : '❌ No'}</p>
+            `;
+        }
+        
+        function calculateHash() {
+            const input = document.getElementById('hashInput').value;
+            const hash = CryptoJS.SHA256(input).toString();
+            document.getElementById('hashOutput').textContent = hash;
+        }
+        
+        async function findNonce() {
+            const input = document.getElementById('hashInput').value;
+            const prefix = document.getElementById('targetPrefix').value;
+            const resultDiv = document.getElementById('nonceResult');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Finding nonce...';
+            
+            let nonce = 0;
+            let hash = '';
+            let attempts = 0;
+            const startTime = Date.now();
+            
+            const findNonceStep = () => {
+                for (let i = 0; i < 1000 && !hash.startsWith(prefix); i++) {
+                    hash = CryptoJS.SHA256(input + nonce).toString();
+                    nonce++;
+                    attempts++;
+                }
+                
+                if (hash.startsWith(prefix)) {
+                    const endTime = Date.now();
+                    const hashRate = Math.floor(attempts / ((endTime - startTime) / 1000));
+                    
+                    resultDiv.innerHTML = `
+                        ✅ Found nonce: ${nonce - 1}<br>
+                        Hash: ${hash}<br>
+                        Attempts: ${attempts.toLocaleString()}<br>
+                        Hash Rate: ${hashRate.toLocaleString()} H/s<br>
+                        Time: ${endTime - startTime}ms
+                    `;
+                } else {
+                    resultDiv.textContent = `Searching... Attempts: ${attempts.toLocaleString()}`;
+                    setTimeout(findNonceStep, 10);
+                }
+            };
+            
+            findNonceStep();
+        }
+        
+        function simulateConsensus() {
+            const nodes = ['node1', 'node2', 'node3'];
+            const leader = nodes[Math.floor(Math.random() * nodes.length)];
+            
+            // Reset all nodes
+            nodes.forEach(nodeId => {
+                document.getElementById(nodeId).className = 'node';
+            });
+            
+            // Set new leader
+            document.getElementById(leader).className = 'node leader';
+            
+            const nodeNames = { node1: 'Node 1', node2: 'Node 2', node3: 'Node 3' };
+            document.getElementById('currentLeader').textContent = nodeNames[leader];
+        }
+        
+        // Auto-calculate hash when input changes
+        document.getElementById('hashInput').addEventListener('input', calculateHash);
+        
+        // Initialize
+        calculateHash();
+        inspectBlock();
+        
+        // Initialize MathJax when page loads
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

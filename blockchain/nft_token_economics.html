@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 NFT & Token Economics Mathematics</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #a855f7 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #faf5ff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(250, 245, 255, 0.3);
+        }
+        
+        .nft-panel {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .rarity-panel {
+            background: rgba(168, 85, 247, 0.1);
+            border: 2px solid #a855f7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .marketplace-panel {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .token-economics {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .nft-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #a855f7;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nft-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+        }
+        
+        .nft-card.legendary {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+        }
+        
+        .nft-card.epic {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.2);
+        }
+        
+        .nft-card.rare {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+        
+        .nft-card.common {
+            border-color: #6b7280;
+            background: rgba(107, 114, 128, 0.2);
+        }
+        
+        .nft-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #a855f7, #f59e0b);
+            border-radius: 8px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .rarity-indicator {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .rarity-legendary {
+            background: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .rarity-epic {
+            background: rgba(168, 85, 247, 0.3);
+            color: #a855f7;
+        }
+        
+        .rarity-rare {
+            background: rgba(59, 130, 246, 0.3);
+            color: #3b82f6;
+        }
+        
+        .rarity-common {
+            background: rgba(107, 114, 128, 0.3);
+            color: #9ca3af;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group select, .control-group textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-generate {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            width: 100%;
+        }
+        
+        .btn-mint {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            width: 100%;
+        }
+        
+        .btn-trade {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            width: 100%;
+        }
+        
+        .btn-analyze {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            width: 100%;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #a855f7;
+        }
+        
+        .price-chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 300px;
+        }
+        
+        .distribution-model {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #a855f7;
+        }
+        
+        .royalty-calculator {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .tokenomics-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .token-allocation {
+            text-align: center;
+            padding: 15px;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 10px;
+            margin: 10px;
+            min-width: 120px;
+        }
+        
+        .allocation-pie {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #a855f7, #f59e0b);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .rarity-distribution {
+            margin: 20px 0;
+        }
+        
+        .rarity-bar {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .rarity-label {
+            min-width: 100px;
+            font-weight: bold;
+        }
+        
+        .rarity-progress {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 0 10px;
+        }
+        
+        .rarity-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .rarity-percentage {
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .nft-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 NFT & Token Economics Mathematics</h1>
+        
+        <div class="intro">
+            <h2>Non-Fungible Tokens & Economic Models</h2>
+            <p><strong>NFTs (Non-Fungible Tokens)</strong> represent unique digital assets with verifiable ownership on blockchain networks. The mathematics behind NFTs involves rarity calculations, pricing models, and economic mechanisms.</p>
+            <p><strong>Token Economics</strong> studies the economic incentives and mathematical models that govern cryptocurrency and token systems, including distribution, inflation, and utility mechanisms.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🧮 NFT & Token Mathematics</h3>
+            <p><strong>Rarity Score:</strong> RS = Σ(1 / trait_frequency) for all traits</p>
+            <p><strong>Floor Price:</strong> FP = min(active_listings)</p>
+            <p><strong>Market Cap:</strong> MC = floor_price × total_supply</p>
+            <p><strong>Token Velocity:</strong> V = GDP / M (where GDP = transaction volume, M = money supply)</p>
+            <p><strong>Bonding Curve:</strong> Price = supply^n (where n > 1 for exponential growth)</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="nft-panel">
+                <h3>🎨 NFT Collection Generator</h3>
+                
+                <div class="control-group">
+                    <label>Collection Size:</label>
+                    <input type="number" id="collectionSize" value="100" onchange="generateCollection()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Trait Categories:</label>
+                    <textarea id="traitCategories" placeholder="background,eyes,mouth,hat" onchange="generateCollection()">background,eyes,mouth,hat</textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Traits per Category:</label>
+                    <input type="number" id="traitsPerCategory" value="5" onchange="generateCollection()">
+                </div>
+                
+                <button class="btn btn-generate" onclick="generateCollection()">🎲 Generate Collection</button>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div><strong>Total NFTs</strong></div>
+                        <div id="totalNFTs">100</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>Unique Combinations</strong></div>
+                        <div id="uniqueCombinations">625</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>Rarity Range</strong></div>
+                        <div id="rarityRange">1-20</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>Floor Price</strong></div>
+                        <div id="floorPrice">0.1 ETH</div>
+                    </div>
+                </div>
+                
+                <div class="rarity-distribution">
+                    <h4>📊 Rarity Distribution</h4>
+                    <div class="rarity-bar">
+                        <div class="rarity-label">Legendary</div>
+                        <div class="rarity-progress">
+                            <div class="rarity-fill" id="legendaryBar" style="width: 1%; background: #f59e0b;"></div>
+                        </div>
+                        <div class="rarity-percentage" id="legendaryPercent">1%</div>
+                    </div>
+                    <div class="rarity-bar">
+                        <div class="rarity-label">Epic</div>
+                        <div class="rarity-progress">
+                            <div class="rarity-fill" id="epicBar" style="width: 5%; background: #a855f7;"></div>
+                        </div>
+                        <div class="rarity-percentage" id="epicPercent">5%</div>
+                    </div>
+                    <div class="rarity-bar">
+                        <div class="rarity-label">Rare</div>
+                        <div class="rarity-progress">
+                            <div class="rarity-fill" id="rareBar" style="width: 20%; background: #3b82f6;"></div>
+                        </div>
+                        <div class="rarity-percentage" id="rarePercent">20%</div>
+                    </div>
+                    <div class="rarity-bar">
+                        <div class="rarity-label">Common</div>
+                        <div class="rarity-progress">
+                            <div class="rarity-fill" id="commonBar" style="width: 74%; background: #6b7280;"></div>
+                        </div>
+                        <div class="rarity-percentage" id="commonPercent">74%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rarity-panel">
+                <h3>💎 Rarity Calculator</h3>
+                
+                <div class="control-group">
+                    <label>NFT Traits (JSON):</label>
+                    <textarea id="nftTraits" placeholder='{"background": "blue", "eyes": "laser", "mouth": "smile"}'>{
+  "background": "blue",
+  "eyes": "laser", 
+  "mouth": "smile",
+  "hat": "crown"
+}</textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Trait Frequencies (JSON):</label>
+                    <textarea id="traitFrequencies" placeholder='{"blue": 0.1, "laser": 0.05, ...}'>{
+  "blue": 0.2,
+  "laser": 0.05,
+  "smile": 0.3,
+  "crown": 0.01
+}</textarea>
+                </div>
+                
+                <button class="btn btn-analyze" onclick="calculateRarity()">📊 Calculate Rarity Score</button>
+                
+                <div id="rarityResult" class="royalty-calculator" style="display: none;">
+                    <h4>💎 Rarity Analysis</h4>
+                    <div id="rarityDetails"></div>
+                </div>
+                
+                <div class="nft-grid" id="sampleNFTs">
+                    <!-- Sample NFTs will be generated here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="three-column">
+            <div class="marketplace-panel">
+                <h3>🏪 Marketplace Dynamics</h3>
+                
+                <div class="control-group">
+                    <label>Base Price (ETH):</label>
+                    <input type="number" id="basePrice" value="0.1" step="0.01" onchange="updatePricing()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Demand Multiplier:</label>
+                    <input type="range" id="demandMultiplier" min="0.5" max="5" step="0.1" value="1" onchange="updatePricing()">
+                    <span id="demandValue">1.0x</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Supply Available:</label>
+                    <input type="number" id="supplyAvailable" value="50" onchange="updatePricing()">
+                </div>
+                
+                <div class="royalty-calculator">
+                    <h4>💰 Price Calculation</h4>
+                    <div id="priceBreakdown">
+                        <p><strong>Floor Price:</strong> <span id="calculatedFloor">0.10 ETH</span></p>
+                        <p><strong>Rarity Premium:</strong> <span id="rarityPremium">+50%</span></p>
+                        <p><strong>Market Price:</strong> <span id="marketPrice">0.15 ETH</span></p>
+                        <p><strong>Gas Fees:</strong> <span id="gasFees">0.005 ETH</span></p>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Royalty Percentage:</label>
+                    <input type="range" id="royaltyPercent" min="0" max="10" step="0.5" value="5" onchange="calculateRoyalties()">
+                    <span id="royaltyValue">5%</span>
+                </div>
+                
+                <div class="royalty-calculator">
+                    <h4>👑 Royalty Calculator</h4>
+                    <div id="royaltyBreakdown">
+                        <p><strong>Sale Price:</strong> <span id="salePrice">0.15 ETH</span></p>
+                        <p><strong>Creator Royalty:</strong> <span id="creatorRoyalty">0.0075 ETH</span></p>
+                        <p><strong>Platform Fee:</strong> <span id="platformFee">0.0038 ETH</span></p>
+                        <p><strong>Seller Receives:</strong> <span id="sellerReceives">0.1387 ETH</span></p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-trade" onclick="simulateTrade()">💸 Simulate Trade</button>
+            </div>
+            
+            <div class="token-economics">
+                <h3>🪙 Token Economics Model</h3>
+                
+                <div class="control-group">
+                    <label>Total Supply:</label>
+                    <input type="number" id="totalSupply" value="1000000" onchange="updateTokenomics()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Distribution Model:</label>
+                    <select id="distributionModel" onchange="updateTokenomics()">
+                        <option value="fair-launch">Fair Launch</option>
+                        <option value="ico">ICO Model</option>
+                        <option value="mining">Mining Rewards</option>
+                        <option value="staking">Staking Rewards</option>
+                    </select>
+                </div>
+                
+                <div class="tokenomics-visual">
+                    <div class="token-allocation">
+                        <div class="allocation-pie" style="background: conic-gradient(#f59e0b 0% 30%, #a855f7 30% 50%, #3b82f6 50% 70%, #22c55e 70% 100%);"></div>
+                        <div><strong>Team</strong></div>
+                        <div id="teamAllocation">30%</div>
+                    </div>
+                    <div class="token-allocation">
+                        <div class="allocation-pie" style="background: conic-gradient(#a855f7 0% 20%, #f59e0b 20% 40%, #3b82f6 40% 60%, #22c55e 60% 100%);"></div>
+                        <div><strong>Public Sale</strong></div>
+                        <div id="publicAllocation">20%</div>
+                    </div>
+                    <div class="token-allocation">
+                        <div class="allocation-pie" style="background: conic-gradient(#3b82f6 0% 20%, #f59e0b 20% 40%, #a855f7 40% 60%, #22c55e 60% 100%);"></div>
+                        <div><strong>Ecosystem</strong></div>
+                        <div id="ecosystemAllocation">20%</div>
+                    </div>
+                    <div class="token-allocation">
+                        <div class="allocation-pie" style="background: conic-gradient(#22c55e 0% 30%, #f59e0b 30% 50%, #a855f7 50% 70%, #3b82f6 70% 100%);"></div>
+                        <div><strong>Rewards</strong></div>
+                        <div id="rewardsAllocation">30%</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Inflation Rate (%):</label>
+                    <input type="range" id="inflationRate" min="0" max="20" step="0.5" value="5" onchange="updateTokenomics()">
+                    <span id="inflationValue">5%</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Burn Rate (%):</label>
+                    <input type="range" id="burnRate" min="0" max="10" step="0.1" value="2" onchange="updateTokenomics()">
+                    <span id="burnValue">2%</span>
+                </div>
+                
+                <div class="royalty-calculator">
+                    <h4>📈 Economic Projections</h4>
+                    <div id="economicProjections">
+                        <p><strong>Circulating Supply:</strong> <span id="circulatingSupply">500,000</span></p>
+                        <p><strong>Market Cap:</strong> <span id="marketCap">$1,000,000</span></p>
+                        <p><strong>Annual Inflation:</strong> <span id="annualInflation">25,000 tokens</span></p>
+                        <p><strong>Annual Burn:</strong> <span id="annualBurn">10,000 tokens</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📊 Bonding Curve Simulation</h3>
+                
+                <div class="control-group">
+                    <label>Curve Function:</label>
+                    <select id="curveFunction" onchange="updateBondingCurve()">
+                        <option value="linear">Linear: y = mx + b</option>
+                        <option value="quadratic">Quadratic: y = ax² + bx + c</option>
+                        <option value="exponential">Exponential: y = ae^(bx)</option>
+                        <option value="logarithmic">Logarithmic: y = a·ln(x) + b</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Reserve Ratio:</label>
+                    <input type="range" id="reserveRatio" min="10" max="100" step="5" value="50" onchange="updateBondingCurve()">
+                    <span id="reserveValue">50%</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Buy Amount:</label>
+                    <input type="number" id="buyAmount" value="100" onchange="calculatePurchase()">
+                </div>
+                
+                <div class="price-chart-container">
+                    <canvas id="bondingCurveChart"></canvas>
+                </div>
+                
+                <div class="royalty-calculator">
+                    <h4>💰 Purchase Calculation</h4>
+                    <div id="purchaseDetails">
+                        <p><strong>Tokens to Buy:</strong> <span id="tokensToBuy">100</span></p>
+                        <p><strong>Current Price:</strong> <span id="currentPrice">$2.00</span></p>
+                        <p><strong>Average Price:</strong> <span id="averagePrice">$2.10</span></p>
+                        <p><strong>Total Cost:</strong> <span id="totalCost">$210</span></p>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="executePurchase()" style="width: 100%;">💳 Execute Purchase</button>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>📈 Price History Analysis</h3>
+                
+                <div class="price-chart-container">
+                    <canvas id="priceHistoryChart"></canvas>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div><strong>24h Volume</strong></div>
+                        <div id="volume24h">150 ETH</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>24h Change</strong></div>
+                        <div id="change24h">+15.3%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>Market Cap</strong></div>
+                        <div id="marketCapDisplay">15,000 ETH</div>
+                    </div>
+                    <div class="stat-card">
+                        <div><strong>Holders</strong></div>
+                        <div id="holdersCount">1,247</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="generatePriceHistory()" style="width: 100%;">📊 Generate Price Data</button>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🎯 Utility & Governance</h3>
+                
+                <div class="control-group">
+                    <label>Governance Token Supply:</label>
+                    <input type="number" id="govTokenSupply" value="10000" onchange="updateGovernance()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Voting Power Distribution:</label>
+                    <select id="votingModel" onchange="updateGovernance()">
+                        <option value="linear">Linear (1 token = 1 vote)</option>
+                        <option value="quadratic">Quadratic Voting</option>
+                        <option value="delegated">Delegated Voting</option>
+                        <option value="weighted">Stake-Weighted</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Proposal Threshold:</label>
+                    <input type="range" id="proposalThreshold" min="1" max="20" step="1" value="5" onchange="updateGovernance()">
+                    <span id="thresholdValue">5%</span>
+                </div>
+                
+                <div class="royalty-calculator">
+                    <h4>🗳️ Governance Metrics</h4>
+                    <div id="governanceMetrics">
+                        <p><strong>Min Tokens for Proposal:</strong> <span id="minTokensProposal">500</span></p>
+                        <p><strong>Voting Quorum:</strong> <span id="votingQuorum">20%</span></p>
+                        <p><strong>Execution Threshold:</strong> <span id="executionThreshold">51%</span></p>
+                        <p><strong>Token Concentration:</strong> <span id="tokenConcentration">Moderate</span></p>
+                    </div>
+                </div>
+                
+                <div class="distribution-model">
+                    <h5>📋 Active Proposals</h5>
+                    <div id="activeProposals">
+                        <p>• Increase staking rewards by 2%</p>
+                        <p>• Add new marketplace features</p>
+                        <p>• Burn 5% of treasury tokens</p>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="simulateVoting()" style="width: 100%;">🗳️ Simulate Voting</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let nftCollection = [];
+        let rarityScores = {};
+        let bondingCurveChart = null;
+        let priceHistoryChart = null;
+        let currentSupply = 1000;
+        let tokenPrice = 2.0;
+        
+        // Initialize
+        generateCollection();
+        initializeCharts();
+        updateTokenomics();
+        updateBondingCurve();
+        
+        function generateCollection() {
+            const size = parseInt(document.getElementById('collectionSize').value);
+            const traitCategoriesStr = document.getElementById('traitCategories').value;
+            const traitsPerCategory = parseInt(document.getElementById('traitsPerCategory').value);
+            
+            const categories = traitCategoriesStr.split(',').map(s => s.trim());
+            
+            // Calculate total possible combinations
+            const totalCombinations = Math.pow(traitsPerCategory, categories.length);
+            
+            // Generate collection
+            nftCollection = [];
+            for (let i = 0; i < size; i++) {
+                const nft = {
+                    id: i + 1,
+                    traits: {}
+                };
+                
+                categories.forEach(category => {
+                    const traitIndex = Math.floor(Math.random() * traitsPerCategory);
+                    nft.traits[category] = `${category}_${traitIndex + 1}`;
+                });
+                
+                nftCollection.push(nft);
+            }
+            
+            calculateCollectionRarity();
+            updateCollectionStats(totalCombinations);
+            generateSampleNFTs();
+        }
+        
+        function calculateCollectionRarity() {
+            // Calculate trait frequencies
+            const traitFrequencies = {};
+            
+            nftCollection.forEach(nft => {
+                Object.values(nft.traits).forEach(trait => {
+                    traitFrequencies[trait] = (traitFrequencies[trait] || 0) + 1;
+                });
+            });
+            
+            // Convert to percentages
+            Object.keys(traitFrequencies).forEach(trait => {
+                traitFrequencies[trait] = traitFrequencies[trait] / nftCollection.length;
+            });
+            
+            // Calculate rarity scores
+            nftCollection.forEach(nft => {
+                let rarityScore = 0;
+                Object.values(nft.traits).forEach(trait => {
+                    rarityScore += 1 / traitFrequencies[trait];
+                });
+                nft.rarityScore = rarityScore;
+                nft.rarity = getRarityTier(rarityScore);
+            });
+            
+            // Sort by rarity score
+            nftCollection.sort((a, b) => b.rarityScore - a.rarityScore);
+        }
+        
+        function getRarityTier(score) {
+            if (score > 15) return 'legendary';
+            if (score > 10) return 'epic';
+            if (score > 7) return 'rare';
+            return 'common';
+        }
+        
+        function updateCollectionStats(totalCombinations) {
+            document.getElementById('totalNFTs').textContent = nftCollection.length;
+            document.getElementById('uniqueCombinations').textContent = totalCombinations.toLocaleString();
+            
+            const rarityScores = nftCollection.map(nft => nft.rarityScore);
+            const minRarity = Math.min(...rarityScores);
+            const maxRarity = Math.max(...rarityScores);
+            document.getElementById('rarityRange').textContent = `${minRarity.toFixed(1)}-${maxRarity.toFixed(1)}`;
+            
+            // Calculate rarity distribution
+            const distribution = {
+                legendary: nftCollection.filter(nft => nft.rarity === 'legendary').length,
+                epic: nftCollection.filter(nft => nft.rarity === 'epic').length,
+                rare: nftCollection.filter(nft => nft.rarity === 'rare').length,
+                common: nftCollection.filter(nft => nft.rarity === 'common').length
+            };
+            
+            const total = nftCollection.length;
+            Object.keys(distribution).forEach(rarity => {
+                const percentage = (distribution[rarity] / total * 100).toFixed(1);
+                document.getElementById(`${rarity}Percent`).textContent = percentage + '%';
+                document.getElementById(`${rarity}Bar`).style.width = percentage + '%';
+            });
+            
+            updatePricing();
+        }
+        
+        function generateSampleNFTs() {
+            const container = document.getElementById('sampleNFTs');
+            container.innerHTML = '';
+            
+            // Show top 6 rarest NFTs
+            const topNFTs = nftCollection.slice(0, 6);
+            
+            topNFTs.forEach(nft => {
+                const nftDiv = document.createElement('div');
+                nftDiv.className = `nft-card ${nft.rarity}`;
+                
+                const emoji = ['👑', '💎', '⭐', '🎨', '🌟', '🔥'][Math.floor(Math.random() * 6)];
+                
+                nftDiv.innerHTML = `
+                    <div class="nft-image">${emoji}</div>
+                    <div><strong>#${nft.id}</strong></div>
+                    <div class="rarity-indicator rarity-${nft.rarity}">${nft.rarity.toUpperCase()}</div>
+                    <div>Score: ${nft.rarityScore.toFixed(2)}</div>
+                `;
+                
+                container.appendChild(nftDiv);
+            });
+        }
+        
+        function calculateRarity() {
+            try {
+                const traitsStr = document.getElementById('nftTraits').value;
+                const frequenciesStr = document.getElementById('traitFrequencies').value;
+                
+                const traits = JSON.parse(traitsStr);
+                const frequencies = JSON.parse(frequenciesStr);
+                
+                let rarityScore = 0;
+                let breakdown = [];
+                
+                Object.values(traits).forEach(trait => {
+                    if (frequencies[trait]) {
+                        const contribution = 1 / frequencies[trait];
+                        rarityScore += contribution;
+                        breakdown.push(`${trait}: ${contribution.toFixed(2)} (${(frequencies[trait] * 100).toFixed(1)}% frequency)`);
+                    }
+                });
+                
+                const rarity = getRarityTier(rarityScore);
+                const rank = Math.ceil(rarityScore * 100); // Simulated rank
+                
+                document.getElementById('rarityResult').style.display = 'block';
+                document.getElementById('rarityDetails').innerHTML = `
+                    <p><strong>Total Rarity Score:</strong> ${rarityScore.toFixed(2)}</p>
+                    <p><strong>Rarity Tier:</strong> ${rarity.toUpperCase()}</p>
+                    <p><strong>Estimated Rank:</strong> #${rank} / 10,000</p>
+                    <p><strong>Breakdown:</strong></p>
+                    <ul>
+                        ${breakdown.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                `;
+                
+            } catch (error) {
+                alert('Please enter valid JSON format!');
+            }
+        }
+        
+        function updatePricing() {
+            const basePrice = parseFloat(document.getElementById('basePrice').value);
+            const demandMultiplier = parseFloat(document.getElementById('demandMultiplier').value);
+            const supply = parseInt(document.getElementById('supplyAvailable').value);
+            
+            document.getElementById('demandValue').textContent = demandMultiplier.toFixed(1) + 'x';
+            
+            // Calculate pricing
+            const floorPrice = basePrice * demandMultiplier * (100 / Math.max(supply, 1));
+            const rarityPremium = 50; // 50% premium for rare items
+            const marketPrice = floorPrice * (1 + rarityPremium / 100);
+            const gasFees = 0.005; // Fixed gas fees
+            
+            document.getElementById('calculatedFloor').textContent = floorPrice.toFixed(3) + ' ETH';
+            document.getElementById('rarityPremium').textContent = '+' + rarityPremium + '%';
+            document.getElementById('marketPrice').textContent = marketPrice.toFixed(3) + ' ETH';
+            document.getElementById('gasFees').textContent = gasFees.toFixed(3) + ' ETH';
+            document.getElementById('floorPrice').textContent = floorPrice.toFixed(2) + ' ETH';
+            
+            calculateRoyalties();
+        }
+        
+        function calculateRoyalties() {
+            const salePrice = parseFloat(document.getElementById('marketPrice').textContent);
+            const royaltyPercent = parseFloat(document.getElementById('royaltyPercent').value);
+            
+            document.getElementById('royaltyValue').textContent = royaltyPercent + '%';
+            
+            const creatorRoyalty = salePrice * (royaltyPercent / 100);
+            const platformFee = salePrice * 0.025; // 2.5% platform fee
+            const sellerReceives = salePrice - creatorRoyalty - platformFee;
+            
+            document.getElementById('salePrice').textContent = salePrice.toFixed(4) + ' ETH';
+            document.getElementById('creatorRoyalty').textContent = creatorRoyalty.toFixed(4) + ' ETH';
+            document.getElementById('platformFee').textContent = platformFee.toFixed(4) + ' ETH';
+            document.getElementById('sellerReceives').textContent = sellerReceives.toFixed(4) + ' ETH';
+        }
+        
+        function simulateTrade() {
+            alert('Trade simulated successfully! 💸\n\nTransaction hash: 0x' + Math.random().toString(16).substr(2, 64));
+        }
+        
+        function updateTokenomics() {
+            const totalSupply = parseInt(document.getElementById('totalSupply').value);
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value);
+            const burnRate = parseFloat(document.getElementById('burnRate').value);
+            
+            document.getElementById('inflationValue').textContent = inflationRate + '%';
+            document.getElementById('burnValue').textContent = burnRate + '%';
+            
+            const circulatingSupply = Math.floor(totalSupply * 0.5); // 50% circulating
+            const tokenPrice = 2.00; // $2 per token
+            const marketCap = circulatingSupply * tokenPrice;
+            const annualInflation = Math.floor(circulatingSupply * (inflationRate / 100));
+            const annualBurn = Math.floor(circulatingSupply * (burnRate / 100));
+            
+            document.getElementById('circulatingSupply').textContent = circulatingSupply.toLocaleString();
+            document.getElementById('marketCap').textContent = '$' + marketCap.toLocaleString();
+            document.getElementById('annualInflation').textContent = annualInflation.toLocaleString() + ' tokens';
+            document.getElementById('annualBurn').textContent = annualBurn.toLocaleString() + ' tokens';
+        }
+        
+        function updateBondingCurve() {
+            const curveFunction = document.getElementById('curveFunction').value;
+            const reserveRatio = parseFloat(document.getElementById('reserveRatio').value);
+            
+            document.getElementById('reserveValue').textContent = reserveRatio + '%';
+            
+            calculatePurchase();
+            updateBondingCurveChart();
+        }
+        
+        function calculatePurchase() {
+            const buyAmount = parseInt(document.getElementById('buyAmount').value);
+            const currentPrice = tokenPrice;
+            
+            // Simplified bonding curve calculation
+            let totalCost = 0;
+            let averagePrice = 0;
+            
+            for (let i = 0; i < buyAmount; i++) {
+                const price = currentPrice * Math.pow((currentSupply + i) / currentSupply, 0.5);
+                totalCost += price;
+            }
+            
+            averagePrice = totalCost / buyAmount;
+            
+            document.getElementById('tokensToBuy').textContent = buyAmount.toLocaleString();
+            document.getElementById('currentPrice').textContent = '$' + currentPrice.toFixed(2);
+            document.getElementById('averagePrice').textContent = '$' + averagePrice.toFixed(2);
+            document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(0);
+        }
+        
+        function executePurchase() {
+            const buyAmount = parseInt(document.getElementById('buyAmount').value);
+            currentSupply += buyAmount;
+            tokenPrice *= 1.1; // Price increases with supply
+            
+            alert(`Purchase executed!\n\nBought: ${buyAmount} tokens\nNew supply: ${currentSupply.toLocaleString()}\nNew price: $${tokenPrice.toFixed(2)}`);
+            
+            calculatePurchase();
+            updateBondingCurveChart();
+        }
+        
+        function updateGovernance() {
+            const govTokenSupply = parseInt(document.getElementById('govTokenSupply').value);
+            const proposalThreshold = parseFloat(document.getElementById('proposalThreshold').value);
+            
+            document.getElementById('thresholdValue').textContent = proposalThreshold + '%';
+            
+            const minTokensProposal = Math.floor(govTokenSupply * (proposalThreshold / 100));
+            const votingQuorum = 20; // 20% quorum
+            const executionThreshold = 51; // 51% to execute
+            
+            // Calculate token concentration (simplified)
+            const concentration = proposalThreshold > 10 ? 'High' : proposalThreshold > 5 ? 'Moderate' : 'Low';
+            
+            document.getElementById('minTokensProposal').textContent = minTokensProposal.toLocaleString();
+            document.getElementById('votingQuorum').textContent = votingQuorum + '%';
+            document.getElementById('executionThreshold').textContent = executionThreshold + '%';
+            document.getElementById('tokenConcentration').textContent = concentration;
+        }
+        
+        function simulateVoting() {
+            alert('Voting simulation completed!\n\n• Proposal 1: PASSED (67% yes)\n• Proposal 2: FAILED (43% yes)\n• Proposal 3: PENDING (voting ends in 2 days)');
+        }
+        
+        function generatePriceHistory() {
+            // Generate sample price data
+            const data = [];
+            let price = 0.1;
+            
+            for (let i = 0; i < 30; i++) {
+                price *= (0.8 + Math.random() * 0.4); // Random walk
+                data.push({
+                    day: i + 1,
+                    price: price
+                });
+            }
+            
+            updatePriceHistoryChart(data);
+            
+            // Update stats
+            const volume = 150 + Math.random() * 100;
+            const change = (Math.random() - 0.5) * 30;
+            
+            document.getElementById('volume24h').textContent = volume.toFixed(0) + ' ETH';
+            document.getElementById('change24h').textContent = (change > 0 ? '+' : '') + change.toFixed(1) + '%';
+            document.getElementById('change24h').style.color = change > 0 ? '#22c55e' : '#ef4444';
+        }
+        
+        function initializeCharts() {
+            // Initialize bonding curve chart
+            const bondingCtx = document.getElementById('bondingCurveChart').getContext('2d');
+            bondingCurveChart = new Chart(bondingCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Token Price',
+                        data: [],
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Price ($)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Token Supply'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Initialize price history chart
+            const priceCtx = document.getElementById('priceHistoryChart').getContext('2d');
+            priceHistoryChart = new Chart(priceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Floor Price (ETH)',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Price (ETH)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (Days)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateBondingCurveChart();
+        }
+        
+        function updateBondingCurveChart() {
+            const data = [];
+            const labels = [];
+            
+            for (let supply = 100; supply <= 2000; supply += 50) {
+                const price = 2.0 * Math.pow(supply / 1000, 0.5);
+                data.push(price);
+                labels.push(supply);
+            }
+            
+            bondingCurveChart.data.labels = labels;
+            bondingCurveChart.data.datasets[0].data = data;
+            bondingCurveChart.update();
+        }
+        
+        function updatePriceHistoryChart(priceData) {
+            const labels = priceData.map(d => `Day ${d.day}`);
+            const data = priceData.map(d => d.price);
+            
+            priceHistoryChart.data.labels = labels;
+            priceHistoryChart.data.datasets[0].data = data;
+            priceHistoryChart.update();
+        }
+        
+        // Initialize MathJax when page loads
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

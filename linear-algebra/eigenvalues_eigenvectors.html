@@ -3,21 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trị Riêng & Vec-tơ Riêng - Lý Thuyết Toán Học & Giải Thích Hình Học</title>
+    <title>Eigenvalues & Eigenvectors - Theory and Interactive Visualization</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
     <style>
-        body {
-            margin: 0;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-y: auto;
-            font-size: 18px;
-            line-height: 1.7;
+        * {
+            box-sizing: border-box;
         }
         
-        .container {
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            line-height: 1.6;
+        }
+        
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .nav-tabs {
             display: flex;
-            min-height: 600px; /* Fixed minimum height for visualization */
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .nav-tab {
+            padding: 10px 25px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            background: #555;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+        }
+        
+        .section {
+            display: none;
+            padding: 80px 20px 20px;
+            min-height: 100vh;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .theory-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+        }
+        
+        .theory-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .theory-header h1 {
+            color: #4fc3f7;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .theory-header p {
+            font-size: 1.2em;
+            color: #aaa;
+            margin: 0;
+        }
+        
+        .theory-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .theory-section h2 {
+            color: #4fc3f7;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section h3 {
+            color: #81c784;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+        
+        .definition {
+            background: rgba(79, 195, 247, 0.1);
+            border: 1px solid #4fc3f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .definition h4 {
+            color: #4fc3f7;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .example {
+            background: rgba(129, 199, 132, 0.1);
+            border: 1px solid #81c784;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example h4 {
+            color: #81c784;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .theorem {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .theorem h4 {
+            color: #e74c3c;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .application-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .application-card h4 {
+            color: #4fc3f7;
+            margin: 0 0 15px 0;
+        }
+        
+        .interactive-container {
+            display: flex;
+            height: calc(100vh - 80px);
         }
         
         .canvas-container {
@@ -47,121 +215,9 @@
         }
         
         .control-section h3 {
-            margin: 0 0 20px 0;
-            color: #00FFFF;
-            font-size: 1.4em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-        }
-        
-        .matrix-input {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .matrix-input input {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: 600;
-            backdrop-filter: blur(5px);
-        }
-        
-        .preset-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .preset-buttons button {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        .preset-buttons button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-        }
-        
-        .eigenvalue-display {
-            background: rgba(0, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-        }
-        
-        .eigenvalue {
-            margin: 8px 0;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        .real-eigenvalue {
-            border-left: 3px solid #e74c3c;
-        }
-        
-        .complex-eigenvalue {
-            border-left: 3px solid #9b59b6;
-        }
-        
-        .toggle-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .toggle-button {
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        .toggle-button.active {
-            background: #00FFFF;
-            color: #000000;
-            font-weight: 800;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
-        }
-        
-        
-        .legend {
-            font-size: 11px;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-        
-        .legend-item {
-            margin: 3px 0;
+            margin: 0 0 15px 0;
+            color: #4fc3f7;
+            font-size: 16px;
         }
         
         .slider-group {
@@ -171,179 +227,472 @@
         .slider-group label {
             display: block;
             margin-bottom: 5px;
-            font-size: 13px;
+            font-size: 14px;
             color: #aaa;
         }
         
         .slider-group input[type="range"] {
             width: 100%;
+            margin-bottom: 5px;
         }
         
         .slider-value {
             font-size: 12px;
-            color: #0ff;
+            color: #4fc3f7;
             text-align: right;
-            margin-top: 2px;
         }
         
-        .footer-legend {
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+        .matrix-display {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
             font-size: 14px;
-            font-weight: 600;
-            margin-top: 20px;
+            line-height: 1.4;
+            margin: 10px 0;
         }
         
-        .footer-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .header-section {
-            background: rgba(0, 0, 0, 0.9);
+        button {
+            background: linear-gradient(45deg, #4fc3f7, #81c784);
             color: white;
-            padding: 25px 30px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(10px);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 3px;
+            transition: transform 0.2s;
+            font-size: 12px;
         }
         
-        .header-section h1 {
-            margin: 0 0 15px 0;
-            font-size: 1.8em;
-            color: #00FFFF;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-        }
-        
-        .header-section p {
-            margin: 8px 0;
-            font-size: 1.1em;
-            line-height: 1.6;
+        button:hover {
+            transform: scale(1.05);
         }
     </style>
-
-
-
-
-
 </head>
 <body>
-    <!-- Header Section with Mathematical Explanation -->
-    <div class="header-section">
-        <h1>🔍 Phân Tích Trị Riêng - Nền Tảng Toán Học</h1>
-        <p><strong>🎯 Khái Niệm Cơ Bản:</strong> Với ma trận A, nếu Av = λv với vec-tơ v khác không, thì λ là trị riêng và v là vec-tơ riêng tương ứng.</p>
-        <p><strong>💡 Ý Nghĩa Hình Học:</strong> Phép biến đổi bảo toàn hướng dọc vec-tơ riêng</p>
-        
-        <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #FFD700;">
-            <h2 style="margin: 0 0 10px 0; color: #FFD700; font-size: 1.3em;">📐 Cách Tìm Giá Trị Riêng & Vector Riêng</h2>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
-                <div>
-                    <h3 style="color: #00FFFF; font-size: 1.1em; margin: 10px 0 5px 0;">🔢 Bước 1: Tìm Giá Trị Riêng</h3>
-                    <p style="font-size: 0.95em; margin: 5px 0;">1. Lập phương trình đặc trưng: <strong>det(A - λI) = 0</strong></p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">2. Với ma trận 2×2: <strong>det([a-λ, b; c, d-λ]) = 0</strong></p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">3. Khai triển: <strong>(a-λ)(d-λ) - bc = 0</strong></p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">4. Giải phương trình bậc 2 để tìm λ₁, λ₂</p>
-                </div>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('theory')">📚 Theory</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 Interactive</button>
+        </div>
+    </div>
+
+    <!-- Theory Section -->
+    <div id="theory" class="section active">
+        <div class="theory-content">
+            <div class="theory-header">
+                <h1>Eigenvalues & Eigenvectors</h1>
+                <p>Understanding the fundamental concepts that power PCA, spectral analysis, and machine learning</p>
+            </div>
+
+            <!-- Historical Section -->
+            <div class="theory-section" style="background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+                <h2 style="color: #FFD700; text-align: center; margin-bottom: 25px;">📚 Historical Development</h2>
                 
-                <div>
-                    <h3 style="color: #2ecc71; font-size: 1.1em; margin: 10px 0 5px 0;">📐 Bước 2: Tìm Vector Riêng</h3>
-                    <p style="font-size: 0.95em; margin: 5px 0;">1. Với mỗi λᵢ, giải hệ: <strong>(A - λᵢI)v = 0</strong></p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">2. Thiết lập ma trận mở rộng và khử Gauss</p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">3. Tìm không gian nghiệm (null space)</p>
-                    <p style="font-size: 0.95em; margin: 5px 0;">4. Chuẩn hóa vector để có độ dài đơn vị</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #00d4ff; margin-bottom: 15px;">🧮 Leonhard Euler (1707-1783)</h4>
+                        <p>Euler studied the rotation of rigid bodies and discovered what we now recognize as eigenvalue problems in his work on principal axes of rotation.</p>
+                    </div>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #ff6b6b; margin-bottom: 15px;">🔬 Joseph-Louis Lagrange (1736-1813)</h4>
+                        <p>Developed the theory of quadratic forms and showed how to diagonalize symmetric matrices, laying groundwork for eigenvalue theory.</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="color: #FFD700; margin-bottom: 15px;">⚡ Modern Foundations</h4>
+                    <ul style="color: #ffffff; line-height: 1.8;">
+                        <li><strong>Augustin-Louis Cauchy (1789-1857):</strong> First to use the term "characteristic equation" and develop systematic methods</li>
+                        <li><strong>Charles Hermite (1822-1901):</strong> Studied Hermitian matrices and proved key spectral theorems</li>
+                        <li><strong>David Hilbert (1862-1943):</strong> Extended eigenvalue theory to infinite-dimensional spaces</li>
+                        <li><strong>20th Century:</strong> Became fundamental to quantum mechanics, with Schrödinger equation as eigenvalue problem</li>
+                    </ul>
+                </div>
+
+                <div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #4caf50; margin-bottom: 15px;">🌟 Modern Applications</h4>
+                    <p>From solving mechanical vibration problems in the 18th century to powering Google's PageRank algorithm and machine learning dimensionality reduction in the 21st century.</p>
                 </div>
             </div>
-            
-            <div style="background: rgba(52, 152, 219, 0.1); padding: 12px; border-radius: 8px; margin-top: 15px;">
-                <h3 style="color: #3498db; font-size: 1.1em; margin: 0 0 8px 0;">🧮 Ví Dụ Cụ Thể</h3>
-                <p style="font-size: 0.9em; margin: 3px 0;"><strong>Ma trận A = [2, 1; 1, 2]</strong></p>
-                <p style="font-size: 0.9em; margin: 3px 0;">• Phương trình đặc trưng: (2-λ)² - 1 = 0 → λ² - 4λ + 3 = 0</p>
-                <p style="font-size: 0.9em; margin: 3px 0;">• Giá trị riêng: λ₁ = 3, λ₂ = 1</p>
-                <p style="font-size: 0.9em; margin: 3px 0;">• Vector riêng λ₁=3: v₁ = [1, 1]ᵀ (hướng y=x)</p>
-                <p style="font-size: 0.9em; margin: 3px 0;">• Vector riêng λ₂=1: v₂ = [1, -1]ᵀ (hướng y=-x)</p>
+
+            <div class="theory-section">
+                <h2>1. Fundamental Definitions</h2>
+                
+                <div class="definition">
+                    <h4>Definition: Eigenvalue and Eigenvector</h4>
+                    <p>For a square matrix $A$, a non-zero vector $\vec{v}$ is an <strong>eigenvector</strong> with corresponding <strong>eigenvalue</strong> $\lambda$ if:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$A\vec{v} = \lambda\vec{v}$$
+                    </div>
+                    <p><strong>Geometric Interpretation:</strong> Eigenvectors are special directions that remain unchanged (only scaled) when the linear transformation $A$ is applied.</p>
+                </div>
+
+                <div class="example">
+                    <h4>Physical Intuition</h4>
+                    <p>Imagine stretching a rubber sheet:</p>
+                    <ul>
+                        <li><strong>Eigenvectors:</strong> Directions that only stretch/compress, don't rotate</li>
+                        <li><strong>Eigenvalues:</strong> How much stretching/compression occurs</li>
+                        <li><strong>$\lambda > 1$:</strong> Stretching in that direction</li>
+                        <li><strong>$0 < \lambda < 1$:</strong> Compression in that direction</li>
+                        <li><strong>$\lambda < 0$:</strong> Reflection + scaling</li>
+                    </ul>
+                </div>
+
+                <h3>The Characteristic Equation</h3>
+                <div class="theorem">
+                    <h4>Finding Eigenvalues</h4>
+                    <p>Eigenvalues are found by solving the <strong>characteristic equation</strong>:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$\det(A - \lambda I) = 0$$
+                    </div>
+                    <p>For a 2×2 matrix $A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$\lambda^2 - (a+d)\lambda + (ad-bc) = 0$$
+                    </div>
+                    <p><strong>Trace:</strong> $\text{tr}(A) = a + d = \lambda_1 + \lambda_2$</p>
+                    <p><strong>Determinant:</strong> $\det(A) = ad - bc = \lambda_1 \lambda_2$</p>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>2. Computing Eigenvalues and Eigenvectors</h2>
+
+                <h3>Step-by-Step Process</h3>
+                <div class="example">
+                    <h4>Example: Find eigenvalues of $A = \begin{pmatrix} 3 & 1 \\ 0 & 2 \end{pmatrix}$</h4>
+                    
+                    <p><strong>Step 1:</strong> Set up characteristic equation</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$\det\begin{pmatrix} 3-\lambda & 1 \\ 0 & 2-\lambda \end{pmatrix} = (3-\lambda)(2-\lambda) = 0$$
+                    </div>
+                    
+                    <p><strong>Step 2:</strong> Solve for eigenvalues</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$\lambda_1 = 3, \quad \lambda_2 = 2$$
+                    </div>
+                    
+                    <p><strong>Step 3:</strong> Find eigenvectors by solving $(A - \lambda I)\vec{v} = 0$</p>
+                    
+                    <p>For $\lambda_1 = 3$:</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$\begin{pmatrix} 0 & 1 \\ 0 & -1 \end{pmatrix}\begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix} \Rightarrow \vec{v_1} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$$
+                    </div>
+                    
+                    <p>For $\lambda_2 = 2$:</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$\begin{pmatrix} 1 & 1 \\ 0 & 0 \end{pmatrix}\begin{pmatrix} x \\ y \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \end{pmatrix} \Rightarrow \vec{v_2} = \begin{pmatrix} -1 \\ 1 \end{pmatrix}$$
+                    </div>
+                </div>
+
+                <h3>Types of Eigenvalues</h3>
+                <div class="applications-grid">
+                    <div class="application-card">
+                        <h4>Real Distinct Eigenvalues</h4>
+                        <p>Matrix has two different real eigenvalues with corresponding real eigenvectors.</p>
+                        <p><strong>Behavior:</strong> Scaling along two independent directions</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Complex Eigenvalues</h4>
+                        <p>Come in conjugate pairs: $\lambda = a \pm bi$</p>
+                        <p><strong>Behavior:</strong> Rotation + scaling, spiral patterns</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Repeated Eigenvalues</h4>
+                        <p>Same eigenvalue with multiplicity > 1</p>
+                        <p><strong>Behavior:</strong> May or may not have full set of eigenvectors</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>3. Geometric Interpretation</h2>
+
+                <div class="definition">
+                    <h4>Eigenspaces</h4>
+                    <p>The <strong>eigenspace</strong> $E_\lambda$ for eigenvalue $\lambda$ is the set of all eigenvectors with eigenvalue $\lambda$, plus the zero vector:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$E_\lambda = \{\vec{v} : A\vec{v} = \lambda\vec{v}\} = \text{null}(A - \lambda I)$$
+                    </div>
+                    <p>Eigenspaces are <strong>invariant subspaces</strong> under the transformation $A$.</p>
+                </div>
+
+                <h3>Matrix Powers and Eigenvalues</h3>
+                <div class="theorem">
+                    <h4>Powers of Matrices</h4>
+                    <p>If $\vec{v}$ is an eigenvector of $A$ with eigenvalue $\lambda$, then:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$A^k\vec{v} = \lambda^k\vec{v}$$
+                    </div>
+                    <p>This makes eigenvalues crucial for understanding long-term behavior of dynamical systems!</p>
+                </div>
+
+                <div class="example">
+                    <h4>Stability Analysis</h4>
+                    <ul>
+                        <li><strong>$|\lambda| < 1$:</strong> Stable direction (decays to zero)</li>
+                        <li><strong>$|\lambda| = 1$:</strong> Neutral stability</li>
+                        <li><strong>$|\lambda| > 1$:</strong> Unstable direction (grows exponentially)</li>
+                    </ul>
+                    <p>This is fundamental in control theory, population dynamics, and neural network training!</p>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>4. Diagonalization</h2>
+
+                <div class="theorem">
+                    <h4>Diagonalization Theorem</h4>
+                    <p>A matrix $A$ is <strong>diagonalizable</strong> if there exists an invertible matrix $P$ such that:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$P^{-1}AP = D$$
+                    </div>
+                    <p>where $D$ is diagonal. The columns of $P$ are eigenvectors of $A$, and the diagonal entries of $D$ are the corresponding eigenvalues.</p>
+                </div>
+
+                <div class="definition">
+                    <h4>Spectral Decomposition</h4>
+                    <p>For a diagonalizable matrix:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$A = PDP^{-1} = \lambda_1\vec{v_1}\vec{v_1}^T + \lambda_2\vec{v_2}\vec{v_2}^T + \cdots$$
+                    </div>
+                    <p>This expresses $A$ as a sum of rank-1 matrices weighted by eigenvalues!</p>
+                </div>
+
+                <h3>Benefits of Diagonalization</h3>
+                <div class="applications-grid">
+                    <div class="application-card">
+                        <h4>Computing Powers</h4>
+                        <p>$A^k = PD^kP^{-1}$</p>
+                        <p>Computing $D^k$ is trivial since $D$ is diagonal!</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Solving Differential Equations</h4>
+                        <p>$\frac{d\vec{x}}{dt} = A\vec{x}$ has solution $\vec{x}(t) = e^{At}\vec{x}(0)$</p>
+                        <p>Diagonalization makes computing $e^{At}$ easy!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>5. Applications in Machine Learning and Data Science</h2>
+
+                <div class="applications-grid">
+                    <div class="application-card">
+                        <h4>Principal Component Analysis (PCA)</h4>
+                        <p><strong>Core Idea:</strong> Find principal components as eigenvectors of covariance matrix</p>
+                        <p><strong>Process:</strong></p>
+                        <ol style="font-size: 14px;">
+                            <li>Compute covariance matrix $C$ of data</li>
+                            <li>Find eigenvectors of $C$ (principal components)</li>
+                            <li>Project data onto top eigenvectors</li>
+                            <li>Eigenvalues = variance explained by each component</li>
+                        </ol>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Spectral Clustering</h4>
+                        <p><strong>Idea:</strong> Use eigenvectors of graph Laplacian for clustering</p>
+                        <p><strong>Applications:</strong> Image segmentation, community detection, dimensionality reduction</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Google PageRank</h4>
+                        <p><strong>Core:</strong> Find dominant eigenvector of web link matrix</p>
+                        <p><strong>Eigenvalue = 1:</strong> Steady-state probability distribution</p>
+                        <p><strong>Eigenvector:</strong> Page importance scores</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Markov Chains</h4>
+                        <p><strong>Steady State:</strong> Eigenvector with eigenvalue 1</p>
+                        <p><strong>Convergence:</strong> Determined by second-largest eigenvalue</p>
+                        <p><strong>Applications:</strong> Random walks, recommendation systems</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Vibration Analysis</h4>
+                        <p><strong>Natural Frequencies:</strong> Square roots of eigenvalues</p>
+                        <p><strong>Mode Shapes:</strong> Eigenvectors</p>
+                        <p><strong>Applications:</strong> Structural engineering, mechanical systems</p>
+                    </div>
+
+                    <div class="application-card">
+                        <h4>Quantum Mechanics</h4>
+                        <p><strong>Energy Levels:</strong> Eigenvalues of Hamiltonian</p>
+                        <p><strong>Quantum States:</strong> Eigenvectors</p>
+                        <p><strong>Measurement:</strong> Collapses to eigenstate</p>
+                    </div>
+                </div>
+
+                <div class="example">
+                    <h4>PCA Example: Dimensionality Reduction</h4>
+                    <p>Consider data points in 2D that lie approximately on a line:</p>
+                    <ol>
+                        <li><strong>Center the data:</strong> Subtract mean from each point</li>
+                        <li><strong>Compute covariance matrix:</strong> $C = \frac{1}{n-1}X^TX$</li>
+                        <li><strong>Find eigenvectors:</strong> These are the principal components</li>
+                        <li><strong>First PC:</strong> Direction of maximum variance (largest eigenvalue)</li>
+                        <li><strong>Second PC:</strong> Orthogonal direction (smaller eigenvalue)</li>
+                        <li><strong>Projection:</strong> Transform data to PC coordinates</li>
+                    </ol>
+                    <p><strong>Result:</strong> Most information captured in first component, second can be discarded!</p>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="container">
-        <div class="canvas-container">
-            <canvas id="canvas" width="800" height="600"></canvas>
+
+    <!-- Interactive Section -->
+    <div id="interactive" class="section">
+        <div class="interactive-container">
+            <div class="canvas-container">
+                <canvas id="canvas" width="700" height="600"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="control-section">
+                    <h3>Matrix Elements</h3>
+                    <div class="slider-group">
+                        <label>a (top-left):</label>
+                        <input type="range" id="a" min="-3" max="3" step="0.1" value="2">
+                        <div class="slider-value" id="aValue">2.0</div>
+                    </div>
+                    <div class="slider-group">
+                        <label>b (top-right):</label>
+                        <input type="range" id="b" min="-3" max="3" step="0.1" value="1">
+                        <div class="slider-value" id="bValue">1.0</div>
+                    </div>
+                    <div class="slider-group">
+                        <label>c (bottom-left):</label>
+                        <input type="range" id="c" min="-3" max="3" step="0.1" value="1">
+                        <div class="slider-value" id="cValue">1.0</div>
+                    </div>
+                    <div class="slider-group">
+                        <label>d (bottom-right):</label>
+                        <input type="range" id="d" min="-3" max="3" step="0.1" value="2">
+                        <div class="slider-value" id="dValue">2.0</div>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Current Matrix</h3>
+                    <div class="matrix-display">
+                        A = [<span id="matrix11">2.0</span>  <span id="matrix12">1.0</span>]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;[<span id="matrix21">1.0</span>  <span id="matrix22">2.0</span>]
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Eigenvalues</h3>
+                    <div class="matrix-display">
+                        λ₁ = <span id="eigenvalue1">3.0</span><br>
+                        λ₂ = <span id="eigenvalue2">1.0</span>
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Eigenvectors</h3>
+                    <div class="matrix-display">
+                        v₁ = [<span id="eigenvector1x">0.71</span>, <span id="eigenvector1y">0.71</span>]<br>
+                        v₂ = [<span id="eigenvector2x">-0.71</span>, <span id="eigenvector2y">0.71</span>]
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Examples</h3>
+                    <button onclick="loadExample('identity')">Identity Matrix</button>
+                    <button onclick="loadExample('diagonal')">Diagonal Matrix</button>
+                    <button onclick="loadExample('rotation')">Rotation Matrix</button>
+                    <button onclick="loadExample('shear')">Shear Matrix</button>
+                    <button onclick="loadExample('symmetric')">Symmetric Matrix</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Visualization Options</h3>
+                    <button onclick="toggleMode('vectors')">Show Eigenvectors</button>
+                    <button onclick="toggleMode('grid')">Transform Grid</button>
+                    <button onclick="toggleMode('circle')">Transform Circle</button>
+                </div>
+            </div>
         </div>
         
-        <div class="controls">
-            <div class="control-section">
-                <h3>Nhập Ma Trận 2×2</h3>
-                <div class="matrix-input">
-                    <input type="number" id="a11" step="0.1" value="2" placeholder="a₁₁">
-                    <input type="number" id="a12" step="0.1" value="1" placeholder="a₁₂">
-                    <input type="number" id="a21" step="0.1" value="1" placeholder="a₂₁">
-                    <input type="number" id="a22" step="0.1" value="2" placeholder="a₂₂">
-                </div>
-                <div class="preset-buttons">
-                    <button onclick="loadPreset('identity')">Ma Trận Đơn Vị</button>
-                    <button onclick="loadPreset('diagonal')">Ma Trận Chéo</button>
-                    <button onclick="loadPreset('symmetric')">Ma Trận Đối Xứng</button>
-                    <button onclick="loadPreset('rotation')">Xoay</button>
-                    <button onclick="loadPreset('shear')">Trượt</button>
-                    <button onclick="loadPreset('reflection')">Phản Xạ</button>
-                </div>
+        <!-- Enhanced Interactive UI -->
+        <div class="footer-legend">
+            <div class="footer-legend-item">
+                <span style="color: #4fc3f7;">●</span> Eigenvector 1
             </div>
-            
-            <div class="control-section">
-                <h3>Tính Chất Ma Trận</h3>
-                <div style="font-family: 'Courier New', monospace; font-size: 13px;">
-                    <div>Ma trận A:</div>
-                    <div style="text-align: center; margin: 10px 0;">
-                        [<span id="display_a11">2.0</span>  <span id="display_a12">1.0</span>]<br>
-                        [<span id="display_a21">1.0</span>  <span id="display_a22">2.0</span>]
-                    </div>
-                    <div>Định thức: <span id="determinant">3.0</span></div>
-                    <div>Vết: <span id="trace">4.0</span></div>
-                </div>
+            <div class="footer-legend-item">
+                <span style="color: #81c784;">●</span> Eigenvector 2
             </div>
-            
-            <div class="control-section">
-                <h3>Trị Riêng & Vec-tơ Riêng</h3>
-                <div id="eigenvalues-display" class="eigenvalue-display">
-                    <!-- Eigenvalues will be displayed here -->
-                </div>
+            <div class="footer-legend-item">
+                <span style="color: rgba(255, 100, 100, 0.8);">●</span> Transformed by λ₁
             </div>
-            
-            <div class="control-section">
-                <h3>Tùy Chọn Hiển Thị</h3>
-                <div class="toggle-section">
-                    <div class="toggle-button active" id="toggle-circle" onclick="toggleVisualization('circle')">
-                        Đường Tròn Đơn Vị
-                    </div>
-                    <div class="toggle-button" id="toggle-grid" onclick="toggleVisualization('grid')">
-                        Lưới Vec-tơ
-                    </div>
-                    <div class="toggle-button active" id="toggle-eigenvectors" onclick="toggleVisualization('eigenvectors')">
-                        Vec-tơ Riêng
-                    </div>
-                    <div class="toggle-button active" id="toggle-eigenlines" onclick="toggleVisualization('eigenlines')">
-                        Đường Riêng
-                    </div>
-                </div>
+            <div class="footer-legend-item">
+                <span style="color: rgba(255, 200, 100, 0.8);">●</span> Transformed by λ₂
             </div>
-            
-            <div class="control-section">
-                <h3>Hoạt Ảnh</h3>
-                <div class="slider-group">
-                    <label>Tốc Độ Hoạt Ảnh:</label>
-                    <input type="range" id="animSpeed" min="0" max="2" step="0.1" value="1">
-                    <div class="slider-value" id="animSpeedValue">1.0</div>
-                </div>
-                <div class="toggle-section">
+            <div class="footer-legend-item">
+                <span style="color: rgba(255, 255, 100, 0.6);">—</span> Transformed circle
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for the interactive visualization
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 100;
+        
+        // Matrix elements
+        let matrix = {
+            a11: 2, a12: 1,
+            a21: 1, a22: 2
+        };
+        
+        // Eigenvalue calculation results
+        let eigendata = {
+            eigenvalues: [],
+            eigenvectors: [],
+            isReal: true
+        };
+        
+        // Animation state
+        let animationId = null;
+        let animationTime = 0;
+        let animationSpeed = 1;
+        let isAnimating = false;
+        
+        // Visualization options
+        let showOptions = {
+            circle: true,
+            grid: false,
+            eigenvectors: true,
+            eigenlines: true
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function applyMatrix(point) {
+            return {
+                x: matrix.a11 * point.x + matrix.a12 * point.y,
+                y: matrix.a21 * point.x + matrix.a22 * point.y
+            };
+        }
                     <div class="toggle-button" id="toggle-animation" onclick="toggleAnimation()">
                         ▶ Chơi Hoạt Ảnh
                     </div>
@@ -359,6 +708,501 @@
                 <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
                     <h4>🔍 Đa Thức Đặc Trưng:</h4>
                     <p><strong>det(A - λI) = 0</strong><br>
+                    <strong>Với ma trận 2×2:</strong><br>
+                    • det([a₁₁-λ, a₁₂; a₂₁, a₂₂-λ]) = 0<br>
+                    • (a₁₁-λ)(a₂₂-λ) - a₁₂a₂₁ = 0<br>
+                    • Định thức det(A) = a₁₁a₂₂ - a₁₂a₂₁</p>
+                    
+                    <h4 style="color: #2ecc71; margin: 10px 0 5px 0;">Ý Nghĩa Hình Học</h4>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li><strong>λ &gt; 1:</strong> Kéo giãn theo hướng vec-tơ riêng</li>
+                        <li><strong>0 &lt; λ &lt; 1:</strong> Co lại theo hướng vec-tơ riêng</li>
+                        <li><strong>λ &lt; 0:</strong> Phản xạ + tỷ lệ</li>
+                        <li><strong>λ = 1:</strong> Bảo toàn không đổi</li>
+                    </ul>
+                </div>
+                
+                <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #3498db; margin: 0 0 10px 0;">Tính Chất Quan Trọng</h4>
+                    <p><strong>Chéo hóa:</strong><br>
+                    A = PDP⁻¹ (nếu có đủ vec-tơ riêng độc lập)<br>
+                    D là ma trận chéo chứa các trị riêng</p>
+                    
+                    <p><strong>Định lý Phổ:</strong><br>
+                    Ma trận đối xứng luôn có trị riêng thực<br>
+                    Vec-tơ riêng tương ứng trị riêng khác nhau vuông góc</p>
+                    
+                    <p><strong>Vết &amp; Định thức:</strong><br>
+                    • tr(A) = λ₁ + λ₂ + ... + λₙ<br>
+                    • det(A) = λ₁ × λ₂ × ... × λₙ</p>
+                </div>
+            </div>
+            
+            <!-- Mathematical Examples Section -->
+            <div class="control-section">
+                <h3>📚 Ứng Dụng Thực Tế</h3>
+                <div style="background: rgba(155, 89, 182, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #9b59b6; margin: 0 0 10px 0;">🔍 Phân Tích Thành Phần Chính (PCA)</h4>
+                    <p style="font-size: 0.9em;">Trị riêng lớn nhất → Hướng biến thiên lớn nhất của dữ liệu<br>
+                    Vec-tơ riêng → Các thành phần chính để giảm chiều dữ liệu</p>
+                    
+                    <h4 style="color: #e67e22; margin: 10px 0 5px 0;">🌐 Thuật Toán PageRank</h4>
+                    <p style="font-size: 0.9em;">Vec-tơ riêng ứng với trị riêng λ=1 của ma trận chuyển tiếp<br>
+                    Xác định mức độ quan trọng của các trang web</p>
+                    
+                    <p><strong>Ý Nghĩa Trị Riêng:</strong><br>
+                    • λ &gt; 0: Bảo toàn hướng, tỷ lệ theo hệ số λ<br>
+                    • λ &lt; 0: Đảo ngược hướng, tỷ lệ theo hệ số |λ|<br>
+                    • λ phức: Kết hợp xoay và tỷ lệ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const scale = 100;
+        
+        // Matrix elements
+        let matrix = {
+            a11: 2, a12: 1,
+            a21: 1, a22: 2
+        };
+        
+        // Eigenvalue calculation results
+        let eigendata = {
+            eigenvalues: [],
+            eigenvectors: [],
+            isReal: true
+        };
+        
+        // Animation state
+        let animationId = null;
+        let animationTime = 0;
+        let animationSpeed = 1;
+        let isAnimating = false;
+        
+        // Visualization options
+        let showOptions = {
+            circle: true,
+            grid: false,
+            eigenvectors: true,
+            eigenlines: true
+        };
+        
+        function toCanvasX(x) {
+            return centerX + x * scale;
+        }
+        
+        function toCanvasY(y) {
+            return centerY - y * scale;
+        }
+        
+        function applyMatrix(point) {
+            return {
+                x: matrix.a11 * point.x + matrix.a12 * point.y,
+                y: matrix.a21 * point.x + matrix.a22 * point.y
+            };
+        }
+        
+        function calculateEigenvalues() {
+            const a = matrix.a11;
+            const b = matrix.a12;
+            const c = matrix.a21;
+            const d = matrix.a22;
+            
+            // Characteristic polynomial: λ² - trace·λ + det = 0
+            const trace = a + d;
+            const det = a * d - b * c;
+            const discriminant = trace * trace - 4 * det;
+            
+            let eigenvalues = [];
+            let eigenvectors = [];
+            let isReal = discriminant >= 0;
+            
+            if (isReal) {
+                const sqrt_disc = Math.sqrt(discriminant);
+                const lambda1 = (trace + sqrt_disc) / 2;
+                const lambda2 = (trace - sqrt_disc) / 2;
+                
+                eigenvalues = [lambda1, lambda2];
+                
+                // Calculate eigenvectors
+                for (let lambda of eigenvalues) {
+                    let v1, v2;
+                    
+                    // Try (A - λI)v = 0
+                    const m11 = a - lambda;
+                    const m12 = b;
+                    const m21 = c;
+                    const m22 = d - lambda;
+                    
+                    if (Math.abs(m12) > 1e-10) {
+                        v1 = 1;
+                        v2 = -m11 / m12;
+                    } else if (Math.abs(m21) > 1e-10) {
+                        v1 = -m22 / m21;
+                        v2 = 1;
+                    } else if (Math.abs(m11) < 1e-10 && Math.abs(m22) < 1e-10) {
+                        // Any vector is an eigenvector
+                        v1 = 1;
+                        v2 = 0;
+                    } else {
+                        v1 = 1;
+                        v2 = 0;
+                    }
+                    
+                    // Normalize
+                    const norm = Math.sqrt(v1 * v1 + v2 * v2);
+                    eigenvectors.push({ x: v1 / norm, y: v2 / norm });
+                }
+            } else {
+                const realPart = trace / 2;
+                const imagPart = Math.sqrt(-discriminant) / 2;
+                eigenvalues = [
+                    { real: realPart, imag: imagPart },
+                    { real: realPart, imag: -imagPart }
+                ];
+                
+                // For complex eigenvalues, we can still show the real eigenvectors if they exist
+                // Or show the rotation behavior
+                eigenvectors = [
+                    { x: 1, y: 0 },
+                    { x: 0, y: 1 }
+                ];
+            }
+            
+            eigendata = { eigenvalues, eigenvectors, isReal };
+            updateEigenvalueDisplay();
+        }
+        
+        function updateEigenvalueDisplay() {
+            const display = document.getElementById('eigenvalues-display');
+            let html = '';
+            
+            if (eigendata.isReal) {
+                eigendata.eigenvalues.forEach((lambda, i) => {
+                    const v = eigendata.eigenvectors[i];
+                    html += `<div class="eigenvalue real-eigenvalue">
+                        <strong>λ${i+1} = ${lambda.toFixed(3)}</strong><br/>
+                        v${i+1} = [${v.x.toFixed(3)}, ${v.y.toFixed(3)}]<br/>
+                        <small>${lambda > 1 ? 'Stretches' : lambda < -1 ? 'Stretches & flips' : lambda > 0 ? 'Shrinks' : 'Shrinks & flips'} along this direction</small>
+                    </div>`;
+                });
+            } else {
+                const lambda = eigendata.eigenvalues[0];
+                html = `<div class="eigenvalue complex-eigenvalue">
+                    <strong>λ = ${lambda.real.toFixed(3)} ± ${Math.abs(lambda.imag).toFixed(3)}i</strong><br/>
+                    <small>Complex eigenvalues → Rotation + Scaling</small><br/>
+                    <small>|λ| = ${(Math.sqrt(lambda.real*lambda.real + lambda.imag*lambda.imag)).toFixed(3)}</small><br/>
+                    <small>Angle = ${(Math.atan2(lambda.imag, lambda.real) * 180 / Math.PI).toFixed(1)}°</small>
+                </div>`;
+            }
+            
+            display.innerHTML = html;
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 1;
+            
+            for (let i = -10; i <= 10; i++) {
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(toCanvasX(i), 0);
+                ctx.lineTo(toCanvasX(i), height);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(0, toCanvasY(i));
+                ctx.lineTo(width, toCanvasY(i));
+                ctx.stroke();
+            }
+            
+            // Axes
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+        }
+        
+        function drawCircle() {
+            const numPoints = 100;
+            const originalPoints = [];
+            const transformedPoints = [];
+            
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * 2 * Math.PI;
+                const point = { x: Math.cos(angle), y: Math.sin(angle) };
+                originalPoints.push(point);
+                transformedPoints.push(applyMatrix(point));
+            }
+            
+            // Draw original circle
+            ctx.strokeStyle = '#0ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < originalPoints.length; i++) {
+                const p = originalPoints[i];
+                if (i === 0) {
+                    ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
+                } else {
+                    ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y));
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+            
+            // Draw transformed shape
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i < transformedPoints.length; i++) {
+                const p = transformedPoints[i];
+                if (i === 0) {
+                    ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
+                } else {
+                    ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y));
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+        
+        function drawVectorGrid() {
+            const gridSize = 6;
+            const spacing = 0.5;
+            
+            for (let x = -gridSize; x <= gridSize; x += spacing) {
+                for (let y = -gridSize; y <= gridSize; y += spacing) {
+                    const orig = { x, y };
+                    const trans = applyMatrix(orig);
+                    
+                    drawArrow(orig, trans, '#9b59b6', 1);
+                }
+            }
+        }
+        
+        function drawArrow(from, to, color, lineWidth = 2) {
+            const fromX = toCanvasX(from.x);
+            const fromY = toCanvasY(from.y);
+            const toX = toCanvasX(to.x);
+            const toY = toCanvasY(to.y);
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            
+            // Arrow body
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            // Arrow head
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            const headLength = 8;
+            
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle - Math.PI / 6),
+                toY - headLength * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(
+                toX - headLength * Math.cos(angle + Math.PI / 6),
+                toY - headLength * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+        }
+        
+        function drawEigenvectors() {
+            if (!eigendata.isReal) return;
+            
+            const colors = ['#e74c3c', '#2ecc71'];
+            
+            eigendata.eigenvectors.forEach((v, i) => {
+                const lambda = eigendata.eigenvalues[i];
+                const length = Math.min(3, Math.max(0.5, Math.abs(lambda)));
+                
+                // Draw eigenvector line
+                const end = { x: v.x * length, y: v.y * length };
+                const start = { x: -v.x * length, y: -v.y * length };
+                
+                if (showOptions.eigenlines) {
+                    ctx.strokeStyle = colors[i];
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(toCanvasX(start.x), toCanvasY(start.y));
+                    ctx.lineTo(toCanvasX(end.x), toCanvasY(end.y));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                
+                if (showOptions.eigenvectors) {
+                    // Draw eigenvector arrow
+                    drawArrow({ x: 0, y: 0 }, end, colors[i], 3);
+                    
+                    // Draw eigenvalue effect
+                    const transformed = { x: v.x * lambda, y: v.y * lambda };
+                    drawArrow({ x: 0, y: 0 }, transformed, colors[i], 2);
+                    
+                    // Label
+                    ctx.fillStyle = colors[i];
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`λ${i+1}=${lambda.toFixed(2)}`, 
+                        toCanvasX(end.x) + 10, 
+                        toCanvasY(end.y) - 10
+                    );
+                }
+            });
+        }
+        
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            
+            drawGrid();
+            
+            if (showOptions.circle) {
+                drawCircle();
+            }
+            
+            if (showOptions.grid) {
+                drawVectorGrid();
+            }
+            
+            if (showOptions.eigenvectors || showOptions.eigenlines) {
+                drawEigenvectors();
+            }
+        }
+        
+        function updateMatrix() {
+            matrix.a11 = parseFloat(document.getElementById('a11').value) || 0;
+            matrix.a12 = parseFloat(document.getElementById('a12').value) || 0;
+            matrix.a21 = parseFloat(document.getElementById('a21').value) || 0;
+            matrix.a22 = parseFloat(document.getElementById('a22').value) || 0;
+            
+            // Update display
+            document.getElementById('display_a11').textContent = matrix.a11.toFixed(1);
+            document.getElementById('display_a12').textContent = matrix.a12.toFixed(1);
+            document.getElementById('display_a21').textContent = matrix.a21.toFixed(1);
+            document.getElementById('display_a22').textContent = matrix.a22.toFixed(1);
+            
+            const det = matrix.a11 * matrix.a22 - matrix.a12 * matrix.a21;
+            const trace = matrix.a11 + matrix.a22;
+            
+            document.getElementById('determinant').textContent = det.toFixed(3);
+            document.getElementById('trace').textContent = trace.toFixed(3);
+            
+            calculateEigenvalues();
+            draw();
+        }
+        
+        function loadPreset(type) {
+            const presets = {
+                identity: [1, 0, 0, 1],
+                diagonal: [3, 0, 0, 1],
+                symmetric: [2, 1, 1, 2],
+                rotation: [Math.cos(Math.PI/4), -Math.sin(Math.PI/4), Math.sin(Math.PI/4), Math.cos(Math.PI/4)],
+                shear: [1, 1, 0, 1],
+                reflection: [1, 0, 0, -1]
+            };
+            
+            const values = presets[type];
+            document.getElementById('a11').value = values[0];
+            document.getElementById('a12').value = values[1];
+            document.getElementById('a21').value = values[2];
+            document.getElementById('a22').value = values[3];
+            
+            updateMatrix();
+        }
+        
+        function toggleVisualization(option) {
+            showOptions[option] = !showOptions[option];
+            const button = document.getElementById(`toggle-${option}`);
+            button.classList.toggle('active', showOptions[option]);
+            draw();
+        }
+        
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            const button = document.getElementById('toggle-animation');
+            
+            if (isAnimating) {
+                button.textContent = '⏸ Pause';
+                animate();
+            } else {
+                button.textContent = '▶ Play Animation';
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        }
+        
+        function animate() {
+            if (!isAnimating) return;
+            
+            animationTime += 0.02 * animationSpeed;
+            
+            // Animate by interpolating between identity and the matrix
+            const t = (Math.sin(animationTime) + 1) / 2; // 0 to 1
+            
+            const originalMatrix = { ...matrix };
+            matrix.a11 = 1 + t * (originalMatrix.a11 - 1);
+            matrix.a12 = t * originalMatrix.a12;
+            matrix.a21 = t * originalMatrix.a21;
+            matrix.a22 = 1 + t * (originalMatrix.a22 - 1);
+            
+            calculateEigenvalues();
+            draw();
+            
+            matrix = originalMatrix; // Restore original matrix
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function resetVisualization() {
+            isAnimating = false;
+            animationTime = 0;
+            document.getElementById('toggle-animation').textContent = '▶ Play Animation';
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            updateMatrix();
+        }
+        
+        // Event listeners
+        document.getElementById('a11').addEventListener('input', updateMatrix);
+        document.getElementById('a12').addEventListener('input', updateMatrix);
+        document.getElementById('a21').addEventListener('input', updateMatrix);
+        document.getElementById('a22').addEventListener('input', updateMatrix);
+        
+        document.getElementById('animSpeed').addEventListener('input', function() {
+            animationSpeed = parseFloat(this.value);
+            document.getElementById('animSpeedValue').textContent = animationSpeed.toFixed(1);
+        });
+        
+        // Initialize
+        updateMatrix();
+    </script>
+</body>
+</html>
                     • Đối với ma trận 2×2: λ² - tr(A)λ + det(A) = 0<br>
                     • Vết tr(A) = a₁₁ + a₂₂<br>
                     • Định thức det(A) = a₁₁a₂₂ - a₁₂a₂₁</p>
@@ -854,31 +1698,394 @@
         
         // Initialize
         updateMatrix();
-        draw();
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Initialize canvas when interactive section is shown
+            if (sectionName === 'interactive' && !window.canvasInitialized) {
+                initializeCanvas();
+                window.canvasInitialized = true;
+            }
+        }
+
+        // Canvas and visualization variables
+        let canvas, ctx;
+        let mode = { vectors: true, grid: false, circle: false };
+        let animationId;
+        
+        // Matrix elements
+        let matrix = { a: 2, b: 1, c: 1, d: 2 };
+        let eigenvalues = { lambda1: 0, lambda2: 0 };
+        let eigenvectors = { v1: [0, 0], v2: [0, 0] };
+
+        function initializeCanvas() {
+            canvas = document.getElementById('canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set up event listeners for sliders
+            ['a', 'b', 'c', 'd'].forEach(param => {
+                const slider = document.getElementById(param);
+                slider.addEventListener('input', updateMatrix);
+                slider.addEventListener('input', () => {
+                    document.getElementById(param + 'Value').textContent = parseFloat(slider.value).toFixed(1);
+                });
+            });
+            
+            updateMatrix();
+            draw();
+        }
+
+        function updateMatrix() {
+            // Get matrix values from sliders
+            matrix.a = parseFloat(document.getElementById('a').value);
+            matrix.b = parseFloat(document.getElementById('b').value);
+            matrix.c = parseFloat(document.getElementById('c').value);
+            matrix.d = parseFloat(document.getElementById('d').value);
+            
+            // Update matrix display
+            document.getElementById('matrix11').textContent = matrix.a.toFixed(1);
+            document.getElementById('matrix12').textContent = matrix.b.toFixed(1);
+            document.getElementById('matrix21').textContent = matrix.c.toFixed(1);
+            document.getElementById('matrix22').textContent = matrix.d.toFixed(1);
+            
+            // Calculate eigenvalues and eigenvectors
+            calculateEigenvalues();
+            draw();
+        }
+
+        function calculateEigenvalues() {
+            const { a, b, c, d } = matrix;
+            
+            // Characteristic polynomial: λ² - trace*λ + determinant = 0
+            const trace = a + d;
+            const det = a * d - b * c;
+            
+            // Quadratic formula
+            const discriminant = trace * trace - 4 * det;
+            
+            if (discriminant >= 0) {
+                eigenvalues.lambda1 = (trace + Math.sqrt(discriminant)) / 2;
+                eigenvalues.lambda2 = (trace - Math.sqrt(discriminant)) / 2;
+                
+                // Calculate eigenvectors
+                calculateEigenvectors();
+            } else {
+                // Complex eigenvalues
+                const real = trace / 2;
+                const imag = Math.sqrt(-discriminant) / 2;
+                eigenvalues.lambda1 = real + imag;
+                eigenvalues.lambda2 = real - imag;
+                
+                // For complex eigenvalues, we'll show the real and imaginary parts
+                eigenvectors.v1 = [1, 0];
+                eigenvectors.v2 = [0, 1];
+            }
+            
+            // Update displays
+            document.getElementById('eigenvalue1').textContent = eigenvalues.lambda1.toFixed(2);
+            document.getElementById('eigenvalue2').textContent = eigenvalues.lambda2.toFixed(2);
+        }
+
+        function calculateEigenvectors() {
+            const { a, b, c, d } = matrix;
+            
+            // For λ₁
+            if (Math.abs(b) > 1e-10) {
+                const v1x = 1;
+                const v1y = (eigenvalues.lambda1 - a) / b;
+                const norm1 = Math.sqrt(v1x * v1x + v1y * v1y);
+                eigenvectors.v1 = [v1x / norm1, v1y / norm1];
+            } else if (Math.abs(c) > 1e-10) {
+                const v1y = 1;
+                const v1x = (eigenvalues.lambda1 - d) / c;
+                const norm1 = Math.sqrt(v1x * v1x + v1y * v1y);
+                eigenvectors.v1 = [v1x / norm1, v1y / norm1];
+            } else {
+                eigenvectors.v1 = [1, 0];
+            }
+            
+            // For λ₂
+            if (Math.abs(b) > 1e-10) {
+                const v2x = 1;
+                const v2y = (eigenvalues.lambda2 - a) / b;
+                const norm2 = Math.sqrt(v2x * v2x + v2y * v2y);
+                eigenvectors.v2 = [v2x / norm2, v2y / norm2];
+            } else if (Math.abs(c) > 1e-10) {
+                const v2y = 1;
+                const v2x = (eigenvalues.lambda2 - d) / c;
+                const norm2 = Math.sqrt(v2x * v2x + v2y * v2y);
+                eigenvectors.v2 = [v2x / norm2, v2y / norm2];
+            } else {
+                eigenvectors.v2 = [0, 1];
+            }
+            
+            // Update displays
+            document.getElementById('eigenvector1x').textContent = eigenvectors.v1[0].toFixed(2);
+            document.getElementById('eigenvector1y').textContent = eigenvectors.v1[1].toFixed(2);
+            document.getElementById('eigenvector2x').textContent = eigenvectors.v2[0].toFixed(2);
+            document.getElementById('eigenvector2y').textContent = eigenvectors.v2[1].toFixed(2);
+        }
+
+        function draw() {
+            if (!ctx) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system (center of canvas)
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(1, -1); // Flip y-axis to match mathematical convention
+            
+            const scale = 80; // Scale for visualization
+            
+            // Draw grid if enabled
+            if (mode.grid) {
+                drawTransformedGrid(scale);
+            }
+            
+            // Draw circle if enabled
+            if (mode.circle) {
+                drawTransformedCircle(scale);
+            }
+            
+            // Draw coordinate axes
+            drawAxes(scale);
+            
+            // Draw eigenvectors if enabled
+            if (mode.vectors) {
+                drawEigenvectors(scale);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawAxes(scale) {
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(-canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, 0);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(0, -canvas.height / 2);
+            ctx.lineTo(0, canvas.height / 2);
+            ctx.stroke();
+            
+            // Grid lines
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = -5; i <= 5; i++) {
+                if (i === 0) continue;
+                
+                // Vertical lines
+                ctx.beginPath();
+                ctx.moveTo(i * scale, -canvas.height / 2);
+                ctx.lineTo(i * scale, canvas.height / 2);
+                ctx.stroke();
+                
+                // Horizontal lines
+                ctx.beginPath();
+                ctx.moveTo(-canvas.width / 2, i * scale);
+                ctx.lineTo(canvas.width / 2, i * scale);
+                ctx.stroke();
+            }
+        }
+
+        function drawEigenvectors(scale) {
+            const vectorLength = 2 * scale;
+            
+            // Draw eigenspace lines (extended eigenvectors)
+            ctx.strokeStyle = 'rgba(79, 195, 247, 0.3)';
+            ctx.lineWidth = 1;
+            
+            // First eigenspace
+            const v1 = eigenvectors.v1;
+            ctx.beginPath();
+            ctx.moveTo(-canvas.width * v1[0], -canvas.width * v1[1]);
+            ctx.lineTo(canvas.width * v1[0], canvas.width * v1[1]);
+            ctx.stroke();
+            
+            // Second eigenspace
+            const v2 = eigenvectors.v2;
+            ctx.beginPath();
+            ctx.moveTo(-canvas.width * v2[0], -canvas.width * v2[1]);
+            ctx.lineTo(canvas.width * v2[0], canvas.width * v2[1]);
+            ctx.stroke();
+            
+            // Draw eigenvectors as arrows
+            ctx.lineWidth = 3;
+            
+            // First eigenvector
+            ctx.strokeStyle = '#4fc3f7';
+            drawArrow(0, 0, v1[0] * vectorLength, v1[1] * vectorLength);
+            
+            // Second eigenvector
+            ctx.strokeStyle = '#81c784';
+            drawArrow(0, 0, v2[0] * vectorLength, v2[1] * vectorLength);
+            
+            // Draw transformed eigenvectors (scaled by eigenvalues)
+            ctx.strokeStyle = 'rgba(255, 100, 100, 0.8)';
+            drawArrow(0, 0, v1[0] * vectorLength * eigenvalues.lambda1, v1[1] * vectorLength * eigenvalues.lambda1);
+            
+            ctx.strokeStyle = 'rgba(255, 200, 100, 0.8)';
+            drawArrow(0, 0, v2[0] * vectorLength * eigenvalues.lambda2, v2[1] * vectorLength * eigenvalues.lambda2);
+        }
+
+        function drawArrow(x1, y1, x2, y2) {
+            const headSize = 10;
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            
+            // Draw line
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            // Draw arrowhead
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(
+                x2 - headSize * Math.cos(angle - Math.PI / 6),
+                y2 - headSize * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(
+                x2 - headSize * Math.cos(angle + Math.PI / 6),
+                y2 - headSize * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+        }
+
+        function drawTransformedGrid(scale) {
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
+            ctx.lineWidth = 1;
+            
+            // Transform grid points
+            for (let i = -3; i <= 3; i++) {
+                for (let j = -3; j <= 3; j++) {
+                    const x = i * scale;
+                    const y = j * scale;
+                    
+                    // Transform the point
+                    const tx = matrix.a * x + matrix.b * y;
+                    const ty = matrix.c * x + matrix.d * y;
+                    
+                    // Draw horizontal line
+                    if (i < 3) {
+                        const x2 = (i + 1) * scale;
+                        const y2 = j * scale;
+                        const tx2 = matrix.a * x2 + matrix.b * y2;
+                        const ty2 = matrix.c * x2 + matrix.d * y2;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(tx, ty);
+                        ctx.lineTo(tx2, ty2);
+                        ctx.stroke();
+                    }
+                    
+                    // Draw vertical line
+                    if (j < 3) {
+                        const x2 = i * scale;
+                        const y2 = (j + 1) * scale;
+                        const tx2 = matrix.a * x2 + matrix.b * y2;
+                        const ty2 = matrix.c * x2 + matrix.d * y2;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(tx, ty);
+                        ctx.lineTo(tx2, ty2);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function drawTransformedCircle(scale) {
+            ctx.strokeStyle = 'rgba(255, 255, 100, 0.6)';
+            ctx.lineWidth = 2;
+            
+            // Draw unit circle transformed by matrix
+            ctx.beginPath();
+            const numPoints = 100;
+            for (let i = 0; i <= numPoints; i++) {
+                const theta = (i / numPoints) * 2 * Math.PI;
+                const x = Math.cos(theta) * scale;
+                const y = Math.sin(theta) * scale;
+                
+                // Transform the point
+                const tx = matrix.a * x + matrix.b * y;
+                const ty = matrix.c * x + matrix.d * y;
+                
+                if (i === 0) {
+                    ctx.moveTo(tx, ty);
+                } else {
+                    ctx.lineTo(tx, ty);
+                }
+            }
+            ctx.stroke();
+            
+            // Also draw original circle for comparison
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(0, 0, scale, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        function toggleMode(modeType) {
+            mode[modeType] = !mode[modeType];
+            draw();
+        }
+
+        function loadExample(exampleType) {
+            const examples = {
+                identity: { a: 1, b: 0, c: 0, d: 1 },
+                diagonal: { a: 2, b: 0, c: 0, d: 0.5 },
+                rotation: { a: 0.6, b: -0.8, c: 0.8, d: 0.6 },
+                shear: { a: 1, b: 1, c: 0, d: 1 },
+                symmetric: { a: 2, b: 1, c: 1, d: 2 }
+            };
+            
+            const example = examples[exampleType];
+            if (example) {
+                ['a', 'b', 'c', 'd'].forEach(param => {
+                    document.getElementById(param).value = example[param];
+                    document.getElementById(param + 'Value').textContent = example[param].toFixed(1);
+                });
+                updateMatrix();
+            }
+        }
     </script>
-    
-    <!-- Footer Legend -->
-    <div class="footer-legend">
-        <div class="footer-legend-item">
-            <span style="color: #0ff;">🔵</span>
-            <span>Đường Tròn Đơn Vị (Gốc)</span>
-        </div>
-        <div class="footer-legend-item">
-            <span style="color: #f39c12;">🟠</span>
-            <span>Hình Dạng Biến Đổi</span>
-        </div>
-        <div class="footer-legend-item">
-            <span style="color: #e74c3c;">🔴</span>
-            <span>Vec-tơ Riêng Thứ Nhất λ₁</span>
-        </div>
-        <div class="footer-legend-item">
-            <span style="color: #2ecc71;">🟢</span>
-            <span>Vec-tơ Riêng Thứ Hai λ₂</span>
-        </div>
-        <div class="footer-legend-item">
-            <span style="color: #9b59b6;">🟣</span>
-            <span>Lưới Vec-tơ</span>
-        </div>
-    </div>
 </body>
 </html>

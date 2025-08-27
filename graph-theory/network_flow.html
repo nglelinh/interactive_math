@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Flow Problems - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.active {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .algorithm-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+            font-size: 14px;
+        }
+        .flow-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .step-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .legend {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .speed-control {
+            margin: 15px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .flow-matrix {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .matrix-cell {
+            background: rgba(255,255,255,0.1);
+            padding: 5px;
+            text-align: center;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .augmenting-path {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .cut-visualization {
+            background: rgba(255, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại Graph Theory Hub</a>
+        
+        <h1>🌊 Network Flow Problems - Interactive Exploration</h1>
+        
+        <div class="content-grid">
+            <div class="visualization-panel">
+                <h2>💧 Flow Network Visualization</h2>
+                <canvas id="networkCanvas" width="900" height="600"></canvas>
+                
+                <div class="algorithm-info">
+                    <h3>📚 Current Algorithm: <span id="currentAlgorithm">None</span></h3>
+                    <div class="math-formula" id="algorithmDescription">
+                        Select an algorithm to see its description and complexity analysis.
+                    </div>
+                    
+                    <div class="step-info">
+                        <strong>Current Step:</strong> <span id="currentStep">Ready to start</span><br>
+                        <strong>Current Flow:</strong> <span id="currentFlow">0</span><br>
+                        <strong>Maximum Flow:</strong> <span id="maxFlow">Not calculated</span><br>
+                        <strong>Iterations:</strong> <span id="iterations">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>🎮 Algorithm Controls</h3>
+                    <button onclick="startFordFulkerson()" id="ffBtn">Ford-Fulkerson</button>
+                    <button onclick="startEdmondsKarp()" id="ekBtn">Edmonds-Karp</button>
+                    <button onclick="findMaxFlowMinCut()" id="mcBtn">Max Flow Min Cut</button>
+                    <button onclick="pauseResume()" id="pauseBtn" disabled>Pause</button>
+                    <button onclick="resetVisualization()" id="resetBtn">Reset</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🏗️ Network Setup</h3>
+                    <button onclick="generateSimpleNetwork()">Simple Network</button>
+                    <button onclick="generateComplexNetwork()">Complex Network</button>
+                    <button onclick="generateBottleneckNetwork()">Bottleneck</button>
+                    <button onclick="generateParallelPaths()">Parallel Paths</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🎯 Source & Sink</h3>
+                    <p><strong>Source:</strong> <span id="sourceNode">Node 0</span></p>
+                    <p><strong>Sink:</strong> <span id="sinkNode">Node 5</span></p>
+                    <p><small>Click vertices to set source (left click) or sink (right click)</small></p>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚡ Animation Speed</h3>
+                    <div class="speed-control">
+                        <label>Speed: <span id="speedLabel">Medium</span></label>
+                        <input type="range" id="speedSlider" min="1" max="5" value="3" oninput="updateSpeed()">
+                        <small>Slow ← → Fast</small>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🔧 Edge Editing</h3>
+                    <p><small>Click edge to edit capacity</small></p>
+                    <div id="edgeEditor" style="display: none;">
+                        <label>Capacity: <input type="number" id="capacityInput" min="1" max="100" value="10"></label>
+                        <button onclick="updateEdgeCapacity()">Update</button>
+                        <button onclick="cancelEdgeEdit()">Cancel</button>
+                    </div>
+                </div>
+                
+                <div class="flow-info">
+                    <h3>📊 Current Flow Information</h3>
+                    <div id="flowDetails">
+                        <p>No flow calculated yet. Run an algorithm to see flow details.</p>
+                    </div>
+                </div>
+                
+                <div class="augmenting-path" id="augmentingPathInfo" style="display: none;">
+                    <h3>🛤️ Current Augmenting Path</h3>
+                    <p><strong>Path:</strong> <span id="currentPath">None</span></p>
+                    <p><strong>Bottleneck:</strong> <span id="bottleneck">0</span></p>
+                </div>
+                
+                <div class="cut-visualization" id="minCutInfo" style="display: none;">
+                    <h3>✂️ Minimum Cut</h3>
+                    <p><strong>Cut Capacity:</strong> <span id="cutCapacity">0</span></p>
+                    <p><strong>Source Side:</strong> <span id="sourceSide">None</span></p>
+                    <p><strong>Sink Side:</strong> <span id="sinkSide">None</span></p>
+                </div>
+                
+                <div class="legend">
+                    <h3>🎨 Legend</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4CAF50;"></div>
+                        <span>Source Node</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F44336;"></div>
+                        <span>Sink Node</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #64B5F6;"></div>
+                        <span>Regular Node</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FFD700; width: 40px; height: 3px; border-radius: 1px;"></div>
+                        <span>Augmenting Path</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #FF5722; width: 40px; height: 3px; border-radius: 1px;"></div>
+                        <span>Min Cut Edge</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9C27B0; width: 40px; height: 3px; border-radius: 1px;"></div>
+                        <span>Saturated Edge</span>
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <h3>🧠 Theory & Applications</h3>
+                    <div class="math-formula">
+                        <strong>Max Flow Min Cut Theorem:</strong><br>
+                        The maximum flow from source to sink equals the capacity of the minimum cut that separates them.
+                    </div>
+                    <div class="math-formula">
+                        <strong>Applications:</strong><br>
+                        • Network routing & bandwidth optimization<br>
+                        • Supply chain & logistics<br>
+                        • Image segmentation<br>
+                        • Bipartite matching<br>
+                        • Airline scheduling
+                    </div>
+                    <div class="math-formula">
+                        <strong>Algorithm Complexities:</strong><br>
+                        • Ford-Fulkerson: O(E × f*) where f* is max flow<br>
+                        • Edmonds-Karp: O(VE²)<br>
+                        • Dinic's Algorithm: O(V²E)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Network flow data structures
+        let nodes = [];
+        let edges = [];
+        let sourceNode = null;
+        let sinkNode = null;
+        let isAnimating = false;
+        let isPaused = false;
+        let animationSpeed = 1000;
+        let currentAlgorithm = null;
+        let currentFlow = 0;
+        let maxFlowValue = 0;
+        let iterations = 0;
+        let flowMatrix = [];
+        let capacityMatrix = [];
+        let selectedEdge = null;
+        let currentAugmentingPath = [];
+        let minCutEdges = [];
+        let minCutNodes = { source: [], sink: [] };
+        
+        // Canvas setup
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Visual parameters
+        const NODE_RADIUS = 35;
+        const COLORS = {
+            source: '#4CAF50',
+            sink: '#F44336',
+            regular: '#64B5F6',
+            augmentingPath: '#FFD700',
+            minCutEdge: '#FF5722',
+            saturatedEdge: '#9C27B0',
+            edge: '#FFFFFF',
+            flow: '#00BCD4'
+        };
+        
+        // Node class
+        class Node {
+            constructor(x, y, id) {
+                this.x = x;
+                this.y = y;
+                this.id = id;
+                this.type = 'regular';
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, NODE_RADIUS, 0, 2 * Math.PI);
+                
+                let color = COLORS.regular;
+                if (this === sourceNode) color = COLORS.source;
+                else if (this === sinkNode) color = COLORS.sink;
+                
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Draw node label
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.id.toString(), this.x, this.y);
+            }
+            
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return dx * dx + dy * dy <= NODE_RADIUS * NODE_RADIUS;
+            }
+        }
+        
+        // Edge class
+        class Edge {
+            constructor(from, to, capacity) {
+                this.from = from;
+                this.to = to;
+                this.capacity = capacity;
+                this.flow = 0;
+                this.isAugmenting = false;
+                this.isMinCut = false;
+                this.isSaturated = false;
+            }
+            
+            draw() {
+                const dx = this.to.x - this.from.x;
+                const dy = this.to.y - this.from.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const unitX = dx / length;
+                const unitY = dy / length;
+                
+                // Calculate edge endpoints (avoid overlapping with nodes)
+                const startX = this.from.x + unitX * NODE_RADIUS;
+                const startY = this.from.y + unitY * NODE_RADIUS;
+                const endX = this.to.x - unitX * NODE_RADIUS;
+                const endY = this.to.y - unitY * NODE_RADIUS;
+                
+                // Choose edge color
+                let edgeColor = COLORS.edge;
+                let lineWidth = 2;
+                
+                if (this.isAugmenting) {
+                    edgeColor = COLORS.augmentingPath;
+                    lineWidth = 4;
+                } else if (this.isMinCut) {
+                    edgeColor = COLORS.minCutEdge;
+                    lineWidth = 4;
+                } else if (this.isSaturated) {
+                    edgeColor = COLORS.saturatedEdge;
+                    lineWidth = 3;
+                }
+                
+                // Draw edge
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = edgeColor;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+                
+                // Draw arrow head
+                this.drawArrowHead(endX, endY, dx, dy, length, edgeColor);
+                
+                // Draw capacity and flow labels
+                this.drawLabels(startX, startY, endX, endY);
+            }
+            
+            drawArrowHead(endX, endY, dx, dy, length, color) {
+                const arrowLength = 15;
+                const arrowAngle = Math.PI / 6;
+                const angle = Math.atan2(dy, dx);
+                
+                const arrowX1 = endX - arrowLength * Math.cos(angle - arrowAngle);
+                const arrowY1 = endY - arrowLength * Math.sin(angle - arrowAngle);
+                const arrowX2 = endX - arrowLength * Math.cos(angle + arrowAngle);
+                const arrowY2 = endY - arrowLength * Math.sin(angle + arrowAngle);
+                
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(arrowX1, arrowY1);
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(arrowX2, arrowY2);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            
+            drawLabels(startX, startY, endX, endY) {
+                const midX = (startX + endX) / 2;
+                const midY = (startY + endY) / 2;
+                
+                // Offset label to avoid overlapping with edge
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const offsetX = -dy / length * 20;
+                const offsetY = dx / length * 20;
+                
+                const labelX = midX + offsetX;
+                const labelY = midY + offsetY;
+                
+                // Draw background for label
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(labelX - 25, labelY - 10, 50, 20);
+                
+                // Draw text
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${this.flow}/${this.capacity}`, labelX, labelY);
+            }
+            
+            contains(x, y, tolerance = 10) {
+                // Check if point is near the edge line
+                const dx = this.to.x - this.from.x;
+                const dy = this.to.y - this.from.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                if (length === 0) return false;
+                
+                const t = Math.max(0, Math.min(1, ((x - this.from.x) * dx + (y - this.from.y) * dy) / (length * length)));
+                const projX = this.from.x + t * dx;
+                const projY = this.from.y + t * dy;
+                
+                const distSq = (x - projX) * (x - projX) + (y - projY) * (y - projY);
+                return distSq <= tolerance * tolerance;
+            }
+            
+            getResidualCapacity() {
+                return this.capacity - this.flow;
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            generateSimpleNetwork();
+            updateDisplay();
+        });
+        
+        // Mouse event handlers
+        canvas.addEventListener('click', (e) => {
+            if (isAnimating) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Check for node clicks
+            const clickedNode = nodes.find(n => n.contains(x, y));
+            if (clickedNode) {
+                sourceNode = clickedNode;
+                document.getElementById('sourceNode').textContent = `Node ${clickedNode.id}`;
+                updateDisplay();
+                return;
+            }
+            
+            // Check for edge clicks
+            const clickedEdge = edges.find(e => e.contains(x, y));
+            if (clickedEdge) {
+                selectedEdge = clickedEdge;
+                document.getElementById('capacityInput').value = clickedEdge.capacity;
+                document.getElementById('edgeEditor').style.display = 'block';
+                return;
+            }
+        });
+        
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (isAnimating) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clickedNode = nodes.find(n => n.contains(x, y));
+            if (clickedNode) {
+                sinkNode = clickedNode;
+                document.getElementById('sinkNode').textContent = `Node ${clickedNode.id}`;
+                updateDisplay();
+            }
+        });
+        
+        // Network generation functions
+        function generateSimpleNetwork() {
+            clearNetwork();
+            
+            // Create a simple 6-node network
+            const nodePositions = [
+                { x: 150, y: 300 },  // 0 - source
+                { x: 300, y: 200 },  // 1
+                { x: 300, y: 400 },  // 2
+                { x: 500, y: 200 },  // 3
+                { x: 500, y: 400 },  // 4
+                { x: 650, y: 300 }   // 5 - sink
+            ];
+            
+            nodePositions.forEach((pos, i) => {
+                nodes.push(new Node(pos.x, pos.y, i));
+            });
+            
+            // Create edges with capacities
+            const edgeData = [
+                { from: 0, to: 1, capacity: 16 },
+                { from: 0, to: 2, capacity: 13 },
+                { from: 1, to: 2, capacity: 10 },
+                { from: 1, to: 3, capacity: 12 },
+                { from: 2, to: 1, capacity: 4 },
+                { from: 2, to: 4, capacity: 14 },
+                { from: 3, to: 2, capacity: 9 },
+                { from: 3, to: 5, capacity: 20 },
+                { from: 4, to: 3, capacity: 7 },
+                { from: 4, to: 5, capacity: 4 }
+            ];
+            
+            edgeData.forEach(e => {
+                edges.push(new Edge(nodes[e.from], nodes[e.to], e.capacity));
+            });
+            
+            sourceNode = nodes[0];
+            sinkNode = nodes[5];
+            initializeMatrices();
+            updateDisplay();
+        }
+        
+        function generateComplexNetwork() {
+            clearNetwork();
+            
+            // Create a more complex 8-node network
+            const nodePositions = [
+                { x: 100, y: 300 },  // 0 - source
+                { x: 250, y: 150 },  // 1
+                { x: 250, y: 300 },  // 2
+                { x: 250, y: 450 },  // 3
+                { x: 450, y: 150 },  // 4
+                { x: 450, y: 300 },  // 5
+                { x: 450, y: 450 },  // 6
+                { x: 600, y: 300 }   // 7 - sink
+            ];
+            
+            nodePositions.forEach((pos, i) => {
+                nodes.push(new Node(pos.x, pos.y, i));
+            });
+            
+            const edgeData = [
+                { from: 0, to: 1, capacity: 8 },
+                { from: 0, to: 2, capacity: 15 },
+                { from: 0, to: 3, capacity: 12 },
+                { from: 1, to: 4, capacity: 10 },
+                { from: 1, to: 5, capacity: 6 },
+                { from: 2, to: 1, capacity: 5 },
+                { from: 2, to: 5, capacity: 18 },
+                { from: 2, to: 6, capacity: 8 },
+                { from: 3, to: 2, capacity: 7 },
+                { from: 3, to: 6, capacity: 20 },
+                { from: 4, to: 7, capacity: 15 },
+                { from: 5, to: 4, capacity: 12 },
+                { from: 5, to: 6, capacity: 9 },
+                { from: 5, to: 7, capacity: 25 },
+                { from: 6, to: 7, capacity: 16 }
+            ];
+            
+            edgeData.forEach(e => {
+                edges.push(new Edge(nodes[e.from], nodes[e.to], e.capacity));
+            });
+            
+            sourceNode = nodes[0];
+            sinkNode = nodes[7];
+            initializeMatrices();
+            updateDisplay();
+        }
+        
+        function generateBottleneckNetwork() {
+            clearNetwork();
+            
+            const nodePositions = [
+                { x: 150, y: 300 },  // 0 - source
+                { x: 300, y: 200 },  // 1
+                { x: 300, y: 400 },  // 2
+                { x: 450, y: 300 },  // 3 - bottleneck
+                { x: 600, y: 200 },  // 4
+                { x: 600, y: 400 },  // 5
+                { x: 750, y: 300 }   // 6 - sink
+            ];
+            
+            nodePositions.forEach((pos, i) => {
+                nodes.push(new Node(pos.x, pos.y, i));
+            });
+            
+            const edgeData = [
+                { from: 0, to: 1, capacity: 25 },
+                { from: 0, to: 2, capacity: 25 },
+                { from: 1, to: 3, capacity: 15 },
+                { from: 2, to: 3, capacity: 15 },
+                { from: 3, to: 4, capacity: 5 },  // Bottleneck!
+                { from: 3, to: 5, capacity: 5 },  // Bottleneck!
+                { from: 4, to: 6, capacity: 20 },
+                { from: 5, to: 6, capacity: 20 }
+            ];
+            
+            edgeData.forEach(e => {
+                edges.push(new Edge(nodes[e.from], nodes[e.to], e.capacity));
+            });
+            
+            sourceNode = nodes[0];
+            sinkNode = nodes[6];
+            initializeMatrices();
+            updateDisplay();
+        }
+        
+        function generateParallelPaths() {
+            clearNetwork();
+            
+            const nodePositions = [
+                { x: 100, y: 300 },  // 0 - source
+                { x: 250, y: 150 },  // 1 - path 1
+                { x: 250, y: 300 },  // 2 - path 2
+                { x: 250, y: 450 },  // 3 - path 3
+                { x: 550, y: 150 },  // 4 - path 1
+                { x: 550, y: 300 },  // 5 - path 2
+                { x: 550, y: 450 },  // 6 - path 3
+                { x: 700, y: 300 }   // 7 - sink
+            ];
+            
+            nodePositions.forEach((pos, i) => {
+                nodes.push(new Node(pos.x, pos.y, i));
+            });
+            
+            const edgeData = [
+                // Source to parallel paths
+                { from: 0, to: 1, capacity: 10 },
+                { from: 0, to: 2, capacity: 15 },
+                { from: 0, to: 3, capacity: 8 },
+                // Parallel paths
+                { from: 1, to: 4, capacity: 10 },
+                { from: 2, to: 5, capacity: 15 },
+                { from: 3, to: 6, capacity: 8 },
+                // Cross connections
+                { from: 1, to: 5, capacity: 5 },
+                { from: 2, to: 4, capacity: 6 },
+                { from: 2, to: 6, capacity: 7 },
+                // To sink
+                { from: 4, to: 7, capacity: 12 },
+                { from: 5, to: 7, capacity: 18 },
+                { from: 6, to: 7, capacity: 10 }
+            ];
+            
+            edgeData.forEach(e => {
+                edges.push(new Edge(nodes[e.from], nodes[e.to], e.capacity));
+            });
+            
+            sourceNode = nodes[0];
+            sinkNode = nodes[7];
+            initializeMatrices();
+            updateDisplay();
+        }
+        
+        function clearNetwork() {
+            nodes = [];
+            edges = [];
+            sourceNode = null;
+            sinkNode = null;
+            selectedEdge = null;
+            resetVisualization();
+            document.getElementById('edgeEditor').style.display = 'none';
+        }
+        
+        function initializeMatrices() {
+            const n = nodes.length;
+            flowMatrix = Array(n).fill().map(() => Array(n).fill(0));
+            capacityMatrix = Array(n).fill().map(() => Array(n).fill(0));
+            
+            edges.forEach(edge => {
+                const fromId = edge.from.id;
+                const toId = edge.to.id;
+                capacityMatrix[fromId][toId] = edge.capacity;
+            });
+        }
+        
+        // Ford-Fulkerson Algorithm
+        async function startFordFulkerson() {
+            if (!sourceNode || !sinkNode || isAnimating) return;
+            
+            resetVisualization();
+            isAnimating = true;
+            currentAlgorithm = 'Ford-Fulkerson';
+            iterations = 0;
+            
+            document.getElementById('currentAlgorithm').textContent = 'Ford-Fulkerson Method';
+            document.getElementById('algorithmDescription').innerHTML = `
+                <strong>Ford-Fulkerson Method:</strong><br>
+                1. Initialize flow to 0<br>
+                2. While there exists an augmenting path from source to sink:<br>
+                &nbsp;&nbsp;a. Find an augmenting path using DFS<br>
+                &nbsp;&nbsp;b. Find the bottleneck (minimum residual capacity)<br>
+                &nbsp;&nbsp;c. Augment flow along the path<br>
+                3. Maximum flow achieved when no augmenting path exists<br><br>
+                <strong>Complexity:</strong> O(E × f*) where f* is the maximum flow value
+            `;
+            
+            updateControlButtons(true);
+            
+            let totalFlow = 0;
+            
+            while (true) {
+                // Find augmenting path using DFS
+                const path = await findAugmentingPathDFS(sourceNode, sinkNode, []);
+                
+                if (!path || path.length === 0) {
+                    break; // No more augmenting paths
+                }
+                
+                iterations++;
+                
+                // Highlight the augmenting path
+                highlightAugmentingPath(path);
+                
+                // Find bottleneck capacity
+                let bottleneck = Infinity;
+                for (let i = 0; i < path.length - 1; i++) {
+                    const edge = findEdge(path[i], path[i + 1]);
+                    if (edge) {
+                        bottleneck = Math.min(bottleneck, edge.getResidualCapacity());
+                    }
+                }
+                
+                document.getElementById('currentPath').textContent = path.map(n => n.id).join(' → ');
+                document.getElementById('bottleneck').textContent = bottleneck;
+                document.getElementById('augmentingPathInfo').style.display = 'block';
+                
+                await sleep(animationSpeed);
+                
+                // Augment flow along the path
+                for (let i = 0; i < path.length - 1; i++) {
+                    const edge = findEdge(path[i], path[i + 1]);
+                    if (edge) {
+                        edge.flow += bottleneck;
+                        edge.isSaturated = (edge.flow === edge.capacity);
+                    }
+                }
+                
+                totalFlow += bottleneck;
+                currentFlow = totalFlow;
+                
+                document.getElementById('currentFlow').textContent = totalFlow;
+                document.getElementById('iterations').textContent = iterations;
+                
+                // Clear augmenting path highlight
+                clearHighlights();
+                updateDisplay();
+                
+                await sleep(animationSpeed);
+            }
+            
+            maxFlowValue = totalFlow;
+            document.getElementById('maxFlow').textContent = totalFlow;
+            document.getElementById('currentStep').textContent = 'Ford-Fulkerson completed!';
+            document.getElementById('augmentingPathInfo').style.display = 'none';
+            
+            isAnimating = false;
+            updateControlButtons(false);
+            updateFlowDetails();
+        }
+        
+        // Edmonds-Karp Algorithm (BFS-based Ford-Fulkerson)
+        async function startEdmondsKarp() {
+            if (!sourceNode || !sinkNode || isAnimating) return;
+            
+            resetVisualization();
+            isAnimating = true;
+            currentAlgorithm = 'Edmonds-Karp';
+            iterations = 0;
+            
+            document.getElementById('currentAlgorithm').textContent = 'Edmonds-Karp Algorithm';
+            document.getElementById('algorithmDescription').innerHTML = `
+                <strong>Edmonds-Karp Algorithm:</strong><br>
+                Ford-Fulkerson method using BFS to find shortest augmenting paths<br>
+                1. Initialize flow to 0<br>
+                2. While there exists an augmenting path (found via BFS):<br>
+                &nbsp;&nbsp;a. Find shortest augmenting path using BFS<br>
+                &nbsp;&nbsp;b. Find the bottleneck capacity<br>
+                &nbsp;&nbsp;c. Augment flow along the path<br><br>
+                <strong>Complexity:</strong> O(VE²) - polynomial time guarantee
+            `;
+            
+            updateControlButtons(true);
+            
+            let totalFlow = 0;
+            
+            while (true) {
+                // Find augmenting path using BFS
+                const path = await findAugmentingPathBFS(sourceNode, sinkNode);
+                
+                if (!path || path.length === 0) {
+                    break; // No more augmenting paths
+                }
+                
+                iterations++;
+                
+                // Highlight the augmenting path
+                highlightAugmentingPath(path);
+                
+                // Find bottleneck capacity
+                let bottleneck = Infinity;
+                for (let i = 0; i < path.length - 1; i++) {
+                    const edge = findEdge(path[i], path[i + 1]);
+                    if (edge) {
+                        bottleneck = Math.min(bottleneck, edge.getResidualCapacity());
+                    }
+                }
+                
+                document.getElementById('currentPath').textContent = path.map(n => n.id).join(' → ');
+                document.getElementById('bottleneck').textContent = bottleneck;
+                document.getElementById('augmentingPathInfo').style.display = 'block';
+                
+                await sleep(animationSpeed);
+                
+                // Augment flow along the path
+                for (let i = 0; i < path.length - 1; i++) {
+                    const edge = findEdge(path[i], path[i + 1]);
+                    if (edge) {
+                        edge.flow += bottleneck;
+                        edge.isSaturated = (edge.flow === edge.capacity);
+                    }
+                }
+                
+                totalFlow += bottleneck;
+                currentFlow = totalFlow;
+                
+                document.getElementById('currentFlow').textContent = totalFlow;
+                document.getElementById('iterations').textContent = iterations;
+                
+                // Clear augmenting path highlight
+                clearHighlights();
+                updateDisplay();
+                
+                await sleep(animationSpeed);
+            }
+            
+            maxFlowValue = totalFlow;
+            document.getElementById('maxFlow').textContent = totalFlow;
+            document.getElementById('currentStep').textContent = 'Edmonds-Karp completed!';
+            document.getElementById('augmentingPathInfo').style.display = 'none';
+            
+            isAnimating = false;
+            updateControlButtons(false);
+            updateFlowDetails();
+        }
+        
+        // Max Flow Min Cut demonstration
+        async function findMaxFlowMinCut() {
+            if (!sourceNode || !sinkNode) return;
+            
+            // First run Ford-Fulkerson to get maximum flow
+            await startFordFulkerson();
+            
+            if (!isAnimating) {
+                // Find minimum cut
+                const reachableFromSource = findReachableNodes(sourceNode);
+                const cutEdges = [];
+                let cutCapacity = 0;
+                
+                reachableFromSource.forEach(node => {
+                    edges.forEach(edge => {
+                        if (edge.from === node && !reachableFromSource.includes(edge.to)) {
+                            cutEdges.push(edge);
+                            cutCapacity += edge.capacity;
+                        }
+                    });
+                });
+                
+                // Highlight min cut
+                cutEdges.forEach(edge => {
+                    edge.isMinCut = true;
+                });
+                
+                // Update min cut information
+                minCutNodes.source = reachableFromSource.map(n => n.id);
+                minCutNodes.sink = nodes.filter(n => !reachableFromSource.includes(n)).map(n => n.id);
+                
+                document.getElementById('cutCapacity').textContent = cutCapacity;
+                document.getElementById('sourceSide').textContent = minCutNodes.source.join(', ');
+                document.getElementById('sinkSide').textContent = minCutNodes.sink.join(', ');
+                document.getElementById('minCutInfo').style.display = 'block';
+                
+                updateDisplay();
+            }
+        }
+        
+        // Helper functions for pathfinding
+        async function findAugmentingPathDFS(current, target, visited) {
+            if (current === target) {
+                return [current];
+            }
+            
+            visited.push(current);
+            
+            for (const edge of edges) {
+                if (edge.from === current && edge.getResidualCapacity() > 0) {
+                    if (!visited.includes(edge.to)) {
+                        const path = await findAugmentingPathDFS(edge.to, target, [...visited]);
+                        if (path) {
+                            return [current, ...path];
+                        }
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        async function findAugmentingPathBFS(source, sink) {
+            const queue = [source];
+            const visited = new Set([source]);
+            const parent = new Map();
+            parent.set(source, null);
+            
+            while (queue.length > 0) {
+                const current = queue.shift();
+                
+                if (current === sink) {
+                    // Reconstruct path
+                    const path = [];
+                    let node = sink;
+                    while (node !== null) {
+                        path.unshift(node);
+                        node = parent.get(node);
+                    }
+                    return path;
+                }
+                
+                for (const edge of edges) {
+                    if (edge.from === current && edge.getResidualCapacity() > 0 && !visited.has(edge.to)) {
+                        visited.add(edge.to);
+                        parent.set(edge.to, current);
+                        queue.push(edge.to);
+                    }
+                }
+            }
+            
+            return null; // No path found
+        }
+        
+        function findReachableNodes(source) {
+            const reachable = [];
+            const visited = new Set();
+            const stack = [source];
+            
+            while (stack.length > 0) {
+                const current = stack.pop();
+                
+                if (visited.has(current)) continue;
+                
+                visited.add(current);
+                reachable.push(current);
+                
+                edges.forEach(edge => {
+                    if (edge.from === current && edge.getResidualCapacity() > 0 && !visited.has(edge.to)) {
+                        stack.push(edge.to);
+                    }
+                });
+            }
+            
+            return reachable;
+        }
+        
+        function findEdge(from, to) {
+            return edges.find(e => e.from === from && e.to === to);
+        }
+        
+        function highlightAugmentingPath(path) {
+            clearHighlights();
+            for (let i = 0; i < path.length - 1; i++) {
+                const edge = findEdge(path[i], path[i + 1]);
+                if (edge) {
+                    edge.isAugmenting = true;
+                }
+            }
+            currentAugmentingPath = path;
+            updateDisplay();
+        }
+        
+        function clearHighlights() {
+            edges.forEach(edge => {
+                edge.isAugmenting = false;
+                edge.isMinCut = false;
+            });
+            currentAugmentingPath = [];
+            minCutEdges = [];
+        }
+        
+        // UI functions
+        function pauseResume() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+        }
+        
+        function resetVisualization() {
+            isAnimating = false;
+            isPaused = false;
+            currentAlgorithm = null;
+            currentFlow = 0;
+            maxFlowValue = 0;
+            iterations = 0;
+            
+            edges.forEach(edge => {
+                edge.flow = 0;
+                edge.isAugmenting = false;
+                edge.isMinCut = false;
+                edge.isSaturated = false;
+            });
+            
+            clearHighlights();
+            
+            document.getElementById('currentAlgorithm').textContent = 'None';
+            document.getElementById('algorithmDescription').textContent = 'Select an algorithm to see its description and complexity analysis.';
+            document.getElementById('currentStep').textContent = 'Ready to start';
+            document.getElementById('currentFlow').textContent = '0';
+            document.getElementById('maxFlow').textContent = 'Not calculated';
+            document.getElementById('iterations').textContent = '0';
+            document.getElementById('augmentingPathInfo').style.display = 'none';
+            document.getElementById('minCutInfo').style.display = 'none';
+            
+            updateControlButtons(false);
+            updateDisplay();
+            updateFlowDetails();
+        }
+        
+        function updateControlButtons(animating) {
+            document.getElementById('ffBtn').disabled = animating;
+            document.getElementById('ekBtn').disabled = animating;
+            document.getElementById('mcBtn').disabled = animating;
+            document.getElementById('pauseBtn').disabled = !animating;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+        
+        function updateSpeed() {
+            const value = document.getElementById('speedSlider').value;
+            const speeds = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
+            const delays = [2000, 1500, 1000, 500, 200];
+            
+            document.getElementById('speedLabel').textContent = speeds[value - 1];
+            animationSpeed = delays[value - 1];
+        }
+        
+        function updateEdgeCapacity() {
+            if (selectedEdge) {
+                const newCapacity = parseInt(document.getElementById('capacityInput').value);
+                if (newCapacity > 0) {
+                    selectedEdge.capacity = newCapacity;
+                    selectedEdge.flow = Math.min(selectedEdge.flow, newCapacity);
+                    initializeMatrices();
+                    updateDisplay();
+                }
+            }
+            cancelEdgeEdit();
+        }
+        
+        function cancelEdgeEdit() {
+            selectedEdge = null;
+            document.getElementById('edgeEditor').style.display = 'none';
+        }
+        
+        function updateFlowDetails() {
+            const detailsDiv = document.getElementById('flowDetails');
+            
+            if (edges.length === 0) {
+                detailsDiv.innerHTML = '<p>No flow calculated yet. Run an algorithm to see flow details.</p>';
+                return;
+            }
+            
+            let html = '<h4>Edge Flow Details:</h4>';
+            html += '<div style="font-family: monospace; font-size: 12px;">';
+            
+            edges.forEach(edge => {
+                const utilization = (edge.flow / edge.capacity * 100).toFixed(1);
+                html += `<div>Edge ${edge.from.id}→${edge.to.id}: ${edge.flow}/${edge.capacity} (${utilization}%)</div>`;
+            });
+            
+            html += '</div>';
+            
+            if (maxFlowValue > 0) {
+                html += `<p><strong>Total Flow Value:</strong> ${maxFlowValue}</p>`;
+                html += `<p><strong>Algorithm:</strong> ${currentAlgorithm || 'Unknown'}</p>`;
+                html += `<p><strong>Iterations:</strong> ${iterations}</p>`;
+            }
+            
+            detailsDiv.innerHTML = html;
+        }
+        
+        function updateDisplay() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw edges
+            edges.forEach(edge => edge.draw());
+            
+            // Draw nodes
+            nodes.forEach(node => node.draw());
+            
+            // Update node labels
+            if (sourceNode) {
+                document.getElementById('sourceNode').textContent = `Node ${sourceNode.id}`;
+            }
+            if (sinkNode) {
+                document.getElementById('sinkNode').textContent = `Node ${sinkNode.id}`;
+            }
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+</body>
+</html>

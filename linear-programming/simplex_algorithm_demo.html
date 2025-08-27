@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demo Thuật Toán Simplex - Bảng Tableau</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -255,6 +257,38 @@
     <div class="container">
         <h1>Demo Thuật Toán Simplex</h1>
         <p class="subtitle">Giải bài toán Linear Programming bằng phương pháp Simplex với bảng tableau</p>
+        
+        <!-- Historical Section -->
+        <div style="background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 2px solid rgba(255, 255, 255, 0.1);">
+            <h2 style="color: #FFD700; text-align: center; margin-bottom: 25px;">📚 Lịch Sử Thuật Toán Simplex</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #00d4ff; margin-bottom: 15px;">🧮 George Dantzig (1914-2005)</h4>
+                    <p><strong>Phát minh Simplex (1947):</strong> Dantzig phát triển thuật toán Simplex khi làm việc cho Lực lượng Không quân Mỹ, giải quyết các bài toán logistics trong Thế chiến II.</p>
+                    <p><strong>Ý tưởng cốt lõi:</strong> Di chuyển từ đỉnh này sang đỉnh khác của đa diện khả thi để tìm nghiệm tối ưu.</p>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #ff6b6b; margin-bottom: 15px;">⚔️ Bối cảnh lịch sử</h4>
+                    <p><strong>Thế chiến II:</strong> Nhu cầu tối ưu hóa logistics quân sự - phân bổ tàu, máy bay, lương thực một cách hiệu quả nhất.</p>
+                    <p><strong>Mã hóa:</strong> Thuật toán được giữ bí mật quân sự đến năm 1947.</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="color: #FFD700; margin-bottom: 15px;">⚡ Tác động lịch sử</h4>
+                <ul style="color: #ffffff; line-height: 1.8;">
+                    <li><strong>1975:</strong> Dantzig nhận giải thưởng Von Neumann cho "phát minh cơ bản nhất trong toán học ứng dụng"</li>
+                    <li><strong>Hiện đại:</strong> Nền tảng cho hầu hết các solver LP thương mại</li>
+                    <li><strong>Ứng dụng:</strong> Từ tối ưu hóa chuỗi cung ứng đến machine learning</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px;">
+                <h4 style="color: #4caf50; margin-bottom: 15px;">🌟 Di sản</h4>
+                <p>Thuật toán Simplex được coi là một trong 10 thuật toán quan trọng nhất thế kỷ 20, góp phần tạo nên nền tảng cho ngành Nghiên cứu hoạt động (Operations Research).</p>
+            </div>
+        </div>
         
         <div class="main-content">
             <div class="input-section">

@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Celestial Mechanics - Interactive Orbital Dynamics</title>
+    <script src="mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .orbital-simulator {
+            background: radial-gradient(circle at center, #000428 0%, #004e92 100%);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .central-body {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffd700 0%, #ff8c00 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ffd700;
+        }
+        
+        .orbiting-body {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #63b3ed;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #63b3ed;
+            transition: all 0.1s ease;
+        }
+        
+        .orbit-path {
+            position: absolute;
+            border: 1px dashed rgba(255, 215, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .velocity-vector {
+            position: absolute;
+            border: 2px solid #48bb78;
+            transform-origin: 0 50%;
+        }
+        
+        .velocity-vector::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid #48bb78;
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .force-vector {
+            position: absolute;
+            border: 2px solid #e53e3e;
+            transform-origin: 0 50%;
+        }
+        
+        .force-vector::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid #e53e3e;
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .lagrange-point {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #805ad5;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        
+        .trajectory-trail {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(99, 179, 237, 0.3);
+            border-radius: 50%;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .equation-box {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .theory-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #ff8c00;
+        }
+        
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .concept-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .kepler-laws {
+            background: rgba(72, 187, 120, 0.1);
+            border: 2px solid #48bb78;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .n-body-demo {
+            background: rgba(128, 90, 213, 0.1);
+            border: 2px solid #805ad5;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .perturbation-analysis {
+            background: rgba(237, 137, 54, 0.1);
+            border: 2px solid #ed8936;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .math-container {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .visualization-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .phase-space {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #63b3ed;
+            border-radius: 10px;
+            height: 300px;
+            position: relative;
+            margin: 20px 0;
+        }
+        
+        .orbital-elements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .element-display {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffd700;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Celestial Mechanics</h1>
+        
+        <div class="intro">
+            <h3>🚀 Exploring the Mathematics of Orbital Dynamics</h3>
+            <p><strong>Celestial Mechanics</strong> is the branch of astronomy that deals with the motions of celestial objects under the influence of gravitational forces. From planetary orbits to spacecraft trajectories, it combines Newtonian mechanics with sophisticated mathematical techniques to predict and understand motion in space.</p>
+            
+            <p>Fundamental governing principles:</p>
+            <ul>
+                <li><strong>Newton's Law of Gravitation:</strong> \(F = G\frac{m_1 m_2}{r^2}\)</li>
+                <li><strong>Conservation of Energy:</strong> \(E = \frac{1}{2}mv^2 - \frac{GMm}{r}\)</li>
+                <li><strong>Conservation of Angular Momentum:</strong> \(\mathbf{L} = \mathbf{r} \times m\mathbf{v}\)</li>
+                <li><strong>Kepler's Laws:</strong> Elliptical orbits, equal areas, harmonic law</li>
+            </ul>
+        </div>
+
+        <div class="theory-section">
+            <h2>📐 Kepler's Laws of Planetary Motion</h2>
+            
+            <div class="kepler-laws">
+                <div class="concept-grid">
+                    <div class="concept-card">
+                        <h3>🥚 First Law: Law of Ellipses</h3>
+                        <p>Planets move in elliptical orbits with the Sun at one focus.</p>
+                        <div class="equation-box">
+                            \[\frac{x^2}{a^2} + \frac{y^2}{b^2} = 1\]
+                        </div>
+                        <p>Where \(a\) is the semi-major axis and \(b\) is the semi-minor axis.</p>
+                        <p><strong>Eccentricity:</strong> \(e = \sqrt{1 - \frac{b^2}{a^2}}\)</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3>📐 Second Law: Law of Equal Areas</h3>
+                        <p>A line joining a planet to the Sun sweeps out equal areas in equal times.</p>
+                        <div class="equation-box">
+                            \[\frac{dA}{dt} = \frac{1}{2}r^2\frac{d\theta}{dt} = \frac{L}{2m} = \text{constant}\]
+                        </div>
+                        <p>This is a direct consequence of conservation of angular momentum.</p>
+                    </div>
+                    
+                    <div class="concept-card">
+                        <h3>⏰ Third Law: Harmonic Law</h3>
+                        <p>The square of the orbital period is proportional to the cube of the semi-major axis.</p>
+                        <div class="equation-box">
+                            \[T^2 = \frac{4\pi^2}{GM}a^3\]
+                        </div>
+                        <p>For our solar system: \(T^2 \propto a^3\)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🎮 Orbital Simulation Controls</h3>
+                
+                <div>
+                    <label>Central Mass (Solar Masses): <span id="centralMassValue">1.0</span></label>
+                    <input type="range" id="centralMass" min="0.1" max="5" value="1" step="0.1" oninput="updateOrbitalParameters()">
+                </div>
+                
+                <div>
+                    <label>Semi-major Axis (AU): <span id="semiMajorValue">1.0</span></label>
+                    <input type="range" id="semiMajor" min="0.3" max="5" value="1" step="0.1" oninput="updateOrbitalParameters()">
+                </div>
+                
+                <div>
+                    <label>Eccentricity: <span id="eccentricityValue">0.2</span></label>
+                    <input type="range" id="eccentricity" min="0" max="0.9" value="0.2" step="0.01" oninput="updateOrbitalParameters()">
+                </div>
+                
+                <div>
+                    <label>Inclination (°): <span id="inclinationValue">0</span></label>
+                    <input type="range" id="inclination" min="0" max="90" value="0" step="1" oninput="updateOrbitalParameters()">
+                </div>
+                
+                <div>
+                    <label>Animation Speed: <span id="speedValue">1.0</span>×</label>
+                    <input type="range" id="animationSpeed" min="0.1" max="5" value="1" step="0.1" oninput="updateSpeed()">
+                </div>
+                
+                <div class="visualization-controls">
+                    <button onclick="startOrbitalSimulation()">▶️ Start</button>
+                    <button onclick="pauseOrbitalSimulation()">⏸️ Pause</button>
+                    <button onclick="resetOrbitalSimulation()">🔄 Reset</button>
+                    <button onclick="toggleVectors()">📏 Vectors</button>
+                    <button onclick="toggleTrajectory()">🛤️ Trail</button>
+                </div>
+                
+                <div class="orbital-elements">
+                    <div class="element-display">
+                        <strong>Period</strong><br>
+                        <span id="periodDisplay">1.0 years</span>
+                    </div>
+                    <div class="element-display">
+                        <strong>Aphelion</strong><br>
+                        <span id="aphelionDisplay">1.2 AU</span>
+                    </div>
+                    <div class="element-display">
+                        <strong>Perihelion</strong><br>
+                        <span id="perihelionDisplay">0.8 AU</span>
+                    </div>
+                    <div class="element-display">
+                        <strong>Velocity</strong><br>
+                        <span id="velocityDisplay">30 km/s</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="orbital-simulator" id="orbitalSim">
+                <div id="centralBody" class="central-body"></div>
+                <div id="orbitingBody" class="orbiting-body"></div>
+                <div id="orbitPath" class="orbit-path"></div>
+                <div id="velocityVector" class="velocity-vector"></div>
+                <div id="forceVector" class="force-vector"></div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2>🧮 Two-Body Problem: Analytical Solution</h2>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>⚡ Equations of Motion</h3>
+                    <p>For two bodies under mutual gravitational attraction:</p>
+                    <div class="equation-box">
+                        \[\begin{align}
+                        \mathbf{F}_1 &= -G\frac{m_1 m_2}{|\mathbf{r}_1 - \mathbf{r}_2|^3}(\mathbf{r}_1 - \mathbf{r}_2) \\
+                        \mathbf{F}_2 &= -\mathbf{F}_1
+                        \end{align}\]
+                    </div>
+                    <p>Reduced to single-body problem with reduced mass \(\mu = \frac{m_1 m_2}{m_1 + m_2}\)</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🎯 Orbital Energy</h3>
+                    <p>Total mechanical energy determines orbit type:</p>
+                    <div class="equation-box">
+                        \[E = \frac{1}{2}mv^2 - \frac{GMm}{r}\]
+                    </div>
+                    <ul>
+                        <li><strong>E &lt; 0:</strong> Bound elliptical orbits</li>
+                        <li><strong>E = 0:</strong> Parabolic escape trajectory</li>
+                        <li><strong>E &gt; 0:</strong> Hyperbolic trajectory</li>
+                    </ul>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🌀 Angular Momentum</h3>
+                    <p>Conserved quantity determining orbital shape:</p>
+                    <div class="equation-box">
+                        \[L = mr^2\frac{d\theta}{dt} = \text{constant}\]
+                    </div>
+                    <p>Related to semi-major axis and eccentricity:</p>
+                    <div class="equation-box">
+                        \[L = m\sqrt{GMa(1-e^2)}\]
+                    </div>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>📏 Orbital Equation</h3>
+                    <p>Polar equation of the orbit:</p>
+                    <div class="equation-box">
+                        \[r = \frac{a(1-e^2)}{1 + e\cos\theta}\]
+                    </div>
+                    <p>Where \(\theta\) is the true anomaly measured from periapsis.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>⏰ Kepler's Equation</h3>
+                    <p>Relates time to position in orbit:</p>
+                    <div class="equation-box">
+                        \[M = E - e\sin E\]
+                    </div>
+                    <p>Where \(M\) is mean anomaly and \(E\) is eccentric anomaly.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🚀 Escape Velocity</h3>
+                    <p>Minimum velocity needed to escape gravitational field:</p>
+                    <div class="equation-box">
+                        \[v_{escape} = \sqrt{\frac{2GM}{r}}\]
+                    </div>
+                    <p>For Earth surface: \(v_{escape} \approx 11.2\) km/s</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="n-body-demo">
+            <h3>🌌 Three-Body Problem & Lagrange Points</h3>
+            <p>The three-body problem cannot be solved analytically in general, but special solutions exist including Lagrange points - equilibrium positions in the gravitational field of two massive bodies.</p>
+            
+            <div class="demo-grid">
+                <div class="control-panel">
+                    <h4>🎮 Three-Body System Controls</h4>
+                    
+                    <div>
+                        <label>Mass Ratio m₂/m₁: <span id="massRatioValue">0.1</span></label>
+                        <input type="range" id="massRatio" min="0.01" max="1" value="0.1" step="0.01" oninput="updateThreeBody()">
+                    </div>
+                    
+                    <div>
+                        <label>Test Mass Position: <span id="testMassXValue">0.5</span></label>
+                        <input type="range" id="testMassX" min="-2" max="2" value="0.5" step="0.1" oninput="updateThreeBody()">
+                    </div>
+                    
+                    <button onclick="showLagrangePoints()">📍 Show Lagrange Points</button>
+                    <button onclick="startThreeBodySim()">▶️ Simulate</button>
+                    
+                    <div class="equation-box">
+                        <h4>Lagrange Point Locations:</h4>
+                        <ul>
+                            <li><strong>L₁, L₂, L₃:</strong> Collinear points</li>
+                            <li><strong>L₄, L₅:</strong> Triangular points (60° ahead/behind)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="orbital-simulator" id="threeBodySim">
+                    <div id="primaryMass" class="central-body"></div>
+                    <div id="secondaryMass" class="central-body" style="width: 15px; height: 15px; background: #63b3ed;"></div>
+                    <div id="testMass" class="orbiting-body" style="background: #48bb78;"></div>
+                    <div id="L1" class="lagrange-point"></div>
+                    <div id="L2" class="lagrange-point"></div>
+                    <div id="L3" class="lagrange-point"></div>
+                    <div id="L4" class="lagrange-point"></div>
+                    <div id="L5" class="lagrange-point"></div>
+                </div>
+            </div>
+            
+            <div class="equation-box">
+                <h4>🎯 Effective Potential in Rotating Frame:</h4>
+                \[U_{eff}(x,y) = -\frac{G m_1}{\sqrt{(x-x_1)^2 + y^2}} - \frac{G m_2}{\sqrt{(x-x_2)^2 + y^2}} - \frac{1}{2}\omega^2(x^2 + y^2)\]
+            </div>
+        </div>
+
+        <div class="perturbation-analysis">
+            <h3>🌊 Perturbation Theory</h3>
+            <p>Real astronomical systems involve more than two bodies, requiring perturbation methods to account for small deviations from Keplerian orbits.</p>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>📈 Secular Perturbations</h3>
+                    <p>Long-term changes in orbital elements:</p>
+                    <div class="equation-box">
+                        \[\frac{da}{dt} = \frac{2}{n}\frac{\partial R}{\partial M}\]
+                    </div>
+                    <p>Where \(R\) is the disturbing function and \(n\) is mean motion.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🌊 Periodic Perturbations</h3>
+                    <p>Short-period oscillations about mean orbit:</p>
+                    <div class="equation-box">
+                        \[\delta r = \sum A_k \cos(k\lambda + \phi_k)\]
+                    </div>
+                    <p>Where \(\lambda\) is the mean longitude.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🎯 J₂ Perturbation</h3>
+                    <p>Earth's oblateness causes precession of orbital elements:</p>
+                    <div class="equation-box">
+                        \[\dot{\Omega} = -\frac{3nJ_2 R_E^2}{2a^2(1-e^2)^2}\cos i\]
+                    </div>
+                    <p>Nodal regression rate depends on inclination.</p>
+                </div>
+            </div>
+            
+            <div class="demo-grid">
+                <div class="control-panel">
+                    <h4>🛰️ Satellite Perturbation Demo</h4>
+                    
+                    <div>
+                        <label>Orbital Altitude (km): <span id="altitudeValue">400</span></label>
+                        <input type="range" id="altitude" min="200" max="2000" value="400" step="50" oninput="updatePerturbations()">
+                    </div>
+                    
+                    <div>
+                        <label>Inclination (°): <span id="satInclinationValue">51.6</span></label>
+                        <input type="range" id="satInclination" min="0" max="180" value="51.6" step="0.1" oninput="updatePerturbations()">
+                    </div>
+                    
+                    <button onclick="showPerturbationEffects()">📊 Show Effects</button>
+                    
+                    <div id="perturbationResults" class="equation-box">
+                        <h4>Perturbation Effects:</h4>
+                        <div id="nodalPrecession"></div>
+                        <div id="apsidePrecession"></div>
+                    </div>
+                </div>
+                
+                <canvas id="perturbationChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2>🚀 Spacecraft Trajectory Design</h2>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>🎯 Hohmann Transfer</h3>
+                    <p>Most fuel-efficient transfer between circular orbits:</p>
+                    <div class="equation-box">
+                        \[\Delta v_{total} = \sqrt{\frac{\mu}{r_1}}\left(\sqrt{\frac{2r_2}{r_1+r_2}} - 1\right) + \sqrt{\frac{\mu}{r_2}}\left(1 - \sqrt{\frac{2r_1}{r_1+r_2}}\right)\]
+                    </div>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🌐 Gravity Assist</h3>
+                    <p>Using planetary flybys to change spacecraft velocity:</p>
+                    <div class="equation-box">
+                        \[\Delta v = 2V_p \sin\left(\frac{\delta}{2}\right)\]
+                    </div>
+                    <p>Where \(V_p\) is planet velocity and \(\delta\) is deflection angle.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>📐 Launch Window</h3>
+                    <p>Optimal timing for interplanetary missions:</p>
+                    <div class="equation-box">
+                        \[\text{Synodic Period} = \frac{1}{|1/P_1 - 1/P_2|}\]
+                    </div>
+                    <p>Time between favorable launch opportunities.</p>
+                </div>
+            </div>
+            
+            <div class="demo-grid">
+                <div class="control-panel">
+                    <h4>🛸 Mission Planning Tool</h4>
+                    
+                    <div>
+                        <label>Departure Planet:</label>
+                        <select id="departurePlanet" onchange="updateMission()">
+                            <option value="earth">Earth</option>
+                            <option value="mars">Mars</option>
+                            <option value="venus">Venus</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label>Target Planet:</label>
+                        <select id="targetPlanet" onchange="updateMission()">
+                            <option value="mars">Mars</option>
+                            <option value="venus">Venus</option>
+                            <option value="jupiter">Jupiter</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="calculateTrajectory()">🧮 Calculate Trajectory</button>
+                    
+                    <div id="missionResults" class="equation-box">
+                        <h4>Mission Parameters:</h4>
+                        <div id="transferTime"></div>
+                        <div id="deltaVRequired"></div>
+                        <div id="launchEnergy"></div>
+                    </div>
+                </div>
+                
+                <div class="orbital-simulator" id="interplanetarySim">
+                    <div id="sun" class="central-body" style="width: 40px; height: 40px;"></div>
+                    <div id="earthOrbit" class="orbit-path"></div>
+                    <div id="marsOrbit" class="orbit-path"></div>
+                    <div id="transferOrbit" class="orbit-path" style="border-color: #e53e3e;"></div>
+                    <div id="spacecraft" class="orbiting-body" style="background: #e53e3e;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2>🌟 Advanced Topics</h2>
+            
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h3>🌀 Chaotic Dynamics</h3>
+                    <p>Some three-body systems exhibit chaotic behavior with sensitive dependence on initial conditions.</p>
+                    <canvas id="chaosChart" width="280" height="200"></canvas>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🌊 Tidal Forces</h3>
+                    <p>Gradient in gravitational field causes tidal acceleration:</p>
+                    <div class="equation-box">
+                        \[a_{tidal} \approx \frac{2GM}{r^3}d\]
+                    </div>
+                    <p>Where \(d\) is the size of the extended body.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🔄 Orbital Resonances</h3>
+                    <p>Commensurable periods lead to resonant dynamics:</p>
+                    <div class="equation-box">
+                        \[\frac{T_1}{T_2} = \frac{p}{q}\]
+                    </div>
+                    <p>Examples: Jupiter's moons, asteroid belt gaps, ring systems.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>⚡ Relativistic Effects</h3>
+                    <p>General relativity corrections to Newtonian orbits:</p>
+                    <div class="equation-box">
+                        \[\Delta\phi = \frac{6\pi GM}{c^2 a(1-e^2)}\]
+                    </div>
+                    <p>Perihelion advance per orbit (Mercury: 43"/century).</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🌌 Galactic Dynamics</h3>
+                    <p>Stellar orbits in galactic potentials involve more complex force laws and dark matter effects.</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>🛰️ Station-Keeping</h3>
+                    <p>Maintaining spacecraft at Lagrange points requires active control due to instabilities and perturbations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'color']}
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        // Global simulation variables
+        let orbitalSimRunning = false;
+        let threeBodySimRunning = false;
+        let animationId;
+        let time = 0;
+        let dt = 0.016; // 60 FPS
+        let speedMultiplier = 1.0;
+        
+        // Orbital parameters
+        let centralMass = 1.0; // Solar masses
+        let semiMajorAxis = 1.0; // AU
+        let eccentricity = 0.2;
+        let inclination = 0; // degrees
+        let trueAnomaly = 0;
+        let showVectors = false;
+        let showTrajectory = false;
+        let trajectoryPoints = [];
+        
+        // Physical constants
+        const G = 6.67430e-11; // m³/kg/s²
+        const AU = 1.496e11; // meters
+        const SOLAR_MASS = 1.989e30; // kg
+        
+        // Planetary data
+        const planets = {
+            earth: { a: 1.0, period: 1.0, mass: 3.0e-6 },
+            mars: { a: 1.52, period: 1.88, mass: 3.2e-7 },
+            venus: { a: 0.72, period: 0.62, mass: 2.4e-6 },
+            jupiter: { a: 5.2, period: 11.86, mass: 9.5e-4 }
+        };
+
+        function updateOrbitalParameters() {
+            centralMass = parseFloat(document.getElementById('centralMass').value);
+            semiMajorAxis = parseFloat(document.getElementById('semiMajor').value);
+            eccentricity = parseFloat(document.getElementById('eccentricity').value);
+            inclination = parseFloat(document.getElementById('inclination').value);
+            
+            document.getElementById('centralMassValue').textContent = centralMass.toFixed(1);
+            document.getElementById('semiMajorValue').textContent = semiMajorAxis.toFixed(1);
+            document.getElementById('eccentricityValue').textContent = eccentricity.toFixed(2);
+            document.getElementById('inclinationValue').textContent = inclination;
+            
+            updateOrbitalElements();
+            updateOrbitVisualization();
+        }
+
+        function updateSpeed() {
+            speedMultiplier = parseFloat(document.getElementById('animationSpeed').value);
+            document.getElementById('speedValue').textContent = speedMultiplier.toFixed(1);
+        }
+
+        function updateOrbitalElements() {
+            // Calculate period using Kepler's third law
+            const period = Math.sqrt(Math.pow(semiMajorAxis, 3) / centralMass);
+            
+            // Calculate aphelion and perihelion
+            const aphelion = semiMajorAxis * (1 + eccentricity);
+            const perihelion = semiMajorAxis * (1 - eccentricity);
+            
+            // Calculate current velocity (approximate)
+            const r = semiMajorAxis * (1 - eccentricity * Math.cos(trueAnomaly));
+            const velocity = Math.sqrt(centralMass * (2/r - 1/semiMajorAxis)) * 29.78; // km/s
+            
+            document.getElementById('periodDisplay').textContent = period.toFixed(1) + ' years';
+            document.getElementById('aphelionDisplay').textContent = aphelion.toFixed(2) + ' AU';
+            document.getElementById('perihelionDisplay').textContent = perihelion.toFixed(2) + ' AU';
+            document.getElementById('velocityDisplay').textContent = velocity.toFixed(1) + ' km/s';
+        }
+
+        function updateOrbitVisualization() {
+            const orbitPath = document.getElementById('orbitPath');
+            const centerX = 250;
+            const centerY = 250;
+            const scale = 150; // pixels per AU
+            
+            // Calculate semi-minor axis
+            const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity);
+            
+            // Position ellipse with focus at center
+            const focalDistance = semiMajorAxis * eccentricity * scale;
+            
+            orbitPath.style.width = (2 * semiMajorAxis * scale) + 'px';
+            orbitPath.style.height = (2 * semiMinorAxis * scale) + 'px';
+            orbitPath.style.left = (centerX - semiMajorAxis * scale + focalDistance) + 'px';
+            orbitPath.style.top = (centerY - semiMinorAxis * scale) + 'px';
+            
+            // Position central body at focus
+            const centralBody = document.getElementById('centralBody');
+            centralBody.style.left = (centerX - 15) + 'px';
+            centralBody.style.top = (centerY - 15) + 'px';
+        }
+
+        function startOrbitalSimulation() {
+            orbitalSimRunning = true;
+            time = 0;
+            trueAnomaly = 0;
+            trajectoryPoints = [];
+            animateOrbit();
+        }
+
+        function pauseOrbitalSimulation() {
+            orbitalSimRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function resetOrbitalSimulation() {
+            pauseOrbitalSimulation();
+            time = 0;
+            trueAnomaly = 0;
+            trajectoryPoints = [];
+            
+            // Clear trajectory trail
+            const trails = document.querySelectorAll('.trajectory-trail');
+            trails.forEach(trail => trail.remove());
+        }
+
+        function animateOrbit() {
+            if (!orbitalSimRunning) return;
+            
+            // Calculate mean motion
+            const n = Math.sqrt(centralMass / Math.pow(semiMajorAxis, 3));
+            
+            // Update true anomaly (simplified)
+            const meanAnomaly = n * time * speedMultiplier;
+            trueAnomaly = solveKeplersEquation(meanAnomaly, eccentricity);
+            
+            // Calculate position in orbit
+            const r = semiMajorAxis * (1 - eccentricity * eccentricity) / (1 + eccentricity * Math.cos(trueAnomaly));
+            const x = r * Math.cos(trueAnomaly);
+            const y = r * Math.sin(trueAnomaly);
+            
+            // Convert to screen coordinates
+            const scale = 150;
+            const centerX = 250;
+            const centerY = 250;
+            const screenX = centerX + x * scale;
+            const screenY = centerY + y * scale;
+            
+            // Update orbiting body position
+            const orbitingBody = document.getElementById('orbitingBody');
+            orbitingBody.style.left = (screenX - 4) + 'px';
+            orbitingBody.style.top = (screenY - 4) + 'px';
+            
+            // Add trajectory point if enabled
+            if (showTrajectory && trajectoryPoints.length < 200) {
+                trajectoryPoints.push({x: screenX, y: screenY});
+                createTrajectoryPoint(screenX, screenY);
+            }
+            
+            // Update vectors if enabled
+            if (showVectors) {
+                updateVectors(screenX, screenY, r, trueAnomaly);
+            }
+            
+            time += dt;
+            animationId = requestAnimationFrame(animateOrbit);
+        }
+
+        function solveKeplersEquation(M, e) {
+            // Solve M = E - e*sin(E) for E, then calculate true anomaly
+            let E = M;
+            for (let i = 0; i < 10; i++) {
+                E = M + e * Math.sin(E);
+            }
+            
+            // Convert eccentric anomaly to true anomaly
+            const cosNu = (Math.cos(E) - e) / (1 - e * Math.cos(E));
+            const sinNu = Math.sqrt(1 - e*e) * Math.sin(E) / (1 - e * Math.cos(E));
+            return Math.atan2(sinNu, cosNu);
+        }
+
+        function updateVectors(x, y, r, nu) {
+            const velocityVector = document.getElementById('velocityVector');
+            const forceVector = document.getElementById('forceVector');
+            
+            // Velocity vector (tangent to orbit)
+            const velAngle = nu + Math.PI/2;
+            const velMagnitude = 30; // arbitrary scale
+            velocityVector.style.left = x + 'px';
+            velocityVector.style.top = y + 'px';
+            velocityVector.style.width = velMagnitude + 'px';
+            velocityVector.style.transform = `rotate(${velAngle * 180 / Math.PI}deg)`;
+            velocityVector.style.display = 'block';
+            
+            // Force vector (toward center)
+            const forceAngle = nu + Math.PI;
+            const forceMagnitude = 40 / (r * r); // inverse square law
+            forceVector.style.left = x + 'px';
+            forceVector.style.top = y + 'px';
+            forceVector.style.width = (forceMagnitude * 100) + 'px';
+            forceVector.style.transform = `rotate(${forceAngle * 180 / Math.PI}deg)`;
+            forceVector.style.display = 'block';
+        }
+
+        function createTrajectoryPoint(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'trajectory-trail';
+            trail.style.left = x + 'px';
+            trail.style.top = y + 'px';
+            document.getElementById('orbitalSim').appendChild(trail);
+            
+            // Remove old trail points
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 5000);
+        }
+
+        function toggleVectors() {
+            showVectors = !showVectors;
+            if (!showVectors) {
+                document.getElementById('velocityVector').style.display = 'none';
+                document.getElementById('forceVector').style.display = 'none';
+            }
+        }
+
+        function toggleTrajectory() {
+            showTrajectory = !showTrajectory;
+            if (!showTrajectory) {
+                const trails = document.querySelectorAll('.trajectory-trail');
+                trails.forEach(trail => trail.remove());
+                trajectoryPoints = [];
+            }
+        }
+
+        // Three-body problem functions
+        function updateThreeBody() {
+            const massRatio = parseFloat(document.getElementById('massRatio').value);
+            const testMassX = parseFloat(document.getElementById('testMassX').value);
+            
+            document.getElementById('massRatioValue').textContent = massRatio.toFixed(2);
+            document.getElementById('testMassXValue').textContent = testMassX.toFixed(1);
+            
+            // Update secondary mass size
+            const secondaryMass = document.getElementById('secondaryMass');
+            const size = 15 + massRatio * 15;
+            secondaryMass.style.width = size + 'px';
+            secondaryMass.style.height = size + 'px';
+        }
+
+        function showLagrangePoints() {
+            const centerX = 250;
+            const centerY = 250;
+            const separation = 200; // pixels
+            
+            // Position Lagrange points
+            const L1 = document.getElementById('L1');
+            const L2 = document.getElementById('L2');
+            const L3 = document.getElementById('L3');
+            const L4 = document.getElementById('L4');
+            const L5 = document.getElementById('L5');
+            
+            // L1: between the masses
+            L1.style.left = (centerX + separation * 0.3) + 'px';
+            L1.style.top = (centerY - 3) + 'px';
+            L1.style.display = 'block';
+            
+            // L2: beyond secondary mass
+            L2.style.left = (centerX + separation * 1.2) + 'px';
+            L2.style.top = (centerY - 3) + 'px';
+            L2.style.display = 'block';
+            
+            // L3: opposite side of primary
+            L3.style.left = (centerX - separation * 1.2) + 'px';
+            L3.style.top = (centerY - 3) + 'px';
+            L3.style.display = 'block';
+            
+            // L4: 60° ahead
+            L4.style.left = (centerX + separation * 0.5) + 'px';
+            L4.style.top = (centerY - separation * 0.87) + 'px';
+            L4.style.display = 'block';
+            
+            // L5: 60° behind
+            L5.style.left = (centerX + separation * 0.5) + 'px';
+            L5.style.top = (centerY + separation * 0.87) + 'px';
+            L5.style.display = 'block';
+            
+            // Position masses
+            const primaryMass = document.getElementById('primaryMass');
+            const secondaryMass = document.getElementById('secondaryMass');
+            
+            primaryMass.style.left = (centerX - 15) + 'px';
+            primaryMass.style.top = (centerY - 15) + 'px';
+            
+            secondaryMass.style.left = (centerX + separation - 7.5) + 'px';
+            secondaryMass.style.top = (centerY - 7.5) + 'px';
+        }
+
+        // Three-body simulation function
+        function startThreeBodySim() {
+            // Show Lagrange points first
+            showLagrangePoints();
+            
+            // Initialize simulation parameters
+            const massRatio = parseFloat(document.getElementById('massRatio').value);
+            const testMassX = parseFloat(document.getElementById('testMassX').value);
+            
+            // Get the three-body simulator container
+            const simulator = document.getElementById('threeBodySim');
+            const testMass = document.getElementById('testMass');
+            
+            if (!simulator || !testMass) {
+                console.error('Three-body simulator elements not found');
+                return;
+            }
+            
+            // Initialize test mass position
+            const centerX = 250;
+            const centerY = 250;
+            let massPos = {
+                x: testMassX * 100 + centerX,
+                y: centerY,
+                vx: 0,
+                vy: 30 // Initial velocity
+            };
+            
+            // Clear any existing trails
+            const existingTrails = simulator.querySelectorAll('.orbit-trail');
+            existingTrails.forEach(trail => trail.remove());
+            
+            // Animation variables
+            let animationId;
+            let simTime = 0;
+            const dt = 0.05;
+            let trailPoints = [];
+            
+            function animate() {
+                // Calculate gravitational forces
+                const primary = {x: centerX, y: centerY, mass: 1};
+                const secondary = {x: centerX + 200 * massRatio, y: centerY, mass: massRatio};
+                
+                // Force from primary mass
+                const dx1 = massPos.x - primary.x;
+                const dy1 = massPos.y - primary.y;
+                const r1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+                const F1 = primary.mass * 500 / (r1 * r1 * r1);
+                
+                // Force from secondary mass
+                const dx2 = massPos.x - secondary.x;
+                const dy2 = massPos.y - secondary.y;
+                const r2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                const F2 = secondary.mass * 500 / (r2 * r2 * r2);
+                
+                // Update velocity (gravitational acceleration)
+                massPos.vx += (-dx1 * F1 - dx2 * F2) * dt;
+                massPos.vy += (-dy1 * F1 - dy2 * F2) * dt;
+                
+                // Update position
+                massPos.x += massPos.vx * dt;
+                massPos.y += massPos.vy * dt;
+                
+                // Update test mass visual position
+                testMass.style.left = (massPos.x - 5) + 'px';
+                testMass.style.top = (massPos.y - 5) + 'px';
+                testMass.style.display = 'block';
+                
+                // Add trail point
+                trailPoints.push({x: massPos.x, y: massPos.y});
+                if (trailPoints.length > 100) {
+                    trailPoints.shift();
+                }
+                
+                // Update trail visualization
+                updateTrail();
+                
+                // Continue animation
+                simTime += dt;
+                if (simTime < 50) { // Run for 50 time units
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    // Simulation finished
+                    const button = document.querySelector('button[onclick="startThreeBodySim()"]');
+                    if (button) {
+                        button.textContent = '▶️ Simulate';
+                        button.disabled = false;
+                    }
+                }
+            }
+            
+            function updateTrail() {
+                // Remove old trail
+                const oldTrail = simulator.querySelector('.orbit-trail');
+                if (oldTrail) oldTrail.remove();
+                
+                if (trailPoints.length < 2) return;
+                
+                // Create new trail element
+                const trail = document.createElement('div');
+                trail.className = 'orbit-trail';
+                trail.style.position = 'absolute';
+                trail.style.pointerEvents = 'none';
+                trail.style.zIndex = '1';
+                
+                // Create SVG for smooth trail
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.width = '500px';
+                svg.style.height = '500px';
+                svg.style.overflow = 'visible';
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                let pathData = `M ${trailPoints[0].x} ${trailPoints[0].y}`;
+                for (let i = 1; i < trailPoints.length; i++) {
+                    pathData += ` L ${trailPoints[i].x} ${trailPoints[i].y}`;
+                }
+                
+                path.setAttribute('d', pathData);
+                path.setAttribute('stroke', '#00ff88');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('opacity', '0.7');
+                
+                svg.appendChild(path);
+                trail.appendChild(svg);
+                simulator.appendChild(trail);
+            }
+            
+            // Start animation
+            animate();
+            
+            // Update button to show it's running
+            const button = document.querySelector('button[onclick="startThreeBodySim()"]');
+            if (button) {
+                button.textContent = '⏸️ Running...';
+                button.disabled = true;
+            }
+        }
+
+        // Perturbation analysis
+        function updatePerturbations() {
+            const altitude = parseFloat(document.getElementById('altitude').value);
+            const satInclination = parseFloat(document.getElementById('satInclination').value);
+            
+            document.getElementById('altitudeValue').textContent = altitude;
+            document.getElementById('satInclinationValue').textContent = satInclination.toFixed(1);
+        }
+
+        function showPerturbationEffects() {
+            const altitude = parseFloat(document.getElementById('altitude').value);
+            const satInclination = parseFloat(document.getElementById('satInclination').value) * Math.PI / 180;
+            
+            // Earth parameters
+            const RE = 6371; // km
+            const J2 = 1.08263e-3;
+            const mu = 3.986004418e5; // km³/s²
+            
+            const a = RE + altitude;
+            const n = Math.sqrt(mu / (a*a*a)); // mean motion
+            
+            // Calculate nodal precession rate
+            const nodalPrecession = -1.5 * n * J2 * (RE/a)**2 * Math.cos(satInclination) / (1)**2;
+            const nodalPrecessionDeg = nodalPrecession * 180 / Math.PI * 86400; // deg/day
+            
+            // Calculate apsidal precession rate
+            const apsidalPrecession = 0.75 * n * J2 * (RE/a)**2 * (5 * Math.cos(satInclination)**2 - 1) / (1)**2;
+            const apsidalPrecessionDeg = apsidalPrecession * 180 / Math.PI * 86400; // deg/day
+            
+            document.getElementById('nodalPrecession').innerHTML = 
+                `Nodal Precession: ${nodalPrecessionDeg.toFixed(3)}°/day`;
+            document.getElementById('apsidePrecession').innerHTML = 
+                `Apsidal Precession: ${apsidalPrecessionDeg.toFixed(3)}°/day`;
+        }
+
+        // Mission planning
+        function updateMission() {
+            const departure = document.getElementById('departurePlanet').value;
+            const target = document.getElementById('targetPlanet').value;
+            
+            // Update visualization would go here
+        }
+
+        function calculateTrajectory() {
+            const departure = document.getElementById('departurePlanet').value;
+            const target = document.getElementById('targetPlanet').value;
+            
+            const departureData = planets[departure];
+            const targetData = planets[target];
+            
+            // Simplified Hohmann transfer calculation
+            const a_transfer = (departureData.a + targetData.a) / 2;
+            const transfer_time = Math.sqrt(a_transfer**3) / 2; // years
+            const delta_v = Math.abs(Math.sqrt(1/departureData.a) - Math.sqrt(2/departureData.a - 1/a_transfer)) * 29.78; // km/s
+            
+            document.getElementById('transferTime').innerHTML = 
+                `Transfer Time: ${(transfer_time * 365).toFixed(0)} days`;
+            document.getElementById('deltaVRequired').innerHTML = 
+                `ΔV Required: ${delta_v.toFixed(2)} km/s`;
+            document.getElementById('launchEnergy').innerHTML = 
+                `C₃ Energy: ${(delta_v**2).toFixed(1)} km²/s²`;
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Perturbation effects chart
+            const perturbCtx = document.getElementById('perturbationChart');
+            if (perturbCtx) {
+                new Chart(perturbCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 100}, (_, i) => i),
+                        datasets: [{
+                            label: 'Orbital Element Variation',
+                            data: Array.from({length: 100}, (_, i) => Math.sin(i * 0.1) * (1 + 0.1 * Math.sin(i * 0.05))),
+                            borderColor: '#ffd700',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { labels: { color: 'white' } }
+                        },
+                        scales: {
+                            y: { 
+                                ticks: { color: 'white' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: { 
+                                ticks: { color: 'white' },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Chaos chart
+            const chaosCtx = document.getElementById('chaosChart');
+            if (chaosCtx) {
+                new Chart(chaosCtx.getContext('2d'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Chaotic Trajectory',
+                            data: Array.from({length: 200}, () => ({
+                                x: Math.random() * 2 - 1,
+                                y: Math.random() * 2 - 1
+                            })),
+                            backgroundColor: '#805ad5',
+                            pointRadius: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { labels: { color: 'white', font: { size: 10 } } }
+                        },
+                        scales: {
+                            y: { 
+                                ticks: { color: 'white', font: { size: 8 } },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: { 
+                                ticks: { color: 'white', font: { size: 8 } },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOrbitalParameters();
+            updateSpeed();
+            updateThreeBody();
+            updatePerturbations();
+            initializeCharts();
+            
+            // Ensure MathJax renders everything after it loads
+            window.addEventListener('load', function() {
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise();
+                } else {
+                    // Fallback if MathJax isn't loaded yet
+                    setTimeout(() => {
+                        if (window.MathJax && MathJax.typesetPromise) {
+                            MathJax.typesetPromise();
+                        }
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

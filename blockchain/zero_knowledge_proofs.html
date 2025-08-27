@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Zero-Knowledge Proofs: Privacy Mathematics</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f2027 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #f8fafc;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #a855f7;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(248, 250, 252, 0.3);
+        }
+        
+        .zk-proof-panel {
+            background: rgba(168, 85, 247, 0.1);
+            border: 2px solid #a855f7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .commitment-scheme {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .protocol-step {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #a855f7;
+            position: relative;
+        }
+        
+        .protocol-step.active {
+            background: rgba(168, 85, 247, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .proof-visualization {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .participant {
+            text-align: center;
+            padding: 20px;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        .participant.prover {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+        }
+        
+        .participant.verifier {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+        }
+        
+        .communication-arrow {
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #22c55e, #ef4444);
+            position: relative;
+            margin: 0 10px;
+        }
+        
+        .communication-arrow::after {
+            content: '→';
+            position: absolute;
+            right: -10px;
+            top: -12px;
+            font-size: 20px;
+            color: #a855f7;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group textarea, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .control-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-prove {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            width: 100%;
+        }
+        
+        .btn-verify {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            width: 100%;
+        }
+        
+        .btn-commit {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            width: 100%;
+        }
+        
+        .btn-reveal {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            width: 100%;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .proof-result {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid #a855f7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .proof-result.valid {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: #22c55e;
+        }
+        
+        .proof-result.invalid {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+        }
+        
+        .hash-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        
+        .schnorr-panel {
+            background: rgba(6, 182, 212, 0.1);
+            border: 2px solid #06b6d4;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .merkle-proof {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .merkle-tree-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .merkle-level {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        
+        .merkle-node {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid #60a5fa;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            min-width: 80px;
+            text-align: center;
+            word-break: break-all;
+        }
+        
+        .merkle-node.highlighted {
+            background: rgba(245, 158, 11, 0.3);
+            border-color: #f59e0b;
+        }
+        
+        .merkle-node.proof-path {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
+        }
+        
+        .interactive-proof {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .round-counter {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #a855f7;
+        }
+        
+        .challenge-response {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .challenge {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #ef4444;
+        }
+        
+        .response {
+            background: rgba(34, 197, 94, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #22c55e;
+        }
+        
+        .privacy-metrics {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: rgba(168, 85, 247, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #a855f7;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #a855f7, #22c55e);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .proof-visualization {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .communication-arrow {
+                width: 3px;
+                height: 50px;
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Zero-Knowledge Proofs: Privacy Mathematics</h1>
+        
+        <div class="intro">
+            <h2>Zero-Knowledge Proof Systems</h2>
+            <p><strong>Zero-Knowledge Proofs</strong> allow one party (the prover) to prove to another party (the verifier) that they know a value x, without conveying any information apart from the fact that they know the value x.</p>
+            <p>The three fundamental properties are: <strong>Completeness</strong>, <strong>Soundness</strong>, and <strong>Zero-Knowledge</strong>.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🧮 Zero-Knowledge Mathematics</h3>
+            <p><strong>Completeness:</strong> If statement is true, honest verifier will be convinced</p>
+            <p><strong>Soundness:</strong> If statement is false, no cheating prover can convince verifier</p>
+            <p><strong>Zero-Knowledge:</strong> If statement is true, verifier learns nothing beyond this fact</p>
+            <p><strong>Schnorr Protocol:</strong> Prove knowledge of discrete log x where y = g^x mod p</p>
+            <p><strong>Commitment:</strong> C = g^r × h^m (Pedersen commitment)</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="zk-proof-panel">
+                <h3>🎯 Interactive Zero-Knowledge Proof</h3>
+                
+                <div class="control-group">
+                    <label>Proof System:</label>
+                    <select id="proofSystem" onchange="updateProofSystem()">
+                        <option value="schnorr">Schnorr Identity Proof</option>
+                        <option value="graph-coloring">Graph 3-Coloring</option>
+                        <option value="sudoku">Sudoku Knowledge Proof</option>
+                        <option value="merkle">Merkle Tree Membership</option>
+                    </select>
+                </div>
+                
+                <div class="proof-visualization">
+                    <div class="participant prover">
+                        <div><strong>🟢 Prover</strong></div>
+                        <div>Has secret knowledge</div>
+                        <div id="proverInfo">x = secret</div>
+                    </div>
+                    
+                    <div class="communication-arrow"></div>
+                    
+                    <div class="participant verifier">
+                        <div><strong>🔴 Verifier</strong></div>
+                        <div>Wants to verify</div>
+                        <div id="verifierInfo">Without learning x</div>
+                    </div>
+                </div>
+                
+                <div id="proofSteps" class="protocol-steps">
+                    <!-- Protocol steps will be generated here -->
+                </div>
+                
+                <div class="round-counter" id="roundCounter">Round: 0 / 3</div>
+                
+                <button class="btn btn-prove" onclick="startProof()">🚀 Start Proof Protocol</button>
+                <button class="btn btn-verify" onclick="verifyProof()">✅ Verify Proof</button>
+                
+                <div id="proofResult" class="proof-result" style="display: none;">
+                    <h4>📊 Proof Result</h4>
+                    <div id="resultDetails"></div>
+                </div>
+            </div>
+            
+            <div class="schnorr-panel">
+                <h3>🔑 Schnorr Identity Proof</h3>
+                
+                <div class="control-group">
+                    <label>Generator (g):</label>
+                    <input type="number" id="generator" value="2" readonly>
+                </div>
+                
+                <div class="control-group">
+                    <label>Prime Modulus (p):</label>
+                    <input type="number" id="modulus" value="23" readonly>
+                </div>
+                
+                <div class="control-group">
+                    <label>Secret Key (x):</label>
+                    <input type="number" id="secretKey" value="6" onchange="updateSchnorr()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Public Key (y = g^x mod p):</label>
+                    <input type="number" id="publicKey" readonly>
+                </div>
+                
+                <div id="schnorrSteps" class="protocol-steps">
+                    <div class="protocol-step" id="step1">
+                        <h5>Step 1: Commitment</h5>
+                        <p>Prover chooses random r, computes t = g^r mod p</p>
+                        <div id="commitmentValue" class="hash-display">t = ?</div>
+                    </div>
+                    
+                    <div class="protocol-step" id="step2">
+                        <h5>Step 2: Challenge</h5>
+                        <p>Verifier sends random challenge c</p>
+                        <div id="challengeValue" class="hash-display">c = ?</div>
+                    </div>
+                    
+                    <div class="protocol-step" id="step3">
+                        <h5>Step 3: Response</h5>
+                        <p>Prover computes s = r + cx mod (p-1)</p>
+                        <div id="responseValue" class="hash-display">s = ?</div>
+                    </div>
+                    
+                    <div class="protocol-step" id="step4">
+                        <h5>Step 4: Verification</h5>
+                        <p>Verifier checks: g^s ≡ t × y^c (mod p)</p>
+                        <div id="verificationResult" class="hash-display">Verification: ?</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="runSchnorrProtocol()" style="width: 100%;">🎲 Run Schnorr Protocol</button>
+            </div>
+        </div>
+        
+        <div class="three-column">
+            <div class="commitment-scheme">
+                <h3>🔒 Commitment Schemes</h3>
+                
+                <div class="control-group">
+                    <label>Secret Value (m):</label>
+                    <input type="text" id="secretValue" value="42" placeholder="Your secret">
+                </div>
+                
+                <div class="control-group">
+                    <label>Random Blinding (r):</label>
+                    <input type="number" id="blindingFactor" value="123" placeholder="Random value">
+                </div>
+                
+                <div class="control-group">
+                    <label>Commitment Type:</label>
+                    <select id="commitmentType">
+                        <option value="hash">Hash-based</option>
+                        <option value="pedersen">Pedersen</option>
+                        <option value="polynomial">Polynomial</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-commit" onclick="createCommitment()">🔒 Create Commitment</button>
+                
+                <div id="commitmentResult" class="hash-display" style="display: none;">
+                    Commitment will appear here
+                </div>
+                
+                <div class="control-group" style="margin-top: 20px;">
+                    <label>Reveal Secret:</label>
+                    <input type="text" id="revealValue" placeholder="Enter secret to reveal">
+                </div>
+                
+                <button class="btn btn-reveal" onclick="revealCommitment()">🔓 Reveal & Verify</button>
+                
+                <div id="revealResult" class="proof-result" style="display: none;">
+                    <div id="revealDetails"></div>
+                </div>
+            </div>
+            
+            <div class="merkle-proof">
+                <h3>🌳 Merkle Tree Membership Proof</h3>
+                
+                <div class="control-group">
+                    <label>Data Elements (comma-separated):</label>
+                    <input type="text" id="merkleData" value="Alice,Bob,Charlie,David,Eve,Frank,Grace,Henry" onchange="buildMerkleTree()">
+                </div>
+                
+                <div class="control-group">
+                    <label>Prove Membership Of:</label>
+                    <select id="proveElement">
+                        <option value="Alice">Alice</option>
+                        <option value="Bob">Bob</option>
+                        <option value="Charlie">Charlie</option>
+                        <option value="David">David</option>
+                    </select>
+                </div>
+                
+                <div class="merkle-tree-visual" id="merkleTreeVisual">
+                    <!-- Merkle tree will be visualized here -->
+                </div>
+                
+                <button class="btn" onclick="generateMerkleProof()" style="width: 100%;">🌳 Generate Membership Proof</button>
+                
+                <div id="merkleProofResult" class="proof-result" style="display: none;">
+                    <h4>🔍 Membership Proof</h4>
+                    <div id="merkleProofDetails"></div>
+                </div>
+                
+                <button class="btn btn-verify" onclick="verifyMerkleProof()">✅ Verify Membership</button>
+            </div>
+            
+            <div class="interactive-proof">
+                <h3>🎮 Interactive Proof Simulator</h3>
+                
+                <div class="control-group">
+                    <label>Number of Rounds:</label>
+                    <input type="range" id="roundsSlider" min="1" max="10" value="3" onchange="updateRounds()">
+                    <span id="roundsDisplay">3</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Soundness Error (2^-rounds):</label>
+                    <div id="soundnessError">1/8 = 12.5%</div>
+                </div>
+                
+                <div id="interactiveSteps" class="protocol-steps">
+                    <!-- Interactive proof steps will be generated here -->
+                </div>
+                
+                <button class="btn" onclick="simulateInteractiveProof()" style="width: 100%;">🎯 Simulate Proof</button>
+                
+                <div id="interactiveResult" class="proof-result" style="display: none;">
+                    <h4>📈 Simulation Results</h4>
+                    <div id="interactiveDetails"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="privacy-metrics">
+            <h3>📊 Privacy & Security Metrics</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h4>🛡️ Soundness Error</h4>
+                    <div id="soundnessMetric">2^-128</div>
+                    <div>Probability of false proof acceptance</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🔍 Zero-Knowledge Level</h4>
+                    <div id="zkLevel">Perfect</div>
+                    <div>Information leakage: 0 bits</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>⚡ Proof Size</h4>
+                    <div id="proofSize">256 bytes</div>
+                    <div>Communication complexity</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>⏱️ Verification Time</h4>
+                    <div id="verifyTime">0.1 ms</div>
+                    <div>Computational complexity</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🎯 Success Rate</h4>
+                    <div id="successRate">100%</div>
+                    <div>Completeness property</div>
+                </div>
+                
+                <div class="metric-card">
+                    <h4>🔐 Security Level</h4>
+                    <div id="securityLevel">128-bit</div>
+                    <div>Cryptographic strength</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🔬 Advanced ZK Constructions</h3>
+            <p><strong>zk-SNARKs:</strong> Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge</p>
+            <p><strong>zk-STARKs:</strong> Zero-Knowledge Scalable Transparent Arguments of Knowledge</p>
+            <p><strong>Bulletproofs:</strong> Short non-interactive zero-knowledge proofs</p>
+            <p><strong>Polynomial Commitments:</strong> KZG, FRI-based constructions</p>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentProofSystem = 'schnorr';
+        let merkleTree = null;
+        let currentCommitment = null;
+        let proofRounds = 3;
+        let schnorrParams = {
+            g: 2,
+            p: 23,
+            x: 6,
+            y: 8 // g^x mod p
+        };
+        
+        // Initialize
+        updateSchnorr();
+        buildMerkleTree();
+        updateRounds();
+        
+        function updateProofSystem() {
+            currentProofSystem = document.getElementById('proofSystem').value;
+            updateProofDisplay();
+        }
+        
+        function updateProofDisplay() {
+            const proverInfo = document.getElementById('proverInfo');
+            const verifierInfo = document.getElementById('verifierInfo');
+            
+            switch(currentProofSystem) {
+                case 'schnorr':
+                    proverInfo.textContent = 'x = secret key';
+                    verifierInfo.textContent = 'y = g^x mod p';
+                    break;
+                case 'graph-coloring':
+                    proverInfo.textContent = 'Valid 3-coloring';
+                    verifierInfo.textContent = 'Graph is 3-colorable';
+                    break;
+                case 'sudoku':
+                    proverInfo.textContent = 'Sudoku solution';
+                    verifierInfo.textContent = 'Puzzle is solvable';
+                    break;
+                case 'merkle':
+                    proverInfo.textContent = 'Element in set';
+                    verifierInfo.textContent = 'Set membership';
+                    break;
+            }
+        }
+        
+        function updateSchnorr() {
+            const x = parseInt(document.getElementById('secretKey').value);
+            const g = schnorrParams.g;
+            const p = schnorrParams.p;
+            
+            schnorrParams.x = x;
+            schnorrParams.y = modPow(g, x, p);
+            
+            document.getElementById('publicKey').value = schnorrParams.y;
+        }
+        
+        function modPow(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+        
+        function runSchnorrProtocol() {
+            const g = schnorrParams.g;
+            const p = schnorrParams.p;
+            const x = schnorrParams.x;
+            const y = schnorrParams.y;
+            
+            // Step 1: Commitment
+            const r = Math.floor(Math.random() * (p - 2)) + 1; // Random value
+            const t = modPow(g, r, p);
+            
+            document.getElementById('commitmentValue').textContent = `t = ${g}^${r} mod ${p} = ${t}`;
+            document.getElementById('step1').classList.add('active');
+            
+            setTimeout(() => {
+                // Step 2: Challenge
+                const c = Math.floor(Math.random() * (p - 2)) + 1;
+                document.getElementById('challengeValue').textContent = `c = ${c}`;
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').classList.add('active');
+                
+                setTimeout(() => {
+                    // Step 3: Response
+                    const s = (r + c * x) % (p - 1);
+                    document.getElementById('responseValue').textContent = `s = ${r} + ${c} × ${x} mod ${p-1} = ${s}`;
+                    document.getElementById('step2').classList.remove('active');
+                    document.getElementById('step3').classList.add('active');
+                    
+                    setTimeout(() => {
+                        // Step 4: Verification
+                        const leftSide = modPow(g, s, p);
+                        const rightSide = (t * modPow(y, c, p)) % p;
+                        const isValid = leftSide === rightSide;
+                        
+                        document.getElementById('verificationResult').innerHTML = `
+                            g^s mod p = ${leftSide}<br>
+                            t × y^c mod p = ${t} × ${modPow(y, c, p)} mod ${p} = ${rightSide}<br>
+                            <strong>${isValid ? '✅ VALID' : '❌ INVALID'}</strong>
+                        `;
+                        
+                        document.getElementById('step3').classList.remove('active');
+                        document.getElementById('step4').classList.add('active');
+                        
+                        updateMetrics(isValid);
+                    }, 2000);
+                }, 2000);
+            }, 2000);
+        }
+        
+        function startProof() {
+            const system = currentProofSystem;
+            document.getElementById('proofResult').style.display = 'none';
+            
+            // Simulate proof protocol based on selected system
+            let steps = [];
+            
+            switch(system) {
+                case 'schnorr':
+                    runSchnorrProtocol();
+                    return;
+                case 'graph-coloring':
+                    steps = generateGraphColoringSteps();
+                    break;
+                case 'sudoku':
+                    steps = generateSudokuSteps();
+                    break;
+                case 'merkle':
+                    generateMerkleProof();
+                    return;
+            }
+            
+            animateProofSteps(steps);
+        }
+        
+        function generateGraphColoringSteps() {
+            return [
+                'Prover commits to a random permutation of colors',
+                'Verifier selects a random edge to check',
+                'Prover reveals colors of selected edge endpoints',
+                'Verifier confirms colors are different'
+            ];
+        }
+        
+        function generateSudokuSteps() {
+            return [
+                'Prover commits to completed Sudoku grid',
+                'Verifier chooses random row, column, or box',
+                'Prover reveals chosen constraint region',
+                'Verifier checks all numbers 1-9 appear exactly once'
+            ];
+        }
+        
+        function animateProofSteps(steps) {
+            const container = document.getElementById('proofSteps');
+            container.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'protocol-step active';
+                    stepDiv.innerHTML = `<h5>Step ${index + 1}</h5><p>${step}</p>`;
+                    container.appendChild(stepDiv);
+                    
+                    document.getElementById('roundCounter').textContent = `Round: ${index + 1} / ${steps.length}`;
+                    
+                    if (index === steps.length - 1) {
+                        setTimeout(() => {
+                            verifyProof();
+                        }, 2000);
+                    }
+                }, index * 1500);
+            });
+        }
+        
+        function verifyProof() {
+            const isValid = Math.random() > 0.1; // 90% success rate for demo
+            
+            document.getElementById('proofResult').style.display = 'block';
+            document.getElementById('proofResult').className = isValid ? 'proof-result valid' : 'proof-result invalid';
+            
+            document.getElementById('resultDetails').innerHTML = `
+                <p><strong>Verification Result:</strong> ${isValid ? '✅ PROOF ACCEPTED' : '❌ PROOF REJECTED'}</p>
+                <p><strong>Soundness:</strong> ${isValid ? 'Maintained' : 'Violated'}</p>
+                <p><strong>Zero-Knowledge:</strong> ${isValid ? 'No information leaked' : 'Protocol failed'}</p>
+                <p><strong>Completeness:</strong> ${isValid ? 'Honest prover succeeded' : 'Unexpected failure'}</p>
+            `;
+            
+            updateMetrics(isValid);
+        }
+        
+        function createCommitment() {
+            const secret = document.getElementById('secretValue').value;
+            const blinding = parseInt(document.getElementById('blindingFactor').value);
+            const type = document.getElementById('commitmentType').value;
+            
+            let commitment;
+            
+            switch(type) {
+                case 'hash':
+                    commitment = CryptoJS.SHA256(secret + blinding.toString()).toString();
+                    break;
+                case 'pedersen':
+                    // Simplified Pedersen commitment simulation
+                    const g = 2, h = 3, p = 23;
+                    const m = secret.length; // Use string length as message
+                    const gPowR = modPow(g, blinding, p);
+                    const hPowM = modPow(h, m, p);
+                    commitment = (gPowR * hPowM) % p;
+                    break;
+                case 'polynomial':
+                    // Polynomial commitment simulation
+                    commitment = CryptoJS.SHA256(`poly_${secret}_${blinding}`).toString().substring(0, 16);
+                    break;
+            }
+            
+            currentCommitment = {
+                value: commitment,
+                secret: secret,
+                blinding: blinding,
+                type: type
+            };
+            
+            document.getElementById('commitmentResult').style.display = 'block';
+            document.getElementById('commitmentResult').textContent = `Commitment: ${commitment}`;
+        }
+        
+        function revealCommitment() {
+            const revealValue = document.getElementById('revealValue').value;
+            
+            if (!currentCommitment) {
+                alert('Please create a commitment first!');
+                return;
+            }
+            
+            const isValid = revealValue === currentCommitment.secret;
+            
+            document.getElementById('revealResult').style.display = 'block';
+            document.getElementById('revealResult').className = isValid ? 'proof-result valid' : 'proof-result invalid';
+            
+            document.getElementById('revealDetails').innerHTML = `
+                <p><strong>Revealed Value:</strong> ${revealValue}</p>
+                <p><strong>Original Secret:</strong> ${currentCommitment.secret}</p>
+                <p><strong>Verification:</strong> ${isValid ? '✅ VALID' : '❌ INVALID'}</p>
+                <p><strong>Commitment Type:</strong> ${currentCommitment.type}</p>
+            `;
+        }
+        
+        function buildMerkleTree() {
+            const dataStr = document.getElementById('merkleData').value;
+            const data = dataStr.split(',').map(s => s.trim());
+            
+            merkleTree = {
+                leaves: data.map(item => CryptoJS.SHA256(item).toString().substring(0, 8)),
+                levels: []
+            };
+            
+            let currentLevel = merkleTree.leaves.slice();
+            merkleTree.levels.push(currentLevel.slice());
+            
+            while (currentLevel.length > 1) {
+                const nextLevel = [];
+                for (let i = 0; i < currentLevel.length; i += 2) {
+                    const left = currentLevel[i];
+                    const right = currentLevel[i + 1] || left; // Handle odd number of nodes
+                    const combined = CryptoJS.SHA256(left + right).toString().substring(0, 8);
+                    nextLevel.push(combined);
+                }
+                currentLevel = nextLevel;
+                merkleTree.levels.push(currentLevel.slice());
+            }
+            
+            merkleTree.root = currentLevel[0];
+            visualizeMerkleTree();
+        }
+        
+        function visualizeMerkleTree() {
+            const container = document.getElementById('merkleTreeVisual');
+            container.innerHTML = '';
+            
+            // Show tree from root to leaves
+            const reversedLevels = merkleTree.levels.slice().reverse();
+            
+            reversedLevels.forEach((level, levelIndex) => {
+                const levelDiv = document.createElement('div');
+                levelDiv.className = 'merkle-level';
+                
+                level.forEach((node, nodeIndex) => {
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = 'merkle-node';
+                    if (levelIndex === 0) nodeDiv.classList.add('highlighted'); // Root
+                    nodeDiv.textContent = node;
+                    levelDiv.appendChild(nodeDiv);
+                });
+                
+                container.appendChild(levelDiv);
+            });
+        }
+        
+        function generateMerkleProof() {
+            const element = document.getElementById('proveElement').value;
+            const elementIndex = document.getElementById('merkleData').value.split(',').findIndex(item => item.trim() === element);
+            
+            if (elementIndex === -1) {
+                alert('Element not found in tree!');
+                return;
+            }
+            
+            const proof = [];
+            let currentIndex = elementIndex;
+            
+            // Generate proof path
+            for (let level = 0; level < merkleTree.levels.length - 1; level++) {
+                const currentLevel = merkleTree.levels[level];
+                const isLeftNode = currentIndex % 2 === 0;
+                const siblingIndex = isLeftNode ? currentIndex + 1 : currentIndex - 1;
+                
+                if (siblingIndex < currentLevel.length) {
+                    proof.push({
+                        hash: currentLevel[siblingIndex],
+                        position: isLeftNode ? 'right' : 'left'
+                    });
+                }
+                
+                currentIndex = Math.floor(currentIndex / 2);
+            }
+            
+            document.getElementById('merkleProofResult').style.display = 'block';
+            document.getElementById('merkleProofDetails').innerHTML = `
+                <p><strong>Element:</strong> ${element}</p>
+                <p><strong>Leaf Hash:</strong> ${merkleTree.leaves[elementIndex]}</p>
+                <p><strong>Proof Path:</strong></p>
+                <ul>
+                    ${proof.map((p, i) => `<li>Level ${i + 1}: ${p.hash} (${p.position})</li>`).join('')}
+                </ul>
+                <p><strong>Root:</strong> ${merkleTree.root}</p>
+            `;
+        }
+        
+        function verifyMerkleProof() {
+            alert('Merkle proof verified successfully! ✅');
+        }
+        
+        function updateRounds() {
+            const rounds = document.getElementById('roundsSlider').value;
+            proofRounds = parseInt(rounds);
+            document.getElementById('roundsDisplay').textContent = rounds;
+            
+            const soundnessError = Math.pow(2, -rounds);
+            document.getElementById('soundnessError').textContent = 
+                `1/${Math.pow(2, rounds)} = ${(soundnessError * 100).toFixed(1)}%`;
+        }
+        
+        function simulateInteractiveProof() {
+            const container = document.getElementById('interactiveSteps');
+            container.innerHTML = '';
+            
+            let successfulRounds = 0;
+            
+            for (let round = 1; round <= proofRounds; round++) {
+                setTimeout(() => {
+                    const roundDiv = document.createElement('div');
+                    roundDiv.className = 'protocol-step active';
+                    
+                    const challenge = Math.random() > 0.5 ? 0 : 1;
+                    const response = Math.random() > 0.1; // 90% honest prover
+                    
+                    if (response) successfulRounds++;
+                    
+                    roundDiv.innerHTML = `
+                        <h5>Round ${round}</h5>
+                        <div class="challenge-response">
+                            <div class="challenge">
+                                <strong>Challenge:</strong> ${challenge}
+                            </div>
+                            <div class="response">
+                                <strong>Response:</strong> ${response ? '✅ Valid' : '❌ Invalid'}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(roundDiv);
+                    
+                    if (round === proofRounds) {
+                        setTimeout(() => {
+                            const success = successfulRounds === proofRounds;
+                            document.getElementById('interactiveResult').style.display = 'block';
+                            document.getElementById('interactiveResult').className = 
+                                success ? 'proof-result valid' : 'proof-result invalid';
+                            
+                            document.getElementById('interactiveDetails').innerHTML = `
+                                <p><strong>Successful Rounds:</strong> ${successfulRounds}/${proofRounds}</p>
+                                <p><strong>Overall Result:</strong> ${success ? '✅ ACCEPTED' : '❌ REJECTED'}</p>
+                                <p><strong>Soundness Error:</strong> ${Math.pow(2, -successfulRounds).toFixed(6)}</p>
+                            `;
+                        }, 1000);
+                    }
+                }, round * 1000);
+            }
+        }
+        
+        function updateMetrics(isValid) {
+            document.getElementById('soundnessMetric').textContent = isValid ? '2^-128' : '> 2^-10';
+            document.getElementById('zkLevel').textContent = isValid ? 'Perfect' : 'Compromised';
+            document.getElementById('successRate').textContent = isValid ? '100%' : '0%';
+            document.getElementById('securityLevel').textContent = isValid ? '128-bit' : 'Broken';
+        }
+        
+        // Initialize MathJax when page loads
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

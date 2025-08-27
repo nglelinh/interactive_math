@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Numbers in Audio Processing - Fundamentals - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #81c784;
+            border-bottom: 2px solid #81c784;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h3 {
+            color: #ffb74d;
+            margin-top: 30px;
+        }
+        
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .example-section {
+            background: rgba(129, 199, 132, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #81c784;
+        }
+        
+        .interactive-demo {
+            background: rgba(255, 183, 77, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #ffb74d;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            color: #b3e5fc;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #37474f;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+        }
+        
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 3px solid #4fc3f7;
+        }
+        
+        .visualization-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .plot-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            height: 400px;
+        }
+        
+        .single-plot {
+            grid-column: span 2;
+            height: 500px;
+        }
+        
+        .audio-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .value-display {
+            color: #4fc3f7;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .navigation-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 40px 0;
+            border-left: 4px solid #ff7043;
+            text-align: center;
+        }
+
+        .nav-button {
+            background: linear-gradient(45deg, #ff7043, #ff5722);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 112, 67, 0.3);
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            background: linear-gradient(45deg, #ff5722, #e64a19);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 112, 67, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-container {
+                grid-template-columns: 1fr;
+            }
+            .single-plot {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Complex Numbers in Audio Processing - Fundamentals</h1>
+        
+        <div class="navigation-section">
+            <h3>📚 Tutorial Series Navigation</h3>
+            <p>This is <strong>Part 1</strong> of our comprehensive guide to complex numbers in audio processing.</p>
+            <a href="complex_numbers_audio_fundamentals.html" class="nav-button">📖 Part 1: Fundamentals (Current)</a>
+            <a href="complex_numbers_audio_advanced.html" class="nav-button">🚀 Part 2: Advanced Applications</a>
+        </div>
+        
+        <div class="theory-section">
+            <h2>🎵 Why Complex Numbers in Audio?</h2>
+            <p>Complex numbers are fundamental to audio processing because they provide a natural way to represent both the <strong>magnitude</strong> and <strong>phase</strong> of sinusoidal signals. Every audio signal can be decomposed into sinusoidal components, and complex numbers give us the mathematical tools to analyze and manipulate these components effectively.</p>
+            
+            <div class="math-formula">
+                <h3>Euler's Formula - The Foundation</h3>
+                $$e^{j\omega t} = \cos(\omega t) + j\sin(\omega t)$$
+                <p>This fundamental formula connects complex exponentials to sinusoidal functions, allowing us to represent audio signals elegantly.</p>
+            </div>
+            
+            <h3>Key Concepts:</h3>
+            <ul>
+                <li><strong>Magnitude:</strong> |z| = √(Re(z)² + Im(z)²) - represents the amplitude of the signal</li>
+                <li><strong>Phase:</strong> ∠z = arctan(Im(z)/Re(z)) - represents the timing/phase shift</li>
+                <li><strong>Frequency Domain:</strong> Complex numbers naturally represent frequency components</li>
+                <li><strong>Filtering:</strong> Complex multiplication implements phase shifts and amplitude scaling</li>
+            </ul>
+        </div>
+
+        <div class="interactive-demo">
+            <h2>🔧 Interactive Demo 1: Complex Sinusoids</h2>
+            <p><strong>Understanding Complex Sinusoids:</strong> This demo illustrates the fundamental connection between complex exponentials and audio signals. A complex sinusoid z(t) = Ae^(jωt) represents a rotating vector in the complex plane that traces a perfect circle.</p>
+            
+            <p><strong>Why This Matters:</strong> Every audio signal can be decomposed into sinusoidal components. By representing these as complex exponentials, we can:</p>
+            <ul>
+                <li><strong>Separate magnitude and phase:</strong> The amplitude |z(t)| = A remains constant, while the phase ∠z(t) = ωt + φ increases linearly</li>
+                <li><strong>Simplify calculations:</strong> Complex multiplication handles frequency mixing, filtering, and modulation elegantly</li>
+                <li><strong>Visualize rotation:</strong> The complex plane shows how frequency corresponds to rotational speed</li>
+                <li><strong>Enable frequency analysis:</strong> The Fourier transform becomes a simple projection onto complex basis functions</li>
+            </ul>
+            
+            <p><strong>Key Insight:</strong> The audio waveform you hear is just the <em>real part</em> of this complex rotation. The imaginary part contains the quadrature component, which is essential for advanced signal processing like hilbert transforms and analytic signal analysis.</p>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="frequency1">Frequency (Hz): <span id="freq1-value" class="value-display">440</span></label>
+                    <input type="range" id="frequency1" min="100" max="2000" value="440" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="amplitude1">Amplitude: <span id="amp1-value" class="value-display">1.0</span></label>
+                    <input type="range" id="amplitude1" min="0.1" max="2.0" value="1.0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label for="phase1">Phase (degrees): <span id="phase1-value" class="value-display">0</span></label>
+                    <input type="range" id="phase1" min="0" max="360" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label for="time-speed">Animation Speed: <span id="speed-value" class="value-display">1.0</span></label>
+                    <input type="range" id="time-speed" min="0.1" max="3.0" value="1.0" step="0.1">
+                </div>
+            </div>
+            
+            <div class="audio-controls">
+                <button onclick="toggleAudio1()">🔊 Play/Stop Audio</button>
+                <button onclick="resetAnimation1()">↻ Reset Animation</button>
+            </div>
+            
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="complex-plane-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="waveform-plot"></div>
+                </div>
+            </div>
+            
+            <div class="math-formula">
+                <h4>Mathematical Representation:</h4>
+                $$z(t) = A \cdot e^{j(\omega t + \phi)} = A[\cos(\omega t + \phi) + j\sin(\omega t + \phi)]$$
+                <p><strong>Component Analysis:</strong></p>
+                <ul>
+                    <li><strong>A:</strong> Amplitude (loudness) - determines the radius of the circle in complex plane</li>
+                    <li><strong>ω = 2πf:</strong> Angular frequency (rad/s) - determines rotation speed</li>
+                    <li><strong>φ:</strong> Phase shift (rad) - determines starting angle</li>
+                    <li><strong>Real part:</strong> A cos(ωt + φ) - the actual audio signal we hear</li>
+                    <li><strong>Imaginary part:</strong> A sin(ωt + φ) - the quadrature component for advanced processing</li>
+                </ul>
+                <p><strong>Physical Interpretation:</strong> In audio, this represents a pure tone at frequency f Hz with amplitude A and initial phase φ. The complex representation allows us to track both the instantaneous amplitude and phase, crucial for effects like FM synthesis and audio analysis.</p>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <h2>📊 Example 1: Fourier Transform Fundamentals</h2>
+            <p><strong>The Mathematical Foundation:</strong> The Discrete Fourier Transform (DFT) is the cornerstone of digital audio processing. It reveals the "hidden" frequency components within any audio signal by correlating the signal with complex exponential basis functions.</p>
+            
+            <p><strong>How It Works:</strong> The DFT essentially asks: "How much of each possible frequency component is present in this signal?" Each complex coefficient X[k] tells us both the amplitude |X[k]| and phase ∠X[k] of the k-th frequency component.</p>
+            
+            <div class="math-formula">
+                <h4>DFT Formula:</h4>
+                $$X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-j2\pi kn/N}$$
+                <p><strong>Breaking it down:</strong></p>
+                <ul>
+                    <li><strong>X[k]:</strong> Complex frequency coefficient at frequency bin k (represents kfs/N Hz)</li>
+                    <li><strong>x[n]:</strong> Time-domain signal sample at time n/fs</li>
+                    <li><strong>e^(-j2πkn/N):</strong> Complex exponential basis function - a "template" for frequency k</li>
+                    <li><strong>N:</strong> Number of samples (determines frequency resolution)</li>
+                </ul>
+                <p><strong>Complex Output Interpretation:</strong></p>
+                <ul>
+                    <li><strong>Magnitude |X[k]|:</strong> How much of frequency k is present (amplitude)</li>
+                    <li><strong>Phase ∠X[k]:</strong> When frequency k starts relative to time zero (timing)</li>
+                    <li><strong>Real part Re{X[k]}:</strong> In-phase component with cosine basis</li>
+                    <li><strong>Imaginary part Im{X[k]}:</strong> Quadrature component with sine basis</li>
+                </ul>
+            </div>
+            
+            <p><strong>Real-world Applications:</strong></p>
+            <ul>
+                <li><strong>Equalizers:</strong> Modify |X[k]| for specific frequency bins to boost/cut frequencies</li>
+                <li><strong>Pitch detection:</strong> Find the bin k with maximum |X[k]| to identify fundamental frequency</li>
+                <li><strong>Audio compression (MP3):</strong> Discard X[k] values with small magnitudes (psychoacoustic masking)</li>
+                <li><strong>Noise reduction:</strong> Compare |X[k]| to noise floor estimates and attenuate accordingly</li>
+                <li><strong>Auto-tune:</strong> Shift phase ∠X[k] to correct pitch while preserving timbre</li>
+            </ul>
+            
+            <p><strong>Why Complex Numbers Are Essential:</strong> Real-valued transforms (like DCT) only give you magnitude information. Complex DFT preserves both magnitude AND phase, allowing perfect reconstruction via the inverse DFT. Phase information is crucial for maintaining audio quality and enabling sophisticated processing techniques.</p>
+        </div>
+
+        <div class="interactive-demo">
+            <h2>🧩 Interactive Demo 2: Complex Signal Construction</h2>
+            <p><strong>Building Complex Signals from Scratch:</strong> This demo lets you directly manipulate the real and imaginary components of a complex signal to understand how these mathematical constructs relate to actual audio waveforms and their properties.</p>
+            
+            <p><strong>Mathematical Foundation:</strong> A complex signal can be written as:</p>
+            <div class="math-formula">
+                $$z(t) = \text{Re}(t) + j \cdot \text{Im}(t)$$
+                <p>Where you can independently control:</p>
+                <ul>
+                    <li><strong>Real Part Re(t):</strong> The "in-phase" component - what you actually hear in audio</li>
+                    <li><strong>Imaginary Part Im(t):</strong> The "quadrature" component - mathematically necessary for complete signal description</li>
+                    <li><strong>Magnitude |z(t)|:</strong> √(Re²(t) + Im²(t)) - the instantaneous amplitude</li>
+                    <li><strong>Phase ∠z(t):</strong> arctan(Im(t)/Re(t)) - the instantaneous phase</li>
+                </ul>
+            </div>
+            
+            <p><strong>Key Insights to Explore:</strong></p>
+            <ul>
+                <li><strong>Real-only Signals:</strong> Set Im = 0 to see how traditional audio signals are just the real part of complex representation</li>
+                <li><strong>Pure Imaginary Signals:</strong> Set Re = 0 to explore the quadrature component and its 90° phase relationship</li>
+                <li><strong>Balanced Complex Signals:</strong> Equal Re and Im components create rotating phasors with linear phase progression</li>
+                <li><strong>Amplitude Modulation:</strong> Varying magnitude while keeping phase constant shows how complex numbers handle AM</li>
+                <li><strong>Phase Modulation:</strong> Varying phase while keeping magnitude constant demonstrates FM-like effects</li>
+            </ul>
+            
+            <p><strong>Professional Applications:</strong></p>
+            <ul>
+                <li><strong>Hilbert Transform:</strong> Creates analytic signals where Im(t) is derived from Re(t)</li>
+                <li><strong>I/Q Modulation:</strong> Radio communications use separate real/imaginary channels</li>
+                <li><strong>Complex Envelope:</strong> Represents modulated signals in baseband for efficient processing</li>
+                <li><strong>Instantaneous Frequency:</strong> d(phase)/dt gives frequency variations over time</li>
+            </ul>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="real-freq">Real Part Frequency (Hz): <span id="real-freq-value" class="value-display">440</span></label>
+                    <input type="range" id="real-freq" min="100" max="1000" value="440" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="real-amp">Real Part Amplitude: <span id="real-amp-value" class="value-display">1.0</span></label>
+                    <input type="range" id="real-amp" min="0" max="2.0" value="1.0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label for="real-phase">Real Part Phase (°): <span id="real-phase-value" class="value-display">0</span></label>
+                    <input type="range" id="real-phase" min="0" max="360" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label for="imag-freq">Imaginary Part Frequency (Hz): <span id="imag-freq-value" class="value-display">440</span></label>
+                    <input type="range" id="imag-freq" min="100" max="1000" value="440" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="imag-amp">Imaginary Part Amplitude: <span id="imag-amp-value" class="value-display">1.0</span></label>
+                    <input type="range" id="imag-amp" min="0" max="2.0" value="1.0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label for="imag-phase">Imaginary Part Phase (°): <span id="imag-phase-value" class="value-display">90</span></label>
+                    <input type="range" id="imag-phase" min="0" max="360" value="90" step="5">
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <button onclick="setRealOnly()">📊 Real Only (Traditional Audio)</button>
+                    <button onclick="setImagOnly()">📈 Imaginary Only (Quadrature)</button>
+                </div>
+                <div class="control-group">
+                    <button onclick="setAnalyticSignal()">🌊 Analytic Signal (Hilbert Pair)</button>
+                    <button onclick="setRotatingPhasor()">🔄 Rotating Phasor (Equal Components)</button>
+                </div>
+            </div>
+            
+            <div class="audio-controls">
+                <button onclick="playComplexSignal()">🔊 Play Real Part (Audible Signal)</button>
+                <button onclick="toggleComplexAnimation()">▶️ Start/Stop Complex Animation</button>
+            </div>
+            
+            <!-- Complex Signal Component Plots -->
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="real-part-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="imaginary-part-plot"></div>
+                </div>
+            </div>
+            
+            <!-- Complex Plane and Properties -->
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="complex-trajectory-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="magnitude-phase-plot"></div>
+                </div>
+            </div>
+            
+            <!-- Instantaneous Properties -->
+            <div class="visualization-container">
+                <div class="plot-container single-plot">
+                    <div id="instantaneous-properties-plot"></div>
+                </div>
+            </div>
+            
+            <div class="math-formula">
+                <h4>Real-time Complex Signal Analysis:</h4>
+                <p><strong>Current Signal Properties:</strong></p>
+                <ul>
+                    <li><strong>Complex Signal:</strong> z(t) = <span id="complex-formula">Re(t) + j·Im(t)</span></li>
+                    <li><strong>Instantaneous Magnitude:</strong> |z(t)| = <span id="magnitude-formula">√(Re²(t) + Im²(t))</span></li>
+                    <li><strong>Instantaneous Phase:</strong> ∠z(t) = <span id="phase-formula">arctan(Im(t)/Re(t))</span></li>
+                    <li><strong>Instantaneous Frequency:</strong> f_inst = <span id="freq-formula">d(∠z(t))/dt / 2π</span></li>
+                </ul>
+                <p><strong>Educational Notes:</strong> Observe how changing the real and imaginary components affects the magnitude, phase, and trajectory in the complex plane. This demonstrates why complex numbers are essential for complete signal representation.</p>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <h2>🎛️ Interactive Demo 3: Frequency Analysis with DFT</h2>
+            <p><strong>Composite Signal Analysis:</strong> Real-world audio signals are never pure tones - they're combinations of multiple frequencies. This demo shows how the DFT decomposes a composite signal into its constituent frequency components using complex mathematics.</p>
+            
+            <p><strong>Mathematical Process:</strong> When you create a signal with multiple frequency components f₁, f₂, f₃, the time-domain signal becomes:</p>
+            <div class="math-formula">
+                $$x(t) = A_1\cos(2\pi f_1 t) + A_2\cos(2\pi f_2 t) + A_3\cos(2\pi f_3 t)$$
+            </div>
+            
+            <p><strong>DFT Magic:</strong> The complex DFT acts like a "frequency detector" - it correlates your signal with complex exponentials at each frequency bin. When the input frequency matches a bin frequency, you get constructive interference (large |X[k]|). When they don't match, you get destructive interference (small |X[k]|).</p>
+            
+            <p><strong>What You'll Observe:</strong></p>
+            <ul>
+                <li><strong>Individual Components:</strong> Each component signal shows a pure sinusoid at its specific frequency and amplitude</li>
+                <li><strong>Complex Plane Representation:</strong> Shows each component as a rotating phasor (vector) with its current position and trajectory</li>
+                <li><strong>Composite Signal:</strong> The sum of all components - notice how the waveform becomes more complex</li>
+                <li><strong>Magnitude Spectrum:</strong> Shows peaks at exactly f₁, f₂, and f₃ with heights proportional to A₁, A₂, A₃</li>
+                <li><strong>Phase Spectrum:</strong> Reveals the relative timing of each frequency component</li>
+                <li><strong>Frequency Resolution:</strong> Determined by N (number of samples) - more samples = finer frequency detail</li>
+                <li><strong>Spectral Leakage:</strong> When frequencies don't align with bin centers, energy "leaks" to nearby bins</li>
+            </ul>
+            
+            <p><strong>Complex Phasor Interpretation:</strong></p>
+            <ul>
+                <li><strong>Circle Trajectories:</strong> Each component traces a circle in the complex plane with radius = amplitude</li>
+                <li><strong>Rotation Speed:</strong> Higher frequency components rotate faster (ω = 2πf rad/s)</li>
+                <li><strong>Vector Addition:</strong> The composite signal's instantaneous value is the vector sum of all phasors</li>
+                <li><strong>Phase Relationships:</strong> The relative positions of phasors determine constructive/destructive interference</li>
+            </ul>
+            
+            <p><strong>Professional Applications:</strong></p>
+            <ul>
+                <li><strong>Audio Forensics:</strong> Identify hidden tones or detect audio tampering</li>
+                <li><strong>Musical Analysis:</strong> Extract chord progressions and harmonic content</li>
+                <li><strong>Acoustic Analysis:</strong> Measure room acoustics and speaker frequency response</li>
+                <li><strong>Radar/Sonar:</strong> Detect targets by their frequency signatures</li>
+            </ul>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label for="freq-comp1">Component 1 Frequency (Hz): <span id="comp1-freq-value" class="value-display">440</span></label>
+                    <input type="range" id="freq-comp1" min="100" max="1000" value="440" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="amp-comp1">Component 1 Amplitude: <span id="comp1-amp-value" class="value-display">1.0</span></label>
+                    <input type="range" id="amp-comp1" min="0" max="2" value="1.0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label for="freq-comp2">Component 2 Frequency (Hz): <span id="comp2-freq-value" class="value-display">880</span></label>
+                    <input type="range" id="freq-comp2" min="100" max="1000" value="880" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="amp-comp2">Component 2 Amplitude: <span id="comp2-amp-value" class="value-display">0.5</span></label>
+                    <input type="range" id="amp-comp2" min="0" max="2" value="0.5" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label for="freq-comp3">Component 3 Frequency (Hz): <span id="comp3-freq-value" class="value-display">660</span></label>
+                    <input type="range" id="freq-comp3" min="100" max="1000" value="660" step="10">
+                </div>
+                <div class="control-group">
+                    <label for="amp-comp3">Component 3 Amplitude: <span id="comp3-amp-value" class="value-display">0.3</span></label>
+                    <input type="range" id="amp-comp3" min="0" max="2" value="0.3" step="0.1">
+                </div>
+            </div>
+            
+            <div class="audio-controls">
+                <button onclick="toggleAudio2()">🔊 Play/Stop Composite Signal</button>
+                <button onclick="updateDFT()">🔄 Update Analysis</button>
+            </div>
+            
+            <!-- Individual Component Visualizations -->
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="component1-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="component2-plot"></div>
+                </div>
+            </div>
+            
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="component3-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="components-complex-plane"></div>
+                </div>
+            </div>
+            
+            <!-- Composite Signal Visualization -->
+            <div class="visualization-container">
+                <div class="plot-container single-plot">
+                    <div id="composite-signal-plot"></div>
+                </div>
+            </div>
+            
+            <!-- Frequency Domain Analysis -->
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <div id="magnitude-spectrum-plot"></div>
+                </div>
+                <div class="plot-container">
+                    <div id="phase-spectrum-plot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-section">
+            <h3>🎯 What's Next?</h3>
+            <p>You've learned the fundamentals of complex numbers in audio processing! Continue to Part 2 to explore advanced applications including digital filters, spectrograms, audio effects, and real-world implementations.</p>
+            <a href="complex_numbers_audio_advanced.html" class="nav-button">🚀 Continue to Part 2: Advanced Applications</a>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for audio context and data
+        let audioContext;
+        let isPlaying1 = false;
+        let isPlaying2 = false;
+        let animationFrame;
+        let currentTime = 0;
+        let oscillator1, oscillator2;
+        
+        // Initialize audio context
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Complex number operations
+        class Complex {
+            constructor(real, imag) {
+                this.real = real;
+                this.imag = imag;
+            }
+            
+            magnitude() {
+                return Math.sqrt(this.real * this.real + this.imag * this.imag);
+            }
+            
+            phase() {
+                return Math.atan2(this.imag, this.real);
+            }
+            
+            multiply(other) {
+                return new Complex(
+                    this.real * other.real - this.imag * other.imag,
+                    this.real * other.imag + this.imag * other.real
+                );
+            }
+            
+            add(other) {
+                return new Complex(this.real + other.real, this.imag + other.imag);
+            }
+        }
+
+        // Update value displays
+        function updateValueDisplays() {
+            document.getElementById('freq1-value').textContent = document.getElementById('frequency1').value;
+            document.getElementById('amp1-value').textContent = document.getElementById('amplitude1').value;
+            document.getElementById('phase1-value').textContent = document.getElementById('phase1').value;
+            document.getElementById('speed-value').textContent = document.getElementById('time-speed').value;
+            
+            if (document.getElementById('comp1-freq-value')) {
+                document.getElementById('comp1-freq-value').textContent = document.getElementById('freq-comp1').value;
+                document.getElementById('comp1-amp-value').textContent = document.getElementById('amp-comp1').value;
+                document.getElementById('comp2-freq-value').textContent = document.getElementById('freq-comp2').value;
+                document.getElementById('comp2-amp-value').textContent = document.getElementById('amp-comp2').value;
+                document.getElementById('comp3-freq-value').textContent = document.getElementById('freq-comp3').value;
+                document.getElementById('comp3-amp-value').textContent = document.getElementById('amp-comp3').value;
+            }
+            
+            updateComplexSinusoid();
+            updateDFT();
+        }
+
+        // Update complex value displays
+        function updateComplexValueDisplays() {
+            document.getElementById('real-freq-value').textContent = document.getElementById('real-freq').value;
+            document.getElementById('real-amp-value').textContent = document.getElementById('real-amp').value;
+            document.getElementById('real-phase-value').textContent = document.getElementById('real-phase').value;
+            document.getElementById('imag-freq-value').textContent = document.getElementById('imag-freq').value;
+            document.getElementById('imag-amp-value').textContent = document.getElementById('imag-amp').value;
+            document.getElementById('imag-phase-value').textContent = document.getElementById('imag-phase').value;
+            
+            updateComplexSignal();
+        }
+
+        // Demo 1: Complex sinusoids
+        function updateComplexSinusoid() {
+            const frequency = parseFloat(document.getElementById('frequency1').value);
+            const amplitude = parseFloat(document.getElementById('amplitude1').value);
+            const phase = parseFloat(document.getElementById('phase1').value) * Math.PI / 180;
+            const speed = parseFloat(document.getElementById('time-speed').value);
+            
+            const omega = 2 * Math.PI * frequency;
+            const adjustedTime = currentTime * speed;
+            
+            // Generate time domain data
+            const sampleRate = 1000;
+            const duration = 2;
+            const samples = duration * sampleRate;
+            const timeAxis = [];
+            const realPart = [];
+            const imagPart = [];
+            
+            for (let i = 0; i < samples; i++) {
+                const t = i / sampleRate;
+                timeAxis.push(t);
+                realPart.push(amplitude * Math.cos(omega * t + phase));
+                imagPart.push(amplitude * Math.sin(omega * t + phase));
+            }
+            
+            // Current complex value
+            const currentReal = amplitude * Math.cos(omega * adjustedTime + phase);
+            const currentImag = amplitude * Math.sin(omega * adjustedTime + phase);
+            
+            // Plot complex plane
+            const complexPlaneTrace = {
+                x: [currentReal],
+                y: [currentImag],
+                mode: 'markers',
+                type: 'scatter',
+                marker: { size: 12, color: '#4fc3f7' },
+                name: 'Current Position'
+            };
+            
+            const circleTrace = {
+                x: realPart.slice(0, 100),
+                y: imagPart.slice(0, 100),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#81c784', width: 2 },
+                name: 'Complex Circle'
+            };
+            
+            const complexLayout = {
+                title: 'Complex Plane Representation',
+                xaxis: { title: 'Real Part', range: [-2.5, 2.5] },
+                yaxis: { title: 'Imaginary Part', range: [-2.5, 2.5] },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('complex-plane-plot', [circleTrace, complexPlaneTrace], complexLayout);
+            
+            // Plot waveform
+            const currentIndex = Math.floor(adjustedTime * sampleRate) % samples;
+            const waveformTrace = {
+                x: timeAxis,
+                y: realPart,
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ffb74d', width: 2 },
+                name: 'Real Part (Audio)'
+            };
+            
+            const currentPointTrace = {
+                x: [adjustedTime % duration],
+                y: [currentReal],
+                mode: 'markers',
+                type: 'scatter',
+                marker: { size: 12, color: '#4fc3f7' },
+                name: 'Current Time'
+            };
+            
+            const waveformLayout = {
+                title: 'Audio Waveform (Real Part)',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude', range: [-2.5, 2.5] },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('waveform-plot', [waveformTrace, currentPointTrace], waveformLayout);
+        }
+
+        // Complex signal construction demo
+        function updateComplexSignal() {
+            const realFreq = parseFloat(document.getElementById('real-freq').value);
+            const realAmp = parseFloat(document.getElementById('real-amp').value);
+            const realPhase = parseFloat(document.getElementById('real-phase').value) * Math.PI / 180;
+            
+            const imagFreq = parseFloat(document.getElementById('imag-freq').value);
+            const imagAmp = parseFloat(document.getElementById('imag-amp').value);
+            const imagPhase = parseFloat(document.getElementById('imag-phase').value) * Math.PI / 180;
+            
+            const sampleRate = 1000;
+            const duration = 2.0;
+            const samples = Math.floor(duration * sampleRate);
+            
+            const timeAxis = [];
+            const realParts = [];
+            const imagParts = [];
+            const magnitudes = [];
+            const phases = [];
+            
+            for (let i = 0; i < samples; i++) {
+                const t = i / sampleRate;
+                const realPart = realAmp * Math.cos(2 * Math.PI * realFreq * t + realPhase);
+                const imagPart = imagAmp * Math.cos(2 * Math.PI * imagFreq * t + imagPhase);
+                const z = new Complex(realPart, imagPart);
+                
+                timeAxis.push(t);
+                realParts.push(realPart);
+                imagParts.push(imagPart);
+                magnitudes.push(z.magnitude());
+                phases.push(z.phase() * 180 / Math.PI);
+            }
+            
+            // Plot real part
+            const realTrace = {
+                x: timeAxis.slice(0, 500),
+                y: realParts.slice(0, 500),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#4fc3f7', width: 2 },
+                name: 'Real Part'
+            };
+            
+            const realLayout = {
+                title: 'Real Part (Audible Signal)',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('real-part-plot', [realTrace], realLayout);
+            
+            // Plot imaginary part
+            const imagTrace = {
+                x: timeAxis.slice(0, 500),
+                y: imagParts.slice(0, 500),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#81c784', width: 2 },
+                name: 'Imaginary Part'
+            };
+            
+            const imagLayout = {
+                title: 'Imaginary Part (Quadrature)',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('imaginary-part-plot', [imagTrace], imagLayout);
+            
+            // Plot complex trajectory
+            const trajectoryTrace = {
+                x: realParts.slice(0, 500),
+                y: imagParts.slice(0, 500),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ffb74d', width: 2 },
+                name: 'Complex Trajectory'
+            };
+            
+            const trajectoryLayout = {
+                title: 'Complex Plane Trajectory',
+                xaxis: { title: 'Real Part' },
+                yaxis: { title: 'Imaginary Part' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('complex-trajectory-plot', [trajectoryTrace], trajectoryLayout);
+            
+            // Plot magnitude and phase
+            const magTrace = {
+                x: timeAxis.slice(0, 500),
+                y: magnitudes.slice(0, 500),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ff7043', width: 2 },
+                name: 'Magnitude'
+            };
+            
+            const phaseTrace = {
+                x: timeAxis.slice(0, 500),
+                y: phases.slice(0, 500),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ab47bc', width: 2 },
+                yaxis: 'y2',
+                name: 'Phase'
+            };
+            
+            const magPhaseLayout = {
+                title: 'Magnitude and Phase',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Magnitude', side: 'left' },
+                yaxis2: { title: 'Phase (degrees)', side: 'right', overlaying: 'y' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: true
+            };
+            
+            Plotly.newPlot('magnitude-phase-plot', [magTrace, phaseTrace], magPhaseLayout);
+        }
+
+        // DFT Demo
+        function updateDFT() {
+            const freq1 = parseFloat(document.getElementById('freq-comp1').value);
+            const amp1 = parseFloat(document.getElementById('amp-comp1').value);
+            const freq2 = parseFloat(document.getElementById('freq-comp2').value);
+            const amp2 = parseFloat(document.getElementById('amp-comp2').value);
+            const freq3 = parseFloat(document.getElementById('freq-comp3').value);
+            const amp3 = parseFloat(document.getElementById('amp-comp3').value);
+            
+            const sampleRate = 8000;
+            const duration = 1.0;
+            const samples = sampleRate * duration;
+            const timeAxis = [];
+            const signal = [];
+            const comp1 = [];
+            const comp2 = [];
+            const comp3 = [];
+            
+            // Generate composite signal
+            for (let i = 0; i < samples; i++) {
+                const t = i / sampleRate;
+                const c1 = amp1 * Math.cos(2 * Math.PI * freq1 * t);
+                const c2 = amp2 * Math.cos(2 * Math.PI * freq2 * t);
+                const c3 = amp3 * Math.cos(2 * Math.PI * freq3 * t);
+                
+                timeAxis.push(t);
+                comp1.push(c1);
+                comp2.push(c2);
+                comp3.push(c3);
+                signal.push(c1 + c2 + c3);
+            }
+            
+            // Simple DFT for visualization
+            const N = 1024;
+            const freqAxis = [];
+            const magnitude = [];
+            const phase = [];
+            
+            for (let k = 0; k < N/2; k++) {
+                const freq = k * sampleRate / N;
+                freqAxis.push(freq);
+                
+                let real = 0, imag = 0;
+                for (let n = 0; n < Math.min(N, samples); n++) {
+                    const angle = -2 * Math.PI * k * n / N;
+                    real += signal[n] * Math.cos(angle);
+                    imag += signal[n] * Math.sin(angle);
+                }
+                
+                const mag = Math.sqrt(real*real + imag*imag) / N;
+                const ph = Math.atan2(imag, real) * 180 / Math.PI;
+                
+                magnitude.push(mag);
+                phase.push(ph);
+            }
+            
+            // Plot individual components
+            const comp1Trace = {
+                x: timeAxis.slice(0, 1000),
+                y: comp1.slice(0, 1000),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#4fc3f7', width: 2 },
+                name: `Component 1 (${freq1} Hz)`
+            };
+            
+            const comp1Layout = {
+                title: `Component 1: ${freq1} Hz`,
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('component1-plot', [comp1Trace], comp1Layout);
+            
+            const comp2Trace = {
+                x: timeAxis.slice(0, 1000),
+                y: comp2.slice(0, 1000),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#81c784', width: 2 },
+                name: `Component 2 (${freq2} Hz)`
+            };
+            
+            const comp2Layout = {
+                title: `Component 2: ${freq2} Hz`,
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('component2-plot', [comp2Trace], comp2Layout);
+            
+            const comp3Trace = {
+                x: timeAxis.slice(0, 1000),
+                y: comp3.slice(0, 1000),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ffb74d', width: 2 },
+                name: `Component 3 (${freq3} Hz)`
+            };
+            
+            const comp3Layout = {
+                title: `Component 3: ${freq3} Hz`,
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('component3-plot', [comp3Trace], comp3Layout);
+            
+            // Plot composite signal
+            const compositeTrace = {
+                x: timeAxis.slice(0, 1000),
+                y: signal.slice(0, 1000),
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ff7043', width: 2 },
+                name: 'Composite Signal'
+            };
+            
+            const compositeLayout = {
+                title: 'Composite Signal (Sum of All Components)',
+                xaxis: { title: 'Time (s)' },
+                yaxis: { title: 'Amplitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('composite-signal-plot', [compositeTrace], compositeLayout);
+            
+            // Plot magnitude spectrum
+            const magTrace = {
+                x: freqAxis,
+                y: magnitude,
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ab47bc', width: 2 },
+                name: 'Magnitude Spectrum'
+            };
+            
+            const magLayout = {
+                title: 'Magnitude Spectrum',
+                xaxis: { title: 'Frequency (Hz)', range: [0, 2000] },
+                yaxis: { title: 'Magnitude' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('magnitude-spectrum-plot', [magTrace], magLayout);
+            
+            // Plot phase spectrum
+            const phaseTrace = {
+                x: freqAxis,
+                y: phase,
+                mode: 'lines',
+                type: 'scatter',
+                line: { color: '#ff5722', width: 2 },
+                name: 'Phase Spectrum'
+            };
+            
+            const phaseLayout = {
+                title: 'Phase Spectrum',
+                xaxis: { title: 'Frequency (Hz)', range: [0, 2000] },
+                yaxis: { title: 'Phase (degrees)' },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: 'white' },
+                showlegend: false
+            };
+            
+            Plotly.newPlot('phase-spectrum-plot', [phaseTrace], phaseLayout);
+        }
+
+        // Audio functions
+        function toggleAudio1() {
+            initAudioContext();
+            
+            if (isPlaying1) {
+                if (oscillator1) {
+                    oscillator1.stop();
+                    oscillator1 = null;
+                }
+                isPlaying1 = false;
+            } else {
+                const frequency = parseFloat(document.getElementById('frequency1').value);
+                const amplitude = parseFloat(document.getElementById('amplitude1').value);
+                
+                oscillator1 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator1.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(amplitude * 0.3, audioContext.currentTime);
+                
+                oscillator1.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.start();
+                isPlaying1 = true;
+            }
+        }
+
+        function toggleAudio2() {
+            initAudioContext();
+            
+            if (isPlaying2) {
+                if (oscillator2) {
+                    oscillator2.stop();
+                }
+                isPlaying2 = false;
+            } else {
+                const freq1 = parseFloat(document.getElementById('freq-comp1').value);
+                const amp1 = parseFloat(document.getElementById('amp-comp1').value);
+                const freq2 = parseFloat(document.getElementById('freq-comp2').value);
+                const amp2 = parseFloat(document.getElementById('amp-comp2').value);
+                const freq3 = parseFloat(document.getElementById('freq-comp3').value);
+                const amp3 = parseFloat(document.getElementById('amp-comp3').value);
+                
+                const oscillators = [];
+                const gainNodes = [];
+                
+                // Create three oscillators for the composite signal
+                [[freq1, amp1], [freq2, amp2], [freq3, amp3]].forEach(([freq, amp]) => {
+                    if (amp > 0) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        gain.gain.setValueAtTime(amp * 0.1, audioContext.currentTime);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start();
+                        oscillators.push(osc);
+                        gainNodes.push(gain);
+                    }
+                });
+                
+                oscillator2 = {
+                    stop: () => oscillators.forEach(osc => osc.stop())
+                };
+                
+                isPlaying2 = true;
+            }
+        }
+
+        // Complex signal preset functions
+        function setRealOnly() {
+            document.getElementById('real-amp').value = 1.0;
+            document.getElementById('imag-amp').value = 0.0;
+            updateComplexValueDisplays();
+        }
+
+        function setImagOnly() {
+            document.getElementById('real-amp').value = 0.0;
+            document.getElementById('imag-amp').value = 1.0;
+            updateComplexValueDisplays();
+        }
+
+        function setAnalyticSignal() {
+            document.getElementById('real-amp').value = 1.0;
+            document.getElementById('imag-amp').value = 1.0;
+            document.getElementById('real-phase').value = 0;
+            document.getElementById('imag-phase').value = 90;
+            document.getElementById('real-freq').value = document.getElementById('imag-freq').value;
+            updateComplexValueDisplays();
+        }
+
+        function setRotatingPhasor() {
+            document.getElementById('real-amp').value = 1.0;
+            document.getElementById('imag-amp').value = 1.0;
+            document.getElementById('real-phase').value = 0;
+            document.getElementById('imag-phase').value = 90;
+            updateComplexValueDisplays();
+        }
+
+        function playComplexSignal() {
+            // Play the real part of the complex signal
+            console.log("Playing complex signal real part");
+        }
+
+        function toggleComplexAnimation() {
+            console.log("Toggle complex animation");
+        }
+
+        function resetAnimation1() {
+            currentTime = 0;
+            updateComplexSinusoid();
+        }
+
+        // Animation loop
+        function animate() {
+            currentTime += 0.05;
+            updateComplexSinusoid();
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners for all controls
+            document.getElementById('frequency1').addEventListener('input', updateValueDisplays);
+            document.getElementById('amplitude1').addEventListener('input', updateValueDisplays);
+            document.getElementById('phase1').addEventListener('input', updateValueDisplays);
+            document.getElementById('time-speed').addEventListener('input', updateValueDisplays);
+            
+            // Complex signal demo controls
+            document.getElementById('real-freq').addEventListener('input', updateComplexValueDisplays);
+            document.getElementById('real-amp').addEventListener('input', updateComplexValueDisplays);
+            document.getElementById('real-phase').addEventListener('input', updateComplexValueDisplays);
+            document.getElementById('imag-freq').addEventListener('input', updateComplexValueDisplays);
+            document.getElementById('imag-amp').addEventListener('input', updateComplexValueDisplays);
+            document.getElementById('imag-phase').addEventListener('input', updateComplexValueDisplays);
+            
+            document.getElementById('freq-comp1').addEventListener('input', updateValueDisplays);
+            document.getElementById('amp-comp1').addEventListener('input', updateValueDisplays);
+            document.getElementById('freq-comp2').addEventListener('input', updateValueDisplays);
+            document.getElementById('amp-comp2').addEventListener('input', updateValueDisplays);
+            document.getElementById('freq-comp3').addEventListener('input', updateValueDisplays);
+            document.getElementById('amp-comp3').addEventListener('input', updateValueDisplays);
+            
+            // Initialize displays and plots
+            updateValueDisplays();
+            updateComplexValueDisplays();
+            updateComplexSinusoid();
+            updateDFT();
+            
+            // Start animation
+            animate();
+        });
+    </script>
+</body>
+</html>

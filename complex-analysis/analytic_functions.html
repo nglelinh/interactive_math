@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytic Functions & Cauchy-Riemann - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .function-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status-indicator {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .analytic {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4caf50;
+        }
+        
+        .non-analytic {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #f44336;
+        }
+        
+        #visualizationPlot {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .derivative-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .condition-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Analytic Functions & Cauchy-Riemann Conditions</h1>
+        
+        <div class="math-explanation">
+            <h2>📘 Mathematical Foundation</h2>
+            <p><strong>Analytic (Holomorphic) Functions:</strong> A complex function f(z) = u(x,y) + iv(x,y) is analytic at a point if it's complex-differentiable in a neighborhood of that point.</p>
+            
+            <div class="formula-box">
+                <strong>Cauchy-Riemann Equations:</strong><br>
+                $$\frac{\partial u}{\partial x} = \frac{\partial v}{\partial y} \quad \text{and} \quad \frac{\partial u}{\partial y} = -\frac{\partial v}{\partial x}$$<br>
+                <strong>Complex Derivative:</strong><br>
+                $$f'(z) = \frac{\partial u}{\partial x} + i\frac{\partial v}{\partial x} = \frac{\partial v}{\partial y} - i\frac{\partial u}{\partial y}$$
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('verification')">C-R Verification</button>
+            <button class="tab" onclick="showTab('derivatives')">Complex Derivatives</button>
+            <button class="tab" onclick="showTab('harmonic')">Harmonic Functions</button>
+        </div>
+        
+        <div id="verification" class="tab-content active">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🎮 Function Analysis</h3>
+                    
+                    <div class="function-selector">
+                        <label>Select Function to Analyze:</label>
+                        <select id="functionSelect">
+                            <option value="polynomial">z² (Analytic)</option>
+                            <option value="conjugate">z̄ (Non-analytic)</option>
+                            <option value="real_part">Re(z) (Non-analytic)</option>
+                            <option value="exp">e^z (Analytic)</option>
+                            <option value="sin">sin(z) (Analytic)</option>
+                            <option value="log">log(z) (Analytic)</option>
+                            <option value="absolute">|z| (Non-analytic)</option>
+                            <option value="custom">z³ + z (Analytic)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Test Point:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="testReal" value="1" step="0.1" style="width: 80px;">
+                            <span>+</span>
+                            <input type="number" id="testImag" value="1" step="0.1" style="width: 80px;">
+                            <span>i</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-indicator" id="analyticStatus">
+                        ✅ ANALYTIC FUNCTION
+                    </div>
+                    
+                    <div class="value-display" id="crConditions">
+                        <div><strong>Cauchy-Riemann Check:</strong></div>
+                        <div id="crResults">Computing...</div>
+                    </div>
+                    
+                    <div class="grid-container">
+                        <div class="condition-box">
+                            <div><strong>∂u/∂x</strong></div>
+                            <div id="dudx">0</div>
+                        </div>
+                        <div class="condition-box">
+                            <div><strong>∂v/∂y</strong></div>
+                            <div id="dvdy">0</div>
+                        </div>
+                        <div class="condition-box">
+                            <div><strong>∂u/∂y</strong></div>
+                            <div id="dudy">0</div>
+                        </div>
+                        <div class="condition-box">
+                            <div><strong>-∂v/∂x</strong></div>
+                            <div id="dvdx">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="derivative-info" id="derivativeInfo">
+                        <div><strong>Complex Derivative:</strong></div>
+                        <div id="complexDerivative">f'(z) = 2z</div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="visualizationPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="derivatives" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>📊 Derivative Visualization</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Function for Derivative:</label>
+                        <select id="derivativeFunction">
+                            <option value="z2">z²</option>
+                            <option value="z3">z³</option>
+                            <option value="exp">e^z</option>
+                            <option value="sin">sin(z)</option>
+                            <option value="1_over_z">1/z</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Visualization Type:</label>
+                        <select id="visualizationType">
+                            <option value="vector_field">Vector Field</option>
+                            <option value="magnitude">Magnitude</option>
+                            <option value="phase">Phase</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Grid Density: <span id="densityValue">15</span></label>
+                        <input type="range" id="gridDensity" min="10" max="25" step="1" value="15">
+                    </div>
+                    
+                    <div class="value-display" id="derivativeFormula">
+                        f'(z) = 2z
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="derivativePlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="harmonic" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🌊 Harmonic Functions</h3>
+                    
+                    <div class="parameter-control">
+                        <label>Harmonic Function:</label>
+                        <select id="harmonicSelect">
+                            <option value="u_z2">u = x² - y² (from z²)</option>
+                            <option value="v_z2">v = 2xy (from z²)</option>
+                            <option value="u_exp">u = e^x cos(y) (from e^z)</option>
+                            <option value="v_exp">v = e^x sin(y) (from e^z)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="value-display" id="harmonicInfo">
+                        <div><strong>Laplacian Check:</strong></div>
+                        <div id="laplacianResult">∇²u = 0 ✅</div>
+                    </div>
+                    
+                    <div class="derivative-info">
+                        <div><strong>Harmonic Conjugate:</strong></div>
+                        <div id="conjugateInfo">v = 2xy</div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="harmonicPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🎯 Key Insights & Applications</h2>
+            
+            <div class="grid-container">
+                <div class="condition-box">
+                    <h4>⚡ Electrical Engineering</h4>
+                    <p>Harmonic functions describe electric potential and current flow</p>
+                </div>
+                <div class="condition-box">
+                    <h4>🌊 Fluid Dynamics</h4>
+                    <p>Analytic functions model incompressible, irrotational flow</p>
+                </div>
+                <div class="condition-box">
+                    <h4>🔥 Heat Transfer</h4>
+                    <p>Harmonic functions solve steady-state heat conduction</p>
+                </div>
+                <div class="condition-box">
+                    <h4>🔍 Signal Processing</h4>
+                    <p>Analytic signals enable Hilbert transforms and modulation</p>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <strong>Maximum Principle:</strong> For harmonic functions, maximum and minimum values occur on the boundary<br>
+                <strong>Mean Value Property:</strong> Value at center equals average on any circle<br>
+                <strong>Uniqueness:</strong> Harmonic function uniquely determined by boundary conditions
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentFunction = 'polynomial';
+        
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update relevant visualizations
+            if (tabName === 'verification') {
+                updateCauchyRiemannAnalysis();
+            } else if (tabName === 'derivatives') {
+                updateDerivativeVisualization();
+            } else if (tabName === 'harmonic') {
+                updateHarmonicVisualization();
+            }
+        }
+        
+        // Function definitions for analysis
+        function getFunctionComponents(funcType, x, y) {
+            switch(funcType) {
+                case 'polynomial': // z²
+                    return {
+                        u: x*x - y*y,
+                        v: 2*x*y,
+                        dudx: 2*x, dudy: -2*y,
+                        dvdx: 2*y, dvdy: 2*x,
+                        derivative: {real: 2*x, imag: 2*y},
+                        formula: 'f(z) = z²',
+                        analyticFormula: "f'(z) = 2z"
+                    };
+                    
+                case 'conjugate': // z̄
+                    return {
+                        u: x,
+                        v: -y,
+                        dudx: 1, dudy: 0,
+                        dvdx: 0, dvdy: -1,
+                        derivative: null,
+                        formula: 'f(z) = z̄',
+                        analyticFormula: "Not differentiable"
+                    };
+                    
+                case 'real_part': // Re(z)
+                    return {
+                        u: x,
+                        v: 0,
+                        dudx: 1, dudy: 0,
+                        dvdx: 0, dvdy: 0,
+                        derivative: null,
+                        formula: 'f(z) = Re(z)',
+                        analyticFormula: "Not differentiable"
+                    };
+                    
+                case 'exp': // e^z
+                    const expX = Math.exp(x);
+                    return {
+                        u: expX * Math.cos(y),
+                        v: expX * Math.sin(y),
+                        dudx: expX * Math.cos(y), dudy: -expX * Math.sin(y),
+                        dvdx: expX * Math.sin(y), dvdy: expX * Math.cos(y),
+                        derivative: {real: expX * Math.cos(y), imag: expX * Math.sin(y)},
+                        formula: 'f(z) = e^z',
+                        analyticFormula: "f'(z) = e^z"
+                    };
+                    
+                case 'sin': // sin(z)
+                    const sinhY = Math.sinh(y);
+                    const coshY = Math.cosh(y);
+                    const sinX = Math.sin(x);
+                    const cosX = Math.cos(x);
+                    return {
+                        u: sinX * coshY,
+                        v: cosX * sinhY,
+                        dudx: cosX * coshY, dudy: sinX * sinhY,
+                        dvdx: -sinX * sinhY, dvdy: cosX * coshY,
+                        derivative: {real: cosX * coshY, imag: -sinX * sinhY},
+                        formula: 'f(z) = sin(z)',
+                        analyticFormula: "f'(z) = cos(z)"
+                    };
+                    
+                case 'absolute': // |z|
+                    const r = Math.sqrt(x*x + y*y);
+                    return {
+                        u: r,
+                        v: 0,
+                        dudx: r !== 0 ? x/r : 0, 
+                        dudy: r !== 0 ? y/r : 0,
+                        dvdx: 0, dvdy: 0,
+                        derivative: null,
+                        formula: 'f(z) = |z|',
+                        analyticFormula: "Not differentiable (except at z=0)"
+                    };
+                    
+                default:
+                    return getFunctionComponents('polynomial', x, y);
+            }
+        }
+        
+        function updateCauchyRiemannAnalysis() {
+            const funcType = document.getElementById('functionSelect').value;
+            const testReal = parseFloat(document.getElementById('testReal').value);
+            const testImag = parseFloat(document.getElementById('testImag').value);
+            
+            const func = getFunctionComponents(funcType, testReal, testImag);
+            
+            // Check Cauchy-Riemann conditions
+            const cr1Satisfied = Math.abs(func.dudx - func.dvdy) < 1e-10;
+            const cr2Satisfied = Math.abs(func.dudy + func.dvdx) < 1e-10;
+            const isAnalytic = cr1Satisfied && cr2Satisfied;
+            
+            // Update status
+            const statusElement = document.getElementById('analyticStatus');
+            if (isAnalytic) {
+                statusElement.className = 'status-indicator analytic';
+                statusElement.textContent = '✅ ANALYTIC FUNCTION';
+            } else {
+                statusElement.className = 'status-indicator non-analytic';
+                statusElement.textContent = '❌ NON-ANALYTIC FUNCTION';
+            }
+            
+            // Update partial derivatives
+            document.getElementById('dudx').textContent = func.dudx.toFixed(3);
+            document.getElementById('dvdy').textContent = func.dvdy.toFixed(3);
+            document.getElementById('dudy').textContent = func.dudy.toFixed(3);
+            document.getElementById('dvdx').textContent = (-func.dvdx).toFixed(3);
+            
+            // Update Cauchy-Riemann results
+            document.getElementById('crResults').innerHTML = `
+                <div>∂u/∂x = ∂v/∂y: ${cr1Satisfied ? '✅' : '❌'} (${func.dudx.toFixed(3)} vs ${func.dvdy.toFixed(3)})</div>
+                <div>∂u/∂y = -∂v/∂x: ${cr2Satisfied ? '✅' : '❌'} (${func.dudy.toFixed(3)} vs ${(-func.dvdx).toFixed(3)})</div>
+            `;
+            
+            // Update derivative info
+            document.getElementById('complexDerivative').textContent = func.analyticFormula;
+            
+            // Plot function visualization
+            plotFunctionVisualization(funcType);
+        }
+        
+        function plotFunctionVisualization(funcType) {
+            const range = 3;
+            const resolution = 50;
+            const step = (2 * range) / resolution;
+            
+            const x = [];
+            const y = [];
+            const u = [];
+            const v = [];
+            
+            for (let i = 0; i < resolution; i++) {
+                const xRow = [];
+                const yRow = [];
+                const uRow = [];
+                const vRow = [];
+                
+                for (let j = 0; j < resolution; j++) {
+                    const xVal = -range + i * step;
+                    const yVal = -range + j * step;
+                    
+                    xRow.push(xVal);
+                    yRow.push(yVal);
+                    
+                    const func = getFunctionComponents(funcType, xVal, yVal);
+                    uRow.push(func.u);
+                    vRow.push(func.v);
+                }
+                
+                x.push(xRow);
+                y.push(yRow);
+                u.push(uRow);
+                v.push(vRow);
+            }
+            
+            const traces = [
+                {
+                    z: u,
+                    x: x[0],
+                    y: y.map(row => row[0]),
+                    type: 'surface',
+                    name: 'Real Part u(x,y)',
+                    colorscale: 'Blues',
+                    opacity: 0.8
+                },
+                {
+                    z: v,
+                    x: x[0],
+                    y: y.map(row => row[0]),
+                    type: 'surface',
+                    name: 'Imaginary Part v(x,y)',
+                    colorscale: 'Reds',
+                    opacity: 0.8
+                }
+            ];
+            
+            const layout = {
+                title: getFunctionComponents(funcType, 0, 0).formula,
+                scene: {
+                    xaxis: {title: 'x'},
+                    yaxis: {title: 'y'},
+                    zaxis: {title: 'f(z)'},
+                    bgcolor: 'rgba(0,0,0,0)'
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'}
+            };
+            
+            Plotly.newPlot('visualizationPlot', traces, layout, {responsive: true});
+        }
+        
+        function updateDerivativeVisualization() {
+            const funcType = document.getElementById('derivativeFunction').value;
+            const visType = document.getElementById('visualizationType').value;
+            const density = parseInt(document.getElementById('gridDensity').value);
+            
+            plotDerivativeField(funcType, visType, density);
+        }
+        
+        function plotDerivativeField(funcType, visType, density) {
+            const range = 3;
+            const step = (2 * range) / density;
+            
+            const x = [];
+            const y = [];
+            const u = [];
+            const v = [];
+            const magnitude = [];
+            const phase = [];
+            
+            for (let i = 0; i < density; i++) {
+                for (let j = 0; j < density; j++) {
+                    const xVal = -range + i * step;
+                    const yVal = -range + j * step;
+                    
+                    const derivative = getDerivative(funcType, xVal, yVal);
+                    
+                    x.push(xVal);
+                    y.push(yVal);
+                    u.push(derivative.real);
+                    v.push(derivative.imag);
+                    
+                    const mag = Math.sqrt(derivative.real * derivative.real + derivative.imag * derivative.imag);
+                    const ph = Math.atan2(derivative.imag, derivative.real);
+                    
+                    magnitude.push(mag);
+                    phase.push(ph);
+                }
+            }
+            
+            let trace;
+            
+            if (visType === 'vector_field') {
+                trace = {
+                    x: x,
+                    y: y,
+                    u: u,
+                    v: v,
+                    type: 'scatter',
+                    mode: 'markers',
+                    marker: {
+                        color: magnitude,
+                        colorscale: 'Viridis',
+                        size: 8,
+                        showscale: true
+                    }
+                };
+            } else if (visType === 'magnitude') {
+                trace = {
+                    x: x,
+                    y: y,
+                    z: magnitude,
+                    type: 'scatter',
+                    mode: 'markers',
+                    marker: {
+                        color: magnitude,
+                        colorscale: 'Plasma',
+                        size: 5,
+                        showscale: true
+                    }
+                };
+            } else { // phase
+                trace = {
+                    x: x,
+                    y: y,
+                    z: phase,
+                    type: 'scatter',
+                    mode: 'markers',
+                    marker: {
+                        color: phase,
+                        colorscale: 'HSV',
+                        size: 5,
+                        showscale: true
+                    }
+                };
+            }
+            
+            const layout = {
+                title: `${getDerivativeFormula(funcType)} - ${visType.replace('_', ' ')}`,
+                xaxis: {title: 'Real'},
+                yaxis: {title: 'Imaginary'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'}
+            };
+            
+            Plotly.newPlot('derivativePlot', [trace], layout, {responsive: true});
+            
+            // Update formula display
+            document.getElementById('derivativeFormula').textContent = getDerivativeFormula(funcType);
+        }
+        
+        function getDerivative(funcType, x, y) {
+            switch(funcType) {
+                case 'z2':
+                    return {real: 2*x, imag: 2*y};
+                case 'z3':
+                    return {real: 3*(x*x - y*y), imag: 6*x*y};
+                case 'exp':
+                    const expX = Math.exp(x);
+                    return {real: expX * Math.cos(y), imag: expX * Math.sin(y)};
+                case 'sin':
+                    return {real: Math.cos(x) * Math.cosh(y), imag: -Math.sin(x) * Math.sinh(y)};
+                case '1_over_z':
+                    const denom = (x*x + y*y) * (x*x + y*y);
+                    return {real: -(x*x - y*y) / denom, imag: 2*x*y / denom};
+                default:
+                    return {real: 2*x, imag: 2*y};
+            }
+        }
+        
+        function getDerivativeFormula(funcType) {
+            const formulas = {
+                z2: "f'(z) = 2z",
+                z3: "f'(z) = 3z²",
+                exp: "f'(z) = e^z",
+                sin: "f'(z) = cos(z)",
+                '1_over_z': "f'(z) = -1/z²"
+            };
+            return formulas[funcType] || "f'(z) = 2z";
+        }
+        
+        function updateHarmonicVisualization() {
+            const harmonicType = document.getElementById('harmonicSelect').value;
+            plotHarmonicFunction(harmonicType);
+        }
+        
+        function plotHarmonicFunction(harmonicType) {
+            const range = 3;
+            const resolution = 50;
+            const step = (2 * range) / resolution;
+            
+            const x = [];
+            const y = [];
+            const z = [];
+            
+            for (let i = 0; i < resolution; i++) {
+                const xRow = [];
+                const yRow = [];
+                const zRow = [];
+                
+                for (let j = 0; j < resolution; j++) {
+                    const xVal = -range + i * step;
+                    const yVal = -range + j * step;
+                    
+                    xRow.push(xVal);
+                    yRow.push(yVal);
+                    
+                    let harmonic;
+                    switch(harmonicType) {
+                        case 'u_z2':
+                            harmonic = xVal*xVal - yVal*yVal;
+                            break;
+                        case 'v_z2':
+                            harmonic = 2*xVal*yVal;
+                            break;
+                        case 'u_exp':
+                            harmonic = Math.exp(xVal) * Math.cos(yVal);
+                            break;
+                        case 'v_exp':
+                            harmonic = Math.exp(xVal) * Math.sin(yVal);
+                            break;
+                        default:
+                            harmonic = xVal*xVal - yVal*yVal;
+                    }
+                    
+                    zRow.push(harmonic);
+                }
+                
+                x.push(xRow);
+                y.push(yRow);
+                z.push(zRow);
+            }
+            
+            const trace = {
+                z: z,
+                x: x[0],
+                y: y.map(row => row[0]),
+                type: 'surface',
+                colorscale: 'RdYlBu'
+            };
+            
+            const layout = {
+                title: 'Harmonic Function Visualization',
+                scene: {
+                    xaxis: {title: 'x'},
+                    yaxis: {title: 'y'},
+                    zaxis: {title: 'u(x,y)'},
+                    bgcolor: 'rgba(0,0,0,0)'
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'}
+            };
+            
+            Plotly.newPlot('harmonicPlot', [trace], layout, {responsive: true});
+            
+            // Update harmonic info
+            document.getElementById('laplacianResult').textContent = '∇²u = 0 ✅';
+            
+            const conjugateInfo = {
+                'u_z2': 'v = 2xy',
+                'v_z2': 'u = x² - y²',
+                'u_exp': 'v = e^x sin(y)',
+                'v_exp': 'u = e^x cos(y)'
+            };
+            
+            document.getElementById('conjugateInfo').textContent = conjugateInfo[harmonicType] || 'v = 2xy';
+        }
+        
+        // Event listeners
+        document.getElementById('functionSelect').addEventListener('change', updateCauchyRiemannAnalysis);
+        document.getElementById('testReal').addEventListener('input', updateCauchyRiemannAnalysis);
+        document.getElementById('testImag').addEventListener('input', updateCauchyRiemannAnalysis);
+        
+        document.getElementById('derivativeFunction').addEventListener('change', updateDerivativeVisualization);
+        document.getElementById('visualizationType').addEventListener('change', updateDerivativeVisualization);
+        document.getElementById('gridDensity').addEventListener('input', function() {
+            document.getElementById('densityValue').textContent = this.value;
+            updateDerivativeVisualization();
+        });
+        
+        document.getElementById('harmonicSelect').addEventListener('change', updateHarmonicVisualization);
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                updateCauchyRiemannAnalysis();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithms & Data Structures - Interactive Learning Hub</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    vb: ['\\mathbf{#1}', 1],
+                    mb: ['\\mathbf{#1}', 1],
+                    R: ['\\mathbb{R}'],
+                    N: ['\\mathbb{N}'],
+                    Z: ['\\mathbb{Z}'],
+                    O: ['\\mathcal{O}'],
+                    Theta: ['\\Theta'],
+                    Omega: ['\\Omega']
+                }
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1,
+                minScale: 0.5
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .intro-section {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border-left: 5px solid #FFD700;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .topic-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .topic-card.data-structures {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .topic-card.algorithms {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .topic-card.sorting {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .topic-card.searching {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .topic-card.graph {
+            border-color: #9b59b6;
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .topic-card.dynamic {
+            border-color: #1abc9c;
+            background: rgba(26, 188, 156, 0.1);
+        }
+
+        .topic-card.cryptographic {
+            border-color: #9b59b6;
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .topic-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .topic-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .topic-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .topic-lessons {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .topic-lessons li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .topic-lessons li:hover {
+            padding-left: 10px;
+            color: #4ecdc4;
+        }
+
+        .topic-lessons a {
+            color: inherit;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .lesson-status {
+            font-size: 0.8em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .lesson-status.completed {
+            background: rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+        }
+
+        .lesson-status.in-progress {
+            background: rgba(243, 156, 18, 0.3);
+            color: #f39c12;
+        }
+
+        .lesson-status.planned {
+            background: rgba(149, 165, 166, 0.3);
+            color: #95a5a6;
+        }
+
+        /* Disable planned links */
+        a:has(.lesson-status.planned) {
+            pointer-events: none;
+            cursor: default;
+            opacity: 0.6;
+        }
+        
+        .planned-item {
+            pointer-events: none;
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        .complexity-overview {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .complexity-chart {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .complexity-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .progress-section {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .topics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Algorithms & Data Structures Hub</h1>
+        
+        <div class="intro-section">
+            <h2>🎯 Welcome to Interactive Algorithm Learning</h2>
+            <p>Chào mừng bạn đến với hệ thống học tập tương tác về <strong>Algorithms & Data Structures</strong>! Đây là nơi bạn sẽ khám phá:</p>
+            <ul>
+                <li><strong>🏗️ Data Structures:</strong> Arrays, Linked Lists, Trees, Graphs, Hash Tables</li>
+                <li><strong>⚡ Algorithms:</strong> Sorting, Searching, Graph Algorithms, Dynamic Programming</li>
+                <li><strong>📊 Complexity Analysis:</strong> Big O notation, Time & Space complexity</li>
+                <li><strong>🎮 Interactive Visualizations:</strong> Step-by-step algorithm execution</li>
+                <li><strong>💡 Real-world Applications:</strong> Kết nối với thực tế và interview preparation</li>
+            </ul>
+        </div>
+
+        <div class="progress-section">
+            <h3>📈 Learning Progress</h3>
+            <p>Overall Completion: <strong>30%</strong></p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 30%"></div>
+            </div>
+            <p><span style="color: #2ecc71;">✅ 6 lessons completed</span> • <span style="color: #f39c12;">🔄 1 in progress</span> • <span style="color: #95a5a6;">📋 16 planned</span></p>
+        </div>
+
+        <div class="topics-grid">
+            <div class="topic-card data-structures" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🏗️</div>
+                    <h3 class="topic-title">Data Structures</h3>
+                </div>
+                <p>Fundamental building blocks for organizing and storing data efficiently.</p>
+                <ul class="topic-lessons">
+                    <li><a href="arrays_and_dynamic_arrays.html">Arrays & Dynamic Arrays <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="linked_lists.html">Linked Lists <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="stacks_and_queues.html">Stacks & Queues <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="bloom_filter.html">Bloom Filter <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="trees_and_binary_trees.html" class="planned-item" onclick="return false;">Trees & Binary Trees <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="hash_tables.html" class="planned-item" onclick="return false;">Hash Tables <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="heaps_and_priority_queues.html" class="planned-item" onclick="return false;">Heaps & Priority Queues <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card sorting" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">📊</div>
+                    <h3 class="topic-title">Sorting Algorithms</h3>
+                </div>
+                <p>Comprehensive study of sorting techniques with visual comparisons.</p>
+                <ul class="topic-lessons">
+                    <li><a href="bubble_sort_visualization.html">Bubble Sort <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="merge_sort.html">Merge Sort <span class="lesson-status in-progress">In Progress</span></a></li>
+                    <li><a href="quick_sort.html">Quick Sort <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="heap_sort.html">Heap Sort <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="sorting_comparison.html">Sorting Comparison <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card searching" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🔍</div>
+                    <h3 class="topic-title">Searching Algorithms</h3>
+                </div>
+                <p>Efficient techniques for finding elements in various data structures.</p>
+                <ul class="topic-lessons">
+                    <li><a href="linear_search.html">Linear Search <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="binary_search.html">Binary Search <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="depth_first_search.html">Depth First Search <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="breadth_first_search.html">Breadth First Search <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card graph" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🕸️</div>
+                    <h3 class="topic-title">Graph Algorithms</h3>
+                </div>
+                <p>Advanced algorithms for working with graph structures and networks.</p>
+                <ul class="topic-lessons">
+                    <li><a href="graph_representation.html">Graph Representation <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="dijkstra_algorithm.html">Dijkstra's Algorithm <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="minimum_spanning_tree.html">Minimum Spanning Tree <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="topological_sorting.html">Topological Sorting <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card dynamic" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🧩</div>
+                    <h3 class="topic-title">Dynamic Programming</h3>
+                </div>
+                <p>Optimization technique for solving complex problems by breaking them down.</p>
+                <ul class="topic-lessons">
+                    <li><a href="fibonacci_dp.html">Fibonacci with DP <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="knapsack_problem.html">Knapsack Problem <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="longest_common_subsequence.html">Longest Common Subsequence <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card algorithms" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">⚡</div>
+                    <h3 class="topic-title">Algorithm Analysis</h3>
+                </div>
+                <p>Understanding algorithm efficiency and complexity analysis.</p>
+                <ul class="topic-lessons">
+                    <li><a href="big_o_notation.html">Big O Notation <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="time_space_complexity.html">Time & Space Complexity <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="recursion_analysis.html">Recursion Analysis <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card cryptographic" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🍺</div>
+                    <h3 class="topic-title">Cryptographic Algorithms</h3>
+                </div>
+                <p>Specialized algorithms for security and cryptographic applications.</p>
+                <ul class="topic-lessons">
+                    <li><a href="drunken_bishop.html">Drunken Bishop Algorithm <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="hash_visualization.html" class="planned-item" onclick="return false;">Hash Visualization <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="merkle_trees.html" class="planned-item" onclick="return false;">Merkle Trees <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="complexity-overview">
+            <h2>⚡ Complexity Cheat Sheet</h2>
+            <p>Quick reference for common algorithm complexities:</p>
+            
+            <div class="complexity-chart">
+                <div class="complexity-item">
+                    <h4>$\O(1)$ - Constant</h4>
+                    <p>Array access, Hash lookup</p>
+                </div>
+                <div class="complexity-item">
+                    <h4>$\O(\log n)$ - Logarithmic</h4>
+                    <p>Binary search, Tree operations</p>
+                </div>
+                <div class="complexity-item">
+                    <h4>$\O(n)$ - Linear</h4>
+                    <p>Linear search, Array traversal</p>
+                </div>
+                <div class="complexity-item">
+                    <h4>$\O(n \log n)$ - Linearithmic</h4>
+                    <p>Merge sort, Heap sort</p>
+                </div>
+                <div class="complexity-item">
+                    <h4>$\O(n^2)$ - Quadratic</h4>
+                    <p>Bubble sort, Selection sort</p>
+                </div>
+                <div class="complexity-item">
+                    <h4>$\O(2^n)$ - Exponential</h4>
+                    <p>Recursive Fibonacci, Subset generation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

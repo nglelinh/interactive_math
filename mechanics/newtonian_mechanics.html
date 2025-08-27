@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍎 Newtonian Mechanics - Interactive Physics</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #63b3ed;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #63b3ed;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 179, 237, 0.3);
+        }
+        
+        .physics-simulator {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #63b3ed;
+            border-radius: 10px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .object {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ed8936;
+            border-radius: 50%;
+            transition: all 0.1s ease;
+        }
+        
+        .force-vector {
+            position: absolute;
+            border: 2px solid #48bb78;
+            transform-origin: 0 50%;
+        }
+        
+        .force-vector::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #48bb78;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            width: 100%;
+        }
+        
+        .btn-stop {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            width: 100%;
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            width: 100%;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .law-panel {
+            background: rgba(99, 179, 237, 0.1);
+            border: 2px solid #63b3ed;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .results-display {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #63b3ed;
+        }
+        
+        .vector-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 300px;
+        }
+        
+        .collision-sim {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #ed8936;
+            border-radius: 10px;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .ball1 {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #63b3ed;
+            border-radius: 50%;
+            top: 85px;
+            left: 50px;
+        }
+        
+        .ball2 {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #ed8936;
+            border-radius: 50%;
+            top: 87.5px;
+            right: 50px;
+        }
+        
+        .pendulum-sim {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #48bb78;
+            border-radius: 10px;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .pendulum-string {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 2px;
+            height: 200px;
+            background: #e2e8f0;
+            transform-origin: top center;
+            transform: translateX(-50%);
+        }
+        
+        .pendulum-bob {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: #48bb78;
+            border-radius: 50%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .conservation-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .conservation-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #48bb78;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍎 Newtonian Mechanics</h1>
+        
+        <div class="intro">
+            <h2>The Foundation of Classical Physics</h2>
+            <p><strong>Newtonian mechanics</strong> describes the motion of objects from projectiles to planets using three fundamental laws. These mathematical principles form the foundation of classical physics and engineering.</p>
+            <p>Explore how forces, mass, and acceleration relate through interactive simulations and real-time calculations.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🧮 Newton's Laws of Motion</h3>
+            <p><strong>First Law:</strong> $\vec{v} = \text{constant}$ when $\sum \vec{F} = 0$ (Law of Inertia)</p>
+            <p><strong>Second Law:</strong> $\vec{F} = m\vec{a} = m\frac{d\vec{v}}{dt} = \frac{d\vec{p}}{dt}$</p>
+            <p><strong>Third Law:</strong> $\vec{F}_{12} = -\vec{F}_{21}$ (Action-Reaction)</p>
+            <p><strong>Momentum:</strong> $\vec{p} = m\vec{v}$ (Conservation: $\sum \vec{p} = \text{constant}$)</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="law-panel">
+                <h3>⚖️ Newton's Second Law Simulator</h3>
+                
+                <div class="control-group">
+                    <label>Mass (kg):</label>
+                    <input type="range" id="mass" min="1" max="20" value="5" onchange="updateForceCalculation()">
+                    <span id="massValue">5 kg</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Applied Force (N):</label>
+                    <input type="range" id="force" min="0" max="100" value="25" onchange="updateForceCalculation()">
+                    <span id="forceValue">25 N</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Friction Coefficient:</label>
+                    <input type="range" id="friction" min="0" max="1" step="0.05" value="0.1" onchange="updateForceCalculation()">
+                    <span id="frictionValue">0.1</span>
+                </div>
+                
+                <div class="physics-simulator" id="forceSimulator">
+                    <div class="object" id="forceObject"></div>
+                    <div class="force-vector" id="appliedForceVector"></div>
+                    <div class="force-vector" id="frictionVector" style="border-color: #e53e3e;"></div>
+                </div>
+                
+                <button class="btn btn-start" onclick="startForceSimulation()">🚀 Start Simulation</button>
+                <button class="btn btn-stop" onclick="stopSimulation()">⏹️ Stop</button>
+                <button class="btn btn-reset" onclick="resetSimulation()">🔄 Reset</button>
+                
+                <div class="results-display">
+                    <h4>📊 Real-time Calculations</h4>
+                    <div id="forceResults">
+                        <div class="vector-display">
+                            <span><strong>Net Force:</strong></span>
+                            <span id="netForce">0 N</span>
+                        </div>
+                        <div class="vector-display">
+                            <span><strong>Acceleration:</strong></span>
+                            <span id="acceleration">0 m/s²</span>
+                        </div>
+                        <div class="vector-display">
+                            <span><strong>Velocity:</strong></span>
+                            <span id="velocity">0 m/s</span>
+                        </div>
+                        <div class="vector-display">
+                            <span><strong>Position:</strong></span>
+                            <span id="position">0 m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>📈 Motion Graphs</h3>
+                
+                <div class="chart-container">
+                    <canvas id="motionChart"></canvas>
+                </div>
+                
+                <div class="control-group">
+                    <label>Graph Type:</label>
+                    <select id="graphType" onchange="updateChart()">
+                        <option value="position">Position vs Time</option>
+                        <option value="velocity">Velocity vs Time</option>
+                        <option value="acceleration">Acceleration vs Time</option>
+                        <option value="force">Force vs Time</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Time Scale (s):</label>
+                    <input type="range" id="timeScale" min="5" max="30" value="10" onchange="updateChart()">
+                    <span id="timeScaleValue">10 s</span>
+                </div>
+                
+                <button class="btn" onclick="clearChart()" style="width: 100%;">🗑️ Clear Graph</button>
+            </div>
+        </div>
+        
+        <div class="three-column">
+            <div class="control-panel">
+                <h3>💥 Collision Simulator</h3>
+                
+                <div class="control-group">
+                    <label>Ball 1 Mass (kg):</label>
+                    <input type="range" id="mass1" min="1" max="10" value="3" onchange="updateCollisionSetup()">
+                    <span id="mass1Value">3 kg</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Ball 1 Velocity (m/s):</label>
+                    <input type="range" id="velocity1" min="0" max="10" value="5" onchange="updateCollisionSetup()">
+                    <span id="velocity1Value">5 m/s</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Ball 2 Mass (kg):</label>
+                    <input type="range" id="mass2" min="1" max="10" value="2" onchange="updateCollisionSetup()">
+                    <span id="mass2Value">2 kg</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Ball 2 Velocity (m/s):</label>
+                    <input type="range" id="velocity2" min="-10" max="10" value="0" onchange="updateCollisionSetup()">
+                    <span id="velocity2Value">0 m/s</span>
+                </div>
+                
+                <div class="collision-sim">
+                    <div class="ball1" id="ball1"></div>
+                    <div class="ball2" id="ball2"></div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Collision Type:</label>
+                    <select id="collisionType">
+                        <option value="elastic">Elastic (e = 1)</option>
+                        <option value="inelastic">Inelastic (e < 1)</option>
+                        <option value="perfectly-inelastic">Perfectly Inelastic (e = 0)</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-start" onclick="startCollision()">💥 Collide</button>
+                <button class="btn btn-reset" onclick="resetCollision()">🔄 Reset</button>
+                
+                <div class="conservation-display">
+                    <div class="conservation-item">
+                        <div><strong>Initial Momentum</strong></div>
+                        <div id="initialMomentum">0 kg⋅m/s</div>
+                    </div>
+                    <div class="conservation-item">
+                        <div><strong>Final Momentum</strong></div>
+                        <div id="finalMomentum">0 kg⋅m/s</div>
+                    </div>
+                    <div class="conservation-item">
+                        <div><strong>Momentum Conservation</strong></div>
+                        <div id="momentumConservation">✅</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🔄 Pendulum Motion</h3>
+                
+                <div class="control-group">
+                    <label>Length (m):</label>
+                    <input type="range" id="pendulumLength" min="0.5" max="3" step="0.1" value="1.5" onchange="updatePendulum()">
+                    <span id="lengthValue">1.5 m</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Initial Angle (degrees):</label>
+                    <input type="range" id="initialAngle" min="10" max="60" value="30" onchange="updatePendulum()">
+                    <span id="angleValue">30°</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Damping Factor:</label>
+                    <input type="range" id="damping" min="0" max="0.1" step="0.005" value="0.02" onchange="updatePendulum()">
+                    <span id="dampingValue">0.02</span>
+                </div>
+                
+                <div class="pendulum-sim">
+                    <div class="pendulum-string" id="pendulumString"></div>
+                    <div class="pendulum-bob" id="pendulumBob"></div>
+                </div>
+                
+                <button class="btn btn-start" onclick="startPendulum()">🔄 Start Pendulum</button>
+                <button class="btn btn-stop" onclick="stopPendulum()">⏹️ Stop</button>
+                <button class="btn btn-reset" onclick="resetPendulum()">🔄 Reset</button>
+                
+                <div class="results-display">
+                    <h4>📐 Pendulum Analysis</h4>
+                    <div class="vector-display">
+                        <span><strong>Period:</strong></span>
+                        <span id="period">0 s</span>
+                    </div>
+                    <div class="vector-display">
+                        <span><strong>Frequency:</strong></span>
+                        <span id="frequency">0 Hz</span>
+                    </div>
+                    <div class="vector-display">
+                        <span><strong>Angular Velocity:</strong></span>
+                        <span id="angularVelocity">0 rad/s</span>
+                    </div>
+                    <div class="vector-display">
+                        <span><strong>Restoring Force:</strong></span>
+                        <span id="restoringForce">0 N</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⚡ Energy Conservation</h3>
+                
+                <div class="control-group">
+                    <label>System Type:</label>
+                    <select id="energySystem" onchange="updateEnergySystem()">
+                        <option value="projectile">Projectile Motion</option>
+                        <option value="spring">Spring-Mass System</option>
+                        <option value="falling">Free Fall</option>
+                        <option value="incline">Inclined Plane</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Initial Height (m):</label>
+                    <input type="range" id="height" min="1" max="20" value="10" onchange="updateEnergyCalculation()">
+                    <span id="heightValue">10 m</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Initial Velocity (m/s):</label>
+                    <input type="range" id="initialVelocity" min="0" max="20" value="5" onchange="updateEnergyCalculation()">
+                    <span id="initialVelValue">5 m/s</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Object Mass (kg):</label>
+                    <input type="range" id="objectMass" min="1" max="10" value="2" onchange="updateEnergyCalculation()">
+                    <span id="objectMassValue">2 kg</span>
+                </div>
+                
+                <div class="conservation-display">
+                    <div class="conservation-item">
+                        <div><strong>Kinetic Energy</strong></div>
+                        <div id="kineticEnergy">0 J</div>
+                    </div>
+                    <div class="conservation-item">
+                        <div><strong>Potential Energy</strong></div>
+                        <div id="potentialEnergy">0 J</div>
+                    </div>
+                    <div class="conservation-item">
+                        <div><strong>Total Energy</strong></div>
+                        <div id="totalEnergy">0 J</div>
+                    </div>
+                </div>
+                
+                <div class="math-formula">
+                    <h4>🧮 Energy Equations</h4>
+                    <p><strong>Kinetic:</strong> $KE = \frac{1}{2}mv^2$</p>
+                    <p><strong>Potential:</strong> $PE = mgh$</p>
+                    <p><strong>Conservation:</strong> $E = KE + PE = \text{constant}$</p>
+                </div>
+                
+                <button class="btn" onclick="analyzeEnergy()" style="width: 100%;">📊 Analyze Energy</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let motionChart = null;
+        let simulationRunning = false;
+        let animationId = null;
+        let timeData = [];
+        let positionData = [];
+        let velocityData = [];
+        let accelerationData = [];
+        let forceData = [];
+        
+        // Physics state variables
+        let objectState = {
+            position: 0,
+            velocity: 0,
+            acceleration: 0,
+            time: 0,
+            mass: 5,
+            appliedForce: 25,
+            frictionCoeff: 0.1
+        };
+        
+        // Initialize
+        initializeChart();
+        updateForceCalculation();
+        updateCollisionSetup();
+        updatePendulum();
+        updateEnergyCalculation();
+        
+        function updateForceCalculation() {
+            const mass = parseFloat(document.getElementById('mass').value);
+            const appliedForce = parseFloat(document.getElementById('force').value);
+            const frictionCoeff = parseFloat(document.getElementById('friction').value);
+            
+            document.getElementById('massValue').textContent = mass + ' kg';
+            document.getElementById('forceValue').textContent = appliedForce + ' N';
+            document.getElementById('frictionValue').textContent = frictionCoeff;
+            
+            // Calculate forces
+            const weight = mass * 9.81; // N
+            const normalForce = weight; // Assuming horizontal surface
+            const frictionForce = frictionCoeff * normalForce;
+            const netForce = appliedForce - frictionForce;
+            const acceleration = netForce / mass;
+            
+            // Update display
+            document.getElementById('netForce').textContent = netForce.toFixed(2) + ' N';
+            document.getElementById('acceleration').textContent = acceleration.toFixed(2) + ' m/s²';
+            
+            // Update object state
+            objectState.mass = mass;
+            objectState.appliedForce = appliedForce;
+            objectState.frictionCoeff = frictionCoeff;
+            objectState.acceleration = acceleration;
+            
+            // Update force vectors
+            updateForceVectors();
+        }
+        
+        function updateForceVectors() {
+            const appliedVector = document.getElementById('appliedForceVector');
+            const frictionVector = document.getElementById('frictionVector');
+            
+            const appliedLength = Math.min(objectState.appliedForce * 2, 100);
+            const frictionLength = Math.min(objectState.frictionCoeff * objectState.mass * 9.81 * 2, 100);
+            
+            appliedVector.style.width = appliedLength + 'px';
+            appliedVector.style.left = '50px';
+            appliedVector.style.top = '190px';
+            
+            frictionVector.style.width = frictionLength + 'px';
+            frictionVector.style.left = (50 + appliedLength) + 'px';
+            frictionVector.style.top = '210px';
+            frictionVector.style.transform = 'rotate(180deg)';
+        }
+        
+        function startForceSimulation() {
+            if (simulationRunning) return;
+            
+            simulationRunning = true;
+            objectState.time = 0;
+            objectState.position = 0;
+            objectState.velocity = 0;
+            
+            function animate() {
+                if (!simulationRunning) return;
+                
+                const dt = 0.05; // Time step
+                objectState.time += dt;
+                
+                // Update kinematics
+                objectState.velocity += objectState.acceleration * dt;
+                objectState.position += objectState.velocity * dt;
+                
+                // Update display
+                document.getElementById('velocity').textContent = objectState.velocity.toFixed(2) + ' m/s';
+                document.getElementById('position').textContent = objectState.position.toFixed(2) + ' m';
+                
+                // Update object position on screen
+                const objectElement = document.getElementById('forceObject');
+                const maxPosition = 350; // Maximum pixel position
+                const pixelPosition = Math.min(Math.max(objectState.position * 10, 0), maxPosition);
+                objectElement.style.left = (50 + pixelPosition) + 'px';
+                objectElement.style.top = '180px';
+                
+                // Record data for chart
+                timeData.push(objectState.time);
+                positionData.push(objectState.position);
+                velocityData.push(objectState.velocity);
+                accelerationData.push(objectState.acceleration);
+                forceData.push(objectState.appliedForce - objectState.frictionCoeff * objectState.mass * 9.81);
+                
+                // Limit data points
+                if (timeData.length > 200) {
+                    timeData.shift();
+                    positionData.shift();
+                    velocityData.shift();
+                    accelerationData.shift();
+                    forceData.shift();
+                }
+                
+                updateChart();
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function stopSimulation() {
+            simulationRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+        
+        function resetSimulation() {
+            stopSimulation();
+            objectState.position = 0;
+            objectState.velocity = 0;
+            objectState.time = 0;
+            
+            document.getElementById('velocity').textContent = '0 m/s';
+            document.getElementById('position').textContent = '0 m';
+            
+            const objectElement = document.getElementById('forceObject');
+            objectElement.style.left = '50px';
+            objectElement.style.top = '180px';
+            
+            timeData = [];
+            positionData = [];
+            velocityData = [];
+            accelerationData = [];
+            forceData = [];
+            
+            updateChart();
+        }
+        
+        function initializeChart() {
+            const ctx = document.getElementById('motionChart').getContext('2d');
+            motionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeData,
+                    datasets: [{
+                        label: 'Position (m)',
+                        data: positionData,
+                        borderColor: '#63b3ed',
+                        backgroundColor: 'rgba(99, 179, 237, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Position (m)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (s)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart() {
+            if (!motionChart) return;
+            
+            const graphType = document.getElementById('graphType').value;
+            const timeScale = parseInt(document.getElementById('timeScale').value);
+            
+            document.getElementById('timeScaleValue').textContent = timeScale + ' s';
+            
+            let data, label, color;
+            
+            switch (graphType) {
+                case 'position':
+                    data = positionData;
+                    label = 'Position (m)';
+                    color = '#63b3ed';
+                    break;
+                case 'velocity':
+                    data = velocityData;
+                    label = 'Velocity (m/s)';
+                    color = '#48bb78';
+                    break;
+                case 'acceleration':
+                    data = accelerationData;
+                    label = 'Acceleration (m/s²)';
+                    color = '#ed8936';
+                    break;
+                case 'force':
+                    data = forceData;
+                    label = 'Net Force (N)';
+                    color = '#e53e3e';
+                    break;
+            }
+            
+            // Limit data to time scale
+            const maxPoints = Math.floor(timeScale / 0.05);
+            const limitedTime = timeData.slice(-maxPoints);
+            const limitedData = data.slice(-maxPoints);
+            
+            motionChart.data.labels = limitedTime;
+            motionChart.data.datasets[0].data = limitedData;
+            motionChart.data.datasets[0].label = label;
+            motionChart.data.datasets[0].borderColor = color;
+            motionChart.data.datasets[0].backgroundColor = color + '20';
+            
+            motionChart.options.scales.y.title.text = label;
+            motionChart.update('none');
+        }
+        
+        function clearChart() {
+            timeData = [];
+            positionData = [];
+            velocityData = [];
+            accelerationData = [];
+            forceData = [];
+            updateChart();
+        }
+        
+        function updateCollisionSetup() {
+            const m1 = parseFloat(document.getElementById('mass1').value);
+            const v1 = parseFloat(document.getElementById('velocity1').value);
+            const m2 = parseFloat(document.getElementById('mass2').value);
+            const v2 = parseFloat(document.getElementById('velocity2').value);
+            
+            document.getElementById('mass1Value').textContent = m1 + ' kg';
+            document.getElementById('velocity1Value').textContent = v1 + ' m/s';
+            document.getElementById('mass2Value').textContent = m2 + ' kg';
+            document.getElementById('velocity2Value').textContent = v2 + ' m/s';
+            
+            // Calculate initial momentum
+            const initialMomentum = m1 * v1 + m2 * v2;
+            document.getElementById('initialMomentum').textContent = initialMomentum.toFixed(2) + ' kg⋅m/s';
+        }
+        
+        function startCollision() {
+            const m1 = parseFloat(document.getElementById('mass1').value);
+            const v1 = parseFloat(document.getElementById('velocity1').value);
+            const m2 = parseFloat(document.getElementById('mass2').value);
+            const v2 = parseFloat(document.getElementById('velocity2').value);
+            const collisionType = document.getElementById('collisionType').value;
+            
+            let e = 1; // Coefficient of restitution
+            if (collisionType === 'inelastic') e = 0.5;
+            if (collisionType === 'perfectly-inelastic') e = 0;
+            
+            // Calculate final velocities using conservation equations
+            let v1f, v2f;
+            
+            if (collisionType === 'perfectly-inelastic') {
+                // Objects stick together
+                v1f = v2f = (m1 * v1 + m2 * v2) / (m1 + m2);
+            } else {
+                // Elastic or inelastic collision
+                v1f = ((m1 - e * m2) * v1 + (1 + e) * m2 * v2) / (m1 + m2);
+                v2f = ((m2 - e * m1) * v2 + (1 + e) * m1 * v1) / (m1 + m2);
+            }
+            
+            const finalMomentum = m1 * v1f + m2 * v2f;
+            const initialMomentum = m1 * v1 + m2 * v2;
+            
+            document.getElementById('finalMomentum').textContent = finalMomentum.toFixed(2) + ' kg⋅m/s';
+            document.getElementById('momentumConservation').textContent = 
+                Math.abs(finalMomentum - initialMomentum) < 0.01 ? '✅' : '❌';
+            
+            // Animate collision
+            animateCollision(v1f, v2f);
+        }
+        
+        function animateCollision(v1f, v2f) {
+            const ball1 = document.getElementById('ball1');
+            const ball2 = document.getElementById('ball2');
+            
+            // Reset positions
+            ball1.style.left = '50px';
+            ball2.style.right = '50px';
+            
+            // Animate collision
+            let time = 0;
+            const animateStep = () => {
+                time += 0.1;
+                
+                // Move balls toward center
+                if (time < 2) {
+                    ball1.style.left = (50 + time * 50) + 'px';
+                    ball2.style.right = (50 + time * 50) + 'px';
+                } else {
+                    // Move balls apart with final velocities
+                    const postTime = time - 2;
+                    ball1.style.left = (150 + postTime * v1f * 20) + 'px';
+                    ball2.style.right = (150 + postTime * Math.abs(v2f) * 20) + 'px';
+                }
+                
+                if (time < 5) {
+                    requestAnimationFrame(animateStep);
+                }
+            };
+            
+            animateStep();
+        }
+        
+        function resetCollision() {
+            document.getElementById('ball1').style.left = '50px';
+            document.getElementById('ball2').style.right = '50px';
+            updateCollisionSetup();
+        }
+        
+        function updatePendulum() {
+            const length = parseFloat(document.getElementById('pendulumLength').value);
+            const angle = parseFloat(document.getElementById('initialAngle').value);
+            const damping = parseFloat(document.getElementById('damping').value);
+            
+            document.getElementById('lengthValue').textContent = length + ' m';
+            document.getElementById('angleValue').textContent = angle + '°';
+            document.getElementById('dampingValue').textContent = damping;
+            
+            // Calculate pendulum properties
+            const g = 9.81;
+            const period = 2 * Math.PI * Math.sqrt(length / g);
+            const frequency = 1 / period;
+            
+            document.getElementById('period').textContent = period.toFixed(3) + ' s';
+            document.getElementById('frequency').textContent = frequency.toFixed(3) + ' Hz';
+            
+            // Update visual length
+            const stringElement = document.getElementById('pendulumString');
+            stringElement.style.height = (length * 100) + 'px';
+        }
+        
+        function startPendulum() {
+            const length = parseFloat(document.getElementById('pendulumLength').value);
+            const initialAngle = parseFloat(document.getElementById('initialAngle').value) * Math.PI / 180;
+            const damping = parseFloat(document.getElementById('damping').value);
+            
+            let angle = initialAngle;
+            let angularVelocity = 0;
+            let time = 0;
+            
+            const animatePendulum = () => {
+                const g = 9.81;
+                const dt = 0.02;
+                
+                // Simple pendulum equation with damping
+                const angularAcceleration = -(g / length) * Math.sin(angle) - damping * angularVelocity;
+                
+                angularVelocity += angularAcceleration * dt;
+                angle += angularVelocity * dt;
+                time += dt;
+                
+                // Update display
+                document.getElementById('angularVelocity').textContent = angularVelocity.toFixed(3) + ' rad/s';
+                document.getElementById('restoringForce').textContent = 
+                    (Math.sin(angle) * g).toFixed(3) + ' N';
+                
+                // Update visual position
+                const stringElement = document.getElementById('pendulumString');
+                const bobElement = document.getElementById('pendulumBob');
+                
+                stringElement.style.transform = `translateX(-50%) rotate(${angle}rad)`;
+                
+                if (simulationRunning) {
+                    requestAnimationFrame(animatePendulum);
+                }
+            };
+            
+            simulationRunning = true;
+            animatePendulum();
+        }
+        
+        function stopPendulum() {
+            simulationRunning = false;
+        }
+        
+        function resetPendulum() {
+            stopPendulum();
+            const stringElement = document.getElementById('pendulumString');
+            stringElement.style.transform = 'translateX(-50%) rotate(0rad)';
+            document.getElementById('angularVelocity').textContent = '0 rad/s';
+            document.getElementById('restoringForce').textContent = '0 N';
+        }
+        
+        function updateEnergySystem() {
+            updateEnergyCalculation();
+        }
+        
+        function updateEnergyCalculation() {
+            const height = parseFloat(document.getElementById('height').value);
+            const velocity = parseFloat(document.getElementById('initialVelocity').value);
+            const mass = parseFloat(document.getElementById('objectMass').value);
+            
+            document.getElementById('heightValue').textContent = height + ' m';
+            document.getElementById('initialVelValue').textContent = velocity + ' m/s';
+            document.getElementById('objectMassValue').textContent = mass + ' kg';
+            
+            const g = 9.81;
+            const kineticEnergy = 0.5 * mass * velocity * velocity;
+            const potentialEnergy = mass * g * height;
+            const totalEnergy = kineticEnergy + potentialEnergy;
+            
+            document.getElementById('kineticEnergy').textContent = kineticEnergy.toFixed(1) + ' J';
+            document.getElementById('potentialEnergy').textContent = potentialEnergy.toFixed(1) + ' J';
+            document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(1) + ' J';
+        }
+        
+        function analyzeEnergy() {
+            const system = document.getElementById('energySystem').value;
+            let analysis = '';
+            
+            switch (system) {
+                case 'projectile':
+                    analysis = 'In projectile motion, kinetic energy converts to potential energy during ascent, then back to kinetic energy during descent. Total mechanical energy remains constant (ignoring air resistance).';
+                    break;
+                case 'spring':
+                    analysis = 'In a spring-mass system, energy oscillates between kinetic (maximum at equilibrium) and elastic potential energy (maximum at maximum displacement).';
+                    break;
+                case 'falling':
+                    analysis = 'During free fall, potential energy converts to kinetic energy. The rate of conversion depends on the gravitational field strength.';
+                    break;
+                case 'incline':
+                    analysis = 'On an inclined plane, potential energy converts to kinetic energy and (if friction exists) thermal energy. Without friction, mechanical energy is conserved.';
+                    break;
+            }
+            
+            alert('Energy Analysis:\n\n' + analysis);
+        }
+        
+        // Initialize MathJax
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

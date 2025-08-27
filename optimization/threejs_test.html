@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Test</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #111; color: white; }
+        #renderer { width: 800px; height: 600px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <h1>Three.js Test</h1>
+    <div id="renderer"></div>
+    <div id="status">Loading...</div>
+
+    <!-- Three.js via CDN -->
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        document.getElementById('status').textContent = 'Three.js loaded: ' + (typeof THREE !== 'undefined');
+        
+        if (typeof THREE !== 'undefined') {
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            
+            const container = document.getElementById('renderer');
+            renderer.setSize(800, 600);
+            renderer.setClearColor(0x222222);
+            container.appendChild(renderer.domElement);
+            
+            // Add a simple cube
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+            
+            camera.position.z = 5;
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            document.getElementById('status').textContent = 'Three.js working correctly!';
+        } else {
+            document.getElementById('status').textContent = 'Three.js failed to load!';
+        }
+    </script>
+</body>
+</html>

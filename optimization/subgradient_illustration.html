@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa Phương pháp Subgradient</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -188,6 +203,47 @@
             margin-top: 0;
             color: #2c3e50;
         }
+
+        .step-size-info {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .convergence-chart {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            font-size: 14px;
+            min-width: 180px;
+        }
+
+        .theory-section {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #007bff;
+        }
+
+        .algorithm-box {
+            background: #f0f8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 
 
@@ -226,32 +282,42 @@
             <div class="control-group">
                 <h3>🎯 Phương pháp Tối ưu</h3>
                 <div class="method-selector">
-                    <button onclick="setMethod('subgradient')" class="active">Subgradient</button>
+                    <button onclick="setMethod('subgradient')" class="active">Subgradient Method</button>
                     <button onclick="setMethod('gradient')">Gradient Descent</button>
+                    <button onclick="setMethod('proximal')">Proximal Gradient</button>
                 </div>
                 <div class="control-row">
-                    <label>Điểm bắt đầu:</label>
-                    <input type="range" id="startPoint" min="-2" max="2" value="1" step="0.1">
-                    <input type="number" id="startPointValue" value="1" min="-2" max="2" step="0.1">
+                    <label>Điểm bắt đầu x₀:</label>
+                    <input type="range" id="startPoint" min="-2.5" max="2.5" value="1.5" step="0.1">
+                    <input type="number" id="startPointValue" value="1.5" min="-2.5" max="2.5" step="0.1">
                 </div>
                 <div class="control-row">
-                    <label>Learning rate:</label>
-                    <input type="range" id="learningRate" min="0.01" max="0.5" value="0.1" step="0.01">
-                    <input type="number" id="learningRateValue" value="0.1" min="0.01" max="0.5" step="0.01">
+                    <label>Step size α₀:</label>
+                    <input type="range" id="learningRate" min="0.01" max="0.8" value="0.3" step="0.01">
+                    <input type="number" id="learningRateValue" value="0.3" min="0.01" max="0.8" step="0.01">
                 </div>
                 <div class="control-row">
-                    <label>Số bước:</label>
-                    <input type="range" id="maxSteps" min="10" max="50" value="20" step="5">
-                    <input type="number" id="maxStepsValue" value="20" min="10" max="50" step="5">
+                    <label>Step size rule:</label>
+                    <select id="stepSizeRule" onchange="updateStepSizeRule()">
+                        <option value="constant">Constant: αₖ = α</option>
+                        <option value="diminishing">Diminishing: αₖ = α/√k</option>
+                        <option value="square_summable">Square summable: αₖ = α/k</option>
+                    </select>
                 </div>
                 <div class="control-row">
-                    <button onclick="startOptimization()">▶️ Bắt đầu</button>
-                    <button onclick="stepOptimization()">⏭️ Bước tiếp</button>
-                    <button onclick="resetOptimization()">🔄 Làm lại</button>
+                    <label>Số iterations:</label>
+                    <input type="range" id="maxSteps" min="20" max="100" value="50" step="10">
+                    <input type="number" id="maxStepsValue" value="50" min="20" max="100" step="10">
+                </div>
+                <div class="control-row">
+                    <button onclick="startOptimization()">▶️ Bắt đầu tối ưu</button>
+                    <button onclick="stepOptimization()">⏭️ Bước tiếp theo</button>
+                    <button onclick="resetOptimization()">🔄 Reset</button>
+                    <button onclick="runComparison()">⚡ So sánh phương pháp</button>
                 </div>
                 <div class="comparison-info">
                     <strong>Kết quả tối ưu:</strong><br>
-                    <span id="optimizationResult">Sẵn sàng</span>
+                    <span id="optimizationResult">Sẵn sàng để chạy</span>
                 </div>
             </div>
         </div>
@@ -261,49 +327,125 @@
         </div>
         
         <div class="info-panel">
-            <h3>📚 Thông tin Chi tiết</h3>
+            <h3>📚 Lý thuyết Subgradient và Tối ưu</h3>
+            
+            <div class="theory-section">
+                <h4>🎯 Định nghĩa Subgradient</h4>
+                <div class="formula">
+                    Cho hàm lồi $f: \mathbb{R}^n \to \mathbb{R}$ và điểm $x \in \text{dom}(f)$. Vector $g \in \mathbb{R}^n$ được gọi là <strong>subgradient</strong> của $f$ tại $x$ nếu:
+                    <br><br>
+                    $$f(y) \geq f(x) + g^T(y - x) \quad \forall y \in \text{dom}(f)$$
+                    <br>
+                    Tập hợp tất cả subgradients tại $x$ được gọi là <strong>subdifferential</strong>: $\partial f(x)$
+                </div>
+                
+                <div class="algorithm-box">
+                    <strong>Thuật toán Subgradient Method:</strong><br>
+                    1. Khởi tạo: $x_0 \in \text{dom}(f)$<br>
+                    2. For $k = 0, 1, 2, \ldots$<br>
+                    &nbsp;&nbsp;&nbsp;• Chọn $g_k \in \partial f(x_k)$<br>
+                    &nbsp;&nbsp;&nbsp;• $x_{k+1} = x_k - \alpha_k g_k$<br>
+                    3. End for
+                </div>
+            </div>
             
             <div class="comparison-grid">
                 <div class="comparison-card">
                     <h4>📐 Subgradient Method</h4>
                     <div class="formula">
-                        <strong>Định nghĩa:</strong> f(y) ≥ f(x) + gᵀ(y - x)<br>
-                        <strong>Cập nhật:</strong> x_{k+1} = x_k - α_k g_k
+                        <strong>Cập nhật:</strong> $x_{k+1} = x_k - \alpha_k g_k$<br>
+                        <strong>Điều kiện:</strong> $g_k \in \partial f(x_k)$
                     </div>
                     <ul>
-                        <li>Hoạt động với hàm không khả vi</li>
-                        <li>Không đảm bảo giảm giá trị hàm mỗi bước</li>
-                        <li>Hội tụ chậm hơn gradient descent</li>
-                        <li>Cần step size giảm dần</li>
+                        <li>✅ Hoạt động với hàm lồi không khả vi</li>
+                        <li>⚠️ Không đảm bảo giảm giá trị hàm mỗi bước</li>
+                        <li>📊 Hội tụ chậm: O(1/√k) hoặc O(log k/k)</li>
+                        <li>🔧 Cần step size giảm dần để hội tụ</li>
+                        <li>🎯 Hội tụ đến optimal value, không nhất thiết optimal point</li>
                     </ul>
                 </div>
                 
                 <div class="comparison-card">
                     <h4>📉 Gradient Descent</h4>
                     <div class="formula">
-                        <strong>Định nghĩa:</strong> ∇f(x) = lim_{h→0} (f(x+h) - f(x))/h<br>
-                        <strong>Cập nhật:</strong> x_{k+1} = x_k - α_k ∇f(x_k)
+                        <strong>Cập nhật:</strong> $x_{k+1} = x_k - \alpha_k \nabla f(x_k)$<br>
+                        <strong>Điều kiện:</strong> $f$ khả vi
                     </div>
                     <ul>
-                        <li>Yêu cầu hàm khả vi</li>
-                        <li>Đảm bảo giảm giá trị hàm</li>
-                        <li>Hội tụ nhanh hơn</li>
-                        <li>Có thể dùng line search</li>
+                        <li>⚠️ Yêu cầu hàm khả vi</li>
+                        <li>✅ Đảm bảo giảm giá trị hàm (với step size phù hợp)</li>
+                        <li>🚀 Hội tụ nhanh: O(1/k) cho strongly convex</li>
+                        <li>🔧 Có thể dùng line search hoặc constant step size</li>
+                        <li>🎯 Hội tụ đến optimal point</li>
                     </ul>
+                </div>
+                
+                <div class="comparison-card">
+                    <h4>⚡ Proximal Gradient</h4>
+                    <div class="formula">
+                        <strong>Cập nhật:</strong> $x_{k+1} = \text{prox}_{\alpha_k h}(x_k - \alpha_k \nabla g(x_k))$<br>
+                        <strong>Cho:</strong> $f(x) = g(x) + h(x)$
+                    </div>
+                    <ul>
+                        <li>🎯 Kết hợp gradient descent + proximal operator</li>
+                        <li>✅ Xử lý được f = smooth + non-smooth</li>
+                        <li>🚀 Hội tụ nhanh hơn subgradient method</li>
+                        <li>💡 Ví dụ: LASSO, Total Variation denoising</li>
+                    </ul>
+                </div>
+                
+                <div class="comparison-card">
+                    <h4>📏 Step Size Rules</h4>
+                    <div class="step-size-info">
+                        <strong>1. Constant:</strong> $\alpha_k = \alpha > 0$<br>
+                        • Không hội tụ chính xác đến optimal<br>
+                        • Hội tụ đến neighborhood của optimal<br><br>
+                        
+                        <strong>2. Diminishing:</strong> $\alpha_k \to 0$, $\sum \alpha_k = \infty$<br>
+                        • Ví dụ: $\alpha_k = \alpha/\sqrt{k}$, $\alpha_k = \alpha/(k+1)$<br>
+                        • Đảm bảo hội tụ chính xác<br><br>
+                        
+                        <strong>3. Square Summable:</strong> $\sum \alpha_k^2 < \infty$<br>
+                        • Ví dụ: $\alpha_k = \alpha/k$<br>
+                        • Hội tụ nhanh nhất trong các diminishing rules
+                    </div>
                 </div>
             </div>
             
-            <div class="formula">
-                <strong>Ví dụ hàm |x|:</strong><br>
-                • x > 0: ∂f(x) = {1}<br>
-                • x < 0: ∂f(x) = {-1}<br>
-                • x = 0: ∂f(x) = [-1, 1]
+            <div class="theory-section">
+                <h4>🧮 Ví dụ cụ thể về Subdifferentials</h4>
+                
+                <div class="formula">
+                    <strong>1. Hàm $|x|$:</strong><br>
+                    • $x > 0$: $\partial f(x) = \{1\}$<br>
+                    • $x < 0$: $\partial f(x) = \{-1\}$<br>
+                    • $x = 0$: $\partial f(x) = [-1, 1]$<br><br>
+                    
+                    <strong>2. Hàm $\max(x, 0)$:</strong><br>
+                    • $x > 0$: $\partial f(x) = \{1\}$<br>
+                    • $x < 0$: $\partial f(x) = \{0\}$<br>
+                    • $x = 0$: $\partial f(x) = [0, 1]$<br><br>
+                    
+                    <strong>3. Hàm L1 norm $\|x\|_1$:</strong><br>
+                    • $\partial \|x\|_1 = \{g \in \mathbb{R}^n : g_i = \text{sign}(x_i) \text{ if } x_i \neq 0, |g_i| \leq 1 \text{ if } x_i = 0\}$
+                </div>
             </div>
             
-            <div class="formula">
-                <strong>Step Size Rules:</strong><br>
-                • Constant: α_k = α (có thể không hội tụ chính xác)<br>
-                • Diminishing: α_k → 0, Σα_k = ∞ (hội tụ)
+            <div class="theory-section">
+                <h4>📈 Phân tích hội tụ</h4>
+                <div class="formula">
+                    <strong>Định lý hội tụ Subgradient Method:</strong><br>
+                    Giả sử $f$ lồi, $\|g_k\| \leq G$ $\forall k$, và step sizes thỏa mãn:<br>
+                    • $\sum_k \alpha_k = \infty$ và $\sum_k \alpha_k^2 < \infty$<br><br>
+                    
+                    Thì: $\liminf f(x_k) = f^*$<br><br>
+                    
+                    <strong>Tốc độ hội tụ:</strong><br>
+                    • Với $\alpha_k = \alpha/\sqrt{k}$: $f(\bar{x}_k) - f^* \leq O(1/\sqrt{k})$<br>
+                    • Với $\alpha_k = \alpha/k$: $f(\bar{x}_k) - f^* \leq O(\log k/k)$<br>
+                    
+                    ($\bar{x}_k = \frac{1}{k}\sum_{i=1}^k x_i$ là average của các iterates)
+                </div>
             </div>
         </div>
     </div>
@@ -316,14 +458,17 @@
         // State
         let currentFunction = 'absolute';
         let currentMethod = 'subgradient';
+        let stepSizeRule = 'constant';
         let pointX = 0;
         let subgradientG = 0;
-        let startPoint = 1;
-        let learningRate = 0.1;
-        let maxSteps = 20;
+        let startPoint = 1.5;
+        let learningRate = 0.3;
+        let maxSteps = 50;
         let currentStep = 0;
         let optimizationHistory = [];
+        let comparisonResults = [];
         let isRunning = false;
+        let animationId = null;
         
         // Function definitions
         const functions = {
@@ -356,24 +501,43 @@
                 }
             },
             piecewise: {
-                name: 'f(x) = piecewise',
-                evaluate: (x) => {
-                    if (x < -1) return -x - 1;
-                    if (x > 1) return x - 1;
-                    return 0;
-                },
+                name: 'f(x) = max(|x|-1, 0)',
+                evaluate: (x) => Math.max(Math.abs(x) - 1, 0),
                 subgradient: (x) => {
-                    if (x < -1) return [-1];
                     if (x > 1) return [1];
-                    return [-1, 1]; // Range at x = ±1
+                    if (x < -1) return [-1];
+                    if (Math.abs(x) < 1) return [0];
+                    // At x = ±1, non-differentiable
+                    return x > 0 ? [0, 1] : [-1, 0];
                 },
                 gradient: (x) => {
-                    if (x < -1) return -1;
                     if (x > 1) return 1;
+                    if (x < -1) return -1;
                     return 0; // Not differentiable at x = ±1
                 }
             }
         };
+        
+        // Step size calculation
+        function calculateStepSize(k, initialRate) {
+            switch(stepSizeRule) {
+                case 'constant':
+                    return initialRate;
+                case 'diminishing':
+                    return initialRate / Math.sqrt(k + 1);
+                case 'square_summable':
+                    return initialRate / (k + 1);
+                default:
+                    return initialRate;
+            }
+        }
+        
+        // Proximal operator for |x| (soft thresholding)
+        function proximalOperator(x, lambda) {
+            if (x > lambda) return x - lambda;
+            if (x < -lambda) return x + lambda;
+            return 0;
+        }
         
         // Update parameters
         function updateParameters() {
@@ -382,6 +546,13 @@
             startPoint = parseFloat(document.getElementById('startPointValue').value);
             learningRate = parseFloat(document.getElementById('learningRateValue').value);
             maxSteps = parseInt(document.getElementById('maxStepsValue').value);
+            stepSizeRule = document.getElementById('stepSizeRule').value;
+        }
+        
+        // Update step size rule
+        function updateStepSizeRule() {
+            updateParameters();
+            resetOptimization();
         }
         
         // Set function
@@ -446,7 +617,11 @@
         // Step optimization
         function stepOptimization() {
             if (currentStep >= maxSteps) {
-                document.getElementById('optimizationResult').textContent = 'Hoàn thành';
+                document.getElementById('optimizationResult').innerHTML = `
+                    <strong>Hoàn thành ${maxSteps} iterations</strong><br>
+                    Final convergence analysis...
+                `;
+                analyzeConvergence();
                 return;
             }
             
@@ -454,14 +629,45 @@
             const currentX = optimizationHistory.length > 0 ? 
                 optimizationHistory[optimizationHistory.length - 1].x : startPoint;
             
-            let updateStep;
+            const currentStepSize = calculateStepSize(currentStep, learningRate);
+            let updateStep, chosenSubgradient;
+            
             if (currentMethod === 'subgradient') {
                 const subgradients = func.subgradient(currentX);
-                const g = Array.isArray(subgradients) ? subgradients[0] : subgradients;
-                updateStep = learningRate * g;
-            } else {
+                // Choose a subgradient (random if interval, deterministic if single value)
+                if (Array.isArray(subgradients) && subgradients.length === 2) {
+                    // Random choice in interval for non-differentiable points
+                    chosenSubgradient = subgradients[0] + Math.random() * (subgradients[1] - subgradients[0]);
+                } else {
+                    chosenSubgradient = Array.isArray(subgradients) ? subgradients[0] : subgradients;
+                }
+                updateStep = currentStepSize * chosenSubgradient;
+            } else if (currentMethod === 'gradient') {
                 const gradient = func.gradient(currentX);
-                updateStep = learningRate * gradient;
+                chosenSubgradient = gradient;
+                updateStep = currentStepSize * gradient;
+            } else if (currentMethod === 'proximal') {
+                // For proximal gradient on |x|, this is just soft thresholding
+                const newX = proximalOperator(currentX, currentStepSize);
+                const currentValue = func.evaluate(currentX);
+                const newValue = func.evaluate(newX);
+                
+                optimizationHistory.push({
+                    step: currentStep,
+                    x: currentX,
+                    value: currentValue,
+                    newX: newX,
+                    newValue: newValue,
+                    updateStep: currentX - newX,
+                    stepSize: currentStepSize,
+                    subgradient: 0,  // Not applicable for proximal
+                    method: currentMethod
+                });
+                
+                currentStep++;
+                updateOptimizationResult();
+                drawVisualization();
+                return;
             }
             
             const newX = currentX - updateStep;
@@ -474,12 +680,106 @@
                 value: currentValue,
                 newX: newX,
                 newValue: newValue,
-                updateStep: updateStep
+                updateStep: updateStep,
+                stepSize: currentStepSize,
+                subgradient: chosenSubgradient,
+                method: currentMethod
             });
             
             currentStep++;
             updateOptimizationResult();
             drawVisualization();
+        }
+        
+        // Analyze convergence
+        function analyzeConvergence() {
+            if (optimizationHistory.length === 0) return;
+            
+            const func = functions[currentFunction];
+            const optimalValue = 0; // For our functions, optimal value is 0
+            
+            // Calculate best value so far
+            let bestValue = Infinity;
+            const convergenceData = [];
+            
+            optimizationHistory.forEach((step, index) => {
+                bestValue = Math.min(bestValue, step.newValue);
+                convergenceData.push({
+                    iteration: index + 1,
+                    currentValue: step.newValue,
+                    bestValue: bestValue,
+                    error: bestValue - optimalValue
+                });
+            });
+            
+            const finalError = convergenceData[convergenceData.length - 1].error;
+            const convergenceRate = finalError / Math.sqrt(convergenceData.length);
+            
+            document.getElementById('optimizationResult').innerHTML = `
+                <strong>Phân tích hội tụ:</strong><br>
+                Final x: ${optimizationHistory[optimizationHistory.length - 1].newX.toFixed(4)}<br>
+                Best f(x): ${convergenceData[convergenceData.length - 1].bestValue.toFixed(6)}<br>
+                Error: ${finalError.toFixed(6)}<br>
+                Est. rate: O(${convergenceRate.toFixed(6)}/√k)<br>
+                Step size rule: ${stepSizeRule}
+            `;
+        }
+        
+        // Run comparison between methods
+        function runComparison() {
+            comparisonResults = [];
+            const methods = ['subgradient', 'gradient', 'proximal'];
+            const originalMethod = currentMethod;
+            const originalHistory = [...optimizationHistory];
+            const originalStep = currentStep;
+            
+            methods.forEach(method => {
+                currentMethod = method;
+                resetOptimization();
+                
+                // Run optimization
+                for (let i = 0; i < maxSteps; i++) {
+                    stepOptimization();
+                }
+                
+                // Store results
+                const func = functions[currentFunction];
+                const finalX = optimizationHistory[optimizationHistory.length - 1].newX;
+                const finalValue = func.evaluate(finalX);
+                
+                comparisonResults.push({
+                    method: method,
+                    finalX: finalX,
+                    finalValue: finalValue,
+                    iterations: optimizationHistory.length,
+                    history: [...optimizationHistory]
+                });
+            });
+            
+            // Restore original state
+            currentMethod = originalMethod;
+            optimizationHistory = originalHistory;
+            currentStep = originalStep;
+            
+            displayComparisonResults();
+            drawVisualization();
+        }
+        
+        // Display comparison results
+        function displayComparisonResults() {
+            let resultText = '<strong>So sánh các phương pháp:</strong><br>';
+            
+            comparisonResults.forEach(result => {
+                const methodName = {
+                    'subgradient': 'Subgradient',
+                    'gradient': 'Gradient Descent',
+                    'proximal': 'Proximal Gradient'
+                }[result.method];
+                
+                resultText += `${methodName}: f(${result.finalX.toFixed(3)}) = ${result.finalValue.toFixed(4)}<br>`;
+            });
+            
+            document.getElementById('optimizationResult').innerHTML = resultText;
         }
         
         // Reset optimization
@@ -500,11 +800,16 @@
             const optimalX = 0; // For most of our functions, optimal is at x = 0
             const optimalValue = func.evaluate(optimalX);
             
+            // Calculate current step size
+            const currentStepSize = lastStep.stepSize || learningRate;
+            
             document.getElementById('optimizationResult').innerHTML = `
-                <strong>Bước ${currentStep}:</strong><br>
-                x = ${lastStep.x.toFixed(3)} → ${lastStep.newX.toFixed(3)}<br>
-                f(x) = ${lastStep.value.toFixed(3)} → ${lastStep.newValue.toFixed(3)}<br>
-                <strong>Giá trị tối ưu:</strong> f(${optimalX}) = ${optimalValue.toFixed(3)}
+                <strong>Iteration ${currentStep}:</strong><br>
+                x: ${lastStep.x.toFixed(4)} → ${lastStep.newX.toFixed(4)}<br>
+                f(x): ${lastStep.value.toFixed(4)} → ${lastStep.newValue.toFixed(4)}<br>
+                Step size: ${currentStepSize.toFixed(4)}<br>
+                ${lastStep.method !== 'proximal' ? `Subgradient: ${lastStep.subgradient.toFixed(3)}<br>` : ''}
+                <strong>Optimal:</strong> f(${optimalX}) = ${optimalValue.toFixed(3)}
             `;
         }
         
@@ -620,7 +925,8 @@
             
             // Draw optimization path
             if (optimizationHistory.length > 0) {
-                ctx.strokeStyle = currentMethod === 'subgradient' ? '#28a745' : '#dc3545';
+                ctx.strokeStyle = currentMethod === 'subgradient' ? '#28a745' : 
+                                 currentMethod === 'gradient' ? '#dc3545' : '#6f42c1';
                 ctx.lineWidth = 2;
                 ctx.setLineDash([5, 5]);
                 ctx.beginPath();
@@ -637,13 +943,57 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
-                // Draw points
+                // Draw points with different colors for different methods
                 optimizationHistory.forEach((step, index) => {
                     const pos = transform(step.x, step.value);
                     ctx.fillStyle = index === optimizationHistory.length - 1 ? 
-                        (currentMethod === 'subgradient' ? '#28a745' : '#dc3545') : '#6c757d';
+                        (currentMethod === 'subgradient' ? '#28a745' : 
+                         currentMethod === 'gradient' ? '#dc3545' : '#6f42c1') : '#6c757d';
                     ctx.beginPath();
                     ctx.arc(pos.x, pos.y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Add step numbers for first few points
+                    if (index < 5 && index % 2 === 0) {
+                        ctx.fillStyle = '#333';
+                        ctx.font = '10px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(index.toString(), pos.x, pos.y - 8);
+                    }
+                });
+            }
+            
+            // Draw comparison results if available
+            if (comparisonResults.length > 0) {
+                const colors = {
+                    'subgradient': '#28a745',
+                    'gradient': '#dc3545', 
+                    'proximal': '#6f42c1'
+                };
+                
+                comparisonResults.forEach(result => {
+                    ctx.strokeStyle = colors[result.method];
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([2, 2]);
+                    ctx.beginPath();
+                    
+                    result.history.forEach((step, index) => {
+                        const pos = transform(step.x, step.value);
+                        if (index === 0) {
+                            ctx.moveTo(pos.x, pos.y);
+                        } else {
+                            ctx.lineTo(pos.x, pos.y);
+                        }
+                    });
+                    
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Mark final point
+                    const finalPos = transform(result.finalX, result.finalValue);
+                    ctx.fillStyle = colors[result.method];
+                    ctx.beginPath();
+                    ctx.arc(finalPos.x, finalPos.y, 6, 0, 2 * Math.PI);
                     ctx.fill();
                 });
             }
@@ -653,7 +1003,8 @@
                 const lastStep = optimizationHistory[optimizationHistory.length - 1];
                 const currentPos = transform(lastStep.newX, lastStep.newValue);
                 
-                ctx.fillStyle = currentMethod === 'subgradient' ? '#28a745' : '#dc3545';
+                ctx.fillStyle = currentMethod === 'subgradient' ? '#28a745' : 
+                               currentMethod === 'gradient' ? '#dc3545' : '#6f42c1';
                 ctx.beginPath();
                 ctx.arc(currentPos.x, currentPos.y, 8, 0, 2 * Math.PI);
                 ctx.fill();
@@ -661,16 +1012,43 @@
                 ctx.fillStyle = '#333';
                 ctx.font = '12px Arial';
                 ctx.textAlign = 'left';
-                ctx.fillText(`${currentMethod === 'subgradient' ? 'Subgradient' : 'Gradient'}`, 
+                const methodNames = {
+                    'subgradient': 'Subgradient',
+                    'gradient': 'Gradient',
+                    'proximal': 'Proximal'
+                };
+                ctx.fillText(methodNames[currentMethod], 
                     currentPos.x + 10, currentPos.y - 10);
             }
             
-            // Draw labels
+            // Draw legend
             ctx.fillStyle = '#333';
             ctx.font = '12px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(`f(x) = ${func.name}`, margin + 10, margin + 20);
-            ctx.fillText(`g = ${subgradientG.toFixed(2)}`, margin + 10, margin + 40);
+            ctx.fillText(`Step size rule: ${stepSizeRule}`, margin + 10, margin + 40);
+            if (currentStep > 0) {
+                const currentStepSize = calculateStepSize(currentStep - 1, learningRate);
+                ctx.fillText(`Current α: ${currentStepSize.toFixed(4)}`, margin + 10, margin + 60);
+            }
+            ctx.fillText(`g = ${subgradientG.toFixed(2)}`, margin + 10, margin + 80);
+            
+            // Draw optimal point indicator
+            const optimalPos = transform(0, func.evaluate(0));
+            ctx.strokeStyle = '#ff9800';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(optimalPos.x - 8, optimalPos.y - 8);
+            ctx.lineTo(optimalPos.x + 8, optimalPos.y + 8);
+            ctx.moveTo(optimalPos.x + 8, optimalPos.y - 8);
+            ctx.lineTo(optimalPos.x - 8, optimalPos.y + 8);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#ff9800';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Optimal', optimalPos.x + 10, optimalPos.y + 15);
         }
         
         // Event listeners

@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning - Comprehensive Mathematical Foundation</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            line-height: 1.7;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .introduction {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #FFD700;
+        }
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #4CAF50;
+        }
+        .formula-box {
+            background: linear-gradient(145deg, rgba(15, 15, 40, 0.9), rgba(25, 25, 60, 0.7));
+            padding: 25px 35px;
+            border-radius: 15px;
+            font-family: 'KaTeX_Main', 'Times New Roman', serif;
+            font-size: 20px;
+            line-height: 1.8;
+            text-align: center;
+            margin: 25px 0;
+            border: 2px solid rgba(100, 200, 255, 0.4);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+        
+        .formula-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #7c4dff, #ff6b6b, #4ecdc4);
+            opacity: 0.8;
+        }
+        
+        .formula-box .main-formula {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .formula-box .sub-formula {
+            font-size: 16px;
+            color: #b8e6ff;
+            font-style: italic;
+            margin-top: 8px;
+        }
+        
+        .formula-box .formula-label {
+            font-size: 14px;
+            color: #ffeb3b;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .inline-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Times New Roman', serif;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            margin: 0 2px;
+            color: #e8f4fd;
+        }
+        .theorem-box {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2ecc71;
+        }
+        .algorithm-box {
+            background: rgba(52, 152, 219, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .example-box {
+            background: rgba(230, 126, 34, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #e67e22;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .canvas-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #34495e;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #00FFFF;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+        }
+        .parameter-display {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .app-card {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2ecc71;
+        }
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .loss-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Machine Learning - Nền Tảng Toán Học</h1>
+        
+        <div class="introduction">
+            <h2 style="color: #FFD700; margin: 0 0 15px 0;">🧠 Giới Thiệu Toán Học</h2>
+            <p><strong>Machine Learning</strong> là sự giao thoa giữa thống kê, tối ưu hóa, và đại số tuyến tính. Mọi thuật toán ML đều dựa trên nền tảng toán học vững chắc.</p>
+            
+            <div class="formula-box">
+                <div class="formula-label">Mục tiêu của Machine Learning</div>
+                <div class="main-formula">minimize E[L(f(x), y)]</div>
+                <div class="sub-formula">f: model, L: loss function, E: expectation</div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">📊 Linear Regression - Nền Tảng</h2>
+            
+            <h3>1. Mathematical Framework</h3>
+            <p>Linear Regression là bài toán tối ưu hóa convex với nghiệm giải tích chính xác.</p>
+            
+            <div class="grid-layout">
+                <div>
+                    <h4>🎯 Objective Function:</h4>
+                    <div class="formula-box">
+                        <div class="formula-label">Objective Function</div>
+                        <div class="main-formula">min ||Xθ - y||<sub>2</sub><sup>2</sup></div>
+                        <div class="main-formula">= min (Xθ - y)<sup>T</sup>(Xθ - y)</div>
+                        <div class="sub-formula">Tối thiểu hóa squared error</div>
+                    </div>
+                </div>
+                <div>
+                    <h4>🔍 Closed-form Solution:</h4>
+                    <div class="formula-box">
+                        <div class="formula-label">Closed-form Solution</div>
+                        <div class="main-formula">θ* = (X<sup>T</sup>X)<sup>-1</sup>X<sup>T</sup>y</div>
+                        <div class="sub-formula">Moore-Penrose pseudo-inverse</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>📐 Gauss-Markov Theorem</h4>
+                <p><strong>Theorem:</strong> Under assumptions of linearity, independence, homoscedasticity, và zero expectation of errors, OLS estimator là BLUE (Best Linear Unbiased Estimator).</p>
+            </div>
+
+            <div class="algorithm-box">
+                <h4>⚙️ Gradient Descent for Linear Regression</h4>
+                <p>Khi XᵀX không khả nghịch hoặc n >> p, ta dùng iterative methods:</p>
+                <div class="formula-box">
+                    <div class="formula-label">Gradient Descent</div>
+                    <div class="main-formula">∇J(θ) = 2X<sup>T</sup>Xθ - 2X<sup>T</sup>y</div>
+                    <div class="main-formula">θ<sub>t+1</sub> = θ<sub>t</sub> - α∇J(θ<sub>t</sub>)</div>
+                    <div class="sub-formula">α: learning rate, t: iteration</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <h3 style="color: #2c3e50;">📊 Interactive Linear Regression Visualization</h3>
+            <canvas id="regressionCanvas" width="800" height="400"></canvas>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>Learning Rate α:</label>
+                    <input type="range" id="learningRateSlider" min="0.001" max="0.1" step="0.001" value="0.01">
+                    <div class="parameter-display" id="learningRateDisplay">α = 0.01</div>
+                </div>
+                <div class="control-group">
+                    <label>Regularization λ:</label>
+                    <input type="range" id="lambdaSlider" min="0" max="1" step="0.01" value="0">
+                    <div class="parameter-display" id="lambdaDisplay">λ = 0.00</div>
+                </div>
+                <div class="control-group">
+                    <label>Noise Level:</label>
+                    <input type="range" id="noiseSlider" min="0" max="2" step="0.1" value="0.5">
+                    <div class="parameter-display" id="noiseDisplay">σ = 0.5</div>
+                </div>
+                <div class="control-group">
+                    <button onclick="generateData()">📊 Generate New Data</button>
+                    <button onclick="trainModel()">🎯 Train Model</button>
+                    <button onclick="animateGradientDescent()">🎬 Animate GD</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">🧮 Logistic Regression</h2>
+            
+            <h3>2. Classification và Maximum Likelihood</h3>
+            <p>Logistic Regression là linear classifier sử dụng sigmoid function để map từ real numbers vào probabilities.</p>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h4>📈 Sigmoid Function:</h4>
+                    <div class="formula-box">
+                        σ(z) = 1/(1 + e⁻ᶻ)<br/>
+                        σ'(z) = σ(z)(1 - σ(z))
+                    </div>
+                </div>
+                <div class="example-box">
+                    <h4>📉 Log-Likelihood:</h4>
+                    <div class="formula-box">
+                        ℓ(θ) = Σ[yᵢlog(pᵢ) + (1-yᵢ)log(1-pᵢ)]<br/>
+                        <small>pᵢ = σ(xᵢᵀθ)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>🎲 Maximum Likelihood Estimation (MLE)</h4>
+                <p>Không có closed-form solution. Sử dụng Newton-Raphson hoặc IRLS (Iteratively Reweighted Least Squares):</p>
+                <div class="formula-box">
+                    θₜ₊₁ = θₜ - H⁻¹∇ℓ(θₜ)<br/>
+                    <small>H = Hessian matrix, ∇ℓ = gradient</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">🔄 Regularization Theory</h2>
+            
+            <h3>3. Bias-Variance Tradeoff</h3>
+            
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h4>🎯 Ridge Regression (L2):</h4>
+                    <div class="formula-box">
+                        min ||Xθ - y||₂² + λ||θ||₂²<br/>
+                        θ* = (XᵀX + λI)⁻¹Xᵀy
+                    </div>
+                    <p><strong>Effect:</strong> Shrinks coefficients, prevents overfitting</p>
+                </div>
+                <div class="example-box">
+                    <h4>🔍 LASSO Regression (L1):</h4>
+                    <div class="formula-box">
+                        min ||Xθ - y||₂² + λ||θ||₁
+                    </div>
+                    <p><strong>Effect:</strong> Feature selection, sparse solutions</p>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>⚖️ Bias-Variance Decomposition</h4>
+                <div class="formula-box">
+                    E[(ŷ - y)²] = Bias²(ŷ) + Var(ŷ) + σ²<br/>
+                    <small>Expected MSE = Irreducible Error + Bias² + Variance</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">🧠 Neural Networks</h2>
+            
+            <h3>4. Universal Approximation Theory</h3>
+            
+            <div class="algorithm-box">
+                <h4>🔄 Forward Propagation:</h4>
+                <div class="formula-box">
+                    z^(l) = W^(l)a^(l-1) + b^(l)<br/>
+                    a^(l) = σ(z^(l))<br/>
+                    <small>l = layer index, σ = activation function</small>
+                </div>
+            </div>
+
+            <div class="algorithm-box">
+                <h4>⬅️ Backpropagation:</h4>
+                <div class="formula-box">
+                    δ^(l) = (W^(l+1))ᵀδ^(l+1) ⊙ σ'(z^(l))<br/>
+                    ∂C/∂W^(l) = δ^(l)(a^(l-1))ᵀ<br/>
+                    ∂C/∂b^(l) = δ^(l)
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>🌐 Universal Approximation Theorem</h4>
+                <p><strong>Cybenko (1989):</strong> A feedforward network với một hidden layer và finite number of neurons có thể approximate bất kỳ continuous function nào on compact subset của ℝⁿ.</p>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">📈 Optimization in ML</h2>
+            
+            <div class="loss-viz">
+                <div class="example-box">
+                    <h4>⚡ Stochastic Gradient Descent:</h4>
+                    <div class="formula-box">
+                        θₜ₊₁ = θₜ - α∇L(θₜ; xᵢ, yᵢ)<br/>
+                        <small>Update using single sample</small>
+                    </div>
+                </div>
+                <div class="example-box">
+                    <h4>🎯 Adam Optimizer:</h4>
+                    <div class="formula-box">
+                        mₜ = β₁mₜ₋₁ + (1-β₁)∇L<br/>
+                        vₜ = β₂vₜ₋₁ + (1-β₂)(∇L)²<br/>
+                        θₜ₊₁ = θₜ - α·m̂ₜ/√v̂ₜ
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-table">
+                <table>
+                    <tr>
+                        <th>Optimizer</th>
+                        <th>Convergence Rate</th>
+                        <th>Memory</th>
+                        <th>Best For</th>
+                    </tr>
+                    <tr>
+                        <td>SGD</td>
+                        <td>O(1/√T)</td>
+                        <td>O(1)</td>
+                        <td>Simple problems</td>
+                    </tr>
+                    <tr>
+                        <td>Adam</td>
+                        <td>O(1/√T)</td>
+                        <td>O(d)</td>
+                        <td>Deep networks</td>
+                    </tr>
+                    <tr>
+                        <td>L-BFGS</td>
+                        <td>Superlinear</td>
+                        <td>O(md)</td>
+                        <td>Batch optimization</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2 style="color: #4CAF50; margin: 0 0 20px 0;">📊 Statistical Learning Theory</h2>
+            
+            <div class="theorem-box">
+                <h4>📚 PAC Learning</h4>
+                <p><strong>Probably Approximately Correct Learning:</strong> Với probability ≥ 1-δ, learned hypothesis h có error ≤ ε.</p>
+                <div class="formula-box">
+                    P[R(h) - R(h*) ≤ ε] ≥ 1 - δ<br/>
+                    <small>R(h) = true risk, R(h*) = optimal risk</small>
+                </div>
+            </div>
+
+            <div class="theorem-box">
+                <h4>🎯 VC Dimension</h4>
+                <p>Vapnik-Chervonenkis dimension đo complexity của hypothesis class:</p>
+                <div class="formula-box">
+                    |S| ≥ (8/ε²)log(4/δ) + (8/ε²)d·log(13/ε)<br/>
+                    <small>d = VC dimension, |S| = sample size needed</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="applications-grid">
+            <div class="app-card">
+                <h3>🤖 Deep Learning Applications</h3>
+                <ul>
+                    <li><strong>Computer Vision:</strong> CNNs, ResNets, attention mechanisms</li>
+                    <li><strong>NLP:</strong> Transformers, BERT, GPT architectures</li>
+                    <li><strong>Reinforcement Learning:</strong> DQN, A3C, PPO</li>
+                    <li><strong>Generative Models:</strong> VAE, GANs, diffusion models</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>📊 Classical ML Applications</h3>
+                <ul>
+                    <li><strong>Finance:</strong> Credit scoring, algorithmic trading</li>
+                    <li><strong>Healthcare:</strong> Diagnosis, drug discovery</li>
+                    <li><strong>Recommender Systems:</strong> Collaborative filtering</li>
+                    <li><strong>Time Series:</strong> Forecasting, anomaly detection</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>🔬 Mathematical Connections</h3>
+                <ul>
+                    <li><strong>Linear Algebra:</strong> Matrix factorization, eigenvalues</li>
+                    <li><strong>Calculus:</strong> Optimization, gradients</li>
+                    <li><strong>Probability:</strong> Bayesian inference, uncertainty</li>
+                    <li><strong>Statistics:</strong> Hypothesis testing, confidence intervals</li>
+                </ul>
+            </div>
+
+            <div class="app-card">
+                <h3>🎯 Advanced Topics</h3>
+                <ul>
+                    <li><strong>Kernel Methods:</strong> SVM, Gaussian processes</li>
+                    <li><strong>Ensemble Methods:</strong> Bagging, boosting, stacking</li>
+                    <li><strong>Online Learning:</strong> Regret bounds, bandits</li>
+                    <li><strong>Meta-learning:</strong> Learning to learn, MAML</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('regressionCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let data = [];
+        let model = {theta: [0, 0], cost: []};
+        let learningRate = 0.01;
+        let lambda = 0;
+        let noise = 0.5;
+        let animating = false;
+
+        function generateTrueFunction(x) {
+            return 2 * x + 1; // True underlying function
+        }
+
+        function generateData() {
+            data = [];
+            const n = 50;
+            
+            for (let i = 0; i < n; i++) {
+                const x = Math.random() * 10 - 5;
+                const y = generateTrueFunction(x) + (Math.random() - 0.5) * 2 * noise;
+                data.push({x, y});
+            }
+            
+            // Initialize model
+            model.theta = [Math.random() - 0.5, Math.random() - 0.5];
+            model.cost = [];
+            
+            drawRegression();
+        }
+
+        function predict(x, theta) {
+            return theta[0] + theta[1] * x;
+        }
+
+        function computeCost(theta) {
+            let mse = 0;
+            for (let i = 0; i < data.length; i++) {
+                const prediction = predict(data[i].x, theta);
+                mse += Math.pow(prediction - data[i].y, 2);
+            }
+            mse /= (2 * data.length);
+            
+            // Add regularization
+            const regularization = lambda * (theta[0] * theta[0] + theta[1] * theta[1]) / 2;
+            return mse + regularization;
+        }
+
+        function computeGradient(theta) {
+            let grad = [0, 0];
+            
+            for (let i = 0; i < data.length; i++) {
+                const prediction = predict(data[i].x, theta);
+                const error = prediction - data[i].y;
+                
+                grad[0] += error;
+                grad[1] += error * data[i].x;
+            }
+            
+            grad[0] = grad[0] / data.length + lambda * theta[0];
+            grad[1] = grad[1] / data.length + lambda * theta[1];
+            
+            return grad;
+        }
+
+        function updateParameters() {
+            learningRate = parseFloat(document.getElementById('learningRateSlider').value);
+            lambda = parseFloat(document.getElementById('lambdaSlider').value);
+            noise = parseFloat(document.getElementById('noiseSlider').value);
+            
+            document.getElementById('learningRateDisplay').textContent = `α = ${learningRate.toFixed(3)}`;
+            document.getElementById('lambdaDisplay').textContent = `λ = ${lambda.toFixed(2)}`;
+            document.getElementById('noiseDisplay').textContent = `σ = ${noise.toFixed(1)}`;
+        }
+
+        function trainModel() {
+            const iterations = 1000;
+            
+            for (let i = 0; i < iterations; i++) {
+                const cost = computeCost(model.theta);
+                model.cost.push(cost);
+                
+                const gradient = computeGradient(model.theta);
+                model.theta[0] -= learningRate * gradient[0];
+                model.theta[1] -= learningRate * gradient[1];
+                
+                if (i % 100 === 0) {
+                    console.log(`Iteration ${i}, Cost: ${cost.toFixed(4)}, θ: [${model.theta[0].toFixed(3)}, ${model.theta[1].toFixed(3)}]`);
+                }
+            }
+            
+            drawRegression();
+        }
+
+        function animateGradientDescent() {
+            if (animating) return;
+            
+            animating = true;
+            model.theta = [Math.random() - 0.5, Math.random() - 0.5];
+            model.cost = [];
+            
+            let iteration = 0;
+            const maxIterations = 200;
+            
+            const animate = () => {
+                if (!animating || iteration >= maxIterations) {
+                    animating = false;
+                    return;
+                }
+                
+                const cost = computeCost(model.theta);
+                model.cost.push(cost);
+                
+                const gradient = computeGradient(model.theta);
+                model.theta[0] -= learningRate * gradient[0];
+                model.theta[1] -= learningRate * gradient[1];
+                
+                drawRegression();
+                
+                iteration++;
+                setTimeout(animate, 50);
+            };
+            
+            animate();
+        }
+
+        function drawRegression() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            drawGrid();
+            
+            // Draw data points
+            drawDataPoints();
+            
+            // Draw true function
+            drawTrueFunction();
+            
+            // Draw model prediction
+            drawModelPrediction();
+            
+            // Draw legend and info
+            drawLegend();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i <= canvas.width; i += 40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let j = 0; j <= canvas.height; j += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, j);
+                ctx.lineTo(canvas.width, j);
+                ctx.stroke();
+            }
+            
+            // Axes
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+        }
+
+        function drawDataPoints() {
+            ctx.fillStyle = '#3498db';
+            data.forEach(point => {
+                const x = (point.x + 5) * (canvas.width / 10);
+                const y = canvas.height - (point.y + 5) * (canvas.height / 10);
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        function drawTrueFunction() {
+            ctx.strokeStyle = '#2ecc71';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            
+            for (let x = -5; x <= 5; x += 0.1) {
+                const y = generateTrueFunction(x);
+                const screenX = (x + 5) * (canvas.width / 10);
+                const screenY = canvas.height - (y + 5) * (canvas.height / 10);
+                
+                if (x === -5) {
+                    ctx.moveTo(screenX, screenY);
+                } else {
+                    ctx.lineTo(screenX, screenY);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function drawModelPrediction() {
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            
+            for (let x = -5; x <= 5; x += 0.1) {
+                const y = predict(x, model.theta);
+                const screenX = (x + 5) * (canvas.width / 10);
+                const screenY = canvas.height - (y + 5) * (canvas.height / 10);
+                
+                if (x === -5) {
+                    ctx.moveTo(screenX, screenY);
+                } else {
+                    ctx.lineTo(screenX, screenY);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function drawLegend() {
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            
+            // Legend
+            ctx.fillStyle = '#3498db';
+            ctx.fillText('● Training Data', 20, 30);
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillText('— True Function', 20, 50);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText('— Model Prediction', 20, 70);
+            
+            // Model info
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            const cost = model.cost.length > 0 ? model.cost[model.cost.length - 1] : 0;
+            ctx.fillText(`θ₀ = ${model.theta[0].toFixed(3)}, θ₁ = ${model.theta[1].toFixed(3)}`, canvas.width - 250, 30);
+            ctx.fillText(`Cost = ${cost.toFixed(4)}`, canvas.width - 250, 50);
+            ctx.fillText(`Regularization λ = ${lambda}`, canvas.width - 250, 70);
+        }
+
+        // Event listeners
+        document.getElementById('learningRateSlider').addEventListener('input', updateParameters);
+        document.getElementById('lambdaSlider').addEventListener('input', updateParameters);
+        document.getElementById('noiseSlider').addEventListener('input', updateParameters);
+
+        // Initialize
+        updateParameters();
+        generateData();
+    </script>
+</body>
+</html>

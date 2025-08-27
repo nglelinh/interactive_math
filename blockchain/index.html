@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛓️ Blockchain Technology Hub</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #f1f5f9;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(59, 130, 246, 0.2);
+            border-color: #60a5fa;
+        }
+        
+        .lesson-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #f59e0b);
+        }
+        
+        .lesson-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .lesson-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #f1f5f9;
+        }
+        
+        .lesson-description {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .lesson-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .lesson-features li {
+            padding: 5px 0;
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+        
+        .lesson-features li::before {
+            content: '✓ ';
+            color: #22c55e;
+            font-weight: bold;
+        }
+        
+        .difficulty {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .difficulty.beginner {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+        
+        .difficulty.intermediate {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        
+        .difficulty.advanced {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        
+        .concepts-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .concept-item {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid #8b5cf6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .concept-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .learning-path {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 40px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .path-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .path-step {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid #3b82f6;
+            border-radius: 50px;
+            padding: 15px 20px;
+            text-align: center;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        .path-step::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #60a5fa;
+        }
+        
+        .path-step:last-child::after {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .lessons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .path-steps {
+                flex-direction: column;
+            }
+            
+            .path-step::after {
+                content: '↓';
+                right: 50%;
+                top: 100%;
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⛓️ Blockchain Technology Hub</h1>
+        <p class="subtitle">Master the Mathematical Foundations of Distributed Ledger Technology</p>
+        
+        <div class="intro">
+            <h2>🎯 Welcome to Blockchain Mathematics</h2>
+            <p>Explore the fascinating world of blockchain technology through interactive demonstrations and mathematical analysis. From basic cryptographic principles to advanced consensus algorithms, this comprehensive collection covers all aspects of blockchain technology.</p>
+            <p><strong>What you'll learn:</strong> Hash functions, digital signatures, Merkle trees, consensus algorithms, smart contracts, cryptocurrency economics, and distributed systems theory.</p>
+        </div>
+        
+        <div class="lessons-grid">
+            <div class="lesson-card" onclick="window.open('blockchain_fundamentals.html', '_blank')">
+                <div class="difficulty beginner">Beginner</div>
+                <span class="lesson-icon">📦</span>
+                <div class="lesson-title">Blockchain Fundamentals</div>
+                <div class="lesson-description">
+                    Understand the core concepts of blockchain technology with interactive block mining, chain validation, and cryptographic demonstrations.
+                </div>
+                <ul class="lesson-features">
+                    <li>Interactive block mining simulation</li>
+                    <li>Chain validation and tampering detection</li>
+                    <li>SHA-256 hash function explorer</li>
+                    <li>Proof of Work difficulty adjustment</li>
+                    <li>Merkle tree visualization</li>
+                    <li>PSNR analysis for security</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="window.open('smart_contracts_consensus.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🔗</span>
+                <div class="lesson-title">Smart Contracts & Consensus</div>
+                <div class="lesson-description">
+                    Dive deep into smart contract development and advanced consensus mechanisms with real-time network simulation.
+                </div>
+                <ul class="lesson-features">
+                    <li>Smart contract editor and deployment</li>
+                    <li>Multi-consensus algorithm simulation</li>
+                    <li>Byzantine fault tolerance analysis</li>
+                    <li>Gas economics and optimization</li>
+                    <li>Transaction pool management</li>
+                    <li>Digital signature verification</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="window.open('defi_mathematics.html', '_blank')">
+                <div class="difficulty intermediate">Intermediate</div>
+                <span class="lesson-icon">💰</span>
+                <div class="lesson-title">DeFi Mathematics</div>
+                <div class="lesson-description">
+                    Explore decentralized finance protocols, automated market makers, and yield farming mathematics.
+                </div>
+                <ul class="lesson-features">
+                    <li>Automated Market Maker (AMM) models</li>
+                    <li>Impermanent loss calculations</li>
+                    <li>Liquidity pool optimization</li>
+                    <li>Yield farming strategies</li>
+                    <li>Risk assessment models</li>
+                    <li>Token economics analysis</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="alert('Coming Soon! This lesson will cover NFT mathematics, rarity calculations, and marketplace dynamics.')">
+                <div class="difficulty intermediate">Intermediate</div>
+                <span class="lesson-icon">🎨</span>
+                <div class="lesson-title">NFT & Token Economics</div>
+                <div class="lesson-description">
+                    Understand non-fungible tokens, rarity mathematics, and token distribution mechanisms.
+                </div>
+                <ul class="lesson-features">
+                    <li>NFT rarity calculation algorithms</li>
+                    <li>Token distribution models</li>
+                    <li>Marketplace price discovery</li>
+                    <li>Metadata storage optimization</li>
+                    <li>Royalty mathematics</li>
+                    <li>Collection statistics</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="alert('Coming Soon! This lesson will cover Layer 2 scaling, state channels, and plasma mathematics.')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">⚡</span>
+                <div class="lesson-title">Scaling Solutions</div>
+                <div class="lesson-description">
+                    Learn about Layer 2 solutions, state channels, and the mathematics behind blockchain scalability.
+                </div>
+                <ul class="lesson-features">
+                    <li>Layer 2 rollup mathematics</li>
+                    <li>State channel protocols</li>
+                    <li>Plasma chain construction</li>
+                    <li>Sharding algorithms</li>
+                    <li>Cross-chain bridge security</li>
+                    <li>Throughput optimization</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="window.open('zero_knowledge_proofs.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🔐</span>
+                <div class="lesson-title">Privacy & Zero-Knowledge</div>
+                <div class="lesson-description">
+                    Explore zero-knowledge proofs, privacy-preserving protocols, and advanced cryptographic techniques.
+                </div>
+                <ul class="lesson-features">
+                    <li>Zero-knowledge proof systems</li>
+                    <li>zk-SNARKs and zk-STARKs</li>
+                    <li>Ring signatures and mixers</li>
+                    <li>Homomorphic encryption</li>
+                    <li>Privacy coin mathematics</li>
+                    <li>Anonymity set analysis</li>
+                </ul>
+            </div>
+            
+            <div class="lesson-card" onclick="window.open('nft_token_economics.html', '_blank')">
+                <div class="difficulty advanced">Advanced</div>
+                <span class="lesson-icon">🎨</span>
+                <div class="lesson-title">NFT & Token Economics</div>
+                <div class="lesson-description">
+                    Understand NFT mathematics, rarity calculations, marketplace dynamics, and token economic models.
+                </div>
+                <ul class="lesson-features">
+                    <li>NFT rarity scoring algorithms</li>
+                    <li>Marketplace pricing models</li>
+                    <li>Bonding curve mathematics</li>
+                    <li>Token distribution strategies</li>
+                    <li>Governance token mechanics</li>
+                    <li>Economic incentive design</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="concepts-section">
+            <h2>🧮 Core Mathematical Concepts</h2>
+            <p>Blockchain technology relies on several fundamental mathematical principles:</p>
+            
+            <div class="concepts-grid">
+                <div class="concept-item">
+                    <span class="concept-icon">🔢</span>
+                    <div><strong>Hash Functions</strong></div>
+                    <div>SHA-256, RIPEMD-160, Keccak</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🔐</span>
+                    <div><strong>Digital Signatures</strong></div>
+                    <div>ECDSA, EdDSA, RSA</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🌳</span>
+                    <div><strong>Merkle Trees</strong></div>
+                    <div>Binary hash trees, proofs</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">⚖️</span>
+                    <div><strong>Consensus Theory</strong></div>
+                    <div>Byzantine fault tolerance</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">📊</span>
+                    <div><strong>Game Theory</strong></div>
+                    <div>Nash equilibrium, incentives</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">🎲</span>
+                    <div><strong>Probability Theory</strong></div>
+                    <div>Random selection, security</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">📈</span>
+                    <div><strong>Network Theory</strong></div>
+                    <div>Graph theory, topology</div>
+                </div>
+                
+                <div class="concept-item">
+                    <span class="concept-icon">⚡</span>
+                    <div><strong>Complexity Theory</strong></div>
+                    <div>P vs NP, computational hardness</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="learning-path">
+            <h2>🛤️ Recommended Learning Path</h2>
+            <p>Follow this structured path to master blockchain mathematics:</p>
+            
+            <div class="path-steps">
+                <div class="path-step">
+                    <div><strong>1. Fundamentals</strong></div>
+                    <div>Blocks & Chains</div>
+                </div>
+                
+                <div class="path-step">
+                    <div><strong>2. Cryptography</strong></div>
+                    <div>Hashes & Signatures</div>
+                </div>
+                
+                <div class="path-step">
+                    <div><strong>3. Consensus</strong></div>
+                    <div>Byzantine Fault Tolerance</div>
+                </div>
+                
+                <div class="path-step">
+                    <div><strong>4. Smart Contracts</strong></div>
+                    <div>Code & Gas Economics</div>
+                </div>
+                
+                <div class="path-step">
+                    <div><strong>5. Applications</strong></div>
+                    <div>DeFi & NFTs</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🎓 Part of the Interactive Mathematics Learning Platform</p>
+            <p>Explore mathematical concepts through interactive visualizations and hands-on experiments</p>
+        </div>
+    </div>
+</body>
+</html>

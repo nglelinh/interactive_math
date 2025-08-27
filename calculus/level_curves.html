@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Level Curves - Loss Function Landscapes trong ML</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
@@ -322,7 +324,7 @@
             <h3>🧠 Level Curves trong Deep Learning:</h3>
             <div class="ml-context">
                 <h4>🎯 Loss Function Landscapes:</h4>
-                <p><strong>Neural Network Training:</strong> Loss function f(w₁, w₂) creates complex landscapes với millions parameters. Level curves show constant loss values - optimization algorithms navigate these contours to find minimum loss.</p>
+                <p><strong>Neural Network Training:</strong> Loss function $f(w_1, w_2)$ creates complex landscapes với millions parameters. Level curves show constant loss values - optimization algorithms navigate these contours to find minimum loss.</p>
                 
                 <h4>🔍 Optimization Algorithm Behavior:</h4>
                 <ul>
@@ -350,10 +352,10 @@
             <h3>🔬 Mathematical Foundation:</h3>
             <div class="math-foundation">
                 <ul>
-                    <li><strong>Level Set Definition:</strong> L_c = {(x,y) : f(x,y) = c} for constant c</li>
-                    <li><strong>Implicit Function Theorem:</strong> Level curves exist when ∇f ≠ 0</li>
-                    <li><strong>Gradient Orthogonality:</strong> ∇f ⊥ level curves at every point</li>
-                    <li><strong>Critical Points:</strong> Where ∇f = 0, level curves may intersect or have singular behavior</li>
+                    <li><strong>Level Set Definition:</strong> $L_c = \{(x,y) : f(x,y) = c\}$ for constant $c$</li>
+                    <li><strong>Implicit Function Theorem:</strong> Level curves exist when $\nabla f \neq \vb{0}$</li>
+                    <li><strong>Gradient Orthogonality:</strong> $\nabla f \perp$ level curves at every point</li>
+                    <li><strong>Critical Points:</strong> Where $\nabla f = \vb{0}$, level curves may intersect or have singular behavior</li>
                     <li><strong>Contour Spacing:</strong> Dense contours = steep regions, sparse contours = flat regions</li>
                 </ul>
             </div>

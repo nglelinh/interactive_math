@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Traversal Algorithms - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.active {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .algorithm-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .traversal-order {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .step-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .legend {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .speed-control {
+            margin: 15px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại Graph Theory Hub</a>
+        
+        <h1>🗺️ Graph Traversal Algorithms - Interactive Exploration</h1>
+        
+        <div class="content-grid">
+            <div class="visualization-panel">
+                <h2>🚶 Algorithm Visualization</h2>
+                <canvas id="graphCanvas" width="800" height="600"></canvas>
+                
+                <div class="algorithm-info">
+                    <h3>📚 Current Algorithm: <span id="currentAlgorithm">None</span></h3>
+                    <div class="math-formula" id="algorithmDescription">
+                        Select an algorithm to see its description and complexity analysis.
+                    </div>
+                    
+                    <div class="step-info">
+                        <strong>Current Step:</strong> <span id="currentStep">Ready to start</span><br>
+                        <strong>Visited Count:</strong> <span id="visitedCount">0</span><br>
+                        <strong>Queue/Stack Size:</strong> <span id="queueSize">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>🎮 Algorithm Controls</h3>
+                    <button onclick="startBFS()" id="bfsBtn">Start BFS</button>
+                    <button onclick="startDFS()" id="dfsBtn">Start DFS</button>
+                    <button onclick="startDFSIterative()" id="dfsIterBtn">DFS (Iterative)</button>
+                    <button onclick="pauseResume()" id="pauseBtn" disabled>Pause</button>
+                    <button onclick="resetVisualization()" id="resetBtn">Reset</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🎯 Starting Vertex</h3>
+                    <p>Click on any vertex to set it as the starting point for traversal</p>
+                    <div class="step-info">
+                        <strong>Selected Start:</strong> <span id="selectedStart">None</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>⚡ Animation Speed</h3>
+                    <div class="speed-control">
+                        <label>Speed: <span id="speedLabel">Medium</span></label>
+                        <input type="range" id="speedSlider" min="1" max="5" value="3" oninput="updateSpeed()">
+                        <small>Slow ← → Fast</small>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🏗️ Graph Presets</h3>
+                    <button onclick="generateBinaryTree()">Binary Tree</button>
+                    <button onclick="generateGrid()">Grid Graph</button>
+                    <button onclick="generateCycle()">Cycle</button>
+                    <button onclick="generateRandomGraph()">Random</button>
+                </div>
+                
+                <div class="traversal-order">
+                    <h3>📋 Traversal Order</h3>
+                    <div id="traversalSequence" style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; min-height: 40px;">
+                        Start an algorithm to see the traversal sequence
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>🎨 Vertex States</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #64b5f6;"></div>
+                        <span>Unvisited</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffeb3b;"></div>
+                        <span>In Queue/Stack</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4caf50;"></div>
+                        <span>Currently Visiting</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f44336;"></div>
+                        <span>Visited</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #9c27b0;"></div>
+                        <span>Start Vertex</span>
+                    </div>
+                </div>
+                
+                <div class="algorithm-info">
+                    <h3>🧠 Algorithm Comparison</h3>
+                    <div class="math-formula">
+                        <strong>BFS (Breadth-First Search):</strong><br>
+                        • Time: O(V + E)<br>
+                        • Space: O(V)<br>
+                        • Uses: Queue (FIFO)<br>
+                        • Finds shortest path in unweighted graphs
+                    </div>
+                    <div class="math-formula">
+                        <strong>DFS (Depth-First Search):</strong><br>
+                        • Time: O(V + E)<br>
+                        • Space: O(V)<br>
+                        • Uses: Stack (LIFO) or Recursion<br>
+                        • Memory efficient, explores deeply
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Graph data structures
+        let vertices = [];
+        let edges = [];
+        let startVertex = null;
+        let isAnimating = false;
+        let isPaused = false;
+        let animationSpeed = 1000; // milliseconds
+        let currentAlgorithm = null;
+        let traversalOrder = [];
+        let visitedVertices = new Set();
+        let queueOrStack = [];
+        let currentVertex = null;
+        
+        // Canvas setup
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Colors
+        const COLORS = {
+            unvisited: '#64b5f6',
+            inQueue: '#ffeb3b',
+            visiting: '#4caf50',
+            visited: '#f44336',
+            start: '#9c27b0',
+            edge: '#ffffff'
+        };
+        
+        const VERTEX_RADIUS = 30;
+        
+        // Vertex class
+        class Vertex {
+            constructor(x, y, id) {
+                this.x = x;
+                this.y = y;
+                this.id = id;
+                this.state = 'unvisited';
+                this.neighbors = [];
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, VERTEX_RADIUS, 0, 2 * Math.PI);
+                
+                let color = COLORS[this.state];
+                if (this === startVertex && this.state === 'unvisited') {
+                    color = COLORS.start;
+                }
+                
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw vertex label
+                ctx.fillStyle = this.state === 'inQueue' ? '#000000' : '#ffffff';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.id.toString(), this.x, this.y);
+            }
+            
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return dx * dx + dy * dy <= VERTEX_RADIUS * VERTEX_RADIUS;
+            }
+        }
+        
+        // Edge class
+        class Edge {
+            constructor(vertex1, vertex2) {
+                this.vertex1 = vertex1;
+                this.vertex2 = vertex2;
+                
+                // Add to neighbors
+                vertex1.neighbors.push(vertex2);
+                vertex2.neighbors.push(vertex1);
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.vertex1.x, this.vertex1.y);
+                ctx.lineTo(this.vertex2.x, this.vertex2.y);
+                ctx.strokeStyle = COLORS.edge;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            generateBinaryTree();
+            updateDisplay();
+        });
+        
+        // Mouse event handlers
+        canvas.addEventListener('click', (e) => {
+            if (isAnimating) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clickedVertex = vertices.find(v => v.contains(x, y));
+            
+            if (clickedVertex) {
+                startVertex = clickedVertex;
+                document.getElementById('selectedStart').textContent = clickedVertex.id;
+                updateDisplay();
+            }
+        });
+        
+        // Graph generation functions
+        function generateBinaryTree() {
+            clearGraph();
+            
+            // Create a binary tree structure
+            const levels = 4;
+            const spacing = 80;
+            const levelHeight = 100;
+            
+            let id = 0;
+            const tree = {};
+            
+            // Generate vertices level by level
+            for (let level = 0; level < levels; level++) {
+                const nodesInLevel = Math.pow(2, level);
+                const startX = canvas.width / 2 - (nodesInLevel - 1) * spacing / 2;
+                const y = 80 + level * levelHeight;
+                
+                for (let i = 0; i < nodesInLevel; i++) {
+                    const x = startX + i * spacing;
+                    const vertex = new Vertex(x, y, id);
+                    vertices.push(vertex);
+                    tree[id] = vertex;
+                    id++;
+                }
+            }
+            
+            // Create edges (parent-child relationships)
+            for (let level = 0; level < levels - 1; level++) {
+                const nodesInLevel = Math.pow(2, level);
+                const startId = Math.pow(2, level) - 1;
+                
+                for (let i = 0; i < nodesInLevel; i++) {
+                    const parentId = startId + i;
+                    const leftChildId = startId + nodesInLevel + i * 2;
+                    const rightChildId = leftChildId + 1;
+                    
+                    if (tree[leftChildId]) {
+                        edges.push(new Edge(tree[parentId], tree[leftChildId]));
+                    }
+                    if (tree[rightChildId]) {
+                        edges.push(new Edge(tree[parentId], tree[rightChildId]));
+                    }
+                }
+            }
+            
+            startVertex = vertices[0];
+            document.getElementById('selectedStart').textContent = startVertex.id;
+            updateDisplay();
+        }
+        
+        function generateGrid() {
+            clearGraph();
+            
+            const rows = 5;
+            const cols = 6;
+            const spacing = 80;
+            const startX = (canvas.width - (cols - 1) * spacing) / 2;
+            const startY = (canvas.height - (rows - 1) * spacing) / 2;
+            
+            const grid = [];
+            let id = 0;
+            
+            // Create vertices
+            for (let row = 0; row < rows; row++) {
+                grid[row] = [];
+                for (let col = 0; col < cols; col++) {
+                    const x = startX + col * spacing;
+                    const y = startY + row * spacing;
+                    const vertex = new Vertex(x, y, id++);
+                    vertices.push(vertex);
+                    grid[row][col] = vertex;
+                }
+            }
+            
+            // Create edges
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const current = grid[row][col];
+                    
+                    // Connect to right neighbor
+                    if (col < cols - 1) {
+                        edges.push(new Edge(current, grid[row][col + 1]));
+                    }
+                    
+                    // Connect to bottom neighbor
+                    if (row < rows - 1) {
+                        edges.push(new Edge(current, grid[row + 1][col]));
+                    }
+                }
+            }
+            
+            startVertex = vertices[0];
+            document.getElementById('selectedStart').textContent = startVertex.id;
+            updateDisplay();
+        }
+        
+        function generateCycle() {
+            clearGraph();
+            
+            const numVertices = 8;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 180;
+            
+            // Create vertices in a circle
+            for (let i = 0; i < numVertices; i++) {
+                const angle = (i / numVertices) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Connect vertices in a cycle
+            for (let i = 0; i < vertices.length; i++) {
+                const nextIndex = (i + 1) % vertices.length;
+                edges.push(new Edge(vertices[i], vertices[nextIndex]));
+            }
+            
+            startVertex = vertices[0];
+            document.getElementById('selectedStart').textContent = startVertex.id;
+            updateDisplay();
+        }
+        
+        function generateRandomGraph() {
+            clearGraph();
+            
+            const numVertices = 10;
+            const edgeProb = 0.3;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 200;
+            
+            // Generate vertices
+            for (let i = 0; i < numVertices; i++) {
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = 50 + Math.random() * radius;
+                const x = centerX + distance * Math.cos(angle);
+                const y = centerY + distance * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Generate random edges
+            for (let i = 0; i < vertices.length; i++) {
+                for (let j = i + 1; j < vertices.length; j++) {
+                    if (Math.random() < edgeProb) {
+                        edges.push(new Edge(vertices[i], vertices[j]));
+                    }
+                }
+            }
+            
+            startVertex = vertices[0];
+            document.getElementById('selectedStart').textContent = startVertex.id;
+            updateDisplay();
+        }
+        
+        function clearGraph() {
+            vertices = [];
+            edges = [];
+            startVertex = null;
+            resetVisualization();
+        }
+        
+        // Algorithm implementations
+        async function startBFS() {
+            if (!startVertex || isAnimating) return;
+            
+            resetVisualization();
+            isAnimating = true;
+            currentAlgorithm = 'BFS';
+            
+            document.getElementById('currentAlgorithm').textContent = 'BFS (Breadth-First Search)';
+            document.getElementById('algorithmDescription').innerHTML = `
+                <strong>BFS Algorithm:</strong><br>
+                1. Start at the chosen vertex<br>
+                2. Mark it as visited and add to queue<br>
+                3. While queue is not empty:<br>
+                &nbsp;&nbsp;- Dequeue a vertex<br>
+                &nbsp;&nbsp;- Visit all unvisited neighbors<br>
+                &nbsp;&nbsp;- Add neighbors to queue<br><br>
+                <strong>Properties:</strong> Explores level by level, finds shortest paths
+            `;
+            
+            updateControlButtons(true);
+            
+            const queue = [startVertex];
+            queueOrStack = [...queue];
+            startVertex.state = 'inQueue';
+            
+            while (queue.length > 0 && !isPaused) {
+                await sleep(animationSpeed);
+                if (isPaused) break;
+                
+                const vertex = queue.shift();
+                queueOrStack = [...queue];
+                
+                vertex.state = 'visiting';
+                currentVertex = vertex;
+                visitedVertices.add(vertex);
+                traversalOrder.push(vertex.id);
+                
+                document.getElementById('currentStep').textContent = `Visiting vertex ${vertex.id}`;
+                document.getElementById('visitedCount').textContent = visitedVertices.size;
+                document.getElementById('queueSize').textContent = queue.length;
+                document.getElementById('traversalSequence').textContent = traversalOrder.join(' → ');
+                
+                updateDisplay();
+                await sleep(animationSpeed);
+                
+                vertex.state = 'visited';
+                
+                // Add unvisited neighbors to queue
+                for (const neighbor of vertex.neighbors) {
+                    if (neighbor.state === 'unvisited') {
+                        neighbor.state = 'inQueue';
+                        queue.push(neighbor);
+                        queueOrStack = [...queue];
+                    }
+                }
+                
+                updateDisplay();
+            }
+            
+            isAnimating = false;
+            updateControlButtons(false);
+            document.getElementById('currentStep').textContent = 'BFS completed!';
+        }
+        
+        async function startDFS() {
+            if (!startVertex || isAnimating) return;
+            
+            resetVisualization();
+            isAnimating = true;
+            currentAlgorithm = 'DFS';
+            
+            document.getElementById('currentAlgorithm').textContent = 'DFS (Depth-First Search - Recursive)';
+            document.getElementById('algorithmDescription').innerHTML = `
+                <strong>DFS Algorithm (Recursive):</strong><br>
+                1. Start at the chosen vertex<br>
+                2. Mark it as visited<br>
+                3. For each unvisited neighbor:<br>
+                &nbsp;&nbsp;- Recursively call DFS<br><br>
+                <strong>Properties:</strong> Explores deeply before backtracking, uses call stack
+            `;
+            
+            updateControlButtons(true);
+            
+            await dfsRecursive(startVertex);
+            
+            isAnimating = false;
+            updateControlButtons(false);
+            document.getElementById('currentStep').textContent = 'DFS completed!';
+        }
+        
+        async function dfsRecursive(vertex) {
+            if (isPaused) return;
+            
+            vertex.state = 'visiting';
+            currentVertex = vertex;
+            visitedVertices.add(vertex);
+            traversalOrder.push(vertex.id);
+            
+            document.getElementById('currentStep').textContent = `Visiting vertex ${vertex.id}`;
+            document.getElementById('visitedCount').textContent = visitedVertices.size;
+            document.getElementById('traversalSequence').textContent = traversalOrder.join(' → ');
+            
+            updateDisplay();
+            await sleep(animationSpeed);
+            
+            vertex.state = 'visited';
+            updateDisplay();
+            
+            for (const neighbor of vertex.neighbors) {
+                if (neighbor.state === 'unvisited' && !isPaused) {
+                    await sleep(animationSpeed / 2);
+                    await dfsRecursive(neighbor);
+                }
+            }
+        }
+        
+        async function startDFSIterative() {
+            if (!startVertex || isAnimating) return;
+            
+            resetVisualization();
+            isAnimating = true;
+            currentAlgorithm = 'DFS-Iterative';
+            
+            document.getElementById('currentAlgorithm').textContent = 'DFS (Depth-First Search - Iterative)';
+            document.getElementById('algorithmDescription').innerHTML = `
+                <strong>DFS Algorithm (Iterative):</strong><br>
+                1. Start at the chosen vertex<br>
+                2. Mark it as visited and add to stack<br>
+                3. While stack is not empty:<br>
+                &nbsp;&nbsp;- Pop a vertex<br>
+                &nbsp;&nbsp;- Visit all unvisited neighbors<br>
+                &nbsp;&nbsp;- Add neighbors to stack<br><br>
+                <strong>Properties:</strong> Uses explicit stack, explores deeply
+            `;
+            
+            updateControlButtons(true);
+            
+            const stack = [startVertex];
+            queueOrStack = [...stack];
+            startVertex.state = 'inQueue';
+            
+            while (stack.length > 0 && !isPaused) {
+                await sleep(animationSpeed);
+                if (isPaused) break;
+                
+                const vertex = stack.pop();
+                queueOrStack = [...stack];
+                
+                if (vertex.state === 'visited') continue;
+                
+                vertex.state = 'visiting';
+                currentVertex = vertex;
+                visitedVertices.add(vertex);
+                traversalOrder.push(vertex.id);
+                
+                document.getElementById('currentStep').textContent = `Visiting vertex ${vertex.id}`;
+                document.getElementById('visitedCount').textContent = visitedVertices.size;
+                document.getElementById('queueSize').textContent = stack.length;
+                document.getElementById('traversalSequence').textContent = traversalOrder.join(' → ');
+                
+                updateDisplay();
+                await sleep(animationSpeed);
+                
+                vertex.state = 'visited';
+                
+                // Add unvisited neighbors to stack (in reverse order for consistent behavior)
+                const unvisitedNeighbors = vertex.neighbors.filter(n => n.state === 'unvisited');
+                for (let i = unvisitedNeighbors.length - 1; i >= 0; i--) {
+                    const neighbor = unvisitedNeighbors[i];
+                    neighbor.state = 'inQueue';
+                    stack.push(neighbor);
+                    queueOrStack = [...stack];
+                }
+                
+                updateDisplay();
+            }
+            
+            isAnimating = false;
+            updateControlButtons(false);
+            document.getElementById('currentStep').textContent = 'DFS completed!';
+        }
+        
+        function pauseResume() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+        }
+        
+        function resetVisualization() {
+            isAnimating = false;
+            isPaused = false;
+            currentAlgorithm = null;
+            traversalOrder = [];
+            visitedVertices.clear();
+            queueOrStack = [];
+            currentVertex = null;
+            
+            vertices.forEach(v => {
+                v.state = 'unvisited';
+                v.neighbors = [];
+            });
+            
+            // Rebuild neighbor relationships
+            edges.forEach(edge => {
+                edge.vertex1.neighbors.push(edge.vertex2);
+                edge.vertex2.neighbors.push(edge.vertex1);
+            });
+            
+            document.getElementById('currentAlgorithm').textContent = 'None';
+            document.getElementById('algorithmDescription').textContent = 'Select an algorithm to see its description and complexity analysis.';
+            document.getElementById('currentStep').textContent = 'Ready to start';
+            document.getElementById('visitedCount').textContent = '0';
+            document.getElementById('queueSize').textContent = '0';
+            document.getElementById('traversalSequence').textContent = 'Start an algorithm to see the traversal sequence';
+            
+            updateControlButtons(false);
+            updateDisplay();
+        }
+        
+        function updateControlButtons(animating) {
+            document.getElementById('bfsBtn').disabled = animating;
+            document.getElementById('dfsBtn').disabled = animating;
+            document.getElementById('dfsIterBtn').disabled = animating;
+            document.getElementById('pauseBtn').disabled = !animating;
+            document.getElementById('pauseBtn').textContent = 'Pause';
+        }
+        
+        function updateSpeed() {
+            const value = document.getElementById('speedSlider').value;
+            const speeds = ['Very Slow', 'Slow', 'Medium', 'Fast', 'Very Fast'];
+            const delays = [2000, 1500, 1000, 500, 200];
+            
+            document.getElementById('speedLabel').textContent = speeds[value - 1];
+            animationSpeed = delays[value - 1];
+        }
+        
+        function updateDisplay() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw edges
+            edges.forEach(edge => edge.draw());
+            
+            // Draw vertices
+            vertices.forEach(vertex => vertex.draw());
+            
+            // Highlight vertices in queue/stack
+            queueOrStack.forEach(vertex => {
+                if (vertex.state === 'inQueue') {
+                    ctx.beginPath();
+                    ctx.arc(vertex.x, vertex.y, VERTEX_RADIUS + 5, 0, 2 * Math.PI);
+                    ctx.strokeStyle = '#ffeb3b';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            });
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+</body>
+</html>

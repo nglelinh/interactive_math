@@ -3,40 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giải Tích Thực & Lý Thuyết Tập Hợp - Nền Tảng Toán Học</title>
+    <title>🧮 Set Theory & Real Analysis - Mathematical Foundations</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 30px;
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #3c6382 100%);
+            padding: 20px;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
             color: #ffffff;
-            line-height: 1.8;
-            font-size: 20px;
+            line-height: 1.6;
+            font-size: 16px;
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 30px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         h1 {
             text-align: center;
-            color: #ffffff;
-            text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
-            font-size: 3.2em;
-            margin-bottom: 40px;
-            font-weight: 900;
-            letter-spacing: 1px;
+            color: #63b3ed;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(99, 179, 237, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #63b3ed;
         }
         
         .theory-section {
-            background: rgba(255, 215, 0, 0.15);
+            background: rgba(255, 215, 0, 0.1);
             padding: 25px;
             border-radius: 15px;
             margin-bottom: 30px;
@@ -45,13 +55,13 @@
         
         .controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
         
         .control-group {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             padding: 20px;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -59,36 +69,60 @@
         
         .control-group h3 {
             margin-top: 0;
-            color: #FFD700;
+            color: #63b3ed;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-            font-size: 1.4em;
-            font-weight: 700;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        select, input[type="number"], button {
-            padding: 10px;
+        select, input[type="number"], input[type="text"], button {
+            padding: 8px 12px;
             border: none;
             border-radius: 5px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
             margin: 5px;
             font-size: 14px;
+            border: 1px solid rgba(99, 179, 237, 0.3);
         }
         
         button {
-            background: linear-gradient(45deg, #ff4757, #ff3742);
+            background: linear-gradient(45deg, #4299e1, #63b3ed);
             color: white;
             cursor: pointer;
-            font-weight: 800;
+            font-weight: 600;
             transition: all 0.3s ease;
-            font-size: 1.2em;
-            padding: 12px 20px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
         }
         
         button:hover {
             transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 179, 237, 0.3);
+        }
+        
+        .interactive-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .demo-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid rgba(99, 179, 237, 0.3);
+        }
+        
+        .demo-box h3 {
+            color: #63b3ed;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .canvas-container {
@@ -99,10 +133,46 @@
         }
         
         canvas {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            background: white;
+            border: 2px solid #63b3ed;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
             display: block;
+            width: 100%;
+            height: 300px;
+        }
+        
+        .status-display {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .equation-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #63b3ed;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .exercise-section {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .proof-section {
+            background: rgba(156, 39, 176, 0.1);
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
         }
         
         .concept-grid {
@@ -216,261 +286,447 @@
 </head>
 <body>
     <div class="container">
-        <h1>📐 Giải Tích Thực & Lý Thuyết Tập Hợp - Nền Tảng Toán Học</h1>
+        <h1>🧮 Set Theory & Real Analysis</h1>
         
-        <div class="theory-section">
-            <h2>🔍 Nền Tảng Toán Học</h2>
-            <p><strong>Giải Tích Thực:</strong> Nghiên cứu nghiêm ngặt về hàm số, dãy số, chuỗi và tính liên tục trên đường thẳng số thực ℝ.</p>
-            <p><strong>Lý Thuyết Tập Hợp:</strong> Lý thuyết toán học về tập hợp các đối tượng, cung cấp nền tảng cho toàn bộ toán học.</p>
-            <p><strong>Mối Liên Hệ:</strong> Lý thuyết tập hợp cung cấp ngôn ngữ và khung lý thuyết cho các khái niệm giải tích thực như tập mở, tập đóng, compact và hội tụ.</p>
-        </div>
-        
-        <div class="controls">
-            <div class="control-group">
-                <h3>Minh Họa Phép Toán Tập Hợp</h3>
-                <label>Phần tử Tập A: </label>
-                <input type="text" id="setA" value="1,2,3,4,5" placeholder="phân cách bằng dấu phẩy">
-                <br>
-                <label>Phần tử Tập B: </label>
-                <input type="text" id="setB" value="3,4,5,6,7" placeholder="phân cách bằng dấu phẩy">
-                <br>
-                <button onclick="updateSetOperations()">Cập Nhật Tập Hợp</button>
-                <div id="setOperationsResult"></div>
-            </div>
+        <div class="intro">
+            <h2>Mathematical Foundations</h2>
+            <p><strong>Set Theory</strong> provides the fundamental language for all of mathematics, defining collections of objects and operations between them.</p>
+            <p><strong>Real Analysis</strong> rigorously studies functions, sequences, series, and continuity on the real number line ℝ, forming the foundation for calculus and advanced mathematics.</p>
+            <p><strong>Connection:</strong> Set theory provides the language and framework for real analysis concepts like open sets, closed sets, compactness, and convergence.</p>
             
-            <div class="control-group">
-                <h3>Hội Tụ Dãy Số</h3>
-                <label>Loại Dãy Số:</label>
-                <select id="sequenceType">
-                    <option value="harmonic">1/n (Điều hòa)</option>
-                    <option value="geometric">1/2^n (Hình học)</option>
-                    <option value="polynomial">1/n² (Đa thức)</option>
-                    <option value="exponential">1/e^n (Mũ)</option>
-                    <option value="alternating">(-1)^n/n (Xen kẽ)</option>
-                    <option value="fibonacci">Fn/F(n+1) (Tỷ số Fibonacci)</option>
-                </select>
-                <br>
-                <label>Số lượng số hạng: </label>
-                <input type="number" id="numTerms" value="20" min="5" max="50">
-                <br>
-                <button onclick="updateSequence()">Tạo Dãy Số</button>
-                <div class="sequence-display" id="sequenceDisplay"></div>
-            </div>
-            
-            <div class="control-group">
-                <h3>Trục Số Thực & Khoảng</h3>
-                <label>Điểm Đầu Khoảng: </label>
-                <input type="number" id="intervalStart" value="-2" step="0.1">
-                <label>Điểm Cuối Khoảng: </label>
-                <input type="number" id="intervalEnd" value="3" step="0.1">
-                <br>
-                <label>Loại Khoảng:</label>
-                <select id="intervalType">
-                    <option value="open">Khoảng mở (a,b)</option>
-                    <option value="closed">Khoảng đóng [a,b]</option>
-                    <option value="half-open-left">Nửa mở trái (a,b]</option>
-                    <option value="half-open-right">Nửa mở phải [a,b)</option>
-                </select>
-                <br>
-                <button onclick="updateInterval()">Cập Nhật Khoảng</button>
+            <div class="equation-box">
+                <strong>Key Foundations:</strong><br>
+                Set Operations: A ∪ B, A ∩ B, A \ B, A^c<br>
+                Real Numbers: ℝ = (-∞, +∞)<br>
+                Convergence: lim(n→∞) aₙ = L<br>
+                Continuity: ∀ε > 0, ∃δ > 0: |x-c| < δ ⟹ |f(x)-f(c)| < ε
             </div>
         </div>
-        
-        <div class="canvas-container">
-            <div>
-                <h3 style="text-align: center;">Minh Họa Phép Toán Tập Hợp</h3>
+
+        <div class="interactive-section">
+            <div class="demo-box">
+                <h3>🔢 Set Operations Visualizer</h3>
+                <div class="controls">
+                    <label>Set A elements:</label>
+                    <input type="text" id="setA" value="1,2,3,4,5" placeholder="comma separated">
+                    <label>Set B elements:</label>
+                    <input type="text" id="setB" value="3,4,5,6,7" placeholder="comma separated">
+                    <button onclick="updateSetOperations()">Update Sets</button>
+                </div>
                 <canvas id="setCanvas" width="400" height="300"></canvas>
+                <div class="status-display" id="setOperationsResult">
+                    Click "Update Sets" to see operations
+                </div>
             </div>
-            <div>
-                <h3 style="text-align: center;">Hội Tụ Dãy Số</h3>
+
+            <div class="demo-box">
+                <h3>📈 Sequence Convergence</h3>
+                <div class="controls">
+                    <label>Sequence Type:</label>
+                    <select id="sequenceType">
+                        <option value="harmonic">1/n (Harmonic)</option>
+                        <option value="geometric">1/2^n (Geometric)</option>
+                        <option value="polynomial">1/n² (Polynomial)</option>
+                        <option value="exponential">1/e^n (Exponential)</option>
+                        <option value="alternating">(-1)^n/n (Alternating)</option>
+                        <option value="fibonacci">Fn/F(n+1) (Fibonacci Ratio)</option>
+                        <option value="sqrt">1/√n (Square Root)</option>
+                        <option value="factorial">n!/n^n (Factorial)</option>
+                    </select>
+                    <label>Number of terms:</label>
+                    <input type="number" id="numTerms" value="25" min="5" max="100">
+                    <button onclick="updateSequence()">Generate Sequence</button>
+                </div>
                 <canvas id="sequenceCanvas" width="400" height="300"></canvas>
+                <div class="status-display" id="sequenceDisplay">
+                    Select a sequence type and click "Generate"
+                </div>
             </div>
-            <div>
-                <h3 style="text-align: center;">Trục Số Thực & Khoảng</h3>
+
+            <div class="demo-box">
+                <h3>📏 Real Number Line & Intervals</h3>
+                <div class="controls">
+                    <label>Start:</label>
+                    <input type="number" id="intervalStart" value="-2" step="0.1">
+                    <label>End:</label>
+                    <input type="number" id="intervalEnd" value="3" step="0.1">
+                    <label>Type:</label>
+                    <select id="intervalType">
+                        <option value="open">Open (a,b)</option>
+                        <option value="closed">Closed [a,b]</option>
+                        <option value="half-open-left">Half-open (a,b]</option>
+                        <option value="half-open-right">Half-open [a,b)</option>
+                    </select>
+                    <button onclick="updateInterval()">Update Interval</button>
+                </div>
                 <canvas id="intervalCanvas" width="400" height="200"></canvas>
+                <div class="status-display" id="intervalInfo">
+                    Adjust interval parameters and click "Update"
+                </div>
             </div>
-            <div>
-                <h3 style="text-align: center;">Khái Niệm Tôpô</h3>
+
+            <div class="demo-box">
+                <h3>🎯 Topology Concepts</h3>
+                <div class="controls">
+                    <label>Concept:</label>
+                    <select id="topologyType">
+                        <option value="open-closed">Open vs Closed Sets</option>
+                        <option value="neighborhood">Neighborhoods</option>
+                        <option value="boundary">Boundary Points</option>
+                        <option value="compact">Compactness</option>
+                        <option value="connected">Connectedness</option>
+                    </select>
+                    <button onclick="updateTopology()">Visualize</button>
+                </div>
                 <canvas id="topologyCanvas" width="400" height="300"></canvas>
+                <div class="status-display" id="topologyInfo">
+                    Select a topology concept to visualize
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Interactive Sections -->
+        <div class="demo-box" style="grid-column: 1 / -1; margin: 20px 0;">
+            <h3>🔬 Function Continuity Explorer</h3>
+            <div class="controls">
+                <label>Function:</label>
+                <select id="functionType">
+                    <option value="continuous">f(x) = sin(x) (Continuous)</option>
+                    <option value="jump">Jump Discontinuity</option>
+                    <option value="removable">Removable Discontinuity</option>
+                    <option value="essential">Essential Discontinuity</option>
+                    <option value="uniform">Uniformly Continuous</option>
+                </select>
+                <label>Point of Interest:</label>
+                <input type="number" id="pointOfInterest" value="0" step="0.1">
+                <label>ε (epsilon):</label>
+                <input type="range" id="epsilon" min="0.1" max="2" value="0.5" step="0.1">
+                <span id="epsilonValue">0.5</span>
+                <button onclick="updateContinuity()">Analyze Continuity</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <canvas id="continuityCanvas" width="400" height="300"></canvas>
+                <canvas id="deltaEpsilonCanvas" width="400" height="300"></canvas>
+            </div>
+            <div class="status-display" id="continuityInfo">
+                Select a function type and analyze its continuity properties
+            </div>
+        </div>
+
+        <!-- Cardinality and Infinity Section -->
+        <div class="demo-box" style="grid-column: 1 / -1; margin: 20px 0;">
+            <h3>♾️ Cardinality & Infinite Sets</h3>
+            <div class="controls">
+                <label>Set Comparison:</label>
+                <select id="cardinalityType">
+                    <option value="natural-even">ℕ vs Even Numbers</option>
+                    <option value="natural-rational">ℕ vs ℚ (Rationals)</option>
+                    <option value="natural-real">ℕ vs ℝ (Reals)</option>
+                    <option value="cantor-pairing">Cantor Pairing Function</option>
+                    <option value="power-set">Set vs Power Set</option>
+                </select>
+                <button onclick="updateCardinality()">Show Bijection/Proof</button>
+            </div>
+            <canvas id="cardinalityCanvas" width="800" height="400"></canvas>
+            <div class="status-display" id="cardinalityInfo">
+                Explore different types of infinity and cardinality comparisons
             </div>
         </div>
         
         <div class="concept-grid">
             <div class="concept-card">
-                <h4>🔢 Nền Tảng Lý Thuyết Tập Hợp</h4>
+                <h4>🔢 Set Theory Fundamentals</h4>
                 <div class="definition-box">
-                    <strong>Định nghĩa:</strong> Tập hợp là một bộ sưu tập các đối tượng khác nhau, gọi là phần tử hay thành viên.
+                    <strong>Definition:</strong> A set is a collection of distinct objects, called elements or members.
+                    Sets are denoted with capital letters, and ∈ means "belongs to".
                 </div>
                 <div class="formula-box">
-                    Phép Toán Cơ Bản:<br>
-                    A ∪ B (Hợp)<br>
-                    A ∩ B (Giao)<br>
-                    A \ B (Hiệu)<br>
-                    Aᶜ (Phần bù)
+                    Basic Operations:<br>
+                    A ∪ B (Union)<br>
+                    A ∩ B (Intersection)<br>
+                    A \ B (Difference)<br>
+                    A^c (Complement)<br>
+                    A × B (Cartesian Product)
                 </div>
                 <div class="example-box">
-                    <strong>Ví dụ:</strong> Nếu A = {1,2,3} và B = {2,3,4}, thì:<br>
+                    <strong>Example:</strong> If A = {1,2,3} and B = {2,3,4}, then:<br>
                     A ∪ B = {1,2,3,4}<br>
                     A ∩ B = {2,3}<br>
-                    A \ B = {1}
+                    A \ B = {1}<br>
+                    A × B = {(1,2), (1,3), (1,4), (2,2), (2,3), (2,4), (3,2), (3,3), (3,4)}
                 </div>
             </div>
             
             <div class="concept-card">
-                <h4>📊 Dãy Số và Giới Hạn</h4>
+                <h4>📊 Sequences and Limits</h4>
                 <div class="definition-box">
-                    <strong>Định nghĩa:</strong> Dãy số (aₙ) hội tụ tới L nếu với mọi ε > 0, tồn tại N sao cho |aₙ - L| < ε với mọi n ≥ N.
+                    <strong>Definition:</strong> A sequence (aₙ) converges to L if for every ε > 0, there exists N ∈ ℕ such that for all n ≥ N, |aₙ - L| < ε.
                 </div>
                 <div class="formula-box">
                     lim(n→∞) aₙ = L<br><br>
                     ∀ε > 0, ∃N ∈ ℕ : n ≥ N ⟹ |aₙ - L| < ε
                 </div>
                 <div class="theorem-box">
-                    <strong>Định lý Hội tụ Đơn điệu:</strong> Mọi dãy đơn điệu bị chặn đều hội tụ.
+                    <strong>Monotone Convergence Theorem:</strong> Every bounded monotonic sequence converges.
+                    <br><strong>Squeeze Theorem:</strong> If aₙ ≤ bₙ ≤ cₙ and lim aₙ = lim cₙ = L, then lim bₙ = L.
                 </div>
             </div>
             
             <div class="concept-card">
-                <h4>📈 Tính Liên Tục và Giới Hạn</h4>
+                <h4>📈 Continuity and Limits</h4>
                 <div class="definition-box">
-                    <strong>Định nghĩa:</strong> f liên tục tại x = c nếu lim(x→c) f(x) = f(c).
+                    <strong>Definition:</strong> f is continuous at x = c if lim(x→c) f(x) = f(c).
+                    This means the limit exists, f(c) is defined, and they are equal.
                 </div>
                 <div class="formula-box">
-                    Định nghĩa ε-δ:<br>
+                    ε-δ Definition:<br>
                     ∀ε > 0, ∃δ > 0 : |x - c| < δ ⟹ |f(x) - f(c)| < ε
                 </div>
                 <div class="theorem-box">
-                    <strong>Định lý Giá trị Trung gian:</strong> Nếu f liên tục trên [a,b] và k nằm giữa f(a) và f(b), thì ∃c ∈ (a,b) : f(c) = k.
+                    <strong>Intermediate Value Theorem:</strong> If f is continuous on [a,b] and k lies between f(a) and f(b), then ∃c ∈ (a,b) such that f(c) = k.
+                    <br><strong>Extreme Value Theorem:</strong> A continuous function on a closed bounded interval attains its maximum and minimum.
                 </div>
             </div>
             
             <div class="concept-card">
-                <h4>🎯 Tập Mở và Tập Đóng</h4>
+                <h4>🎯 Open and Closed Sets</h4>
                 <div class="definition-box">
-                    <strong>Tập Mở:</strong> Tập U là tập mở nếu mọi điểm trong U đều có lân cận chứa trong U.<br>
-                    <strong>Tập Đóng:</strong> Tập F là tập đóng nếu phần bù của nó là tập mở.
+                    <strong>Open Set:</strong> U is open if every point in U has a neighborhood contained in U.<br>
+                    <strong>Closed Set:</strong> F is closed if its complement is open, or equivalently, if it contains all its limit points.
                 </div>
                 <div class="formula-box">
-                    Hình cầu mở: B(x,r) = {y ∈ ℝⁿ : |y - x| < r}<br>
-                    Hình cầu đóng: B̄(x,r) = {y ∈ ℝⁿ : |y - x| ≤ r}
+                    Open Ball: B(x,r) = {y ∈ ℝⁿ : |y - x| < r}<br>
+                    Closed Ball: B̄(x,r) = {y ∈ ℝⁿ : |y - x| ≤ r}<br>
+                    Boundary: ∂A = Ā \ A°
                 </div>
                 <div class="example-box">
-                    <strong>Ví dụ:</strong><br>
-                    Mở: (0,1), (-∞,5), ℝ<br>
-                    Đóng: [0,1], {0}, ∅<br>
-                    Không phải cả hai: [0,1), (0,1]
+                    <strong>Examples:</strong><br>
+                    Open: (0,1), (-∞,5), ℝ, ∅<br>
+                    Closed: [0,1], {0}, ℝ, ∅<br>
+                    Neither: [0,1), (0,1], ℚ (rationals)
                 </div>
             </div>
             
             <div class="concept-card">
-                <h4>🔒 Tính Compact</h4>
+                <h4>🔒 Compactness</h4>
                 <div class="definition-box">
-                    <strong>Định nghĩa:</strong> Tập K là compact nếu mọi phủ mở của K đều có phủ con hữu hạn.
+                    <strong>Definition:</strong> K is compact if every open cover of K has a finite subcover.
+                    Equivalently (in metric spaces), every sequence in K has a convergent subsequence with limit in K.
                 </div>
                 <div class="theorem-box">
-                    <strong>Định lý Heine-Borel:</strong> Trong ℝⁿ, tập là compact khi và chỉ khi nó vừa đóng vừa bị chặn.
+                    <strong>Heine-Borel Theorem:</strong> In ℝⁿ, a set is compact if and only if it is closed and bounded.
+                    <br><strong>Properties:</strong> Compact sets are closed, bounded, and complete.
                 </div>
                 <div class="example-box">
-                    <strong>Ví dụ:</strong><br>
-                    Compact: [0,1], hình cầu đơn vị đóng<br>
-                    Không compact: (0,1), ℝ, [0,∞)
+                    <strong>Examples:</strong><br>
+                    Compact: [0,1], closed unit ball in ℝⁿ<br>
+                    Not Compact: (0,1), ℝ, [0,∞), ℕ
                 </div>
             </div>
             
             <div class="concept-card">
-                <h4>📐 Không Gian Mê-tric</h4>
+                <h4>📐 Metric Spaces</h4>
                 <div class="definition-box">
-                    <strong>Định nghĩa:</strong> Không gian mê-tric (X,d) là tập X với hàm khoảng cách d: X × X → ℝ thỏa mãn:
+                    <strong>Definition:</strong> A metric space (X,d) is a set X with a distance function d: X × X → ℝ satisfying:
                 </div>
                 <div class="formula-box">
-                    1. d(x,y) ≥ 0 (không âm)<br>
-                    2. d(x,y) = 0 ⟺ x = y (đồng nhất)<br>
-                    3. d(x,y) = d(y,x) (đối xứng)<br>
-                    4. d(x,z) ≤ d(x,y) + d(y,z) (bất đẳng thức tam giác)
+                    1. d(x,y) ≥ 0 (non-negative)<br>
+                    2. d(x,y) = 0 ⟺ x = y (identity)<br>
+                    3. d(x,y) = d(y,x) (symmetry)<br>
+                    4. d(x,z) ≤ d(x,y) + d(y,z) (triangle inequality)
                 </div>
                 <div class="example-box">
-                    <strong>Mê-tric Phổ Biến:</strong><br>
+                    <strong>Common Metrics:</strong><br>
                     Euclidean: d(x,y) = √Σ(xᵢ-yᵢ)²<br>
                     Manhattan: d(x,y) = Σ|xᵢ-yᵢ|<br>
-                    Max: d(x,y) = max|xᵢ-yᵢ|
+                    Supremum: d(x,y) = max|xᵢ-yᵢ|<br>
+                    Discrete: d(x,y) = 0 if x=y, 1 otherwise
                 </div>
             </div>
         </div>
-        
-        <div class="concept-grid">
-            <div class="concept-card">
-                <h4>🌟 Các Định Lý Nâng Cao</h4>
-                <div class="theorem-box">
-                    <strong>Định lý Bolzano-Weierstrass:</strong> Mọi dãy bị chặn trong ℝⁿ đều có dãy con hội tụ.
+
+        <!-- Advanced Theorems Section -->
+        <div class="theory-section">
+            <h2>🌟 Advanced Theorems & Results</h2>
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h4>� Fundamental Theorems</h4>
+                    <div class="theorem-box">
+                        <strong>Bolzano-Weierstrass Theorem:</strong> Every bounded sequence in ℝⁿ has a convergent subsequence.
+                    </div>
+                    <div class="theorem-box">
+                        <strong>Cantor's Theorem:</strong> For any set A, there is no surjection from A onto its power set P(A).
+                        This proves |P(A)| > |A|.
+                    </div>
+                    <div class="theorem-box">
+                        <strong>Baire Category Theorem:</strong> A complete metric space cannot be expressed as a countable union of nowhere dense sets.
+                    </div>
                 </div>
-                <div class="theorem-box">
-                    <strong>Định lý Cantor:</strong> Với mọi tập A, không tồn tại song ánh từ A lên tập lũy thừa P(A).
+                
+                <div class="concept-card">
+                    <h4>♾️ Cardinality and Infinity</h4>
+                    <div class="definition-box">
+                        <strong>Cardinality:</strong> Two sets have the same cardinality if there exists a bijection between them.
+                        |A| ≤ |B| if there exists an injection from A to B.
+                    </div>
+                    <div class="formula-box">
+                        |ℕ| = ℵ₀ (countably infinite)<br>
+                        |ℝ| = 2^ℵ₀ = 𝔠 (continuum)<br>
+                        |P(A)| > |A| (Cantor's theorem)<br>
+                        |ℝⁿ| = |ℝ| for all n ∈ ℕ
+                    </div>
+                    <div class="example-box">
+                        <strong>Surprising Facts:</strong><br>
+                        |ℕ| = |ℚ| (rationals are countable)<br>
+                        |ℝ| > |ℕ| (reals are uncountable)<br>
+                        |ℝ| = |ℝⁿ| (all Euclidean spaces have same cardinality)<br>
+                        |(0,1)| = |ℝ| (bijection via tan function)
+                    </div>
                 </div>
-                <div class="theorem-box">
-                    <strong>Định lý Phạm trù Baire:</strong> Không gian mê-tric đầy đủ không thể là hợp của đếm được nhiều tập không đều đặc.
+                
+                <div class="concept-card">
+                    <h4>🔬 Applications & Connections</h4>
+                    <div class="example-box">
+                        <strong>Real Analysis Applications:</strong><br>
+                        • Foundation for rigorous calculus<br>
+                        • Measure theory and integration<br>
+                        • Functional analysis<br>
+                        • Fourier analysis<br>
+                        • Optimization theory
+                    </div>
+                    <div class="example-box">
+                        <strong>Set Theory Applications:</strong><br>
+                        • Computer science foundations<br>
+                        • Logic and model theory<br>
+                        • Category theory<br>
+                        • Topology and geometry<br>
+                        • Probability theory
+                    </div>
+                    <div class="example-box">
+                        <strong>Modern Mathematics:</strong><br>
+                        • Axiomatic foundations (ZFC)<br>
+                        • Independence results<br>
+                        • Large cardinal axioms<br>
+                        • Descriptive set theory<br>
+                        • Computability theory
+                    </div>
                 </div>
             </div>
-            
-            <div class="concept-card">
-                <h4>♾️ Lực Lượng và Vô Hạn</h4>
-                <div class="definition-box">
-                    <strong>Lực Lượng:</strong> Hai tập có cùng lực lượng nếu tồn tại song ánh giữa chúng.
+        </div>
+
+        <!-- Interactive Exercises Section -->
+        <div class="exercise-section">
+            <h3>🎓 Interactive Exercises</h3>
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <h4>Exercise 1: ε-δ Continuity</h4>
+                    <p>For f(x) = x², find δ such that |x - 2| < δ ⟹ |f(x) - f(2)| < ε = 0.1</p>
+                    <div class="controls">
+                        <label>Your δ value:</label>
+                        <input type="number" id="delta-guess" step="0.001" placeholder="Enter delta">
+                        <button onclick="checkDeltaEpsilon()">Check Answer</button>
+                    </div>
+                    <div id="delta-result"></div>
                 </div>
-                <div class="formula-box">
-                    |ℕ| = ℵ₀ (vô hạn đếm được)<br>
-                    |ℝ| = 2^ℵ₀ (liên tục)<br>
-                    |P(A)| > |A| (định lý Cantor)
+                
+                <div class="concept-card">
+                    <h4>Exercise 2: Set Cardinality</h4>
+                    <p>Which of these sets has the same cardinality as ℕ?</p>
+                    <div class="controls">
+                        <select id="cardinality-choice">
+                            <option value="">Choose...</option>
+                            <option value="integers">ℤ (Integers)</option>
+                            <option value="rationals">ℚ (Rationals)</option>
+                            <option value="reals">ℝ (Reals)</option>
+                            <option value="powerset">P(ℕ) (Power set of ℕ)</option>
+                        </select>
+                        <button onclick="checkCardinality()">Check Answer</button>
+                    </div>
+                    <div id="cardinality-result"></div>
                 </div>
-                <div class="example-box">
-                    <strong>Sự Thật Bất Ngờ:</strong><br>
-                    |ℕ| = |ℚ| (số hữu tỉ đếm được)<br>
-                    |ℝ| > |ℕ| (số thực không đếm được)<br>
-                    |ℝ| = |ℝⁿ| (mọi không gian Euclidean có cùng lực lượng)
+                
+                <div class="concept-card">
+                    <h4>Exercise 3: Sequence Convergence</h4>
+                    <p>Does the sequence aₙ = (n² + 1)/(2n² - 3) converge? If so, to what limit?</p>
+                    <div class="controls">
+                        <label>Converges?</label>
+                        <select id="convergence-choice">
+                            <option value="">Choose...</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                        <label>Limit (if converges):</label>
+                        <input type="number" id="limit-guess" step="0.1" placeholder="Enter limit">
+                        <button onclick="checkConvergence()">Check Answer</button>
+                    </div>
+                    <div id="convergence-result"></div>
                 </div>
             </div>
-            
-            <div class="concept-card">
-                <h4>🎲 Ứng Dụng</h4>
-                <div class="example-box">
-                    <strong>Giải Tích:</strong><br>
-                    • Nền tảng cho giải tích nghiêm ngặt<br>
-                    • Lý thuyết đo và tích phân<br>
-                    • Giải tích hàm
-                </div>
-                <div class="example-box">
-                    <strong>Tôpô Học:</strong><br>
-                    • Ánh xạ liên tục<br>
-                    • Đồng phôi<br>
-                    • Bất biến tôpô
-                </div>
-                <div class="example-box">
-                    <strong>Toán Học Hiện Đại:</strong><br>
-                    • Nền tảng khoa học máy tính<br>
-                    • Lý thuyết logic và mô hình<br>
-                    • Lý thuyết phạm trù
-                </div>
+        </div>
+
+        <!-- Proof Exploration Section -->
+        <div class="proof-section">
+            <h3>📝 Interactive Proof Explorer</h3>
+            <div class="controls">
+                <label>Select Theorem to Explore:</label>
+                <select id="proof-theorem">
+                    <option value="cantor-diagonal">Cantor's Diagonal Argument</option>
+                    <option value="bolzano-weierstrass">Bolzano-Weierstrass Theorem</option>
+                    <option value="intermediate-value">Intermediate Value Theorem</option>
+                    <option value="heine-borel">Heine-Borel Theorem</option>
+                </select>
+                <button onclick="exploreProof()">Explore Proof</button>
+            </div>
+            <div id="proof-content">
+                Select a theorem above to see an interactive proof exploration
             </div>
         </div>
     </div>
 
     <script>
-        // Set operations functionality
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+
+        // Global variables
         let setA = new Set([1, 2, 3, 4, 5]);
         let setB = new Set([3, 4, 5, 6, 7]);
-        
-        // Sequence data
         let sequenceData = [];
         let currentSequenceType = 'harmonic';
-        
-        // Interval data
         let intervalStart = -2;
         let intervalEnd = 3;
         let intervalType = 'open';
-        
+        let currentTopologyType = 'open-closed';
+        let currentFunctionType = 'continuous';
+        let currentCardinalityType = 'natural-even';
+
+        // Utility functions
         function parseSet(input) {
-            return new Set(input.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x)));
+            return new Set(input.split(',').map(x => {
+                const num = parseFloat(x.trim());
+                return isNaN(num) ? x.trim() : num;
+            }).filter(x => x !== ''));
         }
-        
+
+        function factorial(n) {
+            if (n <= 1) return 1;
+            return n * factorial(n - 1);
+        }
+
+        function fibonacci(n) {
+            if (n <= 2) return 1;
+            let a = 1, b = 1;
+            for (let i = 3; i <= n; i++) {
+                [a, b] = [b, a + b];
+            }
+            return b;
+        }
+
+        // Set Operations
         function updateSetOperations() {
             const inputA = document.getElementById('setA').value;
             const inputB = document.getElementById('setB').value;
@@ -488,17 +744,41 @@
             // Display results
             const resultDiv = document.getElementById('setOperationsResult');
             resultDiv.innerHTML = `
-                <div style="margin-top: 15px;">
-                    <div class="set-operation">A ∪ B = {${Array.from(union).sort((a,b) => a-b).join(', ')}}</div>
-                    <div class="set-operation">A ∩ B = {${Array.from(intersection).sort((a,b) => a-b).join(', ')}}</div>
-                    <div class="set-operation">A \\ B = {${Array.from(differenceAB).sort((a,b) => a-b).join(', ')}}</div>
-                    <div class="set-operation">A ⊕ B = {${Array.from(symmetricDiff).sort((a,b) => a-b).join(', ')}}</div>
+                <div style="margin-top: 15px; font-family: 'Courier New', monospace;">
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(99, 179, 237, 0.2); border-radius: 3px;">
+                        A ∪ B = {${Array.from(union).sort((a,b) => 
+                            typeof a === 'number' && typeof b === 'number' ? a-b : 
+                            a.toString().localeCompare(b.toString())
+                        ).join(', ')}}
+                    </div>
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(76, 175, 80, 0.2); border-radius: 3px;">
+                        A ∩ B = {${Array.from(intersection).sort((a,b) => 
+                            typeof a === 'number' && typeof b === 'number' ? a-b : 
+                            a.toString().localeCompare(b.toString())
+                        ).join(', ')}}
+                    </div>
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(255, 193, 7, 0.2); border-radius: 3px;">
+                        A \\ B = {${Array.from(differenceAB).sort((a,b) => 
+                            typeof a === 'number' && typeof b === 'number' ? a-b : 
+                            a.toString().localeCompare(b.toString())
+                        ).join(', ')}}
+                    </div>
+                    <div style="margin: 5px 0; padding: 5px; background: rgba(156, 39, 176, 0.2); border-radius: 3px;">
+                        A ⊕ B = {${Array.from(symmetricDiff).sort((a,b) => 
+                            typeof a === 'number' && typeof b === 'number' ? a-b : 
+                            a.toString().localeCompare(b.toString())
+                        ).join(', ')}}
+                    </div>
+                    <div style="margin: 10px 0; font-size: 12px;">
+                        |A| = ${setA.size}, |B| = ${setB.size}, |A ∪ B| = ${union.size}
+                    </div>
                 </div>
             `;
             
             drawSetOperations();
         }
-        
+
+        // Sequence Generation
         function generateSequence(type, n) {
             const sequence = [];
             for (let i = 1; i <= n; i++) {
@@ -520,19 +800,15 @@
                         term = Math.pow(-1, i) / i;
                         break;
                     case 'fibonacci':
-                        // Generate Fibonacci numbers
-                        if (i === 1) term = 1;
-                        else if (i === 2) term = 1;
-                        else {
-                            let fib1 = 1, fib2 = 1;
-                            for (let j = 3; j <= i; j++) {
-                                let temp = fib1 + fib2;
-                                fib1 = fib2;
-                                fib2 = temp;
-                            }
-                            let fibNext = fib1 + fib2;
-                            term = fib2 / fibNext; // Fn/F(n+1)
-                        }
+                        const fib_i = fibonacci(i);
+                        const fib_i1 = fibonacci(i + 1);
+                        term = fib_i / fib_i1;
+                        break;
+                    case 'sqrt':
+                        term = 1 / Math.sqrt(i);
+                        break;
+                    case 'factorial':
+                        term = factorial(i) / Math.pow(i, i);
                         break;
                     default:
                         term = 1 / i;
@@ -541,52 +817,184 @@
             }
             return sequence;
         }
-        
+
         function updateSequence() {
             currentSequenceType = document.getElementById('sequenceType').value;
             const numTerms = parseInt(document.getElementById('numTerms').value);
             
             sequenceData = generateSequence(currentSequenceType, numTerms);
             
-            // Display first few terms and limit
+            // Display sequence information
             const display = document.getElementById('sequenceDisplay');
-            const firstTerms = sequenceData.slice(0, 8).map(term => term.value.toFixed(4)).join(', ');
-            const lastTerm = sequenceData[sequenceData.length - 1].value.toFixed(6);
+            const firstTerms = sequenceData.slice(0, 6).map(term => 
+                isNaN(term.value) ? 'undefined' : term.value.toFixed(4)
+            ).join(', ');
+            const lastTerm = sequenceData[sequenceData.length - 1];
+            const lastTermStr = isNaN(lastTerm.value) ? 'undefined' : lastTerm.value.toFixed(6);
             
             let limitText = '';
+            let convergenceRate = '';
             switch (currentSequenceType) {
                 case 'harmonic':
+                    limitText = 'lim → 0 (slow convergence, O(1/n))';
+                    break;
                 case 'geometric':
+                    limitText = 'lim → 0 (exponential convergence)';
+                    break;
                 case 'polynomial':
+                    limitText = 'lim → 0 (fast convergence, O(1/n²))';
+                    break;
                 case 'exponential':
-                    limitText = 'lim → 0';
+                    limitText = 'lim → 0 (very fast convergence)';
                     break;
                 case 'alternating':
-                    limitText = 'lim → 0 (oscillating)';
+                    limitText = 'lim → 0 (oscillating convergence)';
                     break;
                 case 'fibonacci':
-                    limitText = 'lim → φ-1 ≈ 0.618 (golden ratio reciprocal)';
+                    limitText = 'lim → φ⁻¹ ≈ 0.618 (golden ratio reciprocal)';
+                    break;
+                case 'sqrt':
+                    limitText = 'lim → 0 (slow convergence, O(1/√n))';
+                    break;
+                case 'factorial':
+                    limitText = 'lim → 0 (very fast convergence, Stirling approximation)';
                     break;
             }
             
             display.innerHTML = `
-                Terms: ${firstTerms}...<br>
-                a₍${numTerms}₎ = ${lastTerm}<br>
-                <strong>${limitText}</strong>
+                <div style="font-family: 'Courier New', monospace;">
+                    <strong>First terms:</strong> ${firstTerms}...<br>
+                    <strong>Term ${numTerms}:</strong> ${lastTermStr}<br>
+                    <strong>Behavior:</strong> ${limitText}
+                </div>
             `;
             
             drawSequenceGraph();
         }
-        
+
+        // Interval Management
         function updateInterval() {
             intervalStart = parseFloat(document.getElementById('intervalStart').value);
             intervalEnd = parseFloat(document.getElementById('intervalEnd').value);
             intervalType = document.getElementById('intervalType').value;
             
+            // Update info display
+            let notation = '';
+            let description = '';
+            switch (intervalType) {
+                case 'open':
+                    notation = `(${intervalStart}, ${intervalEnd})`;
+                    description = 'Open interval - endpoints not included';
+                    break;
+                case 'closed':
+                    notation = `[${intervalStart}, ${intervalEnd}]`;
+                    description = 'Closed interval - endpoints included';
+                    break;
+                case 'half-open-left':
+                    notation = `(${intervalStart}, ${intervalEnd}]`;
+                    description = 'Half-open interval - left endpoint excluded';
+                    break;
+                case 'half-open-right':
+                    notation = `[${intervalStart}, ${intervalEnd})`;
+                    description = 'Half-open interval - right endpoint excluded';
+                    break;
+            }
+            
+            document.getElementById('intervalInfo').innerHTML = `
+                <strong>Notation:</strong> ${notation}<br>
+                <strong>Type:</strong> ${description}<br>
+                <strong>Length:</strong> ${Math.abs(intervalEnd - intervalStart).toFixed(2)}
+            `;
+            
             drawInterval();
+        }
+
+        // Topology Visualization
+        function updateTopology() {
+            currentTopologyType = document.getElementById('topologyType').value;
+            
+            let description = '';
+            switch (currentTopologyType) {
+                case 'open-closed':
+                    description = 'Open sets contain neighborhoods of all points; closed sets contain all limit points';
+                    break;
+                case 'neighborhood':
+                    description = 'Neighborhoods are open sets containing a given point';
+                    break;
+                case 'boundary':
+                    description = 'Boundary points are limits of both interior and exterior points';
+                    break;
+                case 'compact':
+                    description = 'Compact sets are closed and bounded (in ℝⁿ)';
+                    break;
+                case 'connected':
+                    description = 'Connected sets cannot be partitioned into disjoint open sets';
+                    break;
+            }
+            
+            document.getElementById('topologyInfo').innerHTML = description;
             drawTopologyConcepts();
         }
+
+        // Continuity Analysis
+        function updateContinuity() {
+            currentFunctionType = document.getElementById('functionType').value;
+            const epsilon = parseFloat(document.getElementById('epsilon').value);
+            const point = parseFloat(document.getElementById('pointOfInterest').value);
+            
+            document.getElementById('epsilonValue').textContent = epsilon;
+            
+            let analysis = '';
+            switch (currentFunctionType) {
+                case 'continuous':
+                    analysis = `f(x) = sin(x) is continuous everywhere. At x = ${point}, for ε = ${epsilon}, we can find δ = ε.`;
+                    break;
+                case 'jump':
+                    analysis = `Jump discontinuity at x = ${point}. Left and right limits exist but are different.`;
+                    break;
+                case 'removable':
+                    analysis = `Removable discontinuity at x = ${point}. Limit exists but f(${point}) is undefined or different.`;
+                    break;
+                case 'essential':
+                    analysis = `Essential discontinuity at x = ${point}. Limit does not exist.`;
+                    break;
+                case 'uniform':
+                    analysis = `Uniformly continuous function. δ depends only on ε, not on the point.`;
+                    break;
+            }
+            
+            document.getElementById('continuityInfo').innerHTML = analysis;
+            drawContinuityAnalysis();
+        }
+
+        // Cardinality Exploration
+        function updateCardinality() {
+            currentCardinalityType = document.getElementById('cardinalityType').value;
+            
+            let explanation = '';
+            switch (currentCardinalityType) {
+                case 'natural-even':
+                    explanation = 'Bijection f: ℕ → Even, f(n) = 2n shows |ℕ| = |Even|';
+                    break;
+                case 'natural-rational':
+                    explanation = 'Cantor pairing function shows ℚ is countable: |ℕ| = |ℚ|';
+                    break;
+                case 'natural-real':
+                    explanation = 'Cantor\'s diagonal argument proves |ℕ| < |ℝ|';
+                    break;
+                case 'cantor-pairing':
+                    explanation = 'Cantor pairing: f(m,n) = ½(m+n)(m+n+1)+n shows |ℕ×ℕ| = |ℕ|';
+                    break;
+                case 'power-set':
+                    explanation = 'Cantor\'s theorem: no surjection from A to P(A), so |A| < |P(A)|';
+                    break;
+            }
+            
+            document.getElementById('cardinalityInfo').innerHTML = explanation;
+            drawCardinalityVisualization();
+        }
         
+        // Drawing Functions
         function drawSetOperations() {
             const canvas = document.getElementById('setCanvas');
             const ctx = canvas.getContext('2d');
@@ -598,53 +1006,60 @@
             // Draw Venn diagram
             const centerA = { x: width * 0.35, y: height * 0.5 };
             const centerB = { x: width * 0.65, y: height * 0.5 };
-            const radius = 80;
+            const radius = 70;
             
             // Draw set A
-            ctx.fillStyle = 'rgba(255, 107, 107, 0.5)';
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.4)';
             ctx.beginPath();
             ctx.arc(centerA.x, centerA.y, radius, 0, 2 * Math.PI);
             ctx.fill();
             ctx.strokeStyle = '#ff6b6b';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
             
             // Draw set B
-            ctx.fillStyle = 'rgba(107, 142, 255, 0.5)';
+            ctx.fillStyle = 'rgba(107, 142, 255, 0.4)';
             ctx.beginPath();
             ctx.arc(centerB.x, centerB.y, radius, 0, 2 * Math.PI);
             ctx.fill();
             ctx.strokeStyle = '#6b8eff';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
             
             // Labels
             ctx.fillStyle = '#333';
-            ctx.font = '16px Arial';
-            ctx.fillText('A', centerA.x - 40, centerA.y - 50);
-            ctx.fillText('B', centerB.x + 30, centerB.y - 50);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('A', centerA.x - 45, centerA.y - 45);
+            ctx.fillText('B', centerB.x + 35, centerB.y - 45);
             
             // Draw elements
-            ctx.font = '12px Arial';
+            ctx.font = '14px Arial';
             ctx.fillStyle = '#333';
             
             // A only elements
             const aOnly = Array.from(setA).filter(x => !setB.has(x));
             aOnly.forEach((elem, i) => {
-                ctx.fillText(elem.toString(), centerA.x - 30, centerA.y - 10 + i * 15);
+                ctx.fillText(elem.toString(), centerA.x - 40, centerA.y - 15 + i * 18);
             });
             
             // B only elements
             const bOnly = Array.from(setB).filter(x => !setA.has(x));
             bOnly.forEach((elem, i) => {
-                ctx.fillText(elem.toString(), centerB.x + 15, centerB.y - 10 + i * 15);
+                ctx.fillText(elem.toString(), centerB.x + 25, centerB.y - 15 + i * 18);
             });
             
             // Intersection elements
             const intersection = Array.from(setA).filter(x => setB.has(x));
             intersection.forEach((elem, i) => {
-                ctx.fillText(elem.toString(), (centerA.x + centerB.x) / 2 - 5, centerA.y - 10 + i * 15);
+                ctx.fillText(elem.toString(), (centerA.x + centerB.x) / 2 - 8, centerA.y - 15 + i * 18);
             });
+            
+            // Add cardinality information
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText(`|A| = ${setA.size}`, centerA.x - 50, height - 20);
+            ctx.fillText(`|B| = ${setB.size}`, centerB.x + 20, height - 20);
+            ctx.fillText(`|A ∩ B| = ${intersection.length}`, width/2 - 30, height - 40);
         }
         
         function drawSequenceGraph() {
@@ -663,7 +1078,7 @@
             const graphHeight = height - 2 * margin;
             
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             
             // X-axis
             ctx.beginPath();
@@ -677,58 +1092,88 @@
             ctx.lineTo(margin, height - margin);
             ctx.stroke();
             
+            // Axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('n', width - 25, height - margin + 20);
+            ctx.save();
+            ctx.translate(15, margin + 20);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('aₙ', 0, 0);
+            ctx.restore();
+            
             // Find min/max values for scaling
             const maxN = Math.max(...sequenceData.map(d => d.n));
-            const maxVal = Math.max(...sequenceData.map(d => Math.abs(d.value)));
-            const minVal = Math.min(...sequenceData.map(d => d.value));
+            const values = sequenceData.map(d => d.value).filter(v => !isNaN(v));
+            const maxVal = Math.max(...values);
+            const minVal = Math.min(...values);
             
             const yRange = Math.max(maxVal - minVal, 0.1);
             const yCenter = (maxVal + minVal) / 2;
             
-            // Draw sequence points
-            ctx.fillStyle = '#2196F3';
+            // Draw grid
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 10; i++) {
+                const x = margin + (i / 10) * graphWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, height - margin);
+                ctx.stroke();
+                
+                const y = margin + (i / 10) * graphHeight;
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(width - margin, y);
+                ctx.stroke();
+            }
+            
+            // Draw sequence points and connecting lines
             ctx.strokeStyle = '#2196F3';
+            ctx.fillStyle = '#2196F3';
             ctx.lineWidth = 2;
             
+            ctx.beginPath();
             sequenceData.forEach((point, i) => {
+                if (isNaN(point.value)) return;
+                
                 const x = margin + (point.n / maxN) * graphWidth;
                 const y = height - margin - ((point.value - yCenter + yRange/2) / yRange) * graphHeight;
                 
-                // Draw point
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, 2 * Math.PI);
-                ctx.fill();
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
                 
-                // Draw line to x-axis
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(x, height - margin);
-                ctx.stroke();
+                // Draw point
+                ctx.fillRect(x - 2, y - 2, 4, 4);
             });
+            ctx.stroke();
             
-            // Draw limit line (y = 0 for most sequences)
-            let limitY;
+            // Draw limit line
+            let limitValue = 0;
             if (currentSequenceType === 'fibonacci') {
-                const goldenRatio = (1 + Math.sqrt(5)) / 2;
-                const limit = 1 / goldenRatio;
-                limitY = height - margin - ((limit - yCenter + yRange/2) / yRange) * graphHeight;
-            } else {
-                limitY = height - margin - ((0 - yCenter + yRange/2) / yRange) * graphHeight;
+                limitValue = (Math.sqrt(5) - 1) / 2; // φ⁻¹
             }
             
-            ctx.strokeStyle = 'red';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(margin, limitY);
-            ctx.lineTo(width - margin, limitY);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            const limitY = height - margin - ((limitValue - yCenter + yRange/2) / yRange) * graphHeight;
             
-            // Labels
-            ctx.fillStyle = '#333';
-            ctx.font = '12px Arial';
-            ctx.fillText('n', width - 20, height - margin + 15);
-            ctx.fillText('aₙ', margin - 30, 20);
+            if (limitY >= margin && limitY <= height - margin) {
+                ctx.strokeStyle = 'red';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(margin, limitY);
+                ctx.lineTo(width - margin, limitY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Limit label
+                ctx.fillStyle = 'red';
+                ctx.font = '12px Arial';
+                ctx.fillText(`L = ${limitValue.toFixed(3)}`, width - margin - 60, limitY - 5);
+            }
         }
         
         function drawInterval() {
@@ -745,29 +1190,32 @@
             const lineLength = width - 2 * margin;
             
             ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(margin, lineY);
             ctx.lineTo(width - margin, lineY);
             ctx.stroke();
             
-            // Draw tick marks
+            // Draw tick marks and labels
             const range = 10;
             const step = lineLength / range;
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
             
             for (let i = 0; i <= range; i++) {
                 const x = margin + i * step;
                 const value = -5 + i;
                 
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.moveTo(x, lineY - 5);
-                ctx.lineTo(x, lineY + 5);
+                ctx.moveTo(x, lineY - 8);
+                ctx.lineTo(x, lineY + 8);
                 ctx.stroke();
                 
-                ctx.fillStyle = '#333';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(value.toString(), x, lineY + 20);
+                ctx.fillText(value.toString(), x, lineY + 25);
             }
             
             // Draw interval
@@ -776,7 +1224,7 @@
             
             // Interval line
             ctx.strokeStyle = '#2196F3';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 6;
             ctx.beginPath();
             ctx.moveTo(startX, lineY);
             ctx.lineTo(endX, lineY);
@@ -785,55 +1233,52 @@
             // Endpoint markers
             ctx.fillStyle = '#2196F3';
             ctx.strokeStyle = '#2196F3';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             
             // Start point
             if (intervalType === 'open' || intervalType === 'half-open-right') {
                 // Open circle
                 ctx.beginPath();
-                ctx.arc(startX, lineY, 5, 0, 2 * Math.PI);
+                ctx.arc(startX, lineY, 6, 0, 2 * Math.PI);
                 ctx.stroke();
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
             } else {
                 // Filled circle
                 ctx.beginPath();
-                ctx.arc(startX, lineY, 5, 0, 2 * Math.PI);
+                ctx.arc(startX, lineY, 6, 0, 2 * Math.PI);
                 ctx.fill();
             }
             
             // End point
+            ctx.fillStyle = '#2196F3';
             if (intervalType === 'open' || intervalType === 'half-open-left') {
                 // Open circle
                 ctx.beginPath();
-                ctx.arc(endX, lineY, 5, 0, 2 * Math.PI);
+                ctx.arc(endX, lineY, 6, 0, 2 * Math.PI);
                 ctx.stroke();
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
             } else {
                 // Filled circle
                 ctx.beginPath();
-                ctx.arc(endX, lineY, 5, 0, 2 * Math.PI);
+                ctx.arc(endX, lineY, 6, 0, 2 * Math.PI);
                 ctx.fill();
             }
             
             // Interval notation
             let notation = '';
             switch (intervalType) {
-                case 'open':
-                    notation = `(${intervalStart}, ${intervalEnd})`;
-                    break;
-                case 'closed':
-                    notation = `[${intervalStart}, ${intervalEnd}]`;
-                    break;
-                case 'half-open-left':
-                    notation = `(${intervalStart}, ${intervalEnd}]`;
-                    break;
-                case 'half-open-right':
-                    notation = `[${intervalStart}, ${intervalEnd})`;
-                    break;
+                case 'open': notation = `(${intervalStart}, ${intervalEnd})`; break;
+                case 'closed': notation = `[${intervalStart}, ${intervalEnd}]`; break;
+                case 'half-open-left': notation = `(${intervalStart}, ${intervalEnd}]`; break;
+                case 'half-open-right': notation = `[${intervalStart}, ${intervalEnd})`; break;
             }
             
             ctx.fillStyle = '#333';
-            ctx.font = '16px Arial';
+            ctx.font = 'bold 16px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(notation, width / 2, lineY - 30);
+            ctx.fillText(notation, width / 2, lineY - 35);
         }
         
         function drawTopologyConcepts() {
@@ -844,59 +1289,575 @@
             
             ctx.clearRect(0, 0, width, height);
             
-            // Draw open and closed sets visualization
             const centerX = width / 2;
             const centerY = height / 2;
             
-            // Open set (with fuzzy boundary)
-            ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
-            ctx.strokeStyle = '#4CAF50';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([10, 5]);
+            switch (currentTopologyType) {
+                case 'open-closed':
+                    // Open set (dashed boundary)
+                    ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+                    ctx.strokeStyle = '#4CAF50';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([10, 5]);
+                    
+                    ctx.beginPath();
+                    ctx.arc(centerX - 80, centerY, 60, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Open Set', centerX - 80, centerY + 85);
+                    ctx.fillText('(no boundary)', centerX - 80, centerY + 100);
+                    
+                    // Closed set (solid boundary)
+                    ctx.setLineDash([]);
+                    ctx.fillStyle = 'rgba(33, 150, 243, 0.3)';
+                    ctx.strokeStyle = '#2196F3';
+                    ctx.lineWidth = 4;
+                    
+                    ctx.beginPath();
+                    ctx.arc(centerX + 80, centerY, 60, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Closed Set', centerX + 80, centerY + 85);
+                    ctx.fillText('(includes boundary)', centerX + 80, centerY + 100);
+                    break;
+                    
+                case 'neighborhood':
+                    // Point and its neighborhood
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Neighborhood circles
+                    for (let r = 20; r <= 60; r += 20) {
+                        ctx.strokeStyle = `rgba(255, 107, 107, ${(80-r)/60})`;
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, r, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Point with Neighborhoods', centerX, centerY + 85);
+                    break;
+                    
+                case 'boundary':
+                    // Set with boundary points
+                    ctx.fillStyle = 'rgba(156, 39, 176, 0.3)';
+                    ctx.fillRect(centerX - 80, centerY - 60, 160, 120);
+                    
+                    // Boundary
+                    ctx.strokeStyle = '#9c27b0';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(centerX - 80, centerY - 60, 160, 120);
+                    
+                    // Boundary points
+                    ctx.fillStyle = '#9c27b0';
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * 2 * Math.PI;
+                        const x = centerX + 80 * Math.cos(angle);
+                        const y = centerY + 60 * Math.sin(angle);
+                        ctx.beginPath();
+                        ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Set with Boundary Points', centerX, centerY + 100);
+                    break;
+                    
+                case 'compact':
+                    // Compact set (closed and bounded)
+                    ctx.fillStyle = 'rgba(255, 193, 7, 0.4)';
+                    ctx.strokeStyle = '#FFC107';
+                    ctx.lineWidth = 4;
+                    
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 70, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Bounding box
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([10, 5]);
+                    ctx.strokeRect(centerX - 85, centerY - 85, 170, 170);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Compact Set', centerX, centerY + 100);
+                    ctx.fillText('(closed & bounded)', centerX, centerY + 115);
+                    break;
+                    
+                case 'connected':
+                    // Connected set
+                    ctx.fillStyle = 'rgba(76, 175, 80, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(centerX - 50, centerY, 40, 0, 2 * Math.PI);
+                    ctx.arc(centerX + 50, centerY, 40, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Connection
+                    ctx.fillRect(centerX - 50, centerY - 20, 100, 40);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Connected Set', centerX, centerY + 80);
+                    break;
+            }
+        }
+        
+        function drawContinuityAnalysis() {
+            const continuityCanvas = document.getElementById('continuityCanvas');
+            const deltaEpsilonCanvas = document.getElementById('deltaEpsilonCanvas');
             
+            if (!continuityCanvas || !deltaEpsilonCanvas) return;
+            
+            const ctx1 = continuityCanvas.getContext('2d');
+            const ctx2 = deltaEpsilonCanvas.getContext('2d');
+            
+            // Clear both canvases
+            ctx1.clearRect(0, 0, continuityCanvas.width, continuityCanvas.height);
+            ctx2.clearRect(0, 0, deltaEpsilonCanvas.width, deltaEpsilonCanvas.height);
+            
+            // Draw function graph
+            drawFunctionGraph(ctx1, currentFunctionType);
+            
+            // Draw delta-epsilon visualization
+            drawDeltaEpsilon(ctx2, currentFunctionType);
+        }
+        
+        function drawFunctionGraph(ctx, functionType) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            const margin = 40;
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(centerX - 80, centerY, 60, 0, 2 * Math.PI);
-            ctx.fill();
+            ctx.moveTo(margin, height - margin);
+            ctx.lineTo(width - margin, height - margin);
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, height - margin);
             ctx.stroke();
+            
+            // Draw function
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const steps = 200;
+            for (let i = 0; i <= steps; i++) {
+                const x = -2 * Math.PI + (4 * Math.PI * i) / steps;
+                const canvasX = margin + ((x + 2 * Math.PI) / (4 * Math.PI)) * (width - 2 * margin);
+                
+                let y;
+                switch (functionType) {
+                    case 'continuous':
+                        y = Math.sin(x);
+                        break;
+                    case 'jump':
+                        y = x < 0 ? -1 : 1;
+                        break;
+                    case 'removable':
+                        y = x === 0 ? 0 : Math.sin(x) / x;
+                        break;
+                    case 'essential':
+                        y = x === 0 ? 0 : Math.sin(1/x);
+                        break;
+                    case 'uniform':
+                        y = Math.sqrt(Math.abs(x));
+                        break;
+                    default:
+                        y = Math.sin(x);
+                }
+                
+                const canvasY = height - margin - ((y + 2) / 4) * (height - 2 * margin);
+                
+                if (i === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+        }
+        
+        function drawDeltaEpsilon(ctx, functionType) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            const epsilon = parseFloat(document.getElementById('epsilon').value);
+            
+            // Draw epsilon-delta visualization
+            ctx.fillStyle = 'rgba(255, 193, 7, 0.3)';
+            ctx.fillRect(width/4, height/4, width/2, height/2);
+            
+            ctx.strokeStyle = '#FFC107';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(width/4, height/4, width/2, height/2);
             
             ctx.fillStyle = '#333';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Open Set', centerX - 80, centerY + 80);
-            ctx.fillText('(fuzzy boundary)', centerX - 80, centerY + 95);
-            
-            // Closed set (with solid boundary)
-            ctx.setLineDash([]);
-            ctx.fillStyle = 'rgba(33, 150, 243, 0.3)';
-            ctx.strokeStyle = '#2196F3';
-            ctx.lineWidth = 3;
-            
-            ctx.beginPath();
-            ctx.arc(centerX + 80, centerY, 60, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            
-            ctx.fillStyle = '#333';
-            ctx.textAlign = 'center';
-            ctx.fillText('Closed Set', centerX + 80, centerY + 80);
-            ctx.fillText('(includes boundary)', centerX + 80, centerY + 95);
-            
-            // Show interior points
-            ctx.fillStyle = '#4CAF50';
-            ctx.beginPath();
-            ctx.arc(centerX - 80, centerY, 2, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            ctx.fillStyle = '#2196F3';
-            ctx.beginPath();
-            ctx.arc(centerX + 80, centerY, 2, 0, 2 * Math.PI);
-            ctx.fill();
+            ctx.fillText('ε-δ Definition Visualization', width/2, height - 20);
+            ctx.fillText(`ε = ${epsilon}`, width/2, 30);
         }
         
-        // Initialize visualizations
-        updateSetOperations();
-        updateSequence();
-        updateInterval();
+        function drawCardinalityVisualization() {
+            const canvas = document.getElementById('cardinalityCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            switch (currentCardinalityType) {
+                case 'natural-even':
+                    drawNaturalEvenBijection(ctx, width, height);
+                    break;
+                case 'natural-rational':
+                    drawCantorPairing(ctx, width, height);
+                    break;
+                case 'natural-real':
+                    drawDiagonalArgument(ctx, width, height);
+                    break;
+                case 'cantor-pairing':
+                    drawCantorPairingFunction(ctx, width, height);
+                    break;
+                case 'power-set':
+                    drawPowerSetVisualization(ctx, width, height);
+                    break;
+            }
+        }
+        
+        function drawNaturalEvenBijection(ctx, width, height) {
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Bijection f: ℕ → Even Numbers, f(n) = 2n', width/2, 30);
+            
+            // Draw mappings
+            for (let i = 1; i <= 8; i++) {
+                const x1 = width/4;
+                const x2 = 3*width/4;
+                const y = 60 + i * 35;
+                
+                // Natural number
+                ctx.fillText(i.toString(), x1, y);
+                
+                // Arrow
+                ctx.strokeStyle = '#2196F3';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x1 + 20, y - 5);
+                ctx.lineTo(x2 - 20, y - 5);
+                ctx.stroke();
+                
+                // Even number
+                ctx.fillText((2*i).toString(), x2, y);
+            }
+            
+            ctx.fillText('ℕ', width/4, height - 20);
+            ctx.fillText('Even Numbers', 3*width/4, height - 20);
+        }
+        
+        function drawCantorPairing(ctx, width, height) {
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cantor Pairing Shows ℚ is Countable', width/2, 30);
+            
+            // Draw grid showing rational enumeration
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            
+            const gridSize = 40;
+            const startX = 50;
+            const startY = 60;
+            
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const x = startX + i * gridSize;
+                    const y = startY + j * gridSize;
+                    
+                    ctx.strokeRect(x, y, gridSize, gridSize);
+                    
+                    // Show fraction
+                    ctx.fillStyle = '#333';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${j+1}/${i+1}`, x + gridSize/2, y + gridSize/2);
+                }
+            }
+        }
+        
+        function drawDiagonalArgument(ctx, width, height) {
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cantor\'s Diagonal Argument: |ℝ| > |ℕ|', width/2, 30);
+            
+            // Draw binary sequences
+            const sequences = [
+                '0.101010...',
+                '0.110011...',
+                '0.001100...',
+                '0.111000...',
+                '0.010101...'
+            ];
+            
+            sequences.forEach((seq, i) => {
+                const y = 70 + i * 30;
+                ctx.fillText(`s${i+1}: ${seq}`, width/4, y);
+                
+                // Highlight diagonal
+                if (i < 3) {
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fillText(seq[2+i], width/2 + i*15, y);
+                    ctx.fillStyle = '#333';
+                }
+            });
+            
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText('Diagonal: 0.101...', width/2, height - 80);
+            ctx.fillText('New number: 0.010... (flipped)', width/2, height - 50);
+        }
+        
+        function drawCantorPairingFunction(ctx, width, height) {
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cantor Pairing Function: f(m,n) = ½(m+n)(m+n+1)+n', width/2, 30);
+            
+            // Draw pairing visualization
+            const pairs = [
+                [0,0], [0,1], [1,0], [0,2], [1,1], [2,0], [0,3], [1,2]
+            ];
+            
+            pairs.forEach((pair, i) => {
+                const x = 100 + (i % 4) * 150;
+                const y = 80 + Math.floor(i / 4) * 60;
+                
+                const pairingValue = 0.5 * (pair[0] + pair[1]) * (pair[0] + pair[1] + 1) + pair[1];
+                
+                ctx.fillText(`(${pair[0]},${pair[1]}) → ${pairingValue}`, x, y);
+            });
+        }
+        
+        function drawPowerSetVisualization(ctx, width, height) {
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Power Set |P(A)| > |A|', width/2, 30);
+            
+            // Show example with small set
+            ctx.font = '14px Arial';
+            ctx.fillText('A = {1, 2}', width/4, 80);
+            ctx.fillText('P(A) = {∅, {1}, {2}, {1,2}}', 3*width/4, 80);
+            
+            ctx.fillText('|A| = 2', width/4, 120);
+            ctx.fillText('|P(A)| = 4 = 2²', 3*width/4, 120);
+            
+            // Cantor's theorem explanation
+            ctx.font = '12px Arial';
+            ctx.fillText('No function f: A → P(A) can be surjective', width/2, 160);
+            ctx.fillText('(Cantor\'s diagonal argument applies)', width/2, 180);
+        }
+        
+        // Exercise Functions
+        function checkDeltaEpsilon() {
+            const guess = parseFloat(document.getElementById('delta-guess').value);
+            const result = document.getElementById('delta-result');
+            
+            // For f(x) = x², f'(2) = 4, so δ = ε/4 for small ε
+            const epsilon = 0.1;
+            const correct = epsilon / 4; // δ = ε/4 = 0.025
+            
+            if (Math.abs(guess - correct) < 0.005) {
+                result.innerHTML = '<span style="color: #4caf50;">✓ Correct! For f(x) = x² at x = 2, δ = ε/4 works because |f\'(2)| = 4</span>';
+            } else {
+                result.innerHTML = `<span style="color: #f44336;">✗ Try again. Hint: Use f'(2) = 4. Correct δ ≈ ${correct.toFixed(3)}</span>`;
+            }
+        }
+        
+        function checkCardinality() {
+            const choice = document.getElementById('cardinality-choice').value;
+            const result = document.getElementById('cardinality-result');
+            
+            if (choice === 'integers' || choice === 'rationals') {
+                result.innerHTML = '<span style="color: #4caf50;">✓ Correct! Both ℤ and ℚ have the same cardinality as ℕ (countably infinite)</span>';
+            } else if (choice === 'reals') {
+                result.innerHTML = '<span style="color: #f44336;">✗ Incorrect. ℝ has greater cardinality than ℕ (uncountable vs countable)</span>';
+            } else if (choice === 'powerset') {
+                result.innerHTML = '<span style="color: #f44336;">✗ Incorrect. P(ℕ) has greater cardinality than ℕ by Cantor\'s theorem</span>';
+            } else {
+                result.innerHTML = '<span style="color: #ff9800;">Please select an option</span>';
+            }
+        }
+        
+        function checkConvergence() {
+            const converges = document.getElementById('convergence-choice').value;
+            const limit = parseFloat(document.getElementById('limit-guess').value);
+            const result = document.getElementById('convergence-result');
+            
+            // For (n² + 1)/(2n² - 3), divide by n²: (1 + 1/n²)/(2 - 3/n²) → 1/2
+            const correctLimit = 0.5;
+            
+            if (converges === 'yes' && Math.abs(limit - correctLimit) < 0.1) {
+                result.innerHTML = '<span style="color: #4caf50;">✓ Correct! The sequence converges to 1/2. Divide numerator and denominator by n² to see this.</span>';
+            } else if (converges === 'yes' && Math.abs(limit - correctLimit) >= 0.1) {
+                result.innerHTML = '<span style="color: #ff9800;">Convergence is correct, but check the limit. Hint: divide by highest power of n</span>';
+            } else if (converges === 'no') {
+                result.innerHTML = '<span style="color: #f44336;">✗ The sequence does converge. Try dividing numerator and denominator by n²</span>';
+            } else {
+                result.innerHTML = '<span style="color: #ff9800;">Please select whether it converges and provide a limit if it does</span>';
+            }
+        }
+        
+        function exploreProof() {
+            const theorem = document.getElementById('proof-theorem').value;
+            const content = document.getElementById('proof-content');
+            
+            let proofHTML = '';
+            
+            switch (theorem) {
+                case 'cantor-diagonal':
+                    proofHTML = `
+                        <h4>Cantor's Diagonal Argument</h4>
+                        <p><strong>Theorem:</strong> The set of real numbers is uncountable.</p>
+                        <p><strong>Proof Idea:</strong></p>
+                        <ol>
+                            <li>Assume ℝ is countable, so we can list all reals: r₁, r₂, r₃, ...</li>
+                            <li>Write each real in binary: r₁ = 0.a₁₁a₁₂a₁₃..., r₂ = 0.a₂₁a₂₂a₂₃...</li>
+                            <li>Construct a new real d = 0.d₁d₂d₃... where dᵢ ≠ aᵢᵢ (flip diagonal bits)</li>
+                            <li>Then d differs from rᵢ in the i-th decimal place for all i</li>
+                            <li>So d is not in our list, contradicting the assumption that we listed all reals</li>
+                            <li>Therefore, ℝ is uncountable</li>
+                        </ol>
+                        <p><strong>Key Insight:</strong> The diagonal construction always produces a new element not in any countable list.</p>
+                    `;
+                    break;
+                    
+                case 'bolzano-weierstrass':
+                    proofHTML = `
+                        <h4>Bolzano-Weierstrass Theorem</h4>
+                        <p><strong>Theorem:</strong> Every bounded sequence in ℝ has a convergent subsequence.</p>
+                        <p><strong>Proof Outline:</strong></p>
+                        <ol>
+                            <li>Let (aₙ) be a bounded sequence in ℝ</li>
+                            <li>Since (aₙ) is bounded, all terms lie in some interval [a,b]</li>
+                            <li>Divide [a,b] in half. At least one half contains infinitely many terms of the sequence</li>
+                            <li>Choose such a half and repeat the process indefinitely</li>
+                            <li>This gives nested intervals [a₀,b₀] ⊃ [a₁,b₁] ⊃ [a₂,b₂] ⊃ ...</li>
+                            <li>The intersection point L is the limit of a subsequence</li>
+                        </ol>
+                        <p><strong>Application:</strong> This theorem is fundamental in proving compactness and the extreme value theorem.</p>
+                    `;
+                    break;
+                    
+                case 'intermediate-value':
+                    proofHTML = `
+                        <h4>Intermediate Value Theorem</h4>
+                        <p><strong>Theorem:</strong> If f is continuous on [a,b] and k is between f(a) and f(b), then ∃c ∈ (a,b) such that f(c) = k.</p>
+                        <p><strong>Proof Strategy:</strong></p>
+                        <ol>
+                            <li>WLOG assume f(a) < k < f(b)</li>
+                            <li>Define S = {x ∈ [a,b] : f(x) < k}</li>
+                            <li>S is non-empty (contains a) and bounded above by b</li>
+                            <li>Let c = sup(S) by completeness of ℝ</li>
+                            <li>Show f(c) = k using continuity:</li>
+                            <li>- If f(c) < k, then f(x) < k in a neighborhood of c (contradiction)</li>
+                            <li>- If f(c) > k, then f(x) > k in a neighborhood of c (contradiction)</li>
+                            <li>Therefore f(c) = k</li>
+                        </ol>
+                        <p><strong>Geometric Intuition:</strong> A continuous function cannot "jump over" intermediate values.</p>
+                    `;
+                    break;
+                    
+                case 'heine-borel':
+                    proofHTML = `
+                        <h4>Heine-Borel Theorem</h4>
+                        <p><strong>Theorem:</strong> In ℝⁿ, a set K is compact ⟺ K is closed and bounded.</p>
+                        <p><strong>Proof Outline:</strong></p>
+                        <p><strong>(⟹) Compact ⟹ Closed and Bounded:</strong></p>
+                        <ol>
+                            <li><strong>Bounded:</strong> Cover K with balls B(0,n), n ∈ ℕ. Extract finite subcover.</li>
+                            <li><strong>Closed:</strong> If x ∉ K, cover each k ∈ K with disjoint neighborhoods of k and x.</li>
+                        </ol>
+                        <p><strong>(⟸) Closed and Bounded ⟹ Compact:</strong></p>
+                        <ol>
+                            <li>If K ⊆ ℝⁿ is bounded, then K ⊆ [−M,M]ⁿ for some M</li>
+                            <li>Use nested interval theorem and diagonal argument</li>
+                            <li>Any open cover has a finite subcover by construction</li>
+                        </ol>
+                        <p><strong>Note:</strong> This characterization is specific to ℝⁿ and fails in general metric spaces.</p>
+                    `;
+                    break;
+                    
+                default:
+                    proofHTML = '<p>Select a theorem to explore its proof</p>';
+            }
+            
+            content.innerHTML = proofHTML;
+        }
+        
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Epsilon slider
+            const epsilonSlider = document.getElementById('epsilon');
+            if (epsilonSlider) {
+                epsilonSlider.addEventListener('input', function() {
+                    document.getElementById('epsilonValue').textContent = this.value;
+                });
+            }
+            
+            // Auto-update topology when type changes
+            const topologySelect = document.getElementById('topologyType');
+            if (topologySelect) {
+                topologySelect.addEventListener('change', updateTopology);
+            }
+            
+            // Auto-update cardinality when type changes
+            const cardinalitySelect = document.getElementById('cardinalityType');
+            if (cardinalitySelect) {
+                cardinalitySelect.addEventListener('change', updateCardinality);
+            }
+            
+            // Auto-update function when type changes
+            const functionSelect = document.getElementById('functionType');
+            if (functionSelect) {
+                functionSelect.addEventListener('change', updateContinuity);
+            }
+        }
+        
+        // Initialize all visualizations
+        function initializeAll() {
+            setupEventListeners();
+            updateSetOperations();
+            updateSequence();
+            updateInterval();
+            updateTopology();
+            updateContinuity();
+            updateCardinality();
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeAll);
     </script>
 </body>
 </html>

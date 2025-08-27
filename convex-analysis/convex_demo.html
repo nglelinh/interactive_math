@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔷 Convex Functions - Interactive Mathematical Demo</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body { 
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -194,6 +196,36 @@
   <div class="container">
     <h1>🔷 Convex Functions - Interactive Mathematical Demo</h1>
     
+    <!-- Historical Section -->
+    <div style="background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 2px solid rgba(255, 255, 255, 0.1);">
+      <h2 style="color: #FFD700; text-align: center; margin-bottom: 25px;">📚 Lịch Sử Convex Analysis</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+          <h4 style="color: #00d4ff; margin-bottom: 15px;">📐 Hermann Minkowski (1864-1909)</h4>
+          <p><strong>Geometry of Numbers:</strong> Minkowski đặt nền móng cho hình học lồi (convex geometry) khi nghiên cứu về lý thuyết số và tương đối của Einstein.</p>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+          <h4 style="color: #ff6b6b; margin-bottom: 15px;">🔬 Johan Jensen (1859-1925)</h4>
+          <p><strong>Jensen's Inequality (1906):</strong> Phát triển bất đẳng thức Jensen - công cụ cơ bản cho lý thuyết hàm lồi và theory thông tin.</p>
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <h4 style="color: #FFD700; margin-bottom: 15px;">⚡ Phát triển hiện đại</h4>
+        <ul style="color: #ffffff; line-height: 1.8;">
+          <li><strong>1940s-1950s:</strong> Fenchel, Moreau phát triển convex conjugate và subdifferential</li>
+          <li><strong>1970s:</strong> Rockafellar viết "Convex Analysis" - sách giáo khoa kinh điển</li>
+          <li><strong>Machine Learning boom:</strong> Convex optimization trở thành nền tảng của SVM, logistic regression</li>
+        </ul>
+      </div>
+
+      <div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px;">
+        <h4 style="color: #4caf50; margin-bottom: 15px;">🌟 Tác động hiện đại</h4>
+        <p>Từ nghiên cứu lý thuyết số, convex analysis đã trở thành nền tảng cho machine learning, portfolio optimization, và signal processing hiện đại.</p>
+      </div>
+    </div>
+    
     <div class="ml-intro">
       <div class="highlight-box">
         <h2>📐 Understanding Convex Functions</h2>
@@ -296,34 +328,6 @@
         </div>
       </div>
     </div>
-    
-    <div class="optimization-insights">
-      <h3>🔍 Key Mathematical Properties</h3>
-      <div class="insight-grid">
-        <div class="insight-card convex">
-          <h4>✅ Convex Functions</h4>
-          <ul>
-            <li>🎯 Any local minimum = global minimum</li>
-            <li>📐 Line segment test: always lies above curve</li>
-            <li>📊 Second derivative f''(x) ≥ 0</li>
-            <li>⚡ Gradient descent finds global optimum</li>
-            <li>🔒 Mathematical optimization guarantees</li>
-          </ul>
-        </div>
-        <div class="insight-card non-convex">
-          <h4>❌ Non-Convex Functions</h4>
-          <ul>
-            <li>🔳 Multiple local minima exist</li>
-            <li>📐 Line segment may go below curve</li>
-            <li>📊 Second derivative can be negative</li>
-            <li>🎲 Optimization may get stuck</li>
-            <li>🧩 Complex mathematical landscapes</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    
-  </div>
 
   <script>
     const canvas = document.getElementById('canvas');

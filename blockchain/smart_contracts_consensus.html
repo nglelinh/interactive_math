@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 Advanced Blockchain: Smart Contracts & Consensus</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #f1f5f9;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .intro {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(241, 245, 249, 0.3);
+        }
+        
+        .smart-contract-panel {
+            background: rgba(139, 92, 246, 0.1);
+            border: 2px solid #8b5cf6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .contract-code {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .consensus-visualization {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .validator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .validator {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border: 2px solid #60a5fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .validator.leader {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #fbbf24;
+            transform: scale(1.05);
+        }
+        
+        .validator.malicious {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            border-color: #ef4444;
+        }
+        
+        .validator.offline {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            border-color: #9ca3af;
+            opacity: 0.6;
+        }
+        
+        .network-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .transaction-pool {
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .transaction {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #22c55e;
+        }
+        
+        .transaction.pending {
+            border-left-color: #f59e0b;
+        }
+        
+        .transaction.confirmed {
+            border-left-color: #22c55e;
+        }
+        
+        .transaction.failed {
+            border-left-color: #ef4444;
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+        }
+        
+        .control-group input, .control-group textarea, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #4a5568;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .control-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-deploy {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            width: 100%;
+        }
+        
+        .btn-execute {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            width: 100%;
+        }
+        
+        .btn-consensus {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            width: 100%;
+        }
+        
+        .math-formula {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        .consensus-round {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .voting-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .vote {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .vote.agree {
+            background: rgba(34, 197, 94, 0.2);
+        }
+        
+        .vote.disagree {
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .gas-tracker {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #8b5cf6, #22c55e);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid, .three-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Advanced Blockchain: Smart Contracts & Consensus</h1>
+        
+        <div class="intro">
+            <h2>Advanced Blockchain Concepts</h2>
+            <p><strong>Smart Contracts</strong> are self-executing contracts with terms directly written into code. They run on blockchain networks and automatically execute when predetermined conditions are met.</p>
+            <p><strong>Consensus Algorithms</strong> ensure all nodes in a distributed network agree on the blockchain state. This includes Proof of Work, Proof of Stake, and Byzantine Fault Tolerance.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🧮 Advanced Mathematical Concepts</h3>
+            <p><strong>Byzantine Fault Tolerance:</strong> 3f + 1 ≥ n (where f = faulty nodes, n = total nodes)</p>
+            <p><strong>Proof of Stake Selection:</strong> P(validator) = stake_i / Σ(stake_all)</p>
+            <p><strong>Gas Cost:</strong> Cost = gas_used × gas_price</p>
+            <p><strong>Slashing Condition:</strong> stake_lost = α × stake_total (where α = slashing rate)</p>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="smart-contract-panel">
+                <h3>📝 Smart Contract Editor</h3>
+                
+                <div class="control-group">
+                    <label>Contract Template:</label>
+                    <select id="contractTemplate" onchange="loadTemplate()">
+                        <option value="simple">Simple Transfer</option>
+                        <option value="escrow">Escrow Contract</option>
+                        <option value="voting">Voting Contract</option>
+                        <option value="token">ERC-20 Token</option>
+                        <option value="multisig">Multi-signature Wallet</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Contract Code:</label>
+                    <textarea id="contractCode" class="contract-code"></textarea>
+                </div>
+                
+                <div class="control-group">
+                    <label>Deploy Parameters:</label>
+                    <input type="text" id="deployParams" placeholder="e.g., initial_supply:1000000, owner:0x123...">
+                </div>
+                
+                <button class="btn btn-deploy" onclick="deployContract()">🚀 Deploy Contract</button>
+                
+                <div id="deploymentResult" class="gas-tracker" style="display: none;">
+                    <h4>⛽ Deployment Result</h4>
+                    <div id="deploymentDetails"></div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⚡ Contract Execution</h3>
+                
+                <div class="control-group">
+                    <label>Contract Address:</label>
+                    <input type="text" id="contractAddress" placeholder="0x..." readonly>
+                </div>
+                
+                <div class="control-group">
+                    <label>Function:</label>
+                    <select id="contractFunction">
+                        <option value="">Select a function...</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label>Parameters:</label>
+                    <input type="text" id="functionParams" placeholder="param1:value1, param2:value2">
+                </div>
+                
+                <div class="control-group">
+                    <label>Gas Limit:</label>
+                    <input type="number" id="gasLimit" value="100000" min="21000" max="1000000">
+                </div>
+                
+                <button class="btn btn-execute" onclick="executeContract()">⚡ Execute Function</button>
+                
+                <div id="executionResult" class="gas-tracker" style="display: none;">
+                    <h4>📊 Execution Result</h4>
+                    <div id="executionDetails"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="consensus-visualization">
+            <h3>🤝 Consensus Algorithm Simulation</h3>
+            
+            <div class="demo-grid">
+                <div class="control-panel">
+                    <h4>Network Configuration</h4>
+                    
+                    <div class="control-group">
+                        <label>Consensus Algorithm:</label>
+                        <select id="consensusAlgorithm">
+                            <option value="pos">Proof of Stake</option>
+                            <option value="pbft">Practical Byzantine Fault Tolerance</option>
+                            <option value="pow">Proof of Work (Simplified)</option>
+                            <option value="dpos">Delegated Proof of Stake</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Number of Validators:</label>
+                        <input type="range" id="validatorCount" min="4" max="12" value="7" onchange="updateValidatorCount()">
+                        <span id="validatorCountDisplay">7</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Malicious Nodes:</label>
+                        <input type="range" id="maliciousCount" min="0" max="3" value="1" onchange="updateMaliciousCount()">
+                        <span id="maliciousCountDisplay">1</span>
+                    </div>
+                    
+                    <button class="btn btn-consensus" onclick="startConsensusRound()">🎯 Start Consensus Round</button>
+                    <button class="btn" onclick="resetNetwork()" style="width: 100%;">🔄 Reset Network</button>
+                </div>
+                
+                <div class="control-panel">
+                    <h4>📊 Network Statistics</h4>
+                    
+                    <div class="network-stats">
+                        <div class="stat-card">
+                            <h5>Consensus Success Rate</h5>
+                            <div id="successRate">100%</div>
+                        </div>
+                        <div class="stat-card">
+                            <h5>Average Round Time</h5>
+                            <div id="avgRoundTime">2.3s</div>
+                        </div>
+                        <div class="stat-card">
+                            <h5>Byzantine Tolerance</h5>
+                            <div id="byzantineTolerance">33%</div>
+                        </div>
+                        <div class="stat-card">
+                            <h5>Network Finality</h5>
+                            <div id="networkFinality">Instant</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="validator-grid" id="validatorGrid">
+                <!-- Validators will be generated here -->
+            </div>
+            
+            <div id="consensusRounds"></div>
+        </div>
+        
+        <div class="three-column">
+            <div class="transaction-pool">
+                <h3>💰 Transaction Pool</h3>
+                <div class="control-group">
+                    <input type="text" id="newTxFrom" placeholder="From address" value="0xAlice">
+                    <input type="text" id="newTxTo" placeholder="To address" value="0xBob">
+                    <input type="number" id="newTxAmount" placeholder="Amount" value="10">
+                    <button class="btn" onclick="addTransaction()" style="width: 100%; margin-top: 10px;">➕ Add Transaction</button>
+                </div>
+                <div id="transactionList"></div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🔐 Cryptographic Verification</h3>
+                
+                <div class="control-group">
+                    <label>Message to Sign:</label>
+                    <input type="text" id="messageToSign" value="Transfer 10 ETH to Bob">
+                </div>
+                
+                <div class="control-group">
+                    <label>Private Key (simplified):</label>
+                    <input type="text" id="privateKey" value="my_secret_key_123">
+                </div>
+                
+                <button class="btn" onclick="generateSignature()" style="width: 100%;">✍️ Generate Signature</button>
+                
+                <div id="signatureResult" class="contract-code" style="margin-top: 15px;">
+                    Click to generate signature
+                </div>
+                
+                <button class="btn" onclick="verifySignature()" style="width: 100%; margin-top: 10px;">✅ Verify Signature</button>
+                
+                <div id="verificationResult" style="margin-top: 10px;"></div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>⚡ Gas Economics</h3>
+                
+                <div class="gas-tracker">
+                    <p><strong>Base Fee:</strong> <span id="baseFee">20</span> gwei</p>
+                    <p><strong>Priority Fee:</strong> <span id="priorityFee">5</span> gwei</p>
+                    <p><strong>Max Fee:</strong> <span id="maxFee">25</span> gwei</p>
+                </div>
+                
+                <div class="control-group">
+                    <label>Transaction Type:</label>
+                    <select id="txType" onchange="updateGasEstimate()">
+                        <option value="transfer">Simple Transfer</option>
+                        <option value="contract">Contract Call</option>
+                        <option value="deploy">Contract Deploy</option>
+                        <option value="swap">DEX Swap</option>
+                    </select>
+                </div>
+                
+                <div class="gas-tracker">
+                    <h4>📊 Gas Estimate</h4>
+                    <div id="gasEstimate">
+                        <p>Gas Used: <span id="gasUsed">21,000</span></p>
+                        <p>Total Cost: <span id="totalCost">0.000525 ETH</span></p>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="simulateTransaction()" style="width: 100%;">🎮 Simulate Transaction</button>
+            </div>
+        </div>
+        
+        <div class="consensus-visualization">
+            <h3>📈 Network Metrics Dashboard</h3>
+            
+            <div class="network-stats">
+                <div class="stat-card">
+                    <h5>🔗 Total Blocks</h5>
+                    <div id="totalBlocks">1,247,892</div>
+                </div>
+                <div class="stat-card">
+                    <h5>⚡ TPS (Transactions/sec)</h5>
+                    <div id="tpsRate">15.7</div>
+                </div>
+                <div class="stat-card">
+                    <h5>💰 Total Value Locked</h5>
+                    <div id="tvl">$2.4B</div>
+                </div>
+                <div class="stat-card">
+                    <h5>👥 Active Validators</h5>
+                    <div id="activeValidators">542,891</div>
+                </div>
+                <div class="stat-card">
+                    <h5>🌍 Network Hash Rate</h5>
+                    <div id="hashRate">180.5 TH/s</div>
+                </div>
+                <div class="stat-card">
+                    <h5>⏱️ Block Time</h5>
+                    <div id="blockTime">12.1s</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="networkHealthBar" style="width: 95%"></div>
+            </div>
+            <p style="text-align: center;"><strong>Network Health: 95%</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // Smart contract templates
+        const contractTemplates = {
+            simple: `contract SimpleTransfer {
+    mapping(address => uint256) balances;
+    
+    function transfer(address to, uint256 amount) {
+        require(balances[msg.sender] >= amount);
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+    }
+    
+    function getBalance(address account) returns (uint256) {
+        return balances[account];
+    }
+}`,
+            escrow: `contract Escrow {
+    address buyer;
+    address seller;
+    address arbiter;
+    uint256 amount;
+    bool released;
+    
+    function deposit() payable {
+        require(msg.value > 0);
+        amount = msg.value;
+    }
+    
+    function release() {
+        require(msg.sender == arbiter);
+        require(!released);
+        seller.transfer(amount);
+        released = true;
+    }
+    
+    function refund() {
+        require(msg.sender == arbiter);
+        require(!released);
+        buyer.transfer(amount);
+        released = true;
+    }
+}`,
+            voting: `contract Voting {
+    mapping(bytes32 => uint256) votes;
+    mapping(address => bool) hasVoted;
+    
+    function vote(bytes32 proposal) {
+        require(!hasVoted[msg.sender]);
+        votes[proposal]++;
+        hasVoted[msg.sender] = true;
+    }
+    
+    function getVotes(bytes32 proposal) returns (uint256) {
+        return votes[proposal];
+    }
+}`,
+            token: `contract ERC20Token {
+    mapping(address => uint256) balances;
+    mapping(address => mapping(address => uint256)) allowances;
+    uint256 totalSupply;
+    string name;
+    string symbol;
+    
+    function transfer(address to, uint256 amount) returns (bool) {
+        require(balances[msg.sender] >= amount);
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+        return true;
+    }
+    
+    function approve(address spender, uint256 amount) returns (bool) {
+        allowances[msg.sender][spender] = amount;
+        return true;
+    }
+}`,
+            multisig: `contract MultiSigWallet {
+    address[] owners;
+    uint256 required;
+    mapping(uint256 => Transaction) transactions;
+    mapping(uint256 => mapping(address => bool)) confirmations;
+    
+    struct Transaction {
+        address to;
+        uint256 value;
+        bool executed;
+    }
+    
+    function submitTransaction(address to, uint256 value) {
+        uint256 txId = transactions.length;
+        transactions[txId] = Transaction(to, value, false);
+    }
+    
+    function confirmTransaction(uint256 txId) {
+        require(isOwner(msg.sender));
+        confirmations[txId][msg.sender] = true;
+        
+        if (isConfirmed(txId)) {
+            executeTransaction(txId);
+        }
+    }
+}`
+        };
+        
+        // Blockchain simulation state
+        let validators = [];
+        let consensusRounds = [];
+        let transactionPool = [];
+        let deployedContracts = [];
+        let currentContractAddress = null;
+        let networkStats = {
+            successRate: 100,
+            avgRoundTime: 2.3,
+            totalRounds: 0,
+            successfulRounds: 0
+        };
+        
+        // Initialize
+        initializeValidators();
+        loadTemplate();
+        updateGasEstimate();
+        startNetworkSimulation();
+        
+        function loadTemplate() {
+            const template = document.getElementById('contractTemplate').value;
+            document.getElementById('contractCode').value = contractTemplates[template];
+            updateContractFunctions(template);
+        }
+        
+        function updateContractFunctions(template) {
+            const functionSelect = document.getElementById('contractFunction');
+            functionSelect.innerHTML = '<option value="">Select a function...</option>';
+            
+            const functions = {
+                simple: ['transfer', 'getBalance'],
+                escrow: ['deposit', 'release', 'refund'],
+                voting: ['vote', 'getVotes'],
+                token: ['transfer', 'approve', 'balanceOf'],
+                multisig: ['submitTransaction', 'confirmTransaction']
+            };
+            
+            if (functions[template]) {
+                functions[template].forEach(func => {
+                    const option = document.createElement('option');
+                    option.value = func;
+                    option.textContent = func;
+                    functionSelect.appendChild(option);
+                });
+            }
+        }
+        
+        function deployContract() {
+            const code = document.getElementById('contractCode').value;
+            const params = document.getElementById('deployParams').value;
+            
+            if (!code.trim()) {
+                alert('Please enter contract code!');
+                return;
+            }
+            
+            // Simulate deployment
+            const gasUsed = 500000 + Math.floor(Math.random() * 200000);
+            const gasPrice = 25; // gwei
+            const deploymentCost = (gasUsed * gasPrice) / 1e9; // ETH
+            
+            currentContractAddress = '0x' + Math.random().toString(16).substr(2, 40);
+            
+            const contract = {
+                address: currentContractAddress,
+                code: code,
+                params: params,
+                deployedAt: Date.now(),
+                gasUsed: gasUsed
+            };
+            
+            deployedContracts.push(contract);
+            
+            document.getElementById('contractAddress').value = currentContractAddress;
+            document.getElementById('deploymentResult').style.display = 'block';
+            document.getElementById('deploymentDetails').innerHTML = `
+                <p><strong>Contract Address:</strong> ${currentContractAddress}</p>
+                <p><strong>Gas Used:</strong> ${gasUsed.toLocaleString()}</p>
+                <p><strong>Deployment Cost:</strong> ${deploymentCost.toFixed(6)} ETH</p>
+                <p><strong>Status:</strong> ✅ Successfully Deployed</p>
+            `;
+            
+            updateContractFunctions(document.getElementById('contractTemplate').value);
+        }
+        
+        function executeContract() {
+            const address = document.getElementById('contractAddress').value;
+            const functionName = document.getElementById('contractFunction').value;
+            const params = document.getElementById('functionParams').value;
+            const gasLimit = parseInt(document.getElementById('gasLimit').value);
+            
+            if (!address || !functionName) {
+                alert('Please deploy a contract and select a function!');
+                return;
+            }
+            
+            // Simulate execution
+            const gasUsed = Math.min(gasLimit, 21000 + Math.floor(Math.random() * 50000));
+            const gasPrice = 25; // gwei
+            const executionCost = (gasUsed * gasPrice) / 1e9; // ETH
+            
+            const success = Math.random() > 0.1; // 90% success rate
+            
+            document.getElementById('executionResult').style.display = 'block';
+            document.getElementById('executionDetails').innerHTML = `
+                <p><strong>Function:</strong> ${functionName}</p>
+                <p><strong>Parameters:</strong> ${params || 'none'}</p>
+                <p><strong>Gas Used:</strong> ${gasUsed.toLocaleString()} / ${gasLimit.toLocaleString()}</p>
+                <p><strong>Execution Cost:</strong> ${executionCost.toFixed(6)} ETH</p>
+                <p><strong>Status:</strong> ${success ? '✅ Success' : '❌ Failed'}</p>
+                ${success ? '<p><strong>Return Value:</strong> Transaction executed successfully</p>' : '<p><strong>Error:</strong> Execution reverted</p>'}
+            `;
+        }
+        
+        function initializeValidators() {
+            const count = parseInt(document.getElementById('validatorCount').value);
+            validators = [];
+            
+            for (let i = 0; i < count; i++) {
+                validators.push({
+                    id: i + 1,
+                    address: `0x${Math.random().toString(16).substr(2, 8)}`,
+                    stake: Math.floor(Math.random() * 1000) + 100,
+                    reputation: Math.random() * 100,
+                    status: 'active',
+                    isMalicious: false
+                });
+            }
+            
+            updateValidatorDisplay();
+            updateByzantineTolerance();
+        }
+        
+        function updateValidatorCount() {
+            const count = document.getElementById('validatorCount').value;
+            document.getElementById('validatorCountDisplay').textContent = count;
+            initializeValidators();
+        }
+        
+        function updateMaliciousCount() {
+            const count = parseInt(document.getElementById('maliciousCount').value);
+            document.getElementById('maliciousCountDisplay').textContent = count;
+            
+            // Reset all validators to non-malicious
+            validators.forEach(v => v.isMalicious = false);
+            
+            // Set random validators as malicious
+            const shuffled = validators.sort(() => 0.5 - Math.random());
+            for (let i = 0; i < count; i++) {
+                shuffled[i].isMalicious = true;
+            }
+            
+            updateValidatorDisplay();
+            updateByzantineTolerance();
+        }
+        
+        function updateValidatorDisplay() {
+            const grid = document.getElementById('validatorGrid');
+            grid.innerHTML = '';
+            
+            validators.forEach(validator => {
+                const div = document.createElement('div');
+                div.className = 'validator';
+                
+                if (validator.isMalicious) {
+                    div.classList.add('malicious');
+                } else if (validator.status === 'offline') {
+                    div.classList.add('offline');
+                } else if (validator.status === 'leader') {
+                    div.classList.add('leader');
+                }
+                
+                div.innerHTML = `
+                    <div><strong>V${validator.id}</strong></div>
+                    <div>Stake: ${validator.stake}</div>
+                    <div>Rep: ${validator.reputation.toFixed(1)}</div>
+                    <div>${validator.isMalicious ? '🔴 Malicious' : '🟢 Honest'}</div>
+                `;
+                
+                grid.appendChild(div);
+            });
+        }
+        
+        function updateByzantineTolerance() {
+            const total = validators.length;
+            const malicious = validators.filter(v => v.isMalicious).length;
+            const tolerance = Math.floor((total - 1) / 3);
+            const percentage = ((tolerance / total) * 100).toFixed(1);
+            
+            document.getElementById('byzantineTolerance').textContent = `${percentage}% (${tolerance}/${total})`;
+        }
+        
+        function startConsensusRound() {
+            const algorithm = document.getElementById('consensusAlgorithm').value;
+            const roundId = consensusRounds.length + 1;
+            
+            // Reset validator statuses
+            validators.forEach(v => {
+                v.status = 'active';
+                if (Math.random() < 0.1) v.status = 'offline'; // 10% offline chance
+            });
+            
+            // Select leader based on algorithm
+            let leader = null;
+            if (algorithm === 'pos') {
+                // Stake-weighted selection
+                const totalStake = validators.filter(v => v.status === 'active').reduce((sum, v) => sum + v.stake, 0);
+                let random = Math.random() * totalStake;
+                for (let v of validators.filter(v => v.status === 'active')) {
+                    random -= v.stake;
+                    if (random <= 0) {
+                        leader = v;
+                        break;
+                    }
+                }
+            } else {
+                // Random selection for other algorithms
+                const activeValidators = validators.filter(v => v.status === 'active');
+                leader = activeValidators[Math.floor(Math.random() * activeValidators.length)];
+            }
+            
+            if (leader) {
+                leader.status = 'leader';
+            }
+            
+            updateValidatorDisplay();
+            
+            // Simulate consensus process
+            setTimeout(() => {
+                simulateConsensusVoting(roundId, algorithm, leader);
+            }, 1000);
+        }
+        
+        function simulateConsensusVoting(roundId, algorithm, leader) {
+            const activeValidators = validators.filter(v => v.status === 'active' || v.status === 'leader');
+            const maliciousVotes = activeValidators.filter(v => v.isMalicious).length;
+            const honestVotes = activeValidators.length - maliciousVotes;
+            
+            const success = honestVotes > (activeValidators.length / 2); // Simple majority
+            
+            const round = {
+                id: roundId,
+                algorithm: algorithm,
+                leader: leader ? leader.id : null,
+                totalVotes: activeValidators.length,
+                honestVotes: honestVotes,
+                maliciousVotes: maliciousVotes,
+                success: success,
+                timestamp: Date.now()
+            };
+            
+            consensusRounds.unshift(round);
+            if (consensusRounds.length > 5) consensusRounds.pop();
+            
+            updateConsensusDisplay();
+            updateNetworkStats(success);
+        }
+        
+        function updateConsensusDisplay() {
+            const container = document.getElementById('consensusRounds');
+            container.innerHTML = '';
+            
+            consensusRounds.forEach(round => {
+                const div = document.createElement('div');
+                div.className = 'consensus-round';
+                
+                div.innerHTML = `
+                    <h4>🎯 Consensus Round #${round.id}</h4>
+                    <p><strong>Algorithm:</strong> ${round.algorithm.toUpperCase()}</p>
+                    <p><strong>Leader:</strong> Validator ${round.leader || 'None'}</p>
+                    <p><strong>Result:</strong> ${round.success ? '✅ Success' : '❌ Failed'}</p>
+                    
+                    <div class="voting-results">
+                        <div class="vote agree">
+                            <div>✅ Honest</div>
+                            <div>${round.honestVotes}</div>
+                        </div>
+                        <div class="vote disagree">
+                            <div>❌ Malicious</div>
+                            <div>${round.maliciousVotes}</div>
+                        </div>
+                        <div class="vote">
+                            <div>📊 Total</div>
+                            <div>${round.totalVotes}</div>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+        
+        function updateNetworkStats(success) {
+            networkStats.totalRounds++;
+            if (success) networkStats.successfulRounds++;
+            
+            networkStats.successRate = (networkStats.successfulRounds / networkStats.totalRounds * 100).toFixed(1);
+            networkStats.avgRoundTime = (2 + Math.random() * 2).toFixed(1);
+            
+            document.getElementById('successRate').textContent = networkStats.successRate + '%';
+            document.getElementById('avgRoundTime').textContent = networkStats.avgRoundTime + 's';
+        }
+        
+        function resetNetwork() {
+            consensusRounds = [];
+            networkStats = { successRate: 100, avgRoundTime: 2.3, totalRounds: 0, successfulRounds: 0 };
+            initializeValidators();
+            document.getElementById('consensusRounds').innerHTML = '';
+            document.getElementById('successRate').textContent = '100%';
+            document.getElementById('avgRoundTime').textContent = '2.3s';
+        }
+        
+        function addTransaction() {
+            const from = document.getElementById('newTxFrom').value;
+            const to = document.getElementById('newTxTo').value;
+            const amount = document.getElementById('newTxAmount').value;
+            
+            if (!from || !to || !amount) {
+                alert('Please fill all transaction fields!');
+                return;
+            }
+            
+            const tx = {
+                id: transactionPool.length + 1,
+                from: from,
+                to: to,
+                amount: parseFloat(amount),
+                timestamp: Date.now(),
+                status: 'pending',
+                gasUsed: 21000 + Math.floor(Math.random() * 10000)
+            };
+            
+            transactionPool.unshift(tx);
+            if (transactionPool.length > 10) transactionPool.pop();
+            
+            updateTransactionDisplay();
+            
+            // Simulate processing
+            setTimeout(() => {
+                tx.status = Math.random() > 0.1 ? 'confirmed' : 'failed';
+                updateTransactionDisplay();
+            }, 2000);
+        }
+        
+        function updateTransactionDisplay() {
+            const container = document.getElementById('transactionList');
+            container.innerHTML = '';
+            
+            transactionPool.forEach(tx => {
+                const div = document.createElement('div');
+                div.className = `transaction ${tx.status}`;
+                
+                div.innerHTML = `
+                    <div><strong>TX #${tx.id}</strong> - ${tx.status.toUpperCase()}</div>
+                    <div>${tx.from} → ${tx.to}</div>
+                    <div>${tx.amount} ETH | Gas: ${tx.gasUsed.toLocaleString()}</div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+        
+        function generateSignature() {
+            const message = document.getElementById('messageToSign').value;
+            const privateKey = document.getElementById('privateKey').value;
+            
+            // Simple signature simulation using hash
+            const signature = CryptoJS.SHA256(message + privateKey).toString();
+            
+            document.getElementById('signatureResult').textContent = signature;
+        }
+        
+        function verifySignature() {
+            const message = document.getElementById('messageToSign').value;
+            const privateKey = document.getElementById('privateKey').value;
+            const signature = document.getElementById('signatureResult').textContent;
+            
+            const expectedSignature = CryptoJS.SHA256(message + privateKey).toString();
+            const isValid = signature === expectedSignature;
+            
+            document.getElementById('verificationResult').innerHTML = `
+                <strong>${isValid ? '✅ Signature Valid' : '❌ Signature Invalid'}</strong>
+            `;
+        }
+        
+        function updateGasEstimate() {
+            const txType = document.getElementById('txType').value;
+            const gasUsed = {
+                transfer: 21000,
+                contract: 45000,
+                deploy: 500000,
+                swap: 150000
+            }[txType] || 21000;
+            
+            const baseFee = 20;
+            const priorityFee = 5;
+            const totalCost = (gasUsed * (baseFee + priorityFee)) / 1e9;
+            
+            document.getElementById('gasUsed').textContent = gasUsed.toLocaleString();
+            document.getElementById('totalCost').textContent = totalCost.toFixed(6) + ' ETH';
+        }
+        
+        function simulateTransaction() {
+            const txType = document.getElementById('txType').value;
+            alert(`Simulating ${txType} transaction...`);
+            // Add more sophisticated simulation here
+        }
+        
+        function startNetworkSimulation() {
+            // Simulate real-time network metrics
+            setInterval(() => {
+                document.getElementById('tpsRate').textContent = (15 + Math.random() * 10).toFixed(1);
+                document.getElementById('blockTime').textContent = (12 + Math.random() * 2).toFixed(1) + 's';
+            }, 3000);
+        }
+        
+        // Initialize MathJax when page loads
+        window.onload = function() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,62 +1,224 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minh họa Gradient Descent</title>
+    <title>Gradient Descent - Theory & Interactive</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            line-height: 1.6;
             min-height: 100vh;
         }
-        .container {
+
+        /* Navigation Styles */
+        .nav-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab.active {
+            color: #ff6b6b;
+            border-bottom-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Theory Section Styles */
+        .theory-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .theory-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+
+        .theory-header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theory-header p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .theory-section {
+            margin-bottom: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .theory-section h2 {
+            color: #ff6b6b;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 107, 107, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .theory-section h3 {
+            color: #ee5a24;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+
+        .definition, .theorem, .example {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid #ff6b6b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .definition h4, .theorem h4, .example h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .algorithm-steps {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .variants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .variant-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .variant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.2);
+        }
+
+        .variant-card h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        /* Interactive Section Styles */
+        .interactive-container {
             max-width: 1400px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             padding: 30px;
             backdrop-filter: blur(10px);
+            min-height: calc(100vh - 60px);
         }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+
         .controls {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+        
         .control-group {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
         .control-group h3 {
             margin-top: 0;
             margin-bottom: 15px;
-            color: #fff;
+            color: #ff6b6b;
         }
+        
         .control-row {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
         }
+        
         .control-row label {
             min-width: 120px;
             margin-right: 10px;
         }
+        
         input[type="range"] {
             flex: 1;
             margin-right: 10px;
         }
+        
         input[type="number"] {
             width: 80px;
             padding: 5px;
@@ -65,6 +227,7 @@
             background: rgba(255, 255, 255, 0.2);
             color: white;
         }
+        
         button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
@@ -75,509 +238,1035 @@
             margin: 5px;
             font-weight: bold;
         }
+        
         button:hover {
             transform: scale(1.05);
         }
+        
         .canvas-container {
             text-align: center;
             margin: 20px 0;
         }
+        
         canvas {
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
             background: white;
         }
+        
         .info-panel {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
         }
+        
         .info-panel h3 {
             margin-top: 0;
-            color: #fff;
+            color: #ff6b6b;
         }
-        .formula {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
-        .optimization-info {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-weight: bold;
-        }
-        .iteration-info {
+
+        .performance-metrics {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-top: 15px;
+            margin: 15px 0;
         }
-        .iteration-card {
-            background: rgba(255, 255, 255, 0.1);
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
         }
-        .iteration-card.current {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-        }
-        .function-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .function-selector button {
-            flex: 1;
-            padding: 8px 15px;
-            font-size: 0.9em;
-        }
-        .function-selector button.active {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6b6b;
         }
     </style>
-
-
-
-
-
 </head>
 <body>
-    <div class="container">
-        <h1>📉 Minh họa Gradient Descent</h1>
-        
-        <div class="controls">
-            <div class="control-group">
-                <h3>📊 Hàm mục tiêu</h3>
-                <div class="function-selector">
-                    <button onclick="setFunction('quadratic')" class="active">f(x) = x² + 2</button>
-                    <button onclick="setFunction('rosenbrock')">Rosenbrock</button>
-                    <button onclick="setFunction('himmelblau')">Himmelblau</button>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('theory')">📚 Theory</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 Interactive</button>
+        </div>
+    </div>
+
+    <!-- Theory Section -->
+    <div id="theory" class="section active">
+        <div class="theory-content">
+            <div class="theory-header">
+                <h1>Gradient Descent</h1>
+                <p>The fundamental optimization algorithm powering machine learning and deep learning</p>
+            </div>
+
+            <div class="theory-section">
+                <h2>1. The Optimization Problem</h2>
+                
+                <div class="definition">
+                    <h4>Definition: Optimization Goal</h4>
+                    <p>Given a function $f(x)$ that we want to minimize, find:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$x^* = \arg\min_x f(x)$$
+                    </div>
+                    <p>where $x^*$ is the optimal parameter that gives the minimum value of $f(x)$.</p>
                 </div>
-                <div class="formula">
-                    <strong>Công thức cập nhật: </strong> x_{t+1} = x_t - α∇f(x_t)
+
+                <div class="example">
+                    <h4>Machine Learning Context</h4>
+                    <p>In machine learning, we want to minimize a <strong>loss function</strong>:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>$f(\theta)$:</strong> Loss function (e.g., mean squared error, cross-entropy)</li>
+                        <li><strong>$\theta$:</strong> Model parameters (weights, biases)</li>
+                        <li><strong>Goal:</strong> Find $\theta^*$ that minimizes prediction errors</li>
+                    </ul>
+                    <p><strong>Examples:</strong> Linear regression, neural networks, logistic regression</p>
+                </div>
+
+                <h3>Why Not Analytical Solutions?</h3>
+                <div class="theorem">
+                    <h4>Limitations of Closed-Form Solutions</h4>
+                    <p>For simple functions like $f(x) = x^2$, we can solve $\frac{df}{dx} = 0$ analytically.</p>
+                    <p><strong>But in ML:</strong></p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>Functions are highly non-linear and complex</li>
+                        <li>Millions or billions of parameters</li>
+                        <li>No closed-form solutions exist</li>
+                        <li>Need iterative numerical methods → <strong>Gradient Descent!</strong></li>
+                    </ul>
                 </div>
             </div>
-            
-            <div class="control-group">
-                <h3>⚙️ Tham số tối ưu hóa</h3>
-                <div class="control-row">
-                    <label>Learning rate (α):</label>
-                    <input type="range" id="learningRate" min="0.01" max="0.5" value="0.1" step="0.01">
-                    <input type="number" id="learningRateValue" value="0.1" min="0.01" max="0.5" step="0.01">
+
+            <div class="theory-section">
+                <h2>2. The Gradient Descent Algorithm</h2>
+
+                <div class="theorem">
+                    <h4>Core Intuition</h4>
+                    <p>The <strong>gradient</strong> $\nabla f(x)$ points in the direction of steepest increase.</p>
+                    <p>To minimize $f(x)$, move in the <strong>opposite direction</strong>:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$x_{k+1} = x_k - \alpha \nabla f(x_k)$$
+                    </div>
+                    <p>where $\alpha > 0$ is the <strong>learning rate</strong> (step size).</p>
                 </div>
-                <div class="control-row">
-                    <label>Điểm bắt đầu (x):</label>
-                    <input type="range" id="startX" min="-5" max="5" value="-3" step="0.1">
-                    <input type="number" id="startXValue" value="-3" min="-5" max="5" step="0.1">
+
+                <div class="algorithm-steps">
+                    <h4>Algorithm Steps</h4>
+                    <ol style="margin: 10px 0 0 20px;">
+                        <li><strong>Initialize:</strong> Choose starting point $x_0$ and learning rate $\alpha$</li>
+                        <li><strong>Repeat until convergence:</strong>
+                            <ul style="margin: 5px 0 0 20px;">
+                                <li>Compute gradient: $g_k = \nabla f(x_k)$</li>
+                                <li>Update parameters: $x_{k+1} = x_k - \alpha g_k$</li>
+                                <li>Check convergence: stop if $\|g_k\| < \epsilon$ or max iterations reached</li>
+                            </ul>
+                        </li>
+                        <li><strong>Return:</strong> Final parameter $x^*$</li>
+                    </ol>
                 </div>
-                <div class="control-row">
-                    <label>Số bước tối đa:</label>
-                    <input type="range" id="maxIterations" min="10" max="100" value="50" step="5">
-                    <input type="number" id="maxIterationsValue" value="50" min="10" max="100" step="5">
+
+                <div class="example">
+                    <h4>Geometric Interpretation</h4>
+                    <p>Imagine you're on a mountainside in thick fog:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Goal:</strong> Reach the bottom (minimum)</li>
+                        <li><strong>Strategy:</strong> Feel the slope and take a step downhill</li>
+                        <li><strong>Gradient:</strong> The direction of steepest ascent</li>
+                        <li><strong>Negative gradient:</strong> Direction of steepest descent</li>
+                        <li><strong>Learning rate:</strong> Size of each step</li>
+                    </ul>
+                </div>
+
+                <h3>Mathematical Example</h3>
+                <div class="example">
+                    <h4>Minimizing $f(x) = x^2 - 4x + 5$</h4>
+                    
+                    <p><strong>Step 1:</strong> Compute gradient</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$\frac{df}{dx} = 2x - 4$$
+                    </div>
+                    
+                    <p><strong>Step 2:</strong> Update rule with $\alpha = 0.1$</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        $$x_{k+1} = x_k - 0.1(2x_k - 4) = 0.8x_k + 0.4$$
+                    </div>
+                    
+                    <p><strong>Step 3:</strong> Starting from $x_0 = 0$:</p>
+                    <ul style="margin: 10px 0 0 20px; font-family: monospace;">
+                        <li>$x_1 = 0.8(0) + 0.4 = 0.4$</li>
+                        <li>$x_2 = 0.8(0.4) + 0.4 = 0.72$</li>
+                        <li>$x_3 = 0.8(0.72) + 0.4 = 0.976$</li>
+                        <li>$x_∞ → 2$ (analytical minimum!)</li>
+                    </ul>
                 </div>
             </div>
-            
-            <div class="control-group">
-                <h3>🎮 Điều khiển</h3>
-                <div class="control-row">
-                    <button onclick="startOptimization()">▶️ Bắt đầu</button>
-                    <button onclick="stepOptimization()">⏭️ Bước tiếp</button>
-                    <button onclick="resetOptimization()">🔄 Làm lại</button>
+
+            <div class="theory-section">
+                <h2>3. Learning Rate Selection</h2>
+
+                <div class="theorem">
+                    <h4>The Critical Parameter</h4>
+                    <p>Learning rate $\alpha$ controls convergence behavior:</p>
                 </div>
-                <div class="control-row">
-                    <button onclick="setAutoPlay()">🔄 Tự động</button>
-                    <button onclick="stopAutoPlay()">⏹️ Dừng</button>
+
+                <div class="variants-grid">
+                    <div class="variant-card">
+                        <h4>Too Small Learning Rate</h4>
+                        <p><strong>$\alpha$ very small</strong></p>
+                        <p><strong>Effect:</strong> Very slow convergence</p>
+                        <p><strong>Problem:</strong> Takes forever to reach minimum</p>
+                        <p><strong>Use case:</strong> When very close to optimum</p>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Good Learning Rate</h4>
+                        <p><strong>$\alpha$ just right</strong></p>
+                        <p><strong>Effect:</strong> Steady, fast convergence</p>
+                        <p><strong>Behavior:</strong> Smooth descent to minimum</p>
+                        <p><strong>Goal:</strong> This is what we want!</p>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Too Large Learning Rate</h4>
+                        <p><strong>$\alpha$ too big</strong></p>
+                        <p><strong>Effect:</strong> Oscillation or divergence</p>
+                        <p><strong>Problem:</strong> Overshoots minimum</p>
+                        <p><strong>Extreme:</strong> Function value increases!</p>
+                    </div>
                 </div>
-                <div class="optimization-info">
-                    <strong>Trạng thái:</strong> <span id="optimizationStatus">Sẵn sàng</span>
+
+                <div class="example">
+                    <h4>Adaptive Learning Rates</h4>
+                    <p>Modern approaches automatically adjust $\alpha$:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Learning rate schedules:</strong> Decrease $\alpha$ over time</li>
+                        <li><strong>AdaGrad:</strong> Adaptive per-parameter rates</li>
+                        <li><strong>RMSprop:</strong> Moving average of squared gradients</li>
+                        <li><strong>Adam:</strong> Momentum + adaptive rates (most popular!)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>4. Variants of Gradient Descent</h2>
+
+                <div class="variants-grid">
+                    <div class="variant-card">
+                        <h4>Batch Gradient Descent</h4>
+                        <p><strong>Data usage:</strong> Entire dataset</p>
+                        <p><strong>Update:</strong> One update per epoch</p>
+                        <p><strong>Pros:</strong> Accurate gradient, stable convergence</p>
+                        <p><strong>Cons:</strong> Slow for large datasets</p>
+                        <div style="text-align: center; margin: 10px 0; font-family: monospace;">
+                            $\nabla f = \frac{1}{n}\sum_{i=1}^n \nabla f_i$
+                        </div>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Stochastic Gradient Descent (SGD)</h4>
+                        <p><strong>Data usage:</strong> One sample at a time</p>
+                        <p><strong>Update:</strong> One update per sample</p>
+                        <p><strong>Pros:</strong> Fast updates, can escape local minima</p>
+                        <p><strong>Cons:</strong> Noisy, oscillatory path</p>
+                        <div style="text-align: center; margin: 10px 0; font-family: monospace;">
+                            $\nabla f ≈ \nabla f_i$ (single sample)
+                        </div>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Mini-batch Gradient Descent</h4>
+                        <p><strong>Data usage:</strong> Small batches (32-256 samples)</p>
+                        <p><strong>Update:</strong> One update per batch</p>
+                        <p><strong>Pros:</strong> Best of both worlds</p>
+                        <p><strong>Use:</strong> Most common in practice!</p>
+                        <div style="text-align: center; margin: 10px 0; font-family: monospace;">
+                            $\nabla f = \frac{1}{b}\sum_{i∈batch} \nabla f_i$
+                        </div>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Momentum</h4>
+                        <p><strong>Idea:</strong> Add "velocity" to updates</p>
+                        <p><strong>Effect:</strong> Faster convergence, less oscillation</p>
+                        <p><strong>Physics:</strong> Like a ball rolling downhill</p>
+                        <div style="text-align: center; margin: 10px 0; font-family: monospace;">
+                            $v_t = \beta v_{t-1} + \nabla f$<br>
+                            $x_t = x_{t-1} - \alpha v_t$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>5. Convergence and Challenges</h2>
+
+                <h3>Convergence Conditions</h3>
+                <div class="theorem">
+                    <h4>When Does GD Converge?</h4>
+                    <p>For <strong>convex functions</strong> with <strong>Lipschitz continuous gradients</strong>:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>Choose $\alpha < \frac{2}{L}$ where $L$ is Lipschitz constant</li>
+                        <li>Guaranteed convergence to global minimum</li>
+                        <li>Convergence rate: $O(1/k)$ for general convex functions</li>
+                        <li>Linear convergence for strongly convex functions</li>
+                    </ul>
+                </div>
+
+                <h3>Common Challenges</h3>
+                <div class="variants-grid">
+                    <div class="variant-card">
+                        <h4>Local Minima</h4>
+                        <p><strong>Problem:</strong> Get stuck in suboptimal points</p>
+                        <p><strong>Solutions:</strong> Random restarts, stochastic versions, momentum</p>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Saddle Points</h4>
+                        <p><strong>Problem:</strong> Zero gradient but not minimum</p>
+                        <p><strong>Solutions:</strong> SGD noise helps escape, second-order methods</p>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Ill-conditioning</h4>
+                        <p><strong>Problem:</strong> Very different curvatures in different directions</p>
+                        <p><strong>Solutions:</strong> Preconditioning, adaptive methods (Adam)</p>
+                    </div>
+
+                    <div class="variant-card">
+                        <h4>Vanishing/Exploding Gradients</h4>
+                        <p><strong>Problem:</strong> Gradients become too small or too large</p>
+                        <p><strong>Solutions:</strong> Gradient clipping, better initialization, normalization</p>
+                    </div>
+                </div>
+
+                <div class="example">
+                    <h4>Real-world Success Stories</h4>
+                    <p>Gradient descent has enabled breakthroughs in:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Deep Learning:</strong> Training neural networks with millions of parameters</li>
+                        <li><strong>Computer Vision:</strong> Image recognition, object detection</li>
+                        <li><strong>Natural Language Processing:</strong> Language models like GPT</li>
+                        <li><strong>Recommendation Systems:</strong> Matrix factorization, collaborative filtering</li>
+                        <li><strong>Robotics:</strong> Reinforcement learning, control optimization</li>
+                    </ul>
                 </div>
             </div>
         </div>
-        
-        <div class="canvas-container">
-            <canvas id="gdCanvas" width="800" height="600"></canvas>
-        </div>
-        
-        <div class="info-panel">
-            <h3>📈 Thông tin tối ưu hóa</h3>
-            <div class="iteration-info" id="iterationInfo">
-                <!-- Iteration information will be displayed here -->
-            </div>
+    </div>
+
+    <!-- Interactive Section -->
+    <div id="interactive" class="section">
+        <div class="interactive-container">
+            <h1>Interactive Gradient Descent Visualization</h1>
             
-            <h4>📊 Thông tin chi tiết:</h4>
-            <div id="detailInfo">
-                <p><strong>Hàm hiện tại:</strong> <span id="currentFunction">f(x) = x² + 2</span></p>
-                <p><strong>Đạo hàm:</strong> <span id="derivativeFormula">f'(x) = 2x</span></p>
-                <p><strong>Điểm hiện tại:</strong> <span id="currentPoint">x = -3.0</span></p>
-                <p><strong>Giá trị hàm:</strong> <span id="currentValue">f(x) = 11.0</span></p>
-                <p><strong>Gradient:</strong> <span id="currentGradient">∇f(x) = -6.0</span></p>
-                <p><strong>Bước cập nhật:</strong> <span id="updateStep">Δx = 0.6</span></p>
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🎯 Function Selection</h3>
+                    <div class="control-row">
+                        <label>Function:</label>
+                        <select id="functionSelect" onchange="updateFunction()">
+                            <option value="quadratic">Quadratic Bowl</option>
+                            <option value="rosenbrock">Rosenbrock</option>
+                            <option value="himmelblau">Himmelblau</option>
+                            <option value="beale">Beale Function</option>
+                            <option value="booth">Booth Function</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>Starting X:</label>
+                        <input type="range" id="startXSlider" min="-3" max="3" step="0.1" value="2" oninput="updateStartPosition()">
+                        <input type="number" id="startXInput" min="-3" max="3" step="0.1" value="2" onchange="updateStartPosition()">
+                    </div>
+                    <div class="control-row">
+                        <label>Starting Y:</label>
+                        <input type="range" id="startYSlider" min="-3" max="3" step="0.1" value="2" oninput="updateStartPosition()">
+                        <input type="number" id="startYInput" min="-3" max="3" step="0.1" value="2" onchange="updateStartPosition()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>⚙️ Algorithm Parameters</h3>
+                    <div class="control-row">
+                        <label>Learning Rate:</label>
+                        <input type="range" id="learningRateSlider" min="0.001" max="0.5" step="0.001" value="0.1" oninput="updateLearningRate()">
+                        <input type="number" id="learningRateInput" min="0.001" max="0.5" step="0.001" value="0.1" onchange="updateLearningRate()">
+                    </div>
+                    <div class="control-row">
+                        <label>Algorithm:</label>
+                        <select id="algorithmSelect" onchange="updateAlgorithm()">
+                            <option value="gradient_descent">Gradient Descent</option>
+                            <option value="momentum">Momentum</option>
+                            <option value="rmsprop">RMSprop</option>
+                            <option value="adam">Adam</option>
+                        </select>
+                    </div>
+                    <div class="control-row" id="momentumRow" style="display: none;">
+                        <label>Momentum:</label>
+                        <input type="range" id="momentumSlider" min="0" max="0.99" step="0.01" value="0.9" oninput="updateMomentum()">
+                        <input type="number" id="momentumInput" min="0" max="0.99" step="0.01" value="0.9" onchange="updateMomentum()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎮 Animation Controls</h3>
+                    <div style="text-align: center;">
+                        <button onclick="startOptimization()">🚀 Start Optimization</button>
+                        <button onclick="stepOptimization()">📍 Single Step</button>
+                        <button onclick="pauseOptimization()">⏸️ Pause</button>
+                        <button onclick="resetOptimization()">🔄 Reset</button>
+                    </div>
+                    <div class="control-row">
+                        <label>Animation Speed:</label>
+                        <input type="range" id="speedSlider" min="1" max="10" step="1" value="5" oninput="updateSpeed()">
+                        <span id="speedValue">5</span>
+                    </div>
+                    <div class="control-row">
+                        <label>Show Path:</label>
+                        <input type="checkbox" id="showPathCheckbox" checked onchange="updateVisualization()">
+                    </div>
+                    <div class="control-row">
+                        <label>Show Gradient:</label>
+                        <input type="checkbox" id="showGradientCheckbox" checked onchange="updateVisualization()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="optimizationCanvas" width="800" height="600"></canvas>
+            </div>
+
+            <div class="performance-metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="currentIteration">0</div>
+                    <div>Iteration</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="currentLoss">0.00</div>
+                    <div>Function Value</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="gradientNorm">0.00</div>
+                    <div>Gradient Norm</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="convergenceStatus">Running</div>
+                    <div>Status</div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📊 Real-time Analysis</h3>
+                <div id="analysisText">
+                    Click "Start Optimization" to begin the gradient descent journey! Watch how the algorithm navigates the function landscape to find the minimum.
+                </div>
+                
+                <h4>🔍 Current Function: <span id="functionInfo">Quadratic Bowl</span></h4>
+                <div id="functionDescription">
+                    A simple convex function f(x,y) = x² + y². Perfect for understanding basic gradient descent behavior.
+                </div>
+                
+                <h4>📈 Optimization Progress</h4>
+                <div style="height: 200px; margin: 10px 0;">
+                    <canvas id="lossChart" width="600" height="180"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Canvas setup
-        const canvas = document.getElementById('gdCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Optimization state
+        // Navigation functionality
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Initialize MathJax rendering for theory section
+            if (sectionName === 'theory' && window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Optimization visualization variables
+        let canvas, ctx, lossCanvas, lossCtx;
         let currentFunction = 'quadratic';
+        let currentPosition = { x: 2, y: 2 };
+        let startPosition = { x: 2, y: 2 };
         let learningRate = 0.1;
-        let startX = -3;
-        let maxIterations = 50;
-        let currentIteration = 0;
-        let currentX = startX;
-        let optimizationHistory = [];
+        let algorithm = 'gradient_descent';
+        let momentum = 0.9;
+        let animationSpeed = 5;
         let isRunning = false;
-        let autoPlayInterval = null;
-        
+        let iteration = 0;
+        let path = [];
+        let lossHistory = [];
+        let velocity = { x: 0, y: 0 };
+        let rmsX = 0, rmsY = 0; // For RMSprop
+        let mX = 0, mY = 0, vX = 0, vY = 0; // For Adam
+        let beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8; // Adam parameters
+
         // Function definitions
         const functions = {
             quadratic: {
-                name: 'f(x) = x² + 2',
-                derivativeString: 'f\'(x) = 2x',
-                evaluate: (x) => x * x + 2,
-                derivative: (x) => 2 * x
+                name: "Quadratic Bowl",
+                description: "A simple convex function f(x,y) = x² + y². Perfect for understanding basic gradient descent behavior.",
+                f: (x, y) => x*x + y*y,
+                grad: (x, y) => ({ x: 2*x, y: 2*y }),
+                domain: { xMin: -3, xMax: 3, yMin: -3, yMax: 3 },
+                minimum: { x: 0, y: 0, value: 0 }
             },
             rosenbrock: {
-                name: 'f(x) = (1-x)² + 100(x²-x)²',
-                derivativeString: 'f\'(x) = -2(1-x) + 400x(x²-x)',
-                evaluate: (x) => Math.pow(1 - x, 2) + 100 * Math.pow(x * x - x, 2),
-                derivative: (x) => -2 * (1 - x) + 400 * x * (x * x - x)
+                name: "Rosenbrock Function",
+                description: "The famous 'banana function' f(x,y) = (1-x)² + 100(y-x²)². Known for its challenging narrow valley.",
+                f: (x, y) => Math.pow(1-x, 2) + 100*Math.pow(y-x*x, 2),
+                grad: (x, y) => ({
+                    x: -2*(1-x) - 400*x*(y-x*x),
+                    y: 200*(y-x*x)
+                }),
+                domain: { xMin: -2, xMax: 2, yMin: -1, yMax: 3 },
+                minimum: { x: 1, y: 1, value: 0 }
             },
             himmelblau: {
-                name: 'f(x) = (x²+x-11)² + (x+x²-7)²',
-                derivativeString: 'f\'(x) = 2(x²+x-11)(2x+1) + 2(x+x²-7)(1+2x)',
-                evaluate: (x) => Math.pow(x * x + x - 11, 2) + Math.pow(x + x * x - 7, 2),
-                derivative: (x) => 2 * (x * x + x - 11) * (2 * x + 1) + 2 * (x + x * x - 7) * (1 + 2 * x)
+                name: "Himmelblau's Function",
+                description: "f(x,y) = (x²+y-11)² + (x+y²-7)². A function with four global minima - interesting for exploration!",
+                f: (x, y) => Math.pow(x*x + y - 11, 2) + Math.pow(x + y*y - 7, 2),
+                grad: (x, y) => ({
+                    x: 4*x*(x*x + y - 11) + 2*(x + y*y - 7),
+                    y: 2*(x*x + y - 11) + 4*y*(x + y*y - 7)
+                }),
+                domain: { xMin: -5, xMax: 5, yMin: -5, yMax: 5 },
+                minimum: { x: 3, y: 2, value: 0 }
+            },
+            beale: {
+                name: "Beale Function",
+                description: "f(x,y) = (1.5-x+xy)² + (2.25-x+xy²)² + (2.625-x+xy³)². Shows challenges of narrow valleys.",
+                f: (x, y) => {
+                    const term1 = Math.pow(1.5 - x + x*y, 2);
+                    const term2 = Math.pow(2.25 - x + x*y*y, 2);
+                    const term3 = Math.pow(2.625 - x + x*y*y*y, 2);
+                    return term1 + term2 + term3;
+                },
+                grad: (x, y) => {
+                    const t1 = 1.5 - x + x*y;
+                    const t2 = 2.25 - x + x*y*y;
+                    const t3 = 2.625 - x + x*y*y*y;
+                    return {
+                        x: 2*t1*(-1+y) + 2*t2*(-1+y*y) + 2*t3*(-1+y*y*y),
+                        y: 2*t1*x + 2*t2*x*2*y + 2*t3*x*3*y*y
+                    };
+                },
+                domain: { xMin: -4.5, xMax: 4.5, yMin: -4.5, yMax: 4.5 },
+                minimum: { x: 3, y: 0.5, value: 0 }
+            },
+            booth: {
+                name: "Booth Function",
+                description: "f(x,y) = (x+2y-7)² + (2x+y-5)². A simple quadratic with a unique global minimum.",
+                f: (x, y) => Math.pow(x + 2*y - 7, 2) + Math.pow(2*x + y - 5, 2),
+                grad: (x, y) => ({
+                    x: 2*(x + 2*y - 7) + 4*(2*x + y - 5),
+                    y: 4*(x + 2*y - 7) + 2*(2*x + y - 5)
+                }),
+                domain: { xMin: -10, xMax: 10, yMin: -10, yMax: 10 },
+                minimum: { x: 1, y: 3, value: 0 }
             }
         };
-        
-        // Update parameters
-        function updateParameters() {
-            learningRate = parseFloat(document.getElementById('learningRateValue').value);
-            startX = parseFloat(document.getElementById('startXValue').value);
-            maxIterations = parseInt(document.getElementById('maxIterationsValue').value);
-        }
-        
-        // Set function
-        function setFunction(funcName) {
-            currentFunction = funcName;
-            document.querySelectorAll('.function-selector button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('optimizationCanvas');
+            ctx = canvas.getContext('2d');
+            lossCanvas = document.getElementById('lossChart');
+            lossCtx = lossCanvas.getContext('2d');
+            
+            updateVisualization();
+            updateLossChart();
+        });
+
+        // Control functions
+        function updateFunction() {
+            currentFunction = document.getElementById('functionSelect').value;
+            document.getElementById('functionInfo').textContent = functions[currentFunction].name;
+            document.getElementById('functionDescription').textContent = functions[currentFunction].description;
             resetOptimization();
-            drawOptimization();
         }
-        
-        // Start optimization
+
+        function updateStartPosition() {
+            const x = parseFloat(document.getElementById('startXSlider').value);
+            const y = parseFloat(document.getElementById('startYSlider').value);
+            
+            document.getElementById('startXInput').value = x;
+            document.getElementById('startYInput').value = y;
+            document.getElementById('startXSlider').value = x;
+            document.getElementById('startYSlider').value = y;
+            
+            startPosition = { x, y };
+            currentPosition = { x, y };
+            resetOptimization();
+        }
+
+        function updateLearningRate() {
+            const rate = parseFloat(document.getElementById('learningRateSlider').value);
+            document.getElementById('learningRateInput').value = rate;
+            document.getElementById('learningRateSlider').value = rate;
+            learningRate = rate;
+        }
+
+        function updateAlgorithm() {
+            algorithm = document.getElementById('algorithmSelect').value;
+            const momentumRow = document.getElementById('momentumRow');
+            momentumRow.style.display = (algorithm === 'momentum' || algorithm === 'adam') ? 'flex' : 'none';
+            resetOptimization();
+        }
+
+        function updateMomentum() {
+            const mom = parseFloat(document.getElementById('momentumSlider').value);
+            document.getElementById('momentumInput').value = mom;
+            document.getElementById('momentumSlider').value = mom;
+            momentum = mom;
+        }
+
+        function updateSpeed() {
+            animationSpeed = parseInt(document.getElementById('speedSlider').value);
+            document.getElementById('speedValue').textContent = animationSpeed;
+        }
+
+        // Optimization functions
+        function computeGradient(x, y) {
+            return functions[currentFunction].grad(x, y);
+        }
+
+        function updatePosition() {
+            const grad = computeGradient(currentPosition.x, currentPosition.y);
+            
+            switch(algorithm) {
+                case 'gradient_descent':
+                    currentPosition.x -= learningRate * grad.x;
+                    currentPosition.y -= learningRate * grad.y;
+                    break;
+                    
+                case 'momentum':
+                    velocity.x = momentum * velocity.x - learningRate * grad.x;
+                    velocity.y = momentum * velocity.y - learningRate * grad.y;
+                    currentPosition.x += velocity.x;
+                    currentPosition.y += velocity.y;
+                    break;
+                    
+                case 'rmsprop':
+                    const decay = 0.9;
+                    rmsX = decay * rmsX + (1 - decay) * grad.x * grad.x;
+                    rmsY = decay * rmsY + (1 - decay) * grad.y * grad.y;
+                    currentPosition.x -= learningRate * grad.x / (Math.sqrt(rmsX) + epsilon);
+                    currentPosition.y -= learningRate * grad.y / (Math.sqrt(rmsY) + epsilon);
+                    break;
+                    
+                case 'adam':
+                    mX = beta1 * mX + (1 - beta1) * grad.x;
+                    mY = beta1 * mY + (1 - beta1) * grad.y;
+                    vX = beta2 * vX + (1 - beta2) * grad.x * grad.x;
+                    vY = beta2 * vY + (1 - beta2) * grad.y * grad.y;
+                    
+                    const mXHat = mX / (1 - Math.pow(beta1, iteration + 1));
+                    const mYHat = mY / (1 - Math.pow(beta1, iteration + 1));
+                    const vXHat = vX / (1 - Math.pow(beta2, iteration + 1));
+                    const vYHat = vY / (1 - Math.pow(beta2, iteration + 1));
+                    
+                    currentPosition.x -= learningRate * mXHat / (Math.sqrt(vXHat) + epsilon);
+                    currentPosition.y -= learningRate * mYHat / (Math.sqrt(vYHat) + epsilon);
+                    break;
+            }
+            
+            // Record path and loss
+            path.push({ x: currentPosition.x, y: currentPosition.y });
+            const loss = functions[currentFunction].f(currentPosition.x, currentPosition.y);
+            lossHistory.push(loss);
+            
+            // Update metrics
+            iteration++;
+            const gradNorm = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            
+            document.getElementById('currentIteration').textContent = iteration;
+            document.getElementById('currentLoss').textContent = loss.toFixed(4);
+            document.getElementById('gradientNorm').textContent = gradNorm.toFixed(4);
+            
+            // Check convergence
+            if (gradNorm < 1e-4) {
+                pauseOptimization();
+                document.getElementById('convergenceStatus').textContent = 'Converged';
+                updateAnalysis(`🎉 Converged! Found minimum at (${currentPosition.x.toFixed(3)}, ${currentPosition.y.toFixed(3)}) with function value ${loss.toFixed(6)}`);
+            } else {
+                document.getElementById('convergenceStatus').textContent = 'Running';
+            }
+            
+            updateVisualization();
+            updateLossChart();
+            updateAnalysis();
+        }
+
         function startOptimization() {
-            updateParameters();
-            resetOptimization();
-            stepOptimization();
+            if (!isRunning) {
+                isRunning = true;
+                optimizationLoop();
+            }
         }
-        
-        // Step optimization
+
+        function optimizationLoop() {
+            if (isRunning && iteration < 1000) {
+                updatePosition();
+                setTimeout(optimizationLoop, 1000 / animationSpeed);
+            } else if (iteration >= 1000) {
+                pauseOptimization();
+                document.getElementById('convergenceStatus').textContent = 'Max Iterations';
+            }
+        }
+
         function stepOptimization() {
-            if (currentIteration >= maxIterations) {
-                document.getElementById('optimizationStatus').textContent = 'Hoàn thành';
-                return;
+            if (iteration < 1000) {
+                updatePosition();
             }
-            
-            const currentFunc = functions[currentFunction];
-            const currentValue = currentFunc.evaluate(currentX);
-            const gradient = currentFunc.derivative(currentX);
-            const updateStep = learningRate * gradient;
-            const newX = currentX - updateStep;
-            
-            optimizationHistory.push({
-                iteration: currentIteration,
-                x: currentX,
-                value: currentValue,
-                gradient: gradient,
-                updateStep: updateStep
-            });
-            
-            currentX = newX;
-            currentIteration++;
-            
-            updateDisplay();
-            drawOptimization();
         }
-        
-        // Reset optimization
+
+        function pauseOptimization() {
+            isRunning = false;
+        }
+
         function resetOptimization() {
-            currentIteration = 0;
-            currentX = startX;
-            optimizationHistory = [];
             isRunning = false;
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-                autoPlayInterval = null;
-            }
-            document.getElementById('optimizationStatus').textContent = 'Sẵn sàng';
-            updateDisplay();
-            drawOptimization();
+            iteration = 0;
+            currentPosition = { ...startPosition };
+            path = [{ ...startPosition }];
+            lossHistory = [functions[currentFunction].f(startPosition.x, startPosition.y)];
+            velocity = { x: 0, y: 0 };
+            rmsX = rmsY = 0;
+            mX = mY = vX = vY = 0;
+            
+            document.getElementById('currentIteration').textContent = '0';
+            document.getElementById('currentLoss').textContent = lossHistory[0].toFixed(4);
+            document.getElementById('gradientNorm').textContent = '0.00';
+            document.getElementById('convergenceStatus').textContent = 'Ready';
+            
+            updateVisualization();
+            updateLossChart();
+            updateAnalysis('Ready to start optimization! Click "Start Optimization" to begin the gradient descent journey.');
         }
-        
-        // Auto play
-        function setAutoPlay() {
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
+
+        // Visualization functions
+        function updateVisualization() {
+            if (!canvas) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const func = functions[currentFunction];
+            const domain = func.domain;
+            
+            // Draw contour plot
+            drawContours(func, domain);
+            
+            // Draw path if enabled
+            if (document.getElementById('showPathCheckbox').checked) {
+                drawPath();
             }
-            autoPlayInterval = setInterval(() => {
-                if (currentIteration < maxIterations) {
-                    stepOptimization();
-                } else {
-                    stopAutoPlay();
+            
+            // Draw current position
+            drawCurrentPosition();
+            
+            // Draw gradient if enabled
+            if (document.getElementById('showGradientCheckbox').checked) {
+                drawGradient();
+            }
+            
+            // Draw minimum
+            drawMinimum(func);
+        }
+
+        function drawContours(func, domain) {
+            const resolution = 2;
+            const levels = 20;
+            
+            // Create height map
+            const heightMap = [];
+            for (let i = 0; i < canvas.width; i += resolution) {
+                heightMap[i] = [];
+                for (let j = 0; j < canvas.height; j += resolution) {
+                    const x = domain.xMin + (i / canvas.width) * (domain.xMax - domain.xMin);
+                    const y = domain.yMax - (j / canvas.height) * (domain.yMax - domain.yMin);
+                    heightMap[i][j] = func.f(x, y);
                 }
-            }, 500);
-            isRunning = true;
-            document.getElementById('optimizationStatus').textContent = 'Đang chạy...';
+            }
+            
+            // Find min and max for contour levels
+            let minVal = Infinity, maxVal = -Infinity;
+            for (let i = 0; i < canvas.width; i += resolution) {
+                for (let j = 0; j < canvas.height; j += resolution) {
+                    if (heightMap[i] && heightMap[i][j] !== undefined) {
+                        minVal = Math.min(minVal, heightMap[i][j]);
+                        maxVal = Math.max(maxVal, heightMap[i][j]);
+                    }
+                }
+            }
+            
+            // Draw filled contours
+            for (let i = 0; i < canvas.width - resolution; i += resolution) {
+                for (let j = 0; j < canvas.height - resolution; j += resolution) {
+                    if (heightMap[i] && heightMap[i][j] !== undefined) {
+                        const intensity = (heightMap[i][j] - minVal) / (maxVal - minVal);
+                        const alpha = Math.min(0.6, intensity * 0.8 + 0.1);
+                        ctx.fillStyle = `rgba(70, 130, 250, ${alpha})`;
+                        ctx.fillRect(i, j, resolution, resolution);
+                    }
+                }
+            }
         }
-        
-        // Stop auto play
-        function stopAutoPlay() {
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-                autoPlayInterval = null;
-            }
-            isRunning = false;
-            document.getElementById('optimizationStatus').textContent = 'Đã dừng';
-        }
-        
-        // Update display
-        function updateDisplay() {
-            const currentFunc = functions[currentFunction];
-            const currentValue = currentFunc.evaluate(currentX);
-            const gradient = currentFunc.derivative(currentX);
-            const updateStep = learningRate * gradient;
+
+        function drawPath() {
+            if (path.length < 2) return;
             
-            document.getElementById('currentFunction').textContent = currentFunc.name;
-            document.getElementById('derivativeFormula').textContent = currentFunc.derivativeString;
-            document.getElementById('currentPoint').textContent = `x = ${currentX.toFixed(3)}`;
-            document.getElementById('currentValue').textContent = `f(x) = ${currentValue.toFixed(3)}`;
-            document.getElementById('currentGradient').textContent = `∇f(x) = ${gradient.toFixed(3)}`;
-            document.getElementById('updateStep').textContent = `Δx = ${updateStep.toFixed(3)}`;
+            const domain = functions[currentFunction].domain;
             
-            // Update iteration info
-            const container = document.getElementById('iterationInfo');
-            let html = '';
-            
-            const recentHistory = optimizationHistory.slice(-5);
-            recentHistory.forEach((step, index) => {
-                const isCurrent = step.iteration === currentIteration - 1;
-                html += `
-                    <div class="iteration-card ${isCurrent ? 'current' : ''}">
-                        <strong>Bước ${step.iteration}</strong><br>
-                        x = ${step.x.toFixed(3)}<br>
-                        f(x) = ${step.value.toFixed(3)}<br>
-                        ∇f(x) = ${step.gradient.toFixed(3)}
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // Draw optimization
-        function drawOptimization() {
-            // Clear canvas
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Set up coordinate system
-            const margin = 50;
-            const width = canvas.width - 2 * margin;
-            const height = canvas.height - 2 * margin;
-            const xMin = -5;
-            const xMax = 5;
-            const scaleX = width / (xMax - xMin);
-            const scaleY = height / 20; // Assuming function values are reasonable
-            
-            // Transform function
-            function transform(x, y) {
-                return {
-                    x: margin + (x - xMin) * scaleX,
-                    y: canvas.height - margin - (y + 10) * scaleY
-                };
-            }
-            
-            // Draw grid
-            ctx.strokeStyle = '#f0f0f0';
-            ctx.lineWidth = 1;
-            for (let i = xMin; i <= xMax; i++) {
-                const pos = transform(i, 0);
-                ctx.beginPath();
-                ctx.moveTo(pos.x, margin);
-                ctx.lineTo(pos.x, canvas.height - margin);
-                ctx.stroke();
-            }
-            for (let i = -10; i <= 10; i++) {
-                const pos = transform(0, i);
-                ctx.beginPath();
-                ctx.moveTo(margin, pos.y);
-                ctx.lineTo(canvas.width - margin, pos.y);
-                ctx.stroke();
-            }
-            
-            // Draw axes
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            const origin = transform(0, 0);
-            ctx.beginPath();
-            ctx.moveTo(origin.x, margin);
-            ctx.lineTo(origin.x, canvas.height - margin);
-            ctx.moveTo(margin, origin.y);
-            ctx.lineTo(canvas.width - margin, origin.y);
-            ctx.stroke();
-            
-            // Draw axis labels
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('x', canvas.width / 2, canvas.height - 10);
-            ctx.save();
-            ctx.translate(20, canvas.height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('f(x)', 0, 0);
-            ctx.restore();
-            
-            // Draw function
-            const currentFunc = functions[currentFunction];
-            ctx.strokeStyle = '#667eea';
+            ctx.strokeStyle = '#ff6b6b';
             ctx.lineWidth = 3;
             ctx.beginPath();
             
-            for (let i = 0; i <= width; i++) {
-                const x = xMin + (i / width) * (xMax - xMin);
-                const y = currentFunc.evaluate(x);
-                const pos = transform(x, y);
+            for (let i = 0; i < path.length; i++) {
+                const screenX = ((path[i].x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+                const screenY = ((domain.yMax - path[i].y) / (domain.yMax - domain.yMin)) * canvas.height;
+                
                 if (i === 0) {
-                    ctx.moveTo(pos.x, pos.y);
+                    ctx.moveTo(screenX, screenY);
                 } else {
-                    ctx.lineTo(pos.x, pos.y);
+                    ctx.lineTo(screenX, screenY);
                 }
             }
             ctx.stroke();
             
-            // Draw optimization path
-            if (optimizationHistory.length > 0) {
-                ctx.strokeStyle = '#ff6b6b';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                
-                optimizationHistory.forEach((step, index) => {
-                    const pos = transform(step.x, step.value);
-                    if (index === 0) {
-                        ctx.moveTo(pos.x, pos.y);
-                    } else {
-                        ctx.lineTo(pos.x, pos.y);
-                    }
-                });
-                
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Draw points
-                optimizationHistory.forEach((step, index) => {
-                    const pos = transform(step.x, step.value);
-                    ctx.fillStyle = index === optimizationHistory.length - 1 ? '#ff6b6b' : '#4CAF50';
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, 6, 0, 2 * Math.PI);
-                    ctx.fill();
-                    
-                    // Draw gradient arrows
-                    if (index < optimizationHistory.length - 1) {
-                        const nextStep = optimizationHistory[index + 1];
-                        const gradient = step.gradient;
-                        const arrowLength = 30;
-                        const arrowAngle = Math.atan2(-gradient, 1);
-                        
-                        ctx.strokeStyle = '#ff6b6b';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(pos.x, pos.y);
-                        ctx.lineTo(
-                            pos.x + arrowLength * Math.cos(arrowAngle),
-                            pos.y + arrowLength * Math.sin(arrowAngle)
-                        );
-                        ctx.stroke();
-                        
-                        // Arrow head
-                        ctx.beginPath();
-                        ctx.moveTo(
-                            pos.x + arrowLength * Math.cos(arrowAngle),
-                            pos.y + arrowLength * Math.sin(arrowAngle)
-                        );
-                        ctx.lineTo(
-                            pos.x + (arrowLength - 10) * Math.cos(arrowAngle - 0.3),
-                            pos.y + (arrowLength - 10) * Math.sin(arrowAngle - 0.3)
-                        );
-                        ctx.moveTo(
-                            pos.x + arrowLength * Math.cos(arrowAngle),
-                            pos.y + arrowLength * Math.sin(arrowAngle)
-                        );
-                        ctx.lineTo(
-                            pos.x + (arrowLength - 10) * Math.cos(arrowAngle + 0.3),
-                            pos.y + (arrowLength - 10) * Math.sin(arrowAngle + 0.3)
-                        );
-                        ctx.stroke();
-                    }
-                });
-            }
-            
-            // Draw current point
-            const currentValue = currentFunc.evaluate(currentX);
-            const currentPos = transform(currentX, currentValue);
-            
+            // Draw path points
             ctx.fillStyle = '#ff6b6b';
+            for (let i = 0; i < path.length; i++) {
+                const screenX = ((path[i].x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+                const screenY = ((domain.yMax - path[i].y) / (domain.yMax - domain.yMin)) * canvas.height;
+                
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function drawCurrentPosition() {
+            const domain = functions[currentFunction].domain;
+            const screenX = ((currentPosition.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+            const screenY = ((domain.yMax - currentPosition.y) / (domain.yMax - domain.yMin)) * canvas.height;
+            
+            // Outer glow
+            ctx.fillStyle = 'rgba(255, 107, 107, 0.3)';
             ctx.beginPath();
-            ctx.arc(currentPos.x, currentPos.y, 8, 0, 2 * Math.PI);
+            ctx.arc(screenX, screenY, 15, 0, 2 * Math.PI);
             ctx.fill();
             
-            ctx.fillStyle = '#333';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(`x = ${currentX.toFixed(2)}`, currentPos.x + 10, currentPos.y - 10);
+            // Main point
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Inner highlight
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(screenX - 2, screenY - 2, 3, 0, 2 * Math.PI);
+            ctx.fill();
         }
-        
-        // Event listeners
-        document.getElementById('learningRate').addEventListener('input', function() {
-            document.getElementById('learningRateValue').value = this.value;
-        });
-        
-        document.getElementById('learningRateValue').addEventListener('input', function() {
-            document.getElementById('learningRate').value = this.value;
-        });
-        
-        document.getElementById('startX').addEventListener('input', function() {
-            document.getElementById('startXValue').value = this.value;
-        });
-        
-        document.getElementById('startXValue').addEventListener('input', function() {
-            document.getElementById('startX').value = this.value;
-        });
-        
-        document.getElementById('maxIterations').addEventListener('input', function() {
-            document.getElementById('maxIterationsValue').value = this.value;
-        });
-        
-        document.getElementById('maxIterationsValue').addEventListener('input', function() {
-            document.getElementById('maxIterations').value = this.value;
-        });
-        
-        // Initialize
-        drawOptimization();
-        updateDisplay();
+
+        function drawGradient() {
+            const domain = functions[currentFunction].domain;
+            const grad = computeGradient(currentPosition.x, currentPosition.y);
+            const gradMag = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            
+            if (gradMag < 1e-6) return;
+            
+            const screenX = ((currentPosition.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+            const screenY = ((domain.yMax - currentPosition.y) / (domain.yMax - domain.yMin)) * canvas.height;
+            
+            // Scale gradient for visualization
+            const scale = 50 / Math.max(1, gradMag);
+            const gradScreenX = grad.x * scale * (canvas.width / (domain.xMax - domain.xMin));
+            const gradScreenY = -grad.y * scale * (canvas.height / (domain.yMax - domain.yMin));
+            
+            // Draw gradient vector (direction of steepest ascent)
+            ctx.strokeStyle = 'orange';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(screenX, screenY);
+            ctx.lineTo(screenX + gradScreenX, screenY + gradScreenY);
+            ctx.stroke();
+            
+            // Draw negative gradient vector (direction we'll move)
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(screenX, screenY);
+            ctx.lineTo(screenX - gradScreenX, screenY - gradScreenY);
+            ctx.stroke();
+            
+            // Arrow heads
+            drawArrowHead(screenX + gradScreenX, screenY + gradScreenY, Math.atan2(gradScreenY, gradScreenX), 'orange');
+            drawArrowHead(screenX - gradScreenX, screenY - gradScreenY, Math.atan2(-gradScreenY, -gradScreenX), '#00ff00');
+        }
+
+        function drawArrowHead(x, y, angle, color) {
+            const headSize = 10;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - headSize * Math.cos(angle - Math.PI/6), y - headSize * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(x - headSize * Math.cos(angle + Math.PI/6), y - headSize * Math.sin(angle + Math.PI/6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawMinimum(func) {
+            const domain = func.domain;
+            const min = func.minimum;
+            const screenX = ((min.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+            const screenY = ((domain.yMax - min.y) / (domain.yMax - domain.yMin)) * canvas.height;
+            
+            // Draw target symbol
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 3;
+            
+            // Outer circle
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 12, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Inner circle
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 6, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Center dot
+            ctx.fillStyle = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function updateLossChart() {
+            if (!lossCanvas || lossHistory.length === 0) return;
+            
+            lossCtx.clearRect(0, 0, lossCanvas.width, lossCanvas.height);
+            
+            // Draw background
+            lossCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            lossCtx.fillRect(0, 0, lossCanvas.width, lossCanvas.height);
+            
+            if (lossHistory.length < 2) return;
+            
+            // Find min and max for scaling
+            const minLoss = Math.min(...lossHistory);
+            const maxLoss = Math.max(...lossHistory);
+            const range = maxLoss - minLoss || 1;
+            
+            // Draw loss curve
+            lossCtx.strokeStyle = '#ff6b6b';
+            lossCtx.lineWidth = 2;
+            lossCtx.beginPath();
+            
+            for (let i = 0; i < lossHistory.length; i++) {
+                const x = (i / (lossHistory.length - 1)) * lossCanvas.width;
+                const y = lossCanvas.height - ((lossHistory[i] - minLoss) / range) * lossCanvas.height;
+                
+                if (i === 0) {
+                    lossCtx.moveTo(x, y);
+                } else {
+                    lossCtx.lineTo(x, y);
+                }
+            }
+            lossCtx.stroke();
+            
+            // Draw axes labels
+            lossCtx.fillStyle = 'white';
+            lossCtx.font = '12px Arial';
+            lossCtx.fillText('Iteration →', lossCanvas.width - 80, lossCanvas.height - 5);
+            lossCtx.save();
+            lossCtx.translate(15, 20);
+            lossCtx.rotate(-Math.PI/2);
+            lossCtx.fillText('Loss ↑', 0, 0);
+            lossCtx.restore();
+            
+            // Show current values
+            lossCtx.fillText(`Min: ${minLoss.toFixed(4)}`, 10, lossCanvas.height - 25);
+            lossCtx.fillText(`Current: ${lossHistory[lossHistory.length-1].toFixed(4)}`, 10, lossCanvas.height - 10);
+        }
+
+        function updateAnalysis(customMessage) {
+            if (customMessage) {
+                document.getElementById('analysisText').textContent = customMessage;
+                return;
+            }
+            
+            if (iteration === 0) {
+                document.getElementById('analysisText').textContent = 
+                    "Ready to start! The algorithm will follow the negative gradient (green arrow) to descend towards the minimum.";
+                return;
+            }
+            
+            const grad = computeGradient(currentPosition.x, currentPosition.y);
+            const gradNorm = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            const loss = functions[currentFunction].f(currentPosition.x, currentPosition.y);
+            
+            let analysis = `Step ${iteration}: `;
+            
+            if (gradNorm > 1) {
+                analysis += "Large gradient - far from minimum, taking big steps. ";
+            } else if (gradNorm > 0.1) {
+                analysis += "Moderate gradient - making steady progress. ";
+            } else if (gradNorm > 0.01) {
+                analysis += "Small gradient - getting close to minimum. ";
+            } else {
+                analysis += "Very small gradient - very close to convergence! ";
+            }
+            
+            if (lossHistory.length > 1) {
+                const lossChange = lossHistory[lossHistory.length-1] - lossHistory[lossHistory.length-2];
+                if (lossChange < -0.01) {
+                    analysis += "Good decrease in loss! ";
+                } else if (lossChange < 0) {
+                    analysis += "Small decrease in loss. ";
+                } else {
+                    analysis += "Loss increased - learning rate might be too high! ";
+                }
+            }
+            
+            analysis += `Current loss: ${loss.toFixed(4)}`;
+            
+            document.getElementById('analysisText').textContent = analysis;
+        }
+
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
     </script>
 </body>
-</html> 
+</html>

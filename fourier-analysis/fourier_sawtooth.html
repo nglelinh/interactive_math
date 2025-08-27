@@ -1,96 +1,404 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Fourier Epicycles - Sawtooth Wave</title>
-  <style>
-    body { background-color: #111; color: white; text-align: center; margin: 0; font-family: sans-serif; }
-    canvas { display: block; margin: auto; background-color: #000; }
-  </style>
-
-
-
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sóng Răng Cưa - Chuỗi Fourier</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            -webkit-appearance: none;
+        }
+        
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: #000;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .wave-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #2196f3;
+            text-align: center;
+        }
+        
+        .info-card h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+    </style>
 </head>
 <body>
-  <h2>Fourier Epicycles - Sawtooth Wave</h2>
-  <label>Terms: <input type="range" id="slider" min="1" max="50" value="10"> <span id="termLabel">10</span></label>
-  <canvas id="canvas" width="900" height="500"></canvas>
+    <div class="main-container">
+        <div class="header">
+            <h1>Sóng Răng Cưa - Chuỗi Fourier</h1>
+            <p>Minh họa tương tác về biểu diễn sóng răng cưa bằng epicycles Fourier</p>
+        </div>
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const slider = document.getElementById("slider");
-    const termLabel = document.getElementById("termLabel");
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Sóng Răng Cưa</h3>
+                    <p><strong>Định nghĩa:</strong> Sóng răng cưa là hàm tuần hoàn tăng tuyến tính trong mỗi chu kỳ:</p>
+                    $$f(x) = \frac{x}{\pi} \text{ cho } x \in (-\pi, \pi)$$
+                    
+                    <div class="concept-box">
+                        <h4>Chuỗi Fourier của Sóng Răng Cưa:</h4>
+                        $$f(x) = 2 \sum_{n=1}^{\infty} \frac{(-1)^{n+1}}{n} \sin(nx)$$
+                        $$= 2 \left[ \sin(x) - \frac{\sin(2x)}{2} + \frac{\sin(3x)}{3} - \frac{\sin(4x)}{4} + \ldots \right]$$
+                    </div>
+                </div>
 
-    let time = 0;
-    let path = [];
+                <div class="math-content">
+                    <h3>2. Hệ Số Fourier</h3>
+                    <p><strong>Tính toán hệ số:</strong></p>
+                    
+                    <div class="concept-box">
+                        <h4>Hệ số $a_n$ (cosine):</h4>
+                        $$a_n = \frac{1}{\pi} \int_{-\pi}^{\pi} \frac{x}{\pi} \cos(nx) dx = 0$$
+                        <p>Vì hàm răng cưa là hàm lẻ nên không có thành phần cosine.</p>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Hệ số $b_n$ (sine):</h4>
+                        $$b_n = \frac{1}{\pi} \int_{-\pi}^{\pi} \frac{x}{\pi} \sin(nx) dx = \frac{2(-1)^{n+1}}{n}$$
+                        <p>Biên độ giảm theo $\frac{1}{n}$, tạo ra sự hội tụ chậm.</p>
+                    </div>
+                </div>
 
-    function drawCircle(x, y, r) {
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.stroke();
-    }
+                <div class="math-content">
+                    <h3>3. Đặc Điểm Epicycles</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Các Đặc Trưng:</h4>
+                        <ul>
+                            <li><strong>Chỉ có hệ số sine:</strong> Do tính chất hàm lẻ</li>
+                            <li><strong>Tất cả harmonics:</strong> n = 1, 2, 3, 4, ...</li>
+                            <li><strong>Biên độ:</strong> $\frac{2(-1)^{n+1}}{n}$</li>
+                            <li><strong>Dấu xen kẽ:</strong> +, -, +, -, ...</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Hội Tụ:</h4>
+                        <p>Chuỗi hội tụ chậm do biên độ giảm theo $\frac{1}{n}$, gây ra hiện tượng Gibbs tại các điểm gián đoạn.</p>
+                    </div>
+                </div>
 
-    function drawLine(x1, y1, x2, y2) {
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
+                <div class="math-content">
+                    <h3>4. Ứng Dụng Thực Tế</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Trong Kỹ Thuật:</h4>
+                        <ul>
+                            <li><strong>Tạo dao động:</strong> Mạch oscillator</li>
+                            <li><strong>Xử lý tín hiệu:</strong> Tín hiệu sweep frequency</li>
+                            <li><strong>Âm thanh:</strong> Synthesizer, tạo âm thanh đặc biệt</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-    function sawtoothEpicycles(x, y, time, terms) {
-      for (let n = 1; n <= terms; n++) {
-        const sign = ((n + 1) % 2 === 0) ? 1 : -1;
-        const radius = 50 * (2 / (n * Math.PI)) * sign;
-        const prevX = x;
-        const prevY = y;
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>🔄 <strong>Epicycles:</strong> Quan sát các vòng tròn quay tạo ra sóng</li>
+                        <li>📊 <strong>Điều chỉnh số hạng:</strong> Tăng độ chính xác của xấp xỉ</li>
+                        <li>🌊 <strong>Theo dõi đường vẽ:</strong> Xem sóng răng cưa được tạo thành</li>
+                        <li>⚡ <strong>Real-time:</strong> Animation liên tục để hiểu rõ quá trình</li>
+                    </ul>
+                    
+                    <div class="controls">
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Số hạng chuỗi Fourier:</label>
+                                <input type="range" id="slider" min="1" max="50" value="10">
+                                <div class="value-display" id="termLabel">10</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas" width="900" height="500"></canvas>
+                    
+                    <div class="wave-info">
+                        <div class="info-card">
+                            <h4>Loại Sóng</h4>
+                            <p>Sóng Răng Cưa (Sawtooth)</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Công Thức</h4>
+                            <p>f(x) = 2∑[(-1)^(n+1)/n]sin(nx)</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Số Hạng Hiện Tại</h4>
+                            <p id="currentTerms">N = 10</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Đặc Điểm</h4>
+                            <p>Chỉ có thành phần sine</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        x += radius * Math.cos(n * time);
-        y += radius * Math.sin(n * time);
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const slider = document.getElementById("slider");
+        const termLabel = document.getElementById("termLabel");
 
-        ctx.strokeStyle = "rgba(255,255,255,0.4)";
-        drawCircle(prevX, prevY, Math.abs(radius));
+        let time = 0;
+        let path = [];
 
-        ctx.strokeStyle = "#0f0";
-        drawLine(prevX, prevY, x, y);
-      }
+        function drawCircle(x, y, r) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
 
-      return { x, y };
-    }
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
 
-    function animate() {
-      requestAnimationFrame(animate);
-      const terms = parseInt(slider.value);
-      termLabel.textContent = terms;
+        function sawtoothEpicycles(x, y, time, terms) {
+            for (let n = 1; n <= terms; n++) {
+                const sign = ((n + 1) % 2 === 0) ? 1 : -1;
+                const radius = 50 * (2 / (n * Math.PI)) * sign;
+                const prevX = x;
+                const prevY = y;
 
-      ctx.fillStyle = "rgba(0,0,0,0.08)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+                x += radius * Math.cos(n * time);
+                y += radius * Math.sin(n * time);
 
-      let originX = 200;
-      let originY = canvas.height / 2;
+                ctx.strokeStyle = "rgba(255,255,255,0.4)";
+                drawCircle(prevX, prevY, Math.abs(radius));
 
-      const { x, y } = sawtoothEpicycles(originX, originY, time, terms);
+                ctx.strokeStyle = "#0f0";
+                drawLine(prevX, prevY, x, y);
+            }
 
-      path.unshift({ x: 400, y: y });
-      drawLine(x, y, 400, y);
+            return { x, y };
+        }
 
-      ctx.beginPath();
-      ctx.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length; i++) {
-        ctx.lineTo(path[i].x + i, path[i].y);
-      }
-      ctx.strokeStyle = "#f90";
-      ctx.stroke();
+        function updateInfo() {
+            const terms = parseInt(slider.value);
+            termLabel.textContent = terms;
+            document.getElementById('currentTerms').textContent = `N = ${terms}`;
+        }
 
-      time += 0.02;
+        function animate() {
+            requestAnimationFrame(animate);
+            const terms = parseInt(slider.value);
+            updateInfo();
 
-      if (path.length > 600) path.pop();
-    }
+            ctx.fillStyle = "rgba(0,0,0,0.08)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    animate();
-  </script>
+            let originX = 200;
+            let originY = canvas.height / 2;
+
+            const { x, y } = sawtoothEpicycles(originX, originY, time, terms);
+
+            path.unshift({ x: 400, y: y });
+            drawLine(x, y, 400, y);
+
+            ctx.beginPath();
+            ctx.moveTo(path[0].x, path[0].y);
+            for (let i = 1; i < path.length; i++) {
+                ctx.lineTo(path[i].x + i, path[i].y);
+            }
+            ctx.strokeStyle = "#f90";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            time += 0.02;
+
+            if (path.length > 600) path.pop();
+        }
+
+        // Event listeners
+        slider.addEventListener('input', updateInfo);
+        
+        // Initialize
+        updateInfo();
+        animate();
+    </script>
 </body>
 </html>
-

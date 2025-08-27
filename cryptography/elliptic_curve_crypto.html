@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📈 Elliptic Curve Cryptography - Interactive Demo</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d1b69 50%, #11047a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #a855f7;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .curve-canvas {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #a855f7;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        
+        .control-group {
+            margin: 15px 0;
+        }
+        
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #a855f7;
+        }
+        
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #6b46c1;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-panel {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid #a855f7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .math-display {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #a855f7;
+        }
+        
+        .point-display {
+            background: rgba(168, 85, 247, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 Elliptic Curve Cryptography</h1>
+        <div style="text-align: center; color: #c4b5fd; font-size: 1.2em; margin-bottom: 30px;">
+            Interactive exploration of ECC: stronger security with smaller keys
+        </div>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🔧 Curve Parameters</h3>
+                
+                <div class="control-group">
+                    <label>Curve Type:</label>
+                    <select id="curveType" onchange="updateCurve()">
+                        <option value="secp256k1">secp256k1 (Bitcoin)</option>
+                        <option value="p256">P-256 (NIST)</option>
+                        <option value="custom">Custom (y² = x³ + ax + b)</option>
+                    </select>
+                </div>
+                
+                <div id="customParams" style="display:none;">
+                    <div class="control-group">
+                        <label>Parameter a:</label>
+                        <input type="number" id="paramA" value="-3" step="0.1">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Parameter b:</label>
+                        <input type="number" id="paramB" value="5" step="0.1">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Modulus p (0 for real curve):</label>
+                        <input type="number" id="modulus" value="0" min="0">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="updateCurve()">🔄 Update Curve</button>
+                
+                <div class="result-panel">
+                    <h4>📊 Curve Info:</h4>
+                    <div id="curveInfo">Select a curve to see details</div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🎯 Point Operations</h3>
+                
+                <div class="control-group">
+                    <label>Point P coordinates:</label>
+                    <input type="text" id="pointPX" placeholder="X coordinate" value="1">
+                    <input type="text" id="pointPY" placeholder="Y coordinate" value="2.236" style="margin-top: 5px;">
+                    <button class="btn" onclick="findPointOnCurve()">🎲 Random Point</button>
+                </div>
+                
+                <div class="control-group">
+                    <label>Point Q coordinates:</label>
+                    <input type="text" id="pointQX" placeholder="X coordinate" value="2">
+                    <input type="text" id="pointQY" placeholder="Y coordinate" value="2.236" style="margin-top: 5px;">
+                </div>
+                
+                <button class="btn" onclick="addPoints()">➕ P + Q</button>
+                <button class="btn" onclick="doublePoint()">✖️ 2P</button>
+                <button class="btn" onclick="scalarMultiply()">🔢 kP</button>
+                
+                <div class="control-group">
+                    <label>Scalar k for multiplication:</label>
+                    <input type="number" id="scalar" value="3" min="1" max="20">
+                </div>
+                
+                <div class="result-panel">
+                    <h4>🧮 Operation Results:</h4>
+                    <div id="operationResults">Perform operations to see results</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas id="curveCanvas" class="curve-canvas" width="800" height="600"></canvas>
+        
+        <div class="demo-grid">
+            <div class="control-panel">
+                <h3>🔐 ECC Key Generation</h3>
+                
+                <div class="control-group">
+                    <label>Private Key (random number):</label>
+                    <input type="number" id="privateKey" value="12345" min="1" max="100000">
+                    <button class="btn" onclick="generateRandomPrivateKey()">🎲 Random</button>
+                </div>
+                
+                <button class="btn" onclick="generateKeyPair()">🔑 Generate Key Pair</button>
+                
+                <div class="result-panel">
+                    <h4>🔑 Generated Keys:</h4>
+                    <div id="keyResults">Generate keys to see results</div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <h3>🛡️ Security Analysis</h3>
+                
+                <div class="math-display">
+                    <h4>📊 ECC vs RSA Key Sizes:</h4>
+                    <p><strong>160-bit ECC ≈ 1024-bit RSA</strong></p>
+                    <p><strong>256-bit ECC ≈ 3072-bit RSA</strong></p>
+                    <p><strong>384-bit ECC ≈ 7680-bit RSA</strong></p>
+                </div>
+                
+                <div class="result-panel">
+                    <h4>⚡ Performance Benefits:</h4>
+                    <div id="performanceAnalysis">
+                        <p>• <strong>Smaller keys:</strong> Faster computation</p>
+                        <p>• <strong>Less bandwidth:</strong> Better for mobile</p>
+                        <p>• <strong>Lower power:</strong> IoT devices</p>
+                        <p>• <strong>Same security:</strong> Discrete log problem</p>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="showSecurityComparison()">📈 Security Comparison</button>
+            </div>
+        </div>
+        
+        <div class="control-panel" style="margin-top: 20px;">
+            <h3>🎓 Advanced Mathematical Foundation</h3>
+            <div class="math-display">
+                <h4>📐 Elliptic Curve Equation (Weierstrass Form):</h4>
+                <p><strong>General form:</strong> $y^2 = x^3 + ax + b$ (mod $p$)</p>
+                <p><strong>Discriminant:</strong> $\Delta = -16(4a^3 + 27b^2) \neq 0$ (non-singular)</p>
+                <p><strong>Curve order:</strong> $\#E(\mathbb{F}_p) = p + 1 - t$ (Hasse bound: $|t| \leq 2\sqrt{p}$)</p>
+                
+                <h4>⚡ Point Addition Formulas:</h4>
+                <p><strong>Point Addition (P + Q = R):</strong></p>
+                <p>If $P = (x_1, y_1)$ and $Q = (x_2, y_2)$ with $P \neq Q$:</p>
+                <p>$\lambda = \frac{y_2 - y_1}{x_2 - x_1} \bmod p$</p>
+                <p>$x_3 = \lambda^2 - x_1 - x_2 \bmod p$</p>
+                <p>$y_3 = \lambda(x_1 - x_3) - y_1 \bmod p$</p>
+                
+                <p><strong>Point Doubling (P + P = 2P):</strong></p>
+                <p>If $P = (x_1, y_1)$ and $y_1 \neq 0$:</p>
+                <p>$\lambda = \frac{3x_1^2 + a}{2y_1} \bmod p$</p>
+                <p>$x_3 = \lambda^2 - 2x_1 \bmod p$</p>
+                <p>$y_3 = \lambda(x_1 - x_3) - y_1 \bmod p$</p>
+                
+                <h4>🔢 Scalar Multiplication:</h4>
+                <p><strong>Double-and-Add Algorithm:</strong> $kP = \sum_{i=0}^{n-1} k_i \cdot 2^i P$</p>
+                <p><strong>Montgomery Ladder:</strong> More efficient for large scalars</p>
+                <p><strong>NAF (Non-Adjacent Form):</strong> Reduces Hamming weight</p>
+                
+                <h4>🧮 Finite Field Arithmetic:</h4>
+                <p><strong>Modular Inverse:</strong> $a^{-1} \bmod p$ using Extended Euclidean Algorithm</p>
+                <p>$\gcd(a, p) = 1 \Rightarrow \exists x, y: ax + py = 1$</p>
+                <p><strong>Fermat's Little Theorem:</strong> $a^{p-1} \equiv 1 \pmod p$ for prime $p$</p>
+                <p><strong>Quadratic Residue:</strong> $y^2 \equiv x \pmod p$ (Legendre symbol)</p>
+                
+                <h4>🔐 Cryptographic Operations:</h4>
+                <p><strong>ECDLP (Elliptic Curve Discrete Log Problem):</strong></p>
+                <p>Given $P$ and $Q = kP$, find $k$ (computationally hard)</p>
+                <p><strong>Best Known Attack:</strong> Pollard's rho ($O(\sqrt{n})$ operations)</p>
+                <p><strong>Security Level:</strong> $n$-bit curve ≈ $n/2$-bit security</p>
+                
+                <h4>📊 Complexity Analysis:</h4>
+                <p><strong>Point Addition:</strong> $O(\log p)$ (modular arithmetic)</p>
+                <p><strong>Scalar Multiplication:</strong> $O(\log k \cdot \log p)$ </p>
+                <p><strong>Key Generation:</strong> $O(\log n)$ where $n$ is curve order</p>
+                
+                <h4>🎯 Group Theory Properties:</h4>
+                <p><strong>Abelian Group:</strong> $(E(\mathbb{F}_p), +)$ with identity $\mathcal{O}$ (point at infinity)</p>
+                <p><strong>Closure:</strong> $P + Q \in E(\mathbb{F}_p)$ for all $P, Q \in E(\mathbb{F}_p)$</p>
+                <p><strong>Associativity:</strong> $(P + Q) + R = P + (Q + R)$</p>
+                <p><strong>Identity:</strong> $P + \mathcal{O} = P$</p>
+                <p><strong>Inverse:</strong> $P + (-P) = \mathcal{O}$ where $-P = (x_P, -y_P)$</p>
+                
+                <h4>⚡ Optimization Techniques:</h4>
+                <p><strong>Projective Coordinates:</strong> Avoid modular division</p>
+                <p>$(X : Y : Z)$ where $(x, y) = (X/Z, Y/Z)$</p>
+                <p><strong>Jacobian Coordinates:</strong> $(X : Y : Z)$ with $(x, y) = (X/Z^2, Y/Z^3)$</p>
+                <p><strong>López-Dahab Coordinates:</strong> Efficient for binary fields</p>
+                
+                <h4>🛡️ Side-Channel Resistance:</h4>
+                <p><strong>Timing Attacks:</strong> Constant-time implementations</p>
+                <p><strong>Power Analysis:</strong> Randomized projective coordinates</p>
+                <p><strong>Fault Attacks:</strong> Point validation and redundancy</p>
+            </div>
+            
+            <div class="result-panel">
+                <h4>🔬 Advanced Curve Properties:</h4>
+                <p>• <strong>j-Invariant:</strong> $j = 1728 \cdot \frac{4a^3}{4a^3 + 27b^2}$ (curve classification)</p>
+                <p>• <strong>Endomorphism Ring:</strong> $\text{End}(E)$ determines curve structure</p>
+                <p>• <strong>Torsion Points:</strong> Points of finite order in $E(\mathbb{F}_p)$</p>
+                <p>• <strong>Weil Pairing:</strong> Bilinear map for advanced protocols</p>
+                <p>• <strong>Isogeny:</strong> Rational maps between elliptic curves</p>
+            </div>
+            
+            <div class="result-panel">
+                <h4>🌍 Standardized Curves & Applications:</h4>
+                <p>• <strong>secp256k1:</strong> $y^2 = x^3 + 7$ (Bitcoin, Ethereum)</p>
+                <p>• <strong>P-256 (secp256r1):</strong> NIST standard for TLS/SSL</p>
+                <p>• <strong>Curve25519:</strong> Montgomery curve for high performance</p>
+                <p>• <strong>Ed25519:</strong> Edwards curve for fast signatures</p>
+                <p>• <strong>BLS12-381:</strong> Pairing-friendly for zero-knowledge proofs</p>
+                <p>• <strong>Security Levels:</strong> 256-bit curve ≈ 128-bit symmetric security</p>
+            </div>
+            
+            <div class="math-display">
+                <h4>🧪 Interactive Mathematical Explorer</h4>
+                <div class="control-group">
+                    <label>Mathematical Operation:</label>
+                    <select id="mathOperation" onchange="updateMathDemo()">
+                        <option value="point-addition">Point Addition Calculation</option>
+                        <option value="scalar-mult">Scalar Multiplication</option>
+                        <option value="discriminant">Discriminant & Validity</option>
+                        <option value="order-estimation">Curve Order Estimation</option>
+                        <option value="modular-inverse">Modular Inverse Calculation</option>
+                        <option value="quadratic-residue">Quadratic Residue Test</option>
+                    </select>
+                </div>
+                
+                <div id="mathDemoContent">
+                    <!-- Dynamic mathematical content will be inserted here -->
+                </div>
+                
+                <button class="btn" onclick="executeMathOperation()" style="width: 100%;">🧮 Calculate</button>
+                
+                <div id="mathResults" style="margin-top: 15px;">
+                    <!-- Mathematical results will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCurve = { a: -3, b: 5, p: 0 }; // Default curve
+        let canvas, ctx;
+        let basePoint = { x: 1, y: 2.236 };
+        
+        // Initialize canvas
+        window.onload = function() {
+            canvas = document.getElementById('curveCanvas');
+            ctx = canvas.getContext('2d');
+            updateCurve();
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        };
+        
+        // Curve presets
+        const curvePresets = {
+            secp256k1: {
+                a: 0,
+                b: 7,
+                p: BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'),
+                name: 'secp256k1 (Bitcoin)',
+                gx: BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'),
+                gy: BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8')
+            },
+            p256: {
+                a: -3,
+                b: BigInt('0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B'),
+                p: BigInt('0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF'),
+                name: 'P-256 (NIST)',
+                gx: BigInt('0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296'),
+                gy: BigInt('0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5')
+            }
+        };
+        
+        function updateCurve() {
+            const curveType = document.getElementById('curveType').value;
+            
+            if (curveType === 'custom') {
+                document.getElementById('customParams').style.display = 'block';
+                currentCurve.a = parseFloat(document.getElementById('paramA').value);
+                currentCurve.b = parseFloat(document.getElementById('paramB').value);
+                currentCurve.p = parseInt(document.getElementById('modulus').value) || 0;
+                currentCurve.name = `Custom (y² = x³ + ${currentCurve.a}x + ${currentCurve.b})`;
+            } else {
+                document.getElementById('customParams').style.display = 'none';
+                const preset = curvePresets[curveType];
+                currentCurve = {
+                    a: Number(preset.a),
+                    b: Number(preset.b),
+                    p: 0, // Use real numbers for visualization
+                    name: preset.name
+                };
+            }
+            
+            // Update curve info
+            document.getElementById('curveInfo').innerHTML = `
+                <div class="math-display">
+                    <p><strong>Curve:</strong> ${currentCurve.name}</p>
+                    <p><strong>Equation:</strong> y² = x³ + ${currentCurve.a}x + ${currentCurve.b}</p>
+                    <p><strong>Discriminant:</strong> Δ = ${calculateDiscriminant().toFixed(2)}</p>
+                    <p><strong>Smooth:</strong> ${isSmooth() ? '✅ Yes' : '❌ No'}</p>
+                </div>
+            `;
+            
+            drawCurve();
+        }
+        
+        function calculateDiscriminant() {
+            // Δ = -16(4a³ + 27b²)
+            return -16 * (4 * Math.pow(currentCurve.a, 3) + 27 * Math.pow(currentCurve.b, 2));
+        }
+        
+        function isSmooth() {
+            return calculateDiscriminant() !== 0;
+        }
+        
+        function drawCurve() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set up coordinate system
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 50;
+            
+            // Draw axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.stroke();
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 0.5;
+            for (let i = -10; i <= 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(centerX + i * scale, 0);
+                ctx.lineTo(centerX + i * scale, canvas.height);
+                ctx.moveTo(0, centerY + i * scale);
+                ctx.lineTo(canvas.width, centerY + i * scale);
+                ctx.stroke();
+            }
+            
+            // Draw elliptic curve
+            ctx.strokeStyle = '#a855f7';
+            ctx.lineWidth = 3;
+            
+            for (let x = -8; x <= 8; x += 0.05) {
+                const y2 = Math.pow(x, 3) + currentCurve.a * x + currentCurve.b;
+                
+                if (y2 >= 0) {
+                    const y1 = Math.sqrt(y2);
+                    const y2_neg = -y1;
+                    
+                    // Draw positive branch
+                    const pixelX = centerX + x * scale;
+                    const pixelY1 = centerY - y1 * scale;
+                    const pixelY2 = centerY - y2_neg * scale;
+                    
+                    if (pixelY1 >= 0 && pixelY1 <= canvas.height) {
+                        ctx.fillStyle = '#a855f7';
+                        ctx.fillRect(pixelX - 1, pixelY1 - 1, 2, 2);
+                    }
+                    
+                    if (pixelY2 >= 0 && pixelY2 <= canvas.height) {
+                        ctx.fillStyle = '#a855f7';
+                        ctx.fillRect(pixelX - 1, pixelY2 - 1, 2, 2);
+                    }
+                }
+            }
+            
+            // Draw any marked points
+            drawPoints();
+        }
+        
+        function drawPoints() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 50;
+            
+            // Get current points
+            const px = parseFloat(document.getElementById('pointPX').value);
+            const py = parseFloat(document.getElementById('pointPY').value);
+            const qx = parseFloat(document.getElementById('pointQX').value);
+            const qy = parseFloat(document.getElementById('pointQY').value);
+            
+            // Draw point P
+            if (!isNaN(px) && !isNaN(py)) {
+                const pixelX = centerX + px * scale;
+                const pixelY = centerY - py * scale;
+                
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(pixelX, pixelY, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('P', pixelX + 12, pixelY + 5);
+            }
+            
+            // Draw point Q
+            if (!isNaN(qx) && !isNaN(qy)) {
+                const pixelX = centerX + qx * scale;
+                const pixelY = centerY - qy * scale;
+                
+                ctx.fillStyle = '#4ecdc4';
+                ctx.beginPath();
+                ctx.arc(pixelX, pixelY, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('Q', pixelX + 12, pixelY + 5);
+            }
+        }
+        
+        function isPointOnCurve(x, y) {
+            const left = y * y;
+            const right = x * x * x + currentCurve.a * x + currentCurve.b;
+            return Math.abs(left - right) < 0.01; // Small tolerance for floating point
+        }
+        
+        function findPointOnCurve() {
+            // Generate a random point on the curve
+            for (let attempts = 0; attempts < 100; attempts++) {
+                const x = (Math.random() - 0.5) * 10; // Random x between -5 and 5
+                const y2 = x * x * x + currentCurve.a * x + currentCurve.b;
+                
+                if (y2 >= 0) {
+                    const y = Math.sqrt(y2) * (Math.random() < 0.5 ? 1 : -1);
+                    
+                    document.getElementById('pointPX').value = x.toFixed(3);
+                    document.getElementById('pointPY').value = y.toFixed(3);
+                    drawCurve();
+                    return;
+                }
+            }
+            
+            alert('Could not find a random point on this curve. Try adjusting parameters.');
+        }
+        
+        function addPoints() {
+            const px = parseFloat(document.getElementById('pointPX').value);
+            const py = parseFloat(document.getElementById('pointPY').value);
+            const qx = parseFloat(document.getElementById('pointQX').value);
+            const qy = parseFloat(document.getElementById('pointQY').value);
+            
+            if (!isPointOnCurve(px, py)) {
+                alert('Point P is not on the curve!');
+                return;
+            }
+            
+            if (!isPointOnCurve(qx, qy)) {
+                alert('Point Q is not on the curve!');
+                return;
+            }
+            
+            // Point addition formula
+            let rx, ry, slope;
+            
+            if (px === qx) {
+                if (py === qy) {
+                    // Point doubling
+                    slope = (3 * px * px + currentCurve.a) / (2 * py);
+                } else {
+                    // Points are inverses
+                    document.getElementById('operationResults').innerHTML = `
+                        <div class="point-display">
+                            <p><strong>P + Q = O (point at infinity)</strong></p>
+                            <p>Points are inverses of each other</p>
+                        </div>
+                    `;
+                    return;
+                }
+            } else {
+                slope = (qy - py) / (qx - px);
+            }
+            
+            rx = slope * slope - px - qx;
+            ry = slope * (px - rx) - py;
+            
+            document.getElementById('operationResults').innerHTML = `
+                <div class="point-display">
+                    <p><strong>P + Q = R</strong></p>
+                    <p>P = (${px.toFixed(3)}, ${py.toFixed(3)})</p>
+                    <p>Q = (${qx.toFixed(3)}, ${qy.toFixed(3)})</p>
+                    <p>R = (${rx.toFixed(3)}, ${ry.toFixed(3)})</p>
+                    <p><strong>Slope:</strong> ${slope.toFixed(3)}</p>
+                </div>
+            `;
+            
+            // Draw result point
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scale = 50;
+            
+            const pixelX = centerX + rx * scale;
+            const pixelY = centerY - ry * scale;
+            
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(pixelX, pixelY, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('R', pixelX + 12, pixelY + 5);
+        }
+        
+        function doublePoint() {
+            const px = parseFloat(document.getElementById('pointPX').value);
+            const py = parseFloat(document.getElementById('pointPY').value);
+            
+            if (!isPointOnCurve(px, py)) {
+                alert('Point P is not on the curve!');
+                return;
+            }
+            
+            // Point doubling
+            const slope = (3 * px * px + currentCurve.a) / (2 * py);
+            const rx = slope * slope - 2 * px;
+            const ry = slope * (px - rx) - py;
+            
+            document.getElementById('operationResults').innerHTML = `
+                <div class="point-display">
+                    <p><strong>2P = R</strong></p>
+                    <p>P = (${px.toFixed(3)}, ${py.toFixed(3)})</p>
+                    <p>R = (${rx.toFixed(3)}, ${ry.toFixed(3)})</p>
+                    <p><strong>Tangent slope:</strong> ${slope.toFixed(3)}</p>
+                </div>
+            `;
+        }
+        
+        function scalarMultiply() {
+            const k = parseInt(document.getElementById('scalar').value);
+            const px = parseFloat(document.getElementById('pointPX').value);
+            const py = parseFloat(document.getElementById('pointPY').value);
+            
+            if (!isPointOnCurve(px, py)) {
+                alert('Point P is not on the curve!');
+                return;
+            }
+            
+            // Simple implementation of scalar multiplication
+            let result = { x: px, y: py };
+            
+            for (let i = 1; i < k; i++) {
+                // This is a simplified version - real implementation uses double-and-add
+                const slope = (3 * result.x * result.x + currentCurve.a) / (2 * result.y);
+                const newX = slope * slope - 2 * result.x;
+                const newY = slope * (result.x - newX) - result.y;
+                result = { x: newX, y: newY };
+            }
+            
+            document.getElementById('operationResults').innerHTML = `
+                <div class="point-display">
+                    <p><strong>${k}P = R</strong></p>
+                    <p>P = (${px.toFixed(3)}, ${py.toFixed(3)})</p>
+                    <p>R = (${result.x.toFixed(3)}, ${result.y.toFixed(3)})</p>
+                    <p><em>Note: Simplified calculation for demo</em></p>
+                </div>
+            `;
+        }
+        
+        function generateRandomPrivateKey() {
+            const randomKey = Math.floor(Math.random() * 100000) + 1;
+            document.getElementById('privateKey').value = randomKey;
+        }
+        
+        function generateKeyPair() {
+            const privateKey = parseInt(document.getElementById('privateKey').value);
+            
+            // For demo, use base point coordinates
+            const gx = parseFloat(document.getElementById('pointPX').value);
+            const gy = parseFloat(document.getElementById('pointPY').value);
+            
+            if (!isPointOnCurve(gx, gy)) {
+                alert('Base point is not on the curve!');
+                return;
+            }
+            
+            // Public key = private_key * base_point (simplified)
+            // In real ECC, this uses the curve's generator point
+            
+            document.getElementById('keyResults').innerHTML = `
+                <div class="math-display">
+                    <p><strong>🔐 ECC Key Pair Generated:</strong></p>
+                    <p><strong>Private Key:</strong> d = ${privateKey}</p>
+                    <p><strong>Base Point:</strong> G = (${gx.toFixed(3)}, ${gy.toFixed(3)})</p>
+                    <p><strong>Public Key:</strong> Q = d × G</p>
+                    <p><em>In practice: Q = (Qx, Qy) computed via scalar multiplication</em></p>
+                    <br>
+                    <p><strong>🛡️ Security:</strong></p>
+                    <p>• Private key must remain secret</p>
+                    <p>• Public key can be shared freely</p>
+                    <p>• ECDLP: Given G and Q, finding d is computationally hard</p>
+                </div>
+            `;
+        }
+        
+        function showSecurityComparison() {
+            document.getElementById('performanceAnalysis').innerHTML = `
+                <div class="math-display">
+                    <h4>🔐 Security Comparison:</h4>
+                    <table style="width: 100%; color: white;">
+                        <tr><th>Security Level</th><th>ECC Key Size</th><th>RSA Key Size</th><th>Ratio</th></tr>
+                        <tr><td>80-bit</td><td>160-bit</td><td>1024-bit</td><td>6.4:1</td></tr>
+                        <tr><td>112-bit</td><td>224-bit</td><td>2048-bit</td><td>9.1:1</td></tr>
+                        <tr><td>128-bit</td><td>256-bit</td><td>3072-bit</td><td>12:1</td></tr>
+                        <tr><td>192-bit</td><td>384-bit</td><td>7680-bit</td><td>20:1</td></tr>
+                        <tr><td>256-bit</td><td>512-bit</td><td>15360-bit</td><td>30:1</td></tr>
+                    </table>
+                    <p><strong>⚡ Performance Benefits:</strong></p>
+                    <p>• Faster key generation</p>
+                    <p>• Smaller certificates</p>
+                    <p>• Less memory usage</p>
+                    <p>• Better for mobile/IoT</p>
+                </div>
+            `;
+        }
+        
+        // Auto-update curve when parameters change
+        document.getElementById('curveType').addEventListener('change', updateCurve);
+        document.getElementById('paramA').addEventListener('input', updateCurve);
+        document.getElementById('paramB').addEventListener('input', updateCurve);
+        document.getElementById('modulus').addEventListener('input', updateCurve);
+        
+        // Advanced Mathematical Operations
+        function updateMathDemo() {
+            const operation = document.getElementById('mathOperation').value;
+            const content = document.getElementById('mathDemoContent');
+            
+            switch (operation) {
+                case 'point-addition':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Point P (x₁, y₁):</label>
+                            <input type="number" id="p1x" step="0.001" value="1" placeholder="x₁">
+                            <input type="number" id="p1y" step="0.001" value="2.236" placeholder="y₁">
+                        </div>
+                        <div class="control-group">
+                            <label>Point Q (x₂, y₂):</label>
+                            <input type="number" id="p2x" step="0.001" value="2" placeholder="x₂">
+                            <input type="number" id="p2y" step="0.001" value="3.162" placeholder="y₂">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'scalar-mult':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Scalar k:</label>
+                            <input type="number" id="scalarK" value="3" min="1" max="100">
+                        </div>
+                        <div class="control-group">
+                            <label>Base Point P (x, y):</label>
+                            <input type="number" id="baseX" step="0.001" value="1" placeholder="x">
+                            <input type="number" id="baseY" step="0.001" value="2.236" placeholder="y">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'discriminant':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Parameter a:</label>
+                            <input type="number" id="discA" step="0.001" value="-3">
+                        </div>
+                        <div class="control-group">
+                            <label>Parameter b:</label>
+                            <input type="number" id="discB" step="0.001" value="5">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'order-estimation':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Prime p:</label>
+                            <input type="number" id="primeP" value="23">
+                        </div>
+                        <div class="control-group">
+                            <label>Parameter a:</label>
+                            <input type="number" id="orderA" value="-3">
+                        </div>
+                        <div class="control-group">
+                            <label>Parameter b:</label>
+                            <input type="number" id="orderB" value="5">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'modular-inverse':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Number a:</label>
+                            <input type="number" id="invA" value="7">
+                        </div>
+                        <div class="control-group">
+                            <label>Modulus p:</label>
+                            <input type="number" id="invP" value="23">
+                        </div>
+                    `;
+                    break;
+                    
+                case 'quadratic-residue':
+                    content.innerHTML = `
+                        <div class="control-group">
+                            <label>Number a:</label>
+                            <input type="number" id="qrA" value="4">
+                        </div>
+                        <div class="control-group">
+                            <label>Prime p:</label>
+                            <input type="number" id="qrP" value="23">
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        function executeMathOperation() {
+            const operation = document.getElementById('mathOperation').value;
+            const results = document.getElementById('mathResults');
+            
+            switch (operation) {
+                case 'point-addition':
+                    calculatePointAddition(results);
+                    break;
+                case 'scalar-mult':
+                    calculateScalarMultiplication(results);
+                    break;
+                case 'discriminant':
+                    calculateDiscriminant(results);
+                    break;
+                case 'order-estimation':
+                    estimateCurveOrder(results);
+                    break;
+                case 'modular-inverse':
+                    calculateModularInverse(results);
+                    break;
+                case 'quadratic-residue':
+                    testQuadraticResidue(results);
+                    break;
+            }
+        }
+        
+        function calculatePointAddition(results) {
+            const x1 = parseFloat(document.getElementById('p1x').value);
+            const y1 = parseFloat(document.getElementById('p1y').value);
+            const x2 = parseFloat(document.getElementById('p2x').value);
+            const y2 = parseFloat(document.getElementById('p2y').value);
+            
+            if (x1 === x2) {
+                results.innerHTML = `
+                    <div class="result-panel">
+                        <h4>⚠️ Special Case: Point Doubling</h4>
+                        <p>Since x₁ = x₂, use point doubling formula:</p>
+                        <p>λ = (3x₁² + a) / (2y₁)</p>
+                        <p>Use the Point Doubling operation instead.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const lambda = (y2 - y1) / (x2 - x1);
+            const x3 = lambda * lambda - x1 - x2;
+            const y3 = lambda * (x1 - x3) - y1;
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>📐 Point Addition: P + Q = R</h4>
+                    <p><strong>Given:</strong></p>
+                    <p>P = (${x1}, ${y1})</p>
+                    <p>Q = (${x2}, ${y2})</p>
+                    <p><strong>Calculation:</strong></p>
+                    <p>λ = (y₂ - y₁) / (x₂ - x₁) = (${y2} - ${y1}) / (${x2} - ${x1}) = ${lambda.toFixed(4)}</p>
+                    <p>x₃ = λ² - x₁ - x₂ = ${lambda.toFixed(4)}² - ${x1} - ${x2} = ${x3.toFixed(4)}</p>
+                    <p>y₃ = λ(x₁ - x₃) - y₁ = ${lambda.toFixed(4)}(${x1} - ${x3.toFixed(4)}) - ${y1} = ${y3.toFixed(4)}</p>
+                    <p><strong>Result:</strong></p>
+                    <p>R = P + Q = (${x3.toFixed(4)}, ${y3.toFixed(4)})</p>
+                </div>
+            `;
+        }
+        
+        function calculateScalarMultiplication(results) {
+            const k = parseInt(document.getElementById('scalarK').value);
+            const x = parseFloat(document.getElementById('baseX').value);
+            const y = parseFloat(document.getElementById('baseY').value);
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>⚡ Scalar Multiplication: ${k}P</h4>
+                    <p><strong>Given:</strong></p>
+                    <p>k = ${k}</p>
+                    <p>P = (${x}, ${y})</p>
+                    <p><strong>Algorithm:</strong> Double-and-Add</p>
+                    <p>Binary representation of ${k}: ${k.toString(2)}</p>
+                    <p><strong>Steps:</strong></p>
+                    <p>1. Initialize result = P</p>
+                    <p>2. For each bit in k (from left to right):</p>
+                    <p>   - Double the current result</p>
+                    <p>   - If bit is 1, add P to result</p>
+                    <p><strong>Complexity:</strong> O(log k) point operations</p>
+                    <p><strong>Note:</strong> Actual computation requires modular arithmetic</p>
+                    <p>In practice: kP = (result_x mod p, result_y mod p)</p>
+                </div>
+            `;
+        }
+        
+        function calculateDiscriminant(results) {
+            const a = parseFloat(document.getElementById('discA').value);
+            const b = parseFloat(document.getElementById('discB').value);
+            
+            const discriminant = -16 * (4 * Math.pow(a, 3) + 27 * Math.pow(b, 2));
+            const isValid = discriminant !== 0;
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>🔍 Curve Discriminant Analysis</h4>
+                    <p><strong>Curve:</strong> y² = x³ + ${a}x + ${b}</p>
+                    <p><strong>Formula:</strong> Δ = -16(4a³ + 27b²)</p>
+                    <p><strong>Calculation:</strong></p>
+                    <p>4a³ = 4 × (${a})³ = ${4 * Math.pow(a, 3)}</p>
+                    <p>27b² = 27 × (${b})² = ${27 * Math.pow(b, 2)}</p>
+                    <p>4a³ + 27b² = ${4 * Math.pow(a, 3) + 27 * Math.pow(b, 2)}</p>
+                    <p>Δ = -16 × ${4 * Math.pow(a, 3) + 27 * Math.pow(b, 2)} = ${discriminant}</p>
+                    <p><strong>Result:</strong></p>
+                    <p>Discriminant Δ = ${discriminant}</p>
+                    <p><strong>Validity:</strong> ${isValid ? '✅ Valid (non-singular)' : '❌ Invalid (singular)'}</p>
+                    <p><em>${isValid ? 'Curve has no cusps or self-intersections' : 'Curve is singular - not suitable for cryptography'}</em></p>
+                </div>
+            `;
+        }
+        
+        function estimateCurveOrder(results) {
+            const p = parseInt(document.getElementById('primeP').value);
+            const a = parseInt(document.getElementById('orderA').value);
+            const b = parseInt(document.getElementById('orderB').value);
+            
+            // Simple point counting for small primes (demonstration only)
+            let pointCount = 1; // Point at infinity
+            
+            for (let x = 0; x < p; x++) {
+                const rhs = (x * x * x + a * x + b) % p;
+                if (rhs < 0) rhs += p;
+                
+                // Count points where y² ≡ rhs (mod p)
+                for (let y = 0; y < p; y++) {
+                    if ((y * y) % p === rhs) {
+                        pointCount++;
+                    }
+                }
+            }
+            
+            const hasseMin = p + 1 - 2 * Math.sqrt(p);
+            const hasseMax = p + 1 + 2 * Math.sqrt(p);
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>📊 Curve Order Estimation</h4>
+                    <p><strong>Curve:</strong> y² ≡ x³ + ${a}x + ${b} (mod ${p})</p>
+                    <p><strong>Actual Count:</strong> #E(𝔽${p}) = ${pointCount}</p>
+                    <p><strong>Hasse Bound:</strong></p>
+                    <p>|#E(𝔽p) - (p + 1)| ≤ 2√p</p>
+                    <p>Range: [${hasseMin.toFixed(2)}, ${hasseMax.toFixed(2)}]</p>
+                    <p><strong>Verification:</strong></p>
+                    <p>${pointCount} ∈ [${hasseMin.toFixed(2)}, ${hasseMax.toFixed(2)}] = ${pointCount >= hasseMin && pointCount <= hasseMax ? '✅ Valid' : '❌ Error'}</p>
+                    <p><strong>Trace of Frobenius:</strong></p>
+                    <p>t = p + 1 - #E(𝔽p) = ${p + 1 - pointCount}</p>
+                    <p><em>Note: For large primes, use Schoof's algorithm</em></p>
+                </div>
+            `;
+        }
+        
+        function calculateModularInverse(results) {
+            const a = parseInt(document.getElementById('invA').value);
+            const p = parseInt(document.getElementById('invP').value);
+            
+            // Extended Euclidean Algorithm
+            function extendedGCD(a, b) {
+                if (a === 0) return [b, 0, 1];
+                
+                const [gcd, x1, y1] = extendedGCD(b % a, a);
+                const x = y1 - Math.floor(b / a) * x1;
+                const y = x1;
+                
+                return [gcd, x, y];
+            }
+            
+            const [gcd, x, y] = extendedGCD(a % p, p);
+            const inverse = gcd === 1 ? (x % p + p) % p : null;
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>🔄 Modular Inverse Calculation</h4>
+                    <p><strong>Problem:</strong> Find a⁻¹ such that a × a⁻¹ ≡ 1 (mod p)</p>
+                    <p><strong>Given:</strong> a = ${a}, p = ${p}</p>
+                    <p><strong>Method:</strong> Extended Euclidean Algorithm</p>
+                    <p><strong>Equation:</strong> gcd(a, p) = ax + py</p>
+                    <p><strong>Result:</strong></p>
+                    <p>gcd(${a}, ${p}) = ${gcd}</p>
+                    ${gcd === 1 ? `
+                        <p>Inverse exists: ${a}⁻¹ ≡ ${inverse} (mod ${p})</p>
+                        <p><strong>Verification:</strong></p>
+                        <p>${a} × ${inverse} = ${a * inverse} ≡ ${(a * inverse) % p} ≡ 1 (mod ${p}) ✅</p>
+                    ` : `
+                        <p>❌ Inverse does not exist (gcd ≠ 1)</p>
+                        <p>a and p are not coprime</p>
+                    `}
+                    <p><strong>Alternative:</strong> Use Fermat's Little Theorem</p>
+                    <p>If p is prime: a⁻¹ ≡ a^(p-2) (mod p)</p>
+                </div>
+            `;
+        }
+        
+        function testQuadraticResidue(results) {
+            const a = parseInt(document.getElementById('qrA').value);
+            const p = parseInt(document.getElementById('qrP').value);
+            
+            // Legendre symbol calculation
+            function legendreSymbol(a, p) {
+                if (a % p === 0) return 0;
+                const result = Math.pow(a, (p - 1) / 2) % p;
+                return result === p - 1 ? -1 : result;
+            }
+            
+            const legendre = legendreSymbol(a, p);
+            const isResidue = legendre === 1;
+            
+            // Find square roots if it's a residue
+            let roots = [];
+            if (isResidue) {
+                for (let x = 0; x < p; x++) {
+                    if ((x * x) % p === a % p) {
+                        roots.push(x);
+                    }
+                }
+            }
+            
+            results.innerHTML = `
+                <div class="result-panel">
+                    <h4>🔍 Quadratic Residue Test</h4>
+                    <p><strong>Question:</strong> Is ${a} a quadratic residue modulo ${p}?</p>
+                    <p><strong>Definition:</strong> a is a QR mod p if ∃x: x² ≡ a (mod p)</p>
+                    <p><strong>Legendre Symbol:</strong> (${a}/${p}) = ${a}^((${p}-1)/2) mod ${p}</p>
+                    <p><strong>Calculation:</strong></p>
+                    <p>(${p}-1)/2 = ${(p-1)/2}</p>
+                    <p>${a}^${(p-1)/2} ≡ ${legendre === -1 ? p-1 : legendre} ≡ ${legendre} (mod ${p})</p>
+                    <p><strong>Result:</strong></p>
+                    <p>Legendre symbol = ${legendre}</p>
+                    <p>${isResidue ? '✅ Quadratic Residue' : '❌ Quadratic Non-Residue'}</p>
+                    ${isResidue ? `
+                        <p><strong>Square roots:</strong> x = ${roots.join(', ')} (mod ${p})</p>
+                        <p><strong>Verification:</strong> ${roots[0]}² ≡ ${(roots[0] * roots[0]) % p} ≡ ${a % p} (mod ${p}) ✅</p>
+                    ` : `
+                        <p>No square roots exist modulo ${p}</p>
+                    `}
+                    <p><strong>Cryptographic Application:</strong></p>
+                    <p>Used in point compression and y-coordinate recovery</p>
+                </div>
+            `;
+        }
+        
+        // Initialize the math demo
+        updateMathDemo();
+    </script>
+</body>
+</html>

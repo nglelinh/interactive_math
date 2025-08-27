@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contour Integration & Residues - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .function-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .calculation-box {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #4caf50;
+        }
+        
+        .residue-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        #contourPlot {
+            width: 100%;
+            height: 500px;
+        }
+        
+        .pole-list {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .step-animation {
+            background: rgba(255, 193, 7, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px solid #ffc107;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌀 Contour Integration & Residues</h1>
+        
+        <div class="math-explanation">
+            <h2>🎯 Mathematical Foundation</h2>
+            <p><strong>Cauchy's Residue Theorem:</strong> For a simple closed contour C and function f(z) with isolated singularities inside C:</p>
+            
+            <div class="formula-box">
+                $$\oint_C f(z) \, dz = 2\pi i \sum \text{Res}(f, z_k)$$
+                <br><br>
+                <strong>Residue at Simple Pole:</strong> $\text{Res}(f, a) = \lim_{z \to a} (z-a)f(z)$<br>
+                <strong>Residue at Pole of Order n:</strong> $\text{Res}(f, a) = \frac{1}{(n-1)!} \lim_{z \to a} \frac{d^{n-1}}{dz^{n-1}}[(z-a)^n f(z)]$
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('basic')">Basic Integration</button>
+            <button class="tab" onclick="showTab('residues')">Residue Calculation</button>
+            <button class="tab" onclick="showTab('applications')">Real Integrals</button>
+        </div>
+        
+        <div id="basic" class="tab-content active">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🎮 Contour Integration</h3>
+                    
+                    <div class="function-selector">
+                        <label>Select Function:</label>
+                        <select id="functionSelect">
+                            <option value="simple_pole">1/(z-1) - Simple pole</option>
+                            <option value="double_pole">1/(z-1)² - Double pole</option>
+                            <option value="multiple_poles">1/((z-1)(z+1)) - Two simple poles</option>
+                            <option value="essential">e^(1/z) - Essential singularity</option>
+                            <option value="polynomial">z² + 1 - Polynomial</option>
+                            <option value="rational">z/(z²+1) - Rational function</option>
+                            <option value="trig">sin(z)/z - Trigonometric</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Contour Type:</label>
+                        <select id="contourType">
+                            <option value="circle">Circle</option>
+                            <option value="rectangle">Rectangle</option>
+                            <option value="custom">Custom Path</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Contour Radius: <span id="radiusValue">2</span></label>
+                        <input type="range" id="contourRadius" min="0.5" max="4" step="0.1" value="2">
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Number of Steps: <span id="stepsValue">100</span></label>
+                        <input type="range" id="integrationSteps" min="50" max="500" step="10" value="100">
+                    </div>
+                    
+                    <button onclick="animateIntegration()">🎬 Animate Integration</button>
+                    <button onclick="calculateInstantly()">⚡ Calculate Instantly</button>
+                    
+                    <div class="calculation-box" id="integralResult">
+                        <div><strong>Contour Integral:</strong></div>
+                        <div id="integralValue">∮ f(z) dz = 2πi</div>
+                    </div>
+                    
+                    <div class="pole-list" id="polesList">
+                        <strong>Poles inside contour:</strong>
+                        <div id="polesInside">z = 1 (simple pole)</div>
+                    </div>
+                    
+                    <div class="residue-info" id="residueCalculation">
+                        <strong>Residue Calculation:</strong>
+                        <div id="residueSteps">Res(f, 1) = lim[z→1] (z-1)·1/(z-1) = 1</div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="contourPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="residues" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🔍 Residue Analysis</h3>
+                    
+                    <div class="function-selector">
+                        <label>Function for Residue Analysis:</label>
+                        <select id="residueFunction">
+                            <option value="1/(z^2+1)">1/(z²+1)</option>
+                            <option value="z/(z^2-1)²">z/(z²-1)²</option>
+                            <option value="e^z/(z^3)">e^z/z³</option>
+                            <option value="sin(z)/z^2">sin(z)/z²</option>
+                            <option value="1/(z*(z-1)^2)">1/(z(z-1)²)</option>
+                            <option value="cot(z)">cot(z)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Select Pole to Analyze:</label>
+                        <select id="poleSelect">
+                            <option value="0">All Poles</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="calculateAllResidues()">🧮 Calculate All Residues</button>
+                    <button onclick="showLaurentSeries()">📊 Show Laurent Series</button>
+                    
+                    <div class="calculation-box" id="residueResults">
+                        <div><strong>Residue Results:</strong></div>
+                        <div id="allResidues">Computing...</div>
+                    </div>
+                    
+                    <div class="step-animation" id="calculationSteps">
+                        <div><strong>Step-by-step calculation:</strong></div>
+                        <div id="stepByStep">Select a function to see detailed steps</div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="residuePlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="applications" class="tab-content">
+            <div class="content-grid">
+                <div class="controls-panel">
+                    <h3>🌍 Real Integral Applications</h3>
+                    
+                    <div class="function-selector">
+                        <label>Real Integral to Evaluate:</label>
+                        <select id="realIntegralSelect">
+                            <option value="1/(x^2+1)">∫₋∞^∞ 1/(x²+1) dx</option>
+                            <option value="x^2/(x^4+1)">∫₋∞^∞ x²/(x⁴+1) dx</option>
+                            <option value="cos(x)/(x^2+1)">∫₋∞^∞ cos(x)/(x²+1) dx</option>
+                            <option value="sin(x)/x">∫₀^∞ sin(x)/x dx</option>
+                            <option value="1/(x^2+a^2)">∫₋∞^∞ 1/(x²+a²) dx</option>
+                        </select>
+                    </div>
+                    
+                    <div class="parameter-control">
+                        <label>Parameter a (if applicable): <span id="parameterValue">1</span></label>
+                        <input type="range" id="parameter" min="0.1" max="5" step="0.1" value="1">
+                    </div>
+                    
+                    <button onclick="solveRealIntegral()">🎯 Solve Using Residues</button>
+                    <button onclick="showContourChoice()">🗺️ Show Contour Choice</button>
+                    
+                    <div class="calculation-box" id="realIntegralResult">
+                        <div><strong>Real Integral Value:</strong></div>
+                        <div id="realValue">∫₋∞^∞ 1/(x²+1) dx = π</div>
+                    </div>
+                    
+                    <div class="step-animation" id="solutionMethod">
+                        <div><strong>Solution Method:</strong></div>
+                        <div id="methodSteps">
+                            1. Choose appropriate contour<br>
+                            2. Apply residue theorem<br>
+                            3. Take limit as contour → real axis
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="visualization-panel">
+                    <div id="realIntegralPlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🚀 Applications & Examples</h2>
+            
+            <div class="grid-container">
+                <div class="info-box">
+                    <h4>🔬 Physics Applications</h4>
+                    <p>Quantum field theory, scattering amplitudes, Feynman diagrams</p>
+                </div>
+                <div class="info-box">
+                    <h4>⚡ Engineering</h4>
+                    <p>Control theory, signal processing, inverse Laplace transforms</p>
+                </div>
+                <div class="info-box">
+                    <h4>📊 Statistics</h4>
+                    <p>Characteristic functions, moment generating functions</p>
+                </div>
+                <div class="info-box">
+                    <h4>🌊 Fluid Dynamics</h4>
+                    <p>Complex potential, conformal mapping applications</p>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <strong>Common Techniques:</strong><br>
+                • <strong>Jordan's Lemma:</strong> For integrals over semicircles<br>
+                • <strong>Keyhole Contour:</strong> For branch cuts and logarithmic integrals<br>
+                • <strong>Rectangular Contour:</strong> For periodic functions<br>
+                • <strong>Indented Contour:</strong> For poles on the real axis
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentAnimation = null;
+        let animationStep = 0;
+        
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Update relevant visualizations
+            if (tabName === 'basic') {
+                updateContourVisualization();
+            } else if (tabName === 'residues') {
+                updateResidueAnalysis();
+            } else if (tabName === 'applications') {
+                updateRealIntegralVisualization();
+            }
+        }
+        
+        // Function definitions for complex analysis
+        function getFunctionInfo(funcType) {
+            const functions = {
+                'simple_pole': {
+                    formula: '1/(z-1)',
+                    poles: [{z: {real: 1, imag: 0}, order: 1, residue: 1}],
+                    description: 'Simple pole at z = 1'
+                },
+                'double_pole': {
+                    formula: '1/(z-1)²',
+                    poles: [{z: {real: 1, imag: 0}, order: 2, residue: 1}],
+                    description: 'Double pole at z = 1'
+                },
+                'multiple_poles': {
+                    formula: '1/((z-1)(z+1))',
+                    poles: [
+                        {z: {real: 1, imag: 0}, order: 1, residue: 0.5},
+                        {z: {real: -1, imag: 0}, order: 1, residue: -0.5}
+                    ],
+                    description: 'Simple poles at z = ±1'
+                },
+                'polynomial': {
+                    formula: 'z² + 1',
+                    poles: [],
+                    description: 'No poles (entire function)'
+                },
+                'rational': {
+                    formula: 'z/(z²+1)',
+                    poles: [
+                        {z: {real: 0, imag: 1}, order: 1, residue: {real: 0, imag: 0.5}},
+                        {z: {real: 0, imag: -1}, order: 1, residue: {real: 0, imag: -0.5}}
+                    ],
+                    description: 'Simple poles at z = ±i'
+                }
+            };
+            
+            return functions[funcType] || functions['simple_pole'];
+        }
+        
+        function evaluateFunction(funcType, z) {
+            const {real: x, imag: y} = z;
+            
+            switch(funcType) {
+                case 'simple_pole':
+                    const denom1 = (x - 1) * (x - 1) + y * y;
+                    return {
+                        real: (x - 1) / denom1,
+                        imag: -y / denom1
+                    };
+                    
+                case 'double_pole':
+                    const denom2 = Math.pow((x - 1) * (x - 1) + y * y, 2);
+                    const num_real = (x - 1) * (x - 1) - y * y;
+                    const num_imag = 2 * (x - 1) * y;
+                    return {
+                        real: num_real / denom2,
+                        imag: -num_imag / denom2
+                    };
+                    
+                case 'multiple_poles':
+                    const denom3 = ((x - 1) * (x - 1) + y * y) * ((x + 1) * (x + 1) + y * y);
+                    return {
+                        real: ((x - 1) * (x + 1) + y * y) / denom3,
+                        imag: -y * (2 * x) / denom3
+                    };
+                    
+                case 'polynomial':
+                    return {
+                        real: x * x - y * y + 1,
+                        imag: 2 * x * y
+                    };
+                    
+                case 'rational':
+                    const denom4 = (x * x + y * y + 1) * (x * x + y * y + 1) - 4 * y * y;
+                    return {
+                        real: x * (x * x - y * y + 1) / denom4,
+                        imag: y * (x * x - y * y - 1) / denom4
+                    };
+                    
+                default:
+                    return {real: 0, imag: 0};
+            }
+        }
+        
+        function generateContour(type, radius, steps) {
+            const contour = [];
+            
+            if (type === 'circle') {
+                for (let i = 0; i <= steps; i++) {
+                    const theta = (2 * Math.PI * i) / steps;
+                    contour.push({
+                        real: radius * Math.cos(theta),
+                        imag: radius * Math.sin(theta)
+                    });
+                }
+            } else if (type === 'rectangle') {
+                const half = radius;
+                // Bottom edge
+                for (let i = 0; i <= steps / 4; i++) {
+                    contour.push({
+                        real: -half + (2 * half * i) / (steps / 4),
+                        imag: -half
+                    });
+                }
+                // Right edge
+                for (let i = 1; i <= steps / 4; i++) {
+                    contour.push({
+                        real: half,
+                        imag: -half + (2 * half * i) / (steps / 4)
+                    });
+                }
+                // Top edge
+                for (let i = 1; i <= steps / 4; i++) {
+                    contour.push({
+                        real: half - (2 * half * i) / (steps / 4),
+                        imag: half
+                    });
+                }
+                // Left edge
+                for (let i = 1; i < steps / 4; i++) {
+                    contour.push({
+                        real: -half,
+                        imag: half - (2 * half * i) / (steps / 4)
+                    });
+                }
+            }
+            
+            return contour;
+        }
+        
+        function calculateContourIntegral(funcType, contour) {
+            let integral = {real: 0, imag: 0};
+            
+            for (let i = 0; i < contour.length - 1; i++) {
+                const z1 = contour[i];
+                const z2 = contour[i + 1];
+                
+                // Midpoint rule for approximation
+                const zmid = {
+                    real: (z1.real + z2.real) / 2,
+                    imag: (z1.imag + z2.imag) / 2
+                };
+                
+                const fVal = evaluateFunction(funcType, zmid);
+                const dz = {
+                    real: z2.real - z1.real,
+                    imag: z2.imag - z1.imag
+                };
+                
+                // Complex multiplication: f(z) * dz
+                const product = {
+                    real: fVal.real * dz.real - fVal.imag * dz.imag,
+                    imag: fVal.real * dz.imag + fVal.imag * dz.real
+                };
+                
+                integral.real += product.real;
+                integral.imag += product.imag;
+            }
+            
+            return integral;
+        }
+        
+        function updateContourVisualization() {
+            const funcType = document.getElementById('functionSelect').value;
+            const contourType = document.getElementById('contourType').value;
+            const radius = parseFloat(document.getElementById('contourRadius').value);
+            const steps = parseInt(document.getElementById('integrationSteps').value);
+            
+            const contour = generateContour(contourType, radius, steps);
+            const funcInfo = getFunctionInfo(funcType);
+            
+            // Calculate integral
+            const integral = calculateContourIntegral(funcType, contour);
+            
+            // Update displays
+            document.getElementById('integralValue').innerHTML = 
+                `∮ f(z) dz = ${integral.real.toFixed(3)} + ${integral.imag.toFixed(3)}i`;
+            
+            // Check which poles are inside contour
+            const polesInside = funcInfo.poles.filter(pole => {
+                const distance = Math.sqrt(pole.z.real * pole.z.real + pole.z.imag * pole.z.imag);
+                return distance < radius;
+            });
+            
+            document.getElementById('polesInside').innerHTML = 
+                polesInside.length > 0 ? 
+                polesInside.map(pole => `z = ${pole.z.real} + ${pole.z.imag}i (order ${pole.order})`).join('<br>') :
+                'No poles inside contour';
+            
+            // Calculate residues
+            let totalResidue = {real: 0, imag: 0};
+            let residueText = '';
+            
+            polesInside.forEach(pole => {
+                if (typeof pole.residue === 'number') {
+                    totalResidue.real += pole.residue;
+                    residueText += `Res(f, ${pole.z.real} + ${pole.z.imag}i) = ${pole.residue}<br>`;
+                } else {
+                    totalResidue.real += pole.residue.real;
+                    totalResidue.imag += pole.residue.imag;
+                    residueText += `Res(f, ${pole.z.real} + ${pole.z.imag}i) = ${pole.residue.real} + ${pole.residue.imag}i<br>`;
+                }
+            });
+            
+            const theoretical = {
+                real: -2 * Math.PI * totalResidue.imag,
+                imag: 2 * Math.PI * totalResidue.real
+            };
+            
+            residueText += `<br>By Residue Theorem: 2πi × Σ Residues = ${theoretical.real.toFixed(3)} + ${theoretical.imag.toFixed(3)}i`;
+            
+            document.getElementById('residueSteps').innerHTML = residueText;
+            
+            plotContourIntegration(contour, funcInfo.poles, radius);
+        }
+        
+        function plotContourIntegration(contour, poles, radius) {
+            const traces = [];
+            
+            // Plot contour
+            const contourX = contour.map(p => p.real);
+            const contourY = contour.map(p => p.imag);
+            
+            traces.push({
+                x: contourX,
+                y: contourY,
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: 'Integration Contour',
+                line: {color: '#4fc3f7', width: 3},
+                marker: {size: 4, color: '#4fc3f7'}
+            });
+            
+            // Plot poles
+            poles.forEach((pole, index) => {
+                const distance = Math.sqrt(pole.z.real * pole.z.real + pole.z.imag * pole.z.imag);
+                const isInside = distance < radius;
+                
+                traces.push({
+                    x: [pole.z.real],
+                    y: [pole.z.imag],
+                    mode: 'markers',
+                    type: 'scatter',
+                    name: `Pole ${index + 1} (${isInside ? 'inside' : 'outside'})`,
+                    marker: {
+                        size: 12,
+                        color: isInside ? '#4caf50' : '#f44336',
+                        symbol: pole.order === 1 ? 'x' : 'square'
+                    }
+                });
+            });
+            
+            // Add origin and axes
+            traces.push({
+                x: [-radius*1.5, radius*1.5],
+                y: [0, 0],
+                mode: 'lines',
+                type: 'scatter',
+                line: {color: 'rgba(255,255,255,0.3)', width: 1},
+                showlegend: false
+            });
+            
+            traces.push({
+                x: [0, 0],
+                y: [-radius*1.5, radius*1.5],
+                mode: 'lines',
+                type: 'scatter',
+                line: {color: 'rgba(255,255,255,0.3)', width: 1},
+                showlegend: false
+            });
+            
+            const layout = {
+                title: 'Contour Integration in Complex Plane',
+                xaxis: {
+                    title: 'Real Axis',
+                    range: [-radius*1.5, radius*1.5],
+                    gridcolor: 'rgba(255,255,255,0.2)'
+                },
+                yaxis: {
+                    title: 'Imaginary Axis',
+                    range: [-radius*1.5, radius*1.5],
+                    gridcolor: 'rgba(255,255,255,0.2)'
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('contourPlot', traces, layout, {responsive: true});
+        }
+        
+        function animateIntegration() {
+            // Implementation for step-by-step animation
+            alert('Animation feature - would show step-by-step integration around contour');
+        }
+        
+        function calculateInstantly() {
+            updateContourVisualization();
+        }
+        
+        function updateResidueAnalysis() {
+            // Placeholder for residue analysis tab
+            const func = document.getElementById('residueFunction').value;
+            document.getElementById('allResidues').innerHTML = `Analyzing function: ${func}`;
+        }
+        
+        function calculateAllResidues() {
+            alert('Calculate all residues for the selected function');
+        }
+        
+        function showLaurentSeries() {
+            alert('Show Laurent series expansion around selected pole');
+        }
+        
+        function updateRealIntegralVisualization() {
+            // Placeholder for real integral applications
+            const integral = document.getElementById('realIntegralSelect').value;
+            document.getElementById('realValue').innerHTML = `Evaluating: ${integral}`;
+        }
+        
+        function solveRealIntegral() {
+            const integralType = document.getElementById('realIntegralSelect').value;
+            const param = parseFloat(document.getElementById('parameter').value);
+            
+            let result = '';
+            
+            switch(integralType) {
+                case '1/(x^2+1)':
+                    result = '∫₋∞^∞ 1/(x²+1) dx = π';
+                    break;
+                case '1/(x^2+a^2)':
+                    result = `∫₋∞^∞ 1/(x²+${param}²) dx = π/${param}`;
+                    break;
+                default:
+                    result = 'Computing using residue theorem...';
+            }
+            
+            document.getElementById('realValue').innerHTML = result;
+        }
+        
+        function showContourChoice() {
+            alert('Show how to choose appropriate contour for real integral evaluation');
+        }
+        
+        // Event listeners
+        document.getElementById('functionSelect').addEventListener('change', updateContourVisualization);
+        document.getElementById('contourType').addEventListener('change', updateContourVisualization);
+        
+        document.getElementById('contourRadius').addEventListener('input', function() {
+            document.getElementById('radiusValue').textContent = this.value;
+            updateContourVisualization();
+        });
+        
+        document.getElementById('integrationSteps').addEventListener('input', function() {
+            document.getElementById('stepsValue').textContent = this.value;
+            updateContourVisualization();
+        });
+        
+        document.getElementById('parameter').addEventListener('input', function() {
+            document.getElementById('parameterValue').textContent = this.value;
+            if (document.getElementById('applications').classList.contains('active')) {
+                updateRealIntegralVisualization();
+            }
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                updateContourVisualization();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

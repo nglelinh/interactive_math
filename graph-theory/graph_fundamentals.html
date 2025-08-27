@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Fundamentals - Interactive Learning</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 30px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        button.active {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+        }
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .math-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ffd700;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .graph-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .legend {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Quay lại Graph Theory Hub</a>
+        
+        <h1>📊 Graph Fundamentals - Interactive Exploration</h1>
+        
+        <div class="content-grid">
+            <div class="visualization-panel">
+                <h2>🕸️ Graph Visualization</h2>
+                <canvas id="graphCanvas" width="800" height="600"></canvas>
+                
+                <div class="info-panel">
+                    <h3>📚 Mathematical Foundations</h3>
+                    <div class="math-formula">
+                        <strong>Definition:</strong> A graph G = (V, E) where:<br>
+                        • V = set of vertices (nodes)<br>
+                        • E = set of edges (connections)<br>
+                        • |V| = number of vertices<br>
+                        • |E| = number of edges
+                    </div>
+                    
+                    <div class="math-formula">
+                        <strong>Degree of vertex v:</strong> deg(v) = number of edges connected to v<br>
+                        <strong>Handshaking Lemma:</strong> ∑ deg(v) = 2|E|
+                    </div>
+                    
+                    <div class="math-formula" id="currentGraphInfo">
+                        <strong>Current Graph Properties:</strong><br>
+                        • Vertices: <span id="vertexCount">0</span><br>
+                        • Edges: <span id="edgeCount">0</span><br>
+                        • Type: <span id="graphType">Undirected</span><br>
+                        • Density: <span id="graphDensity">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-group">
+                    <h3>🎮 Graph Controls</h3>
+                    <button onclick="clearGraph()">Clear Graph</button>
+                    <button onclick="generateRandomGraph()">Random Graph</button>
+                    <button onclick="generateCompleteGraph()">Complete Graph</button>
+                    <button onclick="generateCycleGraph()">Cycle Graph</button>
+                    <button onclick="generatePathGraph()">Path Graph</button>
+                    <button onclick="generateStarGraph()">Star Graph</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>🔧 Graph Type</h3>
+                    <button id="undirectedBtn" class="active" onclick="setGraphType('undirected')">Undirected</button>
+                    <button id="directedBtn" onclick="setGraphType('directed')">Directed</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>📊 Graph Generation</h3>
+                    <label>Number of Vertices: <span id="vertexCountLabel">6</span></label>
+                    <input type="range" id="vertexSlider" min="3" max="20" value="6" oninput="updateVertexCount()">
+                    
+                    <label>Edge Probability: <span id="edgeProbLabel">0.3</span></label>
+                    <input type="range" id="edgeProbSlider" min="0.1" max="1" step="0.1" value="0.3" oninput="updateEdgeProb()">
+                </div>
+                
+                <div class="control-group">
+                    <h3>📈 Graph Statistics</h3>
+                    <div class="graph-stats">
+                        <div class="stat-item">
+                            <strong>Vertices</strong><br>
+                            <span id="statsVertices">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Edges</strong><br>
+                            <span id="statsEdges">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Max Degree</strong><br>
+                            <span id="statsMaxDegree">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <strong>Avg Degree</strong><br>
+                            <span id="statsAvgDegree">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>🎨 Legend</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #64b5f6;"></div>
+                        <span>Vertex (Node)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #81c784;"></div>
+                        <span>Selected Vertex</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffffff; width: 40px; height: 2px; border-radius: 1px;"></div>
+                        <span>Edge (Connection)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff8a65; width: 40px; height: 2px; border-radius: 1px;"></div>
+                        <span>Directed Edge</span>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>💡 Interactive Instructions</h3>
+                    <p><strong>Click:</strong> Add vertex at cursor position</p>
+                    <p><strong>Click & Drag:</strong> Move vertices around</p>
+                    <p><strong>Click vertex + Click vertex:</strong> Add/remove edge</p>
+                    <p><strong>Right Click vertex:</strong> Remove vertex</p>
+                    <p><strong>Hover vertex:</strong> Show degree information</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Graph data structures
+        let vertices = [];
+        let edges = [];
+        let isDirected = false;
+        let selectedVertex = null;
+        let draggedVertex = null;
+        let vertexIdCounter = 0;
+        
+        // Canvas setup
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        // Graph visualization parameters
+        const VERTEX_RADIUS = 25;
+        const VERTEX_COLOR = '#64b5f6';
+        const SELECTED_COLOR = '#81c784';
+        const EDGE_COLOR = '#ffffff';
+        const DIRECTED_EDGE_COLOR = '#ff8a65';
+        const TEXT_COLOR = '#ffffff';
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            generateRandomGraph();
+            updateDisplay();
+        });
+        
+        // Vertex class
+        class Vertex {
+            constructor(x, y, id = null) {
+                this.x = x;
+                this.y = y;
+                this.id = id || vertexIdCounter++;
+                this.degree = 0;
+            }
+            
+            draw(selected = false, hovered = false) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, VERTEX_RADIUS, 0, 2 * Math.PI);
+                ctx.fillStyle = selected ? SELECTED_COLOR : (hovered ? '#ffab91' : VERTEX_COLOR);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw vertex label
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.id.toString(), this.x, this.y);
+            }
+            
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return dx * dx + dy * dy <= VERTEX_RADIUS * VERTEX_RADIUS;
+            }
+        }
+        
+        // Edge class
+        class Edge {
+            constructor(vertex1, vertex2) {
+                this.vertex1 = vertex1;
+                this.vertex2 = vertex2;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.vertex1.x, this.vertex1.y);
+                ctx.lineTo(this.vertex2.x, this.vertex2.y);
+                ctx.strokeStyle = isDirected ? DIRECTED_EDGE_COLOR : EDGE_COLOR;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                if (isDirected) {
+                    this.drawArrowHead();
+                }
+            }
+            
+            drawArrowHead() {
+                const dx = this.vertex2.x - this.vertex1.x;
+                const dy = this.vertex2.y - this.vertex1.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const unitX = dx / length;
+                const unitY = dy / length;
+                
+                const arrowLength = 15;
+                const arrowAngle = Math.PI / 6;
+                
+                const endX = this.vertex2.x - unitX * VERTEX_RADIUS;
+                const endY = this.vertex2.y - unitY * VERTEX_RADIUS;
+                
+                const arrowX1 = endX - arrowLength * Math.cos(Math.atan2(dy, dx) - arrowAngle);
+                const arrowY1 = endY - arrowLength * Math.sin(Math.atan2(dy, dx) - arrowAngle);
+                const arrowX2 = endX - arrowLength * Math.cos(Math.atan2(dy, dx) + arrowAngle);
+                const arrowY2 = endY - arrowLength * Math.sin(Math.atan2(dy, dx) + arrowAngle);
+                
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(arrowX1, arrowY1);
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(arrowX2, arrowY2);
+                ctx.strokeStyle = DIRECTED_EDGE_COLOR;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+        
+        // Mouse event handlers
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clickedVertex = vertices.find(v => v.contains(x, y));
+            
+            if (clickedVertex) {
+                if (selectedVertex && selectedVertex !== clickedVertex) {
+                    // Add or remove edge
+                    const existingEdge = edges.find(edge => 
+                        (edge.vertex1 === selectedVertex && edge.vertex2 === clickedVertex) ||
+                        (!isDirected && edge.vertex1 === clickedVertex && edge.vertex2 === selectedVertex)
+                    );
+                    
+                    if (existingEdge) {
+                        edges = edges.filter(edge => edge !== existingEdge);
+                    } else {
+                        edges.push(new Edge(selectedVertex, clickedVertex));
+                    }
+                    selectedVertex = null;
+                } else {
+                    selectedVertex = clickedVertex;
+                }
+            } else {
+                // Add new vertex
+                vertices.push(new Vertex(x, y));
+                selectedVertex = null;
+            }
+            
+            updateDisplay();
+        });
+        
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const clickedVertex = vertices.find(v => v.contains(x, y));
+            if (clickedVertex) {
+                // Remove vertex and associated edges
+                vertices = vertices.filter(v => v !== clickedVertex);
+                edges = edges.filter(edge => 
+                    edge.vertex1 !== clickedVertex && edge.vertex2 !== clickedVertex
+                );
+                selectedVertex = null;
+                updateDisplay();
+            }
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            draggedVertex = vertices.find(v => v.contains(x, y));
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (draggedVertex) {
+                draggedVertex.x = x;
+                draggedVertex.y = y;
+                updateDisplay();
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            draggedVertex = null;
+        });
+        
+        // Graph generation functions
+        function clearGraph() {
+            vertices = [];
+            edges = [];
+            selectedVertex = null;
+            vertexIdCounter = 0;
+            updateDisplay();
+        }
+        
+        function generateRandomGraph() {
+            clearGraph();
+            const numVertices = parseInt(document.getElementById('vertexSlider').value);
+            const edgeProb = parseFloat(document.getElementById('edgeProbSlider').value);
+            
+            // Generate vertices in a circle layout
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 80;
+            
+            for (let i = 0; i < numVertices; i++) {
+                const angle = (i / numVertices) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Generate random edges
+            for (let i = 0; i < vertices.length; i++) {
+                for (let j = i + 1; j < vertices.length; j++) {
+                    if (Math.random() < edgeProb) {
+                        edges.push(new Edge(vertices[i], vertices[j]));
+                    }
+                }
+            }
+            
+            updateDisplay();
+        }
+        
+        function generateCompleteGraph() {
+            clearGraph();
+            const numVertices = parseInt(document.getElementById('vertexSlider').value);
+            
+            // Generate vertices
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 80;
+            
+            for (let i = 0; i < numVertices; i++) {
+                const angle = (i / numVertices) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Connect all vertices
+            for (let i = 0; i < vertices.length; i++) {
+                for (let j = i + 1; j < vertices.length; j++) {
+                    edges.push(new Edge(vertices[i], vertices[j]));
+                }
+            }
+            
+            updateDisplay();
+        }
+        
+        function generateCycleGraph() {
+            clearGraph();
+            const numVertices = parseInt(document.getElementById('vertexSlider').value);
+            
+            // Generate vertices in a circle
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 80;
+            
+            for (let i = 0; i < numVertices; i++) {
+                const angle = (i / numVertices) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Connect vertices in a cycle
+            for (let i = 0; i < vertices.length; i++) {
+                const nextIndex = (i + 1) % vertices.length;
+                edges.push(new Edge(vertices[i], vertices[nextIndex]));
+            }
+            
+            updateDisplay();
+        }
+        
+        function generatePathGraph() {
+            clearGraph();
+            const numVertices = parseInt(document.getElementById('vertexSlider').value);
+            
+            // Generate vertices in a line
+            const startX = 100;
+            const endX = canvas.width - 100;
+            const y = canvas.height / 2;
+            
+            for (let i = 0; i < numVertices; i++) {
+                const x = startX + (endX - startX) * i / (numVertices - 1);
+                vertices.push(new Vertex(x, y, i));
+            }
+            
+            // Connect vertices in a path
+            for (let i = 0; i < vertices.length - 1; i++) {
+                edges.push(new Edge(vertices[i], vertices[i + 1]));
+            }
+            
+            updateDisplay();
+        }
+        
+        function generateStarGraph() {
+            clearGraph();
+            const numVertices = parseInt(document.getElementById('vertexSlider').value);
+            
+            // Center vertex
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            vertices.push(new Vertex(centerX, centerY, 0));
+            
+            // Outer vertices
+            const radius = Math.min(centerX, centerY) - 80;
+            for (let i = 1; i < numVertices; i++) {
+                const angle = ((i - 1) / (numVertices - 1)) * 2 * Math.PI;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                vertices.push(new Vertex(x, y, i));
+                
+                // Connect to center
+                edges.push(new Edge(vertices[0], vertices[i]));
+            }
+            
+            updateDisplay();
+        }
+        
+        function setGraphType(type) {
+            isDirected = (type === 'directed');
+            
+            // Update button states
+            document.getElementById('undirectedBtn').classList.toggle('active', !isDirected);
+            document.getElementById('directedBtn').classList.toggle('active', isDirected);
+            
+            updateDisplay();
+        }
+        
+        function updateVertexCount() {
+            const value = document.getElementById('vertexSlider').value;
+            document.getElementById('vertexCountLabel').textContent = value;
+        }
+        
+        function updateEdgeProb() {
+            const value = document.getElementById('edgeProbSlider').value;
+            document.getElementById('edgeProbLabel').textContent = value;
+        }
+        
+        function calculateGraphStats() {
+            // Calculate degrees
+            vertices.forEach(v => v.degree = 0);
+            
+            edges.forEach(edge => {
+                edge.vertex1.degree++;
+                if (!isDirected) {
+                    edge.vertex2.degree++;
+                } else {
+                    // For directed graphs, this is out-degree
+                }
+            });
+            
+            const degrees = vertices.map(v => v.degree);
+            const maxDegree = degrees.length > 0 ? Math.max(...degrees) : 0;
+            const avgDegree = degrees.length > 0 ? degrees.reduce((a, b) => a + b, 0) / degrees.length : 0;
+            const density = vertices.length > 1 ? (2 * edges.length) / (vertices.length * (vertices.length - 1)) : 0;
+            
+            return { maxDegree, avgDegree: avgDegree.toFixed(2), density: density.toFixed(3) };
+        }
+        
+        function updateDisplay() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw edges
+            edges.forEach(edge => edge.draw());
+            
+            // Draw vertices
+            vertices.forEach(vertex => {
+                vertex.draw(vertex === selectedVertex);
+            });
+            
+            // Update statistics
+            const stats = calculateGraphStats();
+            document.getElementById('vertexCount').textContent = vertices.length;
+            document.getElementById('edgeCount').textContent = edges.length;
+            document.getElementById('graphType').textContent = isDirected ? 'Directed' : 'Undirected';
+            document.getElementById('graphDensity').textContent = stats.density;
+            
+            document.getElementById('statsVertices').textContent = vertices.length;
+            document.getElementById('statsEdges').textContent = edges.length;
+            document.getElementById('statsMaxDegree').textContent = stats.maxDegree;
+            document.getElementById('statsAvgDegree').textContent = stats.avgDegree;
+        }
+        
+        // Initialize MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+</body>
+</html>

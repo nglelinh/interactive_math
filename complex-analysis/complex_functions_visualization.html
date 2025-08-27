@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Functions Visualization - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-container {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .plot-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .function-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        #domainPlot, #rangePlot {
+            width: 100%;
+            height: 400px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Complex Functions Visualization</h1>
+        
+        <div class="math-explanation">
+            <h2>🎨 Domain Coloring Method</h2>
+            <p><strong>Visualizing Complex Functions:</strong> Since complex functions map \( z = x + iy \) to \( w = u + iv \), we need a 4D visualization! Domain coloring solves this by:</p>
+            <div class="formula-box">
+                <strong>Hue:</strong> represents argument \( \arg(f(z)) \)<br>
+                <strong>Brightness:</strong> represents magnitude \( |f(z)| \)<br>
+                <strong>Result:</strong> Beautiful mathematical art that reveals function behavior!
+            </div>
+        </div>
+        
+        <div class="visualization-grid">
+            <div class="controls-panel">
+                <h3>🎮 Function Controls</h3>
+                
+                <div class="function-selector">
+                    <label>Select Complex Function:</label>
+                    <select id="functionSelect">
+                        <option value="polynomial">Polynomial: z^n</option>
+                        <option value="exp">Exponential: e^z</option>
+                        <option value="sin">Sine: sin(z)</option>
+                        <option value="cos">Cosine: cos(z)</option>
+                        <option value="log">Logarithm: log(z)</option>
+                        <option value="sqrt">Square Root: √z</option>
+                        <option value="reciprocal">Reciprocal: 1/z</option>
+                        <option value="mobius">Möbius: (az+b)/(cz+d)</option>
+                        <option value="custom">Custom Function</option>
+                    </select>
+                </div>
+                
+                <div id="polynomialControls">
+                    <div class="parameter-control">
+                        <label>Power (n): <span id="powerValue">2</span></label>
+                        <input type="range" id="power" min="1" max="8" step="1" value="2">
+                    </div>
+                </div>
+                
+                <div id="mobiusControls" style="display: none;">
+                    <div class="parameter-control">
+                        <label>Parameter a: <span id="aValue">1</span></label>
+                        <input type="range" id="paramA" min="-3" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="parameter-control">
+                        <label>Parameter b: <span id="bValue">0</span></label>
+                        <input type="range" id="paramB" min="-3" max="3" step="0.1" value="0">
+                    </div>
+                    <div class="parameter-control">
+                        <label>Parameter c: <span id="cValue">0</span></label>
+                        <input type="range" id="paramC" min="-3" max="3" step="0.1" value="0">
+                    </div>
+                    <div class="parameter-control">
+                        <label>Parameter d: <span id="dValue">1</span></label>
+                        <input type="range" id="paramD" min="-3" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+                
+                <div class="parameter-control">
+                    <label>Domain Range: <span id="rangeValue">3</span></label>
+                    <input type="range" id="domainRange" min="1" max="5" step="0.1" value="3">
+                </div>
+                
+                <div class="parameter-control">
+                    <label>Resolution: <span id="resolutionValue">100</span></label>
+                    <input type="range" id="resolution" min="50" max="200" step="10" value="100">
+                </div>
+                
+                <div class="value-display" id="functionInfo">
+                    <div><strong>Current Function:</strong> f(z) = z²</div>
+                    <div id="functionProperties"></div>
+                </div>
+                
+                <div class="info-grid">
+                    <div class="info-box">
+                        <div><strong>Zeros</strong></div>
+                        <div id="zeros">z = 0</div>
+                    </div>
+                    <div class="info-box">
+                        <div><strong>Poles</strong></div>
+                        <div id="poles">None</div>
+                    </div>
+                    <div class="info-box">
+                        <div><strong>Branch Cuts</strong></div>
+                        <div id="branchCuts">None</div>
+                    </div>
+                    <div class="info-box">
+                        <div><strong>Periodicity</strong></div>
+                        <div id="periodicity">None</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-container">
+                <div class="plot-container">
+                    <h3>🎨 Domain Coloring (Input z-plane)</h3>
+                    <div id="domainPlot"></div>
+                </div>
+                
+                <div class="plot-container">
+                    <h3>🌈 Function Output (w = f(z) plane)</h3>
+                    <div id="rangePlot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🔍 Understanding Complex Function Behavior</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showInfo('zeros')">Zeros & Poles</button>
+                <button class="tab" onclick="showInfo('branches')">Branch Cuts</button>
+                <button class="tab" onclick="showInfo('conformality')">Conformal Mapping</button>
+            </div>
+            
+            <div id="zerosInfo" class="info-content">
+                <h3>🎯 Zeros and Poles</h3>
+                <ul>
+                    <li><strong>Zeros:</strong> Points where f(z) = 0 (appear as black points in domain coloring)</li>
+                    <li><strong>Poles:</strong> Points where f(z) → ∞ (appear as white points with radial color patterns)</li>
+                    <li><strong>Order:</strong> Multiplicity determines how many times colors wrap around the point</li>
+                    <li><strong>Visual Clue:</strong> Count color cycles around a point to determine order!</li>
+                </ul>
+            </div>
+            
+            <div id="branchesInfo" class="info-content" style="display: none;">
+                <h3>🌿 Branch Cuts and Multi-valued Functions</h3>
+                <ul>
+                    <li><strong>Branch Cuts:</strong> Lines where multi-valued functions are discontinuous</li>
+                    <li><strong>Example:</strong> √z has branch cut along negative real axis</li>
+                    <li><strong>Riemann Surfaces:</strong> Mathematical way to make multi-valued functions single-valued</li>
+                    <li><strong>Visualization:</strong> Sharp color discontinuities reveal branch cuts</li>
+                </ul>
+            </div>
+            
+            <div id="conformalityInfo" class="info-content" style="display: none;">
+                <h3>📐 Conformal Mapping Properties</h3>
+                <ul>
+                    <li><strong>Angle Preservation:</strong> Analytic functions preserve angles locally</li>
+                    <li><strong>Grid Distortion:</strong> Watch how rectangular grids transform</li>
+                    <li><strong>Applications:</strong> Fluid flow, electrostatics, aerodynamics</li>
+                    <li><strong>Critical Points:</strong> Conformality breaks down at zeros and poles</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🚀 Applications in Science & Engineering</h2>
+            <div class="info-grid">
+                <div class="info-box">
+                    <h4>⚡ Electrical Engineering</h4>
+                    <p>Complex impedance analysis, filter design, signal processing</p>
+                </div>
+                <div class="info-box">
+                    <h4>🌊 Fluid Dynamics</h4>
+                    <p>Conformal mapping for airfoil design, flow around obstacles</p>
+                </div>
+                <div class="info-box">
+                    <h4>🔬 Quantum Mechanics</h4>
+                    <p>Wave functions, probability amplitudes, scattering theory</p>
+                </div>
+                <div class="info-box">
+                    <h4>📡 Signal Processing</h4>
+                    <p>Fourier transforms, digital filters, communication systems</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            }
+        };
+
+        let currentFunction = 'polynomial';
+        let functionParams = {
+            power: 2,
+            paramA: 1, paramB: 0, paramC: 0, paramD: 1
+        };
+        
+        // Tab switching for info sections
+        function showInfo(section) {
+            document.querySelectorAll('.info-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(section + 'Info').style.display = 'block';
+            event.target.classList.add('active');
+        }
+        
+        // Function selection
+        function updateFunction() {
+            currentFunction = document.getElementById('functionSelect').value;
+            
+            // Show/hide relevant controls
+            document.getElementById('polynomialControls').style.display = 
+                currentFunction === 'polynomial' ? 'block' : 'none';
+            document.getElementById('mobiusControls').style.display = 
+                currentFunction === 'mobius' ? 'block' : 'none';
+            
+            updateFunctionInfo();
+            plotComplexFunction();
+        }
+        
+        function updateFunctionInfo() {
+            const info = getFunctionInfo(currentFunction);
+            document.getElementById('functionInfo').innerHTML = `
+                <div><strong>Current Function:</strong> ${info.formula}</div>
+            `;
+            
+            document.getElementById('zeros').textContent = info.zeros;
+            document.getElementById('poles').textContent = info.poles;
+            document.getElementById('branchCuts').textContent = info.branchCuts;
+            document.getElementById('periodicity').textContent = info.periodicity;
+        }
+        
+        function getFunctionInfo(funcType) {
+            const infos = {
+                polynomial: {
+                    formula: `f(z) = z^${functionParams.power}`,
+                    zeros: 'z = 0',
+                    poles: 'None',
+                    branchCuts: 'None',
+                    periodicity: 'None'
+                },
+                exp: {
+                    formula: 'f(z) = e^z',
+                    zeros: 'None',
+                    poles: 'None', 
+                    branchCuts: 'None',
+                    periodicity: '2πi'
+                },
+                sin: {
+                    formula: 'f(z) = sin(z)',
+                    zeros: 'z = nπ',
+                    poles: 'None',
+                    branchCuts: 'None',
+                    periodicity: '2π'
+                },
+                cos: {
+                    formula: 'f(z) = cos(z)',
+                    zeros: 'z = π/2 + nπ',
+                    poles: 'None',
+                    branchCuts: 'None', 
+                    periodicity: '2π'
+                },
+                log: {
+                    formula: 'f(z) = log(z)',
+                    zeros: 'z = 1',
+                    poles: 'z = 0',
+                    branchCuts: 'Negative real axis',
+                    periodicity: 'None'
+                },
+                sqrt: {
+                    formula: 'f(z) = √z',
+                    zeros: 'z = 0',
+                    poles: 'None',
+                    branchCuts: 'Negative real axis',
+                    periodicity: 'None'
+                },
+                reciprocal: {
+                    formula: 'f(z) = 1/z',
+                    zeros: 'None',
+                    poles: 'z = 0',
+                    branchCuts: 'None',
+                    periodicity: 'None'
+                },
+                mobius: {
+                    formula: `f(z) = (${functionParams.paramA}z + ${functionParams.paramB})/(${functionParams.paramC}z + ${functionParams.paramD})`,
+                    zeros: `z = -${functionParams.paramB}/${functionParams.paramA}`,
+                    poles: `z = -${functionParams.paramD}/${functionParams.paramC}`,
+                    branchCuts: 'None',
+                    periodicity: 'None'
+                }
+            };
+            
+            return infos[funcType] || infos.polynomial;
+        }
+        
+        function evaluateComplexFunction(real, imag, funcType, params) {
+            const z = {real: real, imag: imag};
+            
+            switch(funcType) {
+                case 'polynomial':
+                    return complexPower(z, params.power);
+                case 'exp':
+                    return complexExp(z);
+                case 'sin':
+                    return complexSin(z);
+                case 'cos':
+                    return complexCos(z);
+                case 'log':
+                    return complexLog(z);
+                case 'sqrt':
+                    return complexSqrt(z);
+                case 'reciprocal':
+                    return complexReciprocal(z);
+                case 'mobius':
+                    return complexMobius(z, params);
+                default:
+                    return z;
+            }
+        }
+        
+        // Complex arithmetic functions
+        function complexMult(z1, z2) {
+            return {
+                real: z1.real * z2.real - z1.imag * z2.imag,
+                imag: z1.real * z2.imag + z1.imag * z2.real
+            };
+        }
+        
+        function complexAdd(z1, z2) {
+            return {
+                real: z1.real + z2.real,
+                imag: z1.imag + z2.imag
+            };
+        }
+        
+        function complexDiv(z1, z2) {
+            const denom = z2.real * z2.real + z2.imag * z2.imag;
+            return {
+                real: (z1.real * z2.real + z1.imag * z2.imag) / denom,
+                imag: (z1.imag * z2.real - z1.real * z2.imag) / denom
+            };
+        }
+        
+        function complexPower(z, n) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            const rPow = Math.pow(r, n);
+            const thetaPow = theta * n;
+            
+            return {
+                real: rPow * Math.cos(thetaPow),
+                imag: rPow * Math.sin(thetaPow)
+            };
+        }
+        
+        function complexExp(z) {
+            const r = Math.exp(z.real);
+            return {
+                real: r * Math.cos(z.imag),
+                imag: r * Math.sin(z.imag)
+            };
+        }
+        
+        function complexSin(z) {
+            const expIz = complexExp({real: -z.imag, imag: z.real});
+            const expMinusIz = complexExp({real: z.imag, imag: -z.real});
+            const diff = {
+                real: expIz.real - expMinusIz.real,
+                imag: expIz.imag - expMinusIz.imag
+            };
+            return {
+                real: -diff.imag / 2,
+                imag: diff.real / 2
+            };
+        }
+        
+        function complexCos(z) {
+            const expIz = complexExp({real: -z.imag, imag: z.real});
+            const expMinusIz = complexExp({real: z.imag, imag: -z.real});
+            return {
+                real: (expIz.real + expMinusIz.real) / 2,
+                imag: (expIz.imag + expMinusIz.imag) / 2
+            };
+        }
+        
+        function complexLog(z) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            return {
+                real: Math.log(r),
+                imag: theta
+            };
+        }
+        
+        function complexSqrt(z) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            const sqrtR = Math.sqrt(r);
+            const halfTheta = theta / 2;
+            
+            return {
+                real: sqrtR * Math.cos(halfTheta),
+                imag: sqrtR * Math.sin(halfTheta)
+            };
+        }
+        
+        function complexReciprocal(z) {
+            const denom = z.real * z.real + z.imag * z.imag;
+            return {
+                real: z.real / denom,
+                imag: -z.imag / denom
+            };
+        }
+        
+        function complexMobius(z, params) {
+            const {paramA, paramB, paramC, paramD} = params;
+            const numerator = complexAdd(
+                complexMult({real: paramA, imag: 0}, z),
+                {real: paramB, imag: 0}
+            );
+            const denominator = complexAdd(
+                complexMult({real: paramC, imag: 0}, z),
+                {real: paramD, imag: 0}
+            );
+            
+            return complexDiv(numerator, denominator);
+        }
+        
+        function plotComplexFunction() {
+            const range = parseFloat(document.getElementById('domainRange').value);
+            const resolution = parseInt(document.getElementById('resolution').value);
+            const step = (2 * range) / resolution;
+            
+            // Generate domain grid
+            const domainZ = [];
+            const domainX = [];
+            const domainY = [];
+            
+            // Generate range data
+            const rangeW = [];
+            const rangeU = [];
+            const rangeV = [];
+            
+            for (let i = 0; i < resolution; i++) {
+                const domainRow = [];
+                const rangeRow = [];
+                const xRow = [];
+                const yRow = [];
+                const uRow = [];
+                const vRow = [];
+                
+                for (let j = 0; j < resolution; j++) {
+                    const x = -range + i * step;
+                    const y = -range + j * step;
+                    
+                    xRow.push(x);
+                    yRow.push(y);
+                    
+                    const result = evaluateComplexFunction(x, y, currentFunction, functionParams);
+                    
+                    // Domain coloring
+                    const magnitude = Math.sqrt(result.real * result.real + result.imag * result.imag);
+                    const argument = Math.atan2(result.imag, result.real);
+                    
+                    // Convert to HSV, then RGB for domain coloring
+                    const hue = (argument + Math.PI) / (2 * Math.PI); // Normalize to [0,1]
+                    const saturation = 1;
+                    const value = magnitude / (1 + magnitude); // Compress magnitude
+                    
+                    domainRow.push(value);
+                    
+                    uRow.push(result.real);
+                    vRow.push(result.imag);
+                    rangeRow.push(Math.sqrt(result.real * result.real + result.imag * result.imag));
+                }
+                
+                domainZ.push(domainRow);
+                domainX.push(xRow);
+                domainY.push(yRow);
+                
+                rangeW.push(rangeRow);
+                rangeU.push(uRow);
+                rangeV.push(vRow);
+            }
+            
+            // Plot domain coloring
+            const domainTrace = {
+                z: domainZ,
+                x: domainX[0],
+                y: domainY.map(row => row[0]),
+                type: 'heatmap',
+                colorscale: 'HSV',
+                showscale: false
+            };
+            
+            const domainLayout = {
+                title: 'Domain (z-plane)',
+                xaxis: {title: 'Real', range: [-range, range]},
+                yaxis: {title: 'Imaginary', range: [-range, range]},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            // Plot range visualization
+            const rangeTrace = {
+                z: rangeW,
+                x: rangeU[0],
+                y: rangeV.map(row => row[0]),
+                type: 'heatmap',
+                colorscale: 'Viridis',
+                showscale: true
+            };
+            
+            const rangeLayout = {
+                title: 'Range (w-plane)',
+                xaxis: {title: 'Real(w)'},
+                yaxis: {title: 'Imag(w)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('domainPlot', [domainTrace], domainLayout, {responsive: true});
+            Plotly.newPlot('rangePlot', [rangeTrace], rangeLayout, {responsive: true});
+        }
+        
+        // Event listeners
+        document.getElementById('functionSelect').addEventListener('change', updateFunction);
+        
+        document.getElementById('power').addEventListener('input', function() {
+            functionParams.power = parseInt(this.value);
+            document.getElementById('powerValue').textContent = this.value;
+            updateFunction();
+        });
+        
+        document.getElementById('paramA').addEventListener('input', function() {
+            functionParams.paramA = parseFloat(this.value);
+            document.getElementById('aValue').textContent = this.value;
+            updateFunction();
+        });
+        
+        document.getElementById('paramB').addEventListener('input', function() {
+            functionParams.paramB = parseFloat(this.value);
+            document.getElementById('bValue').textContent = this.value;
+            updateFunction();
+        });
+        
+        document.getElementById('paramC').addEventListener('input', function() {
+            functionParams.paramC = parseFloat(this.value);
+            document.getElementById('cValue').textContent = this.value;
+            updateFunction();
+        });
+        
+        document.getElementById('paramD').addEventListener('input', function() {
+            functionParams.paramD = parseFloat(this.value);
+            document.getElementById('dValue').textContent = this.value;
+            updateFunction();
+        });
+        
+        document.getElementById('domainRange').addEventListener('input', function() {
+            document.getElementById('rangeValue').textContent = this.value;
+            plotComplexFunction();
+        });
+        
+        document.getElementById('resolution').addEventListener('input', function() {
+            document.getElementById('resolutionValue').textContent = this.value;
+            plotComplexFunction();
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                updateFunction();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

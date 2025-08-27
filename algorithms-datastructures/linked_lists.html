@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked Lists - Interactive Data Structure Visualization</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    O: ['\\mathcal{O}'],
+                    Theta: ['\\Theta'],
+                    Omega: ['\\Omega']
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #e74c3c, #3498db);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #e74c3c, #3498db);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .introduction {
+            background: rgba(231, 76, 60, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .linked-list-container {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            padding: 20px;
+            min-width: 800px;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .node {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .node.highlight {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
+        }
+
+        .node.comparing {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            animation: pulse 1s infinite;
+        }
+
+        .data-part {
+            width: 50px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .pointer-part {
+            width: 30px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        .arrow {
+            margin: 0 5px;
+            font-size: 20px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .null-pointer {
+            background: #95a5a6;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .head-pointer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #27ae60;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 14px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        button.secondary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .complexity-box {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .example-box {
+            background: rgba(46, 204, 113, 0.1);
+            border-left: 4px solid #2ecc71;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .operation-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .comparison-table {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .linked-list-container {
+                min-width: 600px;
+            }
+            
+            .node {
+                transform: scale(0.9);
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Linked Lists</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('overview')">🎯 Overview</button>
+            <button class="nav-button" onclick="showSection('singly')">➡️ Singly Linked</button>
+            <button class="nav-button" onclick="showSection('doubly')">↔️ Doubly Linked</button>
+            <button class="nav-button" onclick="showSection('operations')">⚙️ Operations</button>
+            <button class="nav-button" onclick="showSection('complexity')">⚡ Analysis</button>
+            <button class="nav-button" onclick="showSection('interactive')">🎮 Interactive</button>
+        </div>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="overview" class="lesson-section active">
+            <div class="introduction">
+                <h2>🎯 Linked Lists - Dynamic Linear Data Structure</h2>
+                <p><strong>Linked Lists</strong> are linear data structures where elements are stored in nodes, each containing data and a pointer/reference to the next node.</p>
+                <p>🏆 <strong>Key Characteristics:</strong></p>
+                <ul>
+                    <li><strong>🔗 Dynamic Size:</strong> Can grow/shrink during runtime</li>
+                    <li><strong>📍 Non-contiguous Memory:</strong> Nodes scattered in memory</li>
+                    <li><strong>➡️ Sequential Access:</strong> Must traverse from head to reach any element</li>
+                    <li><strong>🔄 Efficient Insertion/Deletion:</strong> O(1) at known positions</li>
+                </ul>
+            </div>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h3>✅ Advantages</h3>
+                    <ul>
+                        <li><strong>Dynamic Size:</strong> No need to declare size beforehand</li>
+                        <li><strong>Memory Efficient:</strong> Allocate only what's needed</li>
+                        <li><strong>Easy Insertion/Deletion:</strong> No shifting elements</li>
+                        <li><strong>Flexible:</strong> Can implement stacks, queues easily</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h3>❌ Disadvantages</h3>
+                    <ul>
+                        <li><strong>No Random Access:</strong> Must traverse to reach elements</li>
+                        <li><strong>Extra Memory:</strong> Storing pointers</li>
+                        <li><strong>Poor Cache Performance:</strong> Non-contiguous memory</li>
+                        <li><strong>Not Thread-safe:</strong> Requires synchronization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="visualization-area">
+                <h3>🔗 Basic Linked List Structure</h3>
+                <div class="linked-list-container">
+                    <div class="node">
+                        <div class="head-pointer">HEAD</div>
+                        <div class="data-part">10</div>
+                        <div class="pointer-part">→</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="node">
+                        <div class="data-part">25</div>
+                        <div class="pointer-part">→</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="node">
+                        <div class="data-part">7</div>
+                        <div class="pointer-part">→</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="node">
+                        <div class="data-part">42</div>
+                        <div class="pointer-part">→</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="null-pointer">NULL</div>
+                </div>
+                <p style="text-align: center; color: #95a5a6;">
+                    Each node contains: [Data | Next Pointer] → Next Node<br>
+                    Memory addresses: scattered, connected via pointers
+                </p>
+            </div>
+
+            <div class="code-block">
+// Basic Node Structure in C++
+struct ListNode {
+    int data;
+    ListNode* next;
+    
+    ListNode(int val) : data(val), next(nullptr) {}
+};
+
+// Creating a linked list
+ListNode* head = new ListNode(10);
+head->next = new ListNode(25);
+head->next->next = new ListNode(7);
+            </div>
+        </div>
+
+        <!-- SINGLY LINKED SECTION -->
+        <div id="singly" class="lesson-section">
+            <div class="theory-section">
+                <h2>➡️ Singly Linked Lists</h2>
+                <p><strong>Singly Linked Lists</strong> have nodes with data and one pointer to the next node. Traversal is unidirectional.</p>
+
+                <div class="example-box">
+                    <h3>🏗️ Node Structure</h3>
+                    <div class="code-block">
+class Node {
+public:
+    int data;        // Data stored in node
+    Node* next;      // Pointer to next node
+    
+    Node(int value) {
+        data = value;
+        next = nullptr;
+    }
+};
+
+class SinglyLinkedList {
+private:
+    Node* head;      // Pointer to first node
+    int size;        // Track list size
+    
+public:
+    SinglyLinkedList() : head(nullptr), size(0) {}
+    // Methods...
+};
+                    </div>
+                </div>
+
+                <h3>⚙️ Core Operations</h3>
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>➕ Insert at Beginning</h4>
+                        <p><strong>Time:</strong> $\O(1)$ - Constant</p>
+                        <div class="code-block">
+void insertAtHead(int value) {
+    Node* newNode = new Node(value);
+    newNode->next = head;
+    head = newNode;
+    size++;
+}
+                        </div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>➕ Insert at End</h4>
+                        <p><strong>Time:</strong> $\O(n)$ - Linear</p>
+                        <div class="code-block">
+void insertAtTail(int value) {
+    Node* newNode = new Node(value);
+    if (!head) {
+        head = newNode;
+        return;
+    }
+    Node* curr = head;
+    while (curr->next) {
+        curr = curr->next;
+    }
+    curr->next = newNode;
+    size++;
+}
+                        </div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🔍 Search</h4>
+                        <p><strong>Time:</strong> $\O(n)$ - Linear</p>
+                        <div class="code-block">
+bool search(int value) {
+    Node* curr = head;
+    while (curr) {
+        if (curr->data == value) {
+            return true;
+        }
+        curr = curr->next;
+    }
+    return false;
+}
+                        </div>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🗑️ Delete</h4>
+                        <p><strong>Time:</strong> $\O(n)$ - Linear</p>
+                        <div class="code-block">
+bool deleteNode(int value) {
+    if (!head) return false;
+    
+    if (head->data == value) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        size--;
+        return true;
+    }
+    
+    Node* curr = head;
+    while (curr->next && curr->next->data != value) {
+        curr = curr->next;
+    }
+    
+    if (curr->next) {
+        Node* temp = curr->next;
+        curr->next = curr->next->next;
+        delete temp;
+        size--;
+        return true;
+    }
+    return false;
+}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOUBLY LINKED SECTION -->
+        <div id="doubly" class="lesson-section">
+            <div class="theory-section">
+                <h2>↔️ Doubly Linked Lists</h2>
+                <p><strong>Doubly Linked Lists</strong> have nodes with data and two pointers: next and previous. Allows bidirectional traversal.</p>
+
+                <div class="visualization-area">
+                    <h3>↔️ Doubly Linked List Structure</h3>
+                    <div class="linked-list-container">
+                        <div class="null-pointer">NULL</div>
+                        <div class="arrow">←</div>
+                        <div class="node" style="width: 100px;">
+                            <div class="head-pointer">HEAD</div>
+                            <div class="pointer-part">←</div>
+                            <div class="data-part">10</div>
+                            <div class="pointer-part">→</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="node" style="width: 100px;">
+                            <div class="pointer-part">←</div>
+                            <div class="data-part">25</div>
+                            <div class="pointer-part">→</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="node" style="width: 100px;">
+                            <div class="pointer-part">←</div>
+                            <div class="data-part">7</div>
+                            <div class="pointer-part">→</div>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="null-pointer">NULL</div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>🏗️ Doubly Linked Node</h3>
+                    <div class="code-block">
+class DoublyNode {
+public:
+    int data;
+    DoublyNode* next;
+    DoublyNode* prev;
+    
+    DoublyNode(int value) {
+        data = value;
+        next = nullptr;
+        prev = nullptr;
+    }
+};
+
+class DoublyLinkedList {
+private:
+    DoublyNode* head;
+    DoublyNode* tail;   // Extra tail pointer for efficiency
+    int size;
+    
+public:
+    DoublyLinkedList() : head(nullptr), tail(nullptr), size(0) {}
+};
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>✅ Advantages of Doubly Linked</h4>
+                        <ul>
+                            <li><strong>Bidirectional Traversal:</strong> Can move forward/backward</li>
+                            <li><strong>Efficient Deletion:</strong> Given node, can delete in O(1)</li>
+                            <li><strong>Insert Before:</strong> Easy insertion before a node</li>
+                            <li><strong>Tail Operations:</strong> O(1) operations at end</li>
+                        </ul>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>❌ Disadvantages</h4>
+                        <ul>
+                            <li><strong>Extra Memory:</strong> Additional prev pointer per node</li>
+                            <li><strong>More Complex:</strong> More pointers to maintain</li>
+                            <li><strong>Slower Insertion:</strong> Must update two pointers</li>
+                            <li><strong>Cache Performance:</strong> Larger nodes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPERATIONS SECTION -->
+        <div id="operations" class="lesson-section">
+            <div class="visualization-area">
+                <h3>⚙️ Interactive Linked List Operations</h3>
+                
+                <div class="linked-list-container" id="interactiveList">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Add Element:</label>
+                        <input type="number" id="newElement" placeholder="Enter value">
+                        <button onclick="insertAtHead()">➕ Add to Head</button>
+                        <button onclick="insertAtTail()">➕ Add to Tail</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Insert at Position:</label>
+                        <input type="number" id="insertValue" placeholder="Value">
+                        <input type="number" id="insertPosition" placeholder="Position" min="0">
+                        <button onclick="insertAtPosition()">🔄 Insert</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Search/Delete:</label>
+                        <input type="number" id="searchValue" placeholder="Value">
+                        <button onclick="searchElement()">🔍 Search</button>
+                        <button onclick="deleteElement()">🗑️ Delete</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>List Operations:</label>
+                        <button onclick="reverseList()" class="secondary">🔄 Reverse</button>
+                        <button onclick="findMiddle()" class="secondary">🎯 Find Middle</button>
+                        <button onclick="detectCycle()" class="secondary">🔄 Detect Cycle</button>
+                        <button onclick="clearList()">🧹 Clear</button>
+                    </div>
+                </div>
+
+                <div class="operation-log" id="operationLog">
+                    <strong>Operation Log:</strong><br>
+                    Linked List ready for operations...
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPLEXITY SECTION -->
+        <div id="complexity" class="lesson-section">
+            <div class="theory-section">
+                <h2>⚡ Complexity Analysis</h2>
+
+                <div class="comparison-table">
+                    <table>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Array</th>
+                            <th>Singly Linked List</th>
+                            <th>Doubly Linked List</th>
+                        </tr>
+                        <tr>
+                            <td>Access by Index</td>
+                            <td>O(1)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                        <tr>
+                            <td>Insert at Beginning</td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Insert at End</td>
+                            <td>O(1)*</td>
+                            <td>O(n) or O(1)**</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Insert at Middle</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete at Beginning</td>
+                            <td>O(n)</td>
+                            <td>O(1)</td>
+                            <td>O(1)</td>
+                        </tr>
+                        <tr>
+                            <td>Delete by Value</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                        <tr>
+                            <td>Space Complexity</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                    </table>
+                </div>
+                <p style="font-size: 0.9em; color: #95a5a6;">
+                    *Dynamic arrays with amortized analysis<br>
+                    **O(1) if tail pointer is maintained
+                </p>
+
+                <div class="grid-layout">
+                    <div class="example-box">
+                        <h3>💾 Memory Analysis</h3>
+                        <h4>Memory per Node:</h4>
+                        <ul>
+                            <li><strong>Array Element:</strong> 4 bytes (int)</li>
+                            <li><strong>Singly Linked Node:</strong> 4 + 8 = 12 bytes</li>
+                            <li><strong>Doubly Linked Node:</strong> 4 + 8 + 8 = 20 bytes</li>
+                        </ul>
+                        <p><strong>Memory Overhead:</strong> Linked lists use 2-5x more memory than arrays for the same data.</p>
+                    </div>
+
+                    <div class="example-box">
+                        <h3>🚀 Cache Performance</h3>
+                        <ul>
+                            <li><strong>Arrays:</strong> Excellent locality, prefetching works well</li>
+                            <li><strong>Linked Lists:</strong> Poor locality, random memory access</li>
+                            <li><strong>Impact:</strong> Arrays can be 10-100x faster for traversal</li>
+                            <li><strong>When to use LL:</strong> Frequent insertions/deletions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="lesson-section">
+            <div class="visualization-area">
+                <h3>🎮 Advanced Linked List Algorithms</h3>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Classic Algorithms:</label>
+                        <button onclick="demonstrateFloydCycle()">🐢🐰 Floyd's Cycle Detection</button>
+                        <button onclick="demonstrateMergeSort()">📊 Merge Sort on List</button>
+                        <button onclick="demonstrateReverse()">🔄 Reverse Linked List</button>
+                        <button onclick="demonstratePalindrome()">🎭 Palindrome Check</button>
+                    </div>
+                </div>
+
+                <div class="linked-list-container" id="algorithmList">
+                    <!-- Algorithm visualization will appear here -->
+                </div>
+
+                <div class="operation-log" id="algorithmLog">
+                    <strong>Algorithm Demonstration:</strong><br>
+                    Select an algorithm to see it in action...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Linked List Node class
+        class ListNode {
+            constructor(data) {
+                this.data = data;
+                this.next = null;
+            }
+        }
+
+        // Linked List class
+        class LinkedList {
+            constructor() {
+                this.head = null;
+                this.size = 0;
+            }
+
+            insertAtHead(data) {
+                const newNode = new ListNode(data);
+                newNode.next = this.head;
+                this.head = newNode;
+                this.size++;
+            }
+
+            insertAtTail(data) {
+                const newNode = new ListNode(data);
+                if (!this.head) {
+                    this.head = newNode;
+                } else {
+                    let current = this.head;
+                    while (current.next) {
+                        current = current.next;
+                    }
+                    current.next = newNode;
+                }
+                this.size++;
+            }
+
+            insertAtPosition(data, position) {
+                if (position < 0 || position > this.size) {
+                    return false;
+                }
+                
+                if (position === 0) {
+                    this.insertAtHead(data);
+                    return true;
+                }
+
+                const newNode = new ListNode(data);
+                let current = this.head;
+                
+                for (let i = 0; i < position - 1; i++) {
+                    current = current.next;
+                }
+                
+                newNode.next = current.next;
+                current.next = newNode;
+                this.size++;
+                return true;
+            }
+
+            search(data) {
+                let current = this.head;
+                let position = 0;
+                
+                while (current) {
+                    if (current.data === data) {
+                        return position;
+                    }
+                    current = current.next;
+                    position++;
+                }
+                return -1;
+            }
+
+            delete(data) {
+                if (!this.head) return false;
+
+                if (this.head.data === data) {
+                    this.head = this.head.next;
+                    this.size--;
+                    return true;
+                }
+
+                let current = this.head;
+                while (current.next && current.next.data !== data) {
+                    current = current.next;
+                }
+
+                if (current.next) {
+                    current.next = current.next.next;
+                    this.size--;
+                    return true;
+                }
+                return false;
+            }
+
+            reverse() {
+                let prev = null;
+                let current = this.head;
+                let next = null;
+
+                while (current) {
+                    next = current.next;
+                    current.next = prev;
+                    prev = current;
+                    current = next;
+                }
+                this.head = prev;
+            }
+
+            toArray() {
+                const result = [];
+                let current = this.head;
+                while (current) {
+                    result.push(current.data);
+                    current = current.next;
+                }
+                return result;
+            }
+
+            clear() {
+                this.head = null;
+                this.size = 0;
+            }
+        }
+
+        // Global linked list instance
+        let linkedList = new LinkedList();
+
+        // Initialize with some data
+        [10, 25, 7, 42, 13].forEach(val => linkedList.insertAtTail(val));
+
+        // Show/hide sections
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.lesson-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.nav-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionId === 'operations') {
+                renderLinkedList();
+            }
+        }
+
+        // Render linked list visualization
+        function renderLinkedList() {
+            const container = document.getElementById('interactiveList');
+            container.innerHTML = '';
+            
+            if (!linkedList.head) {
+                container.innerHTML = '<div class="null-pointer">Empty List</div>';
+                return;
+            }
+
+            let current = linkedList.head;
+            let isFirst = true;
+            
+            while (current) {
+                if (!isFirst) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    arrow.textContent = '→';
+                    container.appendChild(arrow);
+                }
+                
+                const node = document.createElement('div');
+                node.className = 'node';
+                if (isFirst) {
+                    const headPointer = document.createElement('div');
+                    headPointer.className = 'head-pointer';
+                    headPointer.textContent = 'HEAD';
+                    node.appendChild(headPointer);
+                }
+                
+                const dataPart = document.createElement('div');
+                dataPart.className = 'data-part';
+                dataPart.textContent = current.data;
+                node.appendChild(dataPart);
+                
+                const pointerPart = document.createElement('div');
+                pointerPart.className = 'pointer-part';
+                pointerPart.textContent = '→';
+                node.appendChild(pointerPart);
+                
+                node.onclick = () => highlightNode(current.data);
+                container.appendChild(node);
+                
+                current = current.next;
+                isFirst = false;
+            }
+            
+            const arrow = document.createElement('div');
+            arrow.className = 'arrow';
+            arrow.textContent = '→';
+            container.appendChild(arrow);
+            
+            const nullNode = document.createElement('div');
+            nullNode.className = 'null-pointer';
+            nullNode.textContent = 'NULL';
+            container.appendChild(nullNode);
+        }
+
+        // Highlight node
+        function highlightNode(data) {
+            const nodes = document.querySelectorAll('#interactiveList .node');
+            nodes.forEach(node => node.classList.remove('highlight'));
+            
+            let current = linkedList.head;
+            let index = 0;
+            
+            while (current) {
+                if (current.data === data) {
+                    nodes[index].classList.add('highlight');
+                    setTimeout(() => {
+                        nodes[index].classList.remove('highlight');
+                    }, 2000);
+                    break;
+                }
+                current = current.next;
+                index++;
+            }
+        }
+
+        // Insert at head
+        function insertAtHead() {
+            const input = document.getElementById('newElement');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number');
+                return;
+            }
+            
+            linkedList.insertAtHead(value);
+            renderLinkedList();
+            logOperation(`➕ Inserted ${value} at head. List size: ${linkedList.size}`);
+            input.value = '';
+        }
+
+        // Insert at tail
+        function insertAtTail() {
+            const input = document.getElementById('newElement');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number');
+                return;
+            }
+            
+            linkedList.insertAtTail(value);
+            renderLinkedList();
+            logOperation(`➕ Inserted ${value} at tail. List size: ${linkedList.size}`);
+            input.value = '';
+        }
+
+        // Insert at position
+        function insertAtPosition() {
+            const valueInput = document.getElementById('insertValue');
+            const posInput = document.getElementById('insertPosition');
+            const value = parseInt(valueInput.value);
+            const position = parseInt(posInput.value);
+            
+            if (isNaN(value) || isNaN(position)) {
+                logOperation('❌ Please enter valid numbers');
+                return;
+            }
+            
+            if (linkedList.insertAtPosition(value, position)) {
+                renderLinkedList();
+                logOperation(`🔄 Inserted ${value} at position ${position}`);
+            } else {
+                logOperation(`❌ Invalid position. Must be between 0 and ${linkedList.size}`);
+            }
+            
+            valueInput.value = '';
+            posInput.value = '';
+        }
+
+        // Search element
+        function searchElement() {
+            const input = document.getElementById('searchValue');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number');
+                return;
+            }
+            
+            const position = linkedList.search(value);
+            if (position !== -1) {
+                highlightNode(value);
+                logOperation(`🔍 Found ${value} at position ${position}`);
+            } else {
+                logOperation(`🔍 ${value} not found in the list`);
+            }
+            
+            input.value = '';
+        }
+
+        // Delete element
+        function deleteElement() {
+            const input = document.getElementById('searchValue');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number');
+                return;
+            }
+            
+            if (linkedList.delete(value)) {
+                renderLinkedList();
+                logOperation(`🗑️ Deleted ${value} from the list. Size: ${linkedList.size}`);
+            } else {
+                logOperation(`❌ ${value} not found in the list`);
+            }
+            
+            input.value = '';
+        }
+
+        // Reverse list
+        function reverseList() {
+            linkedList.reverse();
+            renderLinkedList();
+            logOperation('🔄 Linked list reversed');
+        }
+
+        // Find middle element
+        function findMiddle() {
+            if (!linkedList.head) {
+                logOperation('❌ List is empty');
+                return;
+            }
+            
+            let slow = linkedList.head;
+            let fast = linkedList.head;
+            
+            while (fast && fast.next) {
+                slow = slow.next;
+                fast = fast.next.next;
+            }
+            
+            highlightNode(slow.data);
+            logOperation(`🎯 Middle element: ${slow.data}`);
+        }
+
+        // Clear list
+        function clearList() {
+            linkedList.clear();
+            renderLinkedList();
+            logOperation('🧹 Linked list cleared');
+        }
+
+        // Log operation
+        function logOperation(message) {
+            const log = document.getElementById('operationLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Advanced algorithm demonstrations
+        function demonstrateFloydCycle() {
+            logAlgorithm('🐢🐰 Floyd\'s Cycle Detection Algorithm (Tortoise and Hare)');
+            logAlgorithm('Creating a cycle for demonstration...');
+            
+            // For demo, we'll simulate without actually creating a cycle
+            setTimeout(() => {
+                logAlgorithm('Slow pointer moves 1 step, Fast pointer moves 2 steps');
+                logAlgorithm('If there\'s a cycle, they will eventually meet');
+                logAlgorithm('✅ No cycle detected in current list');
+            }, 1000);
+        }
+
+        function demonstrateReverse() {
+            logAlgorithm('🔄 Reversing Linked List Algorithm');
+            const originalArray = linkedList.toArray();
+            logAlgorithm(`Original: [${originalArray.join(' → ')}]`);
+            
+            setTimeout(() => {
+                linkedList.reverse();
+                renderLinkedList();
+                const reversedArray = linkedList.toArray();
+                logAlgorithm(`Reversed: [${reversedArray.join(' → ')}]`);
+                logAlgorithm('✅ Algorithm: Use 3 pointers (prev, current, next)');
+            }, 1000);
+        }
+
+        function logAlgorithm(message) {
+            const log = document.getElementById('algorithmLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLinkedList();
+        });
+    </script>
+</body>
+</html>

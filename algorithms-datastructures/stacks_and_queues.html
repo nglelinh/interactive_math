@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stacks & Queues - Linear Data Structures</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'newcommand', 'mathtools', 'bm']},
+                macros: {
+                    O: ['\\mathcal{O}'],
+                    Theta: ['\\Theta'],
+                    Omega: ['\\Omega']
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d1b69 100%);
+            color: white;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #9b59b6, #3498db);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(45deg, #9b59b6, #3498db);
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .lesson-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .introduction {
+            background: rgba(155, 89, 182, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #9b59b6;
+        }
+
+        .theory-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .visualization-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .data-structure-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .stack-container, .queue-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .stack-container {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .queue-container {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .stack-visualization {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            min-height: 200px;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .queue-visualization {
+            display: flex;
+            align-items: center;
+            min-height: 80px;
+            border: 2px solid #2ecc71;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 15px 0;
+            background: rgba(46, 204, 113, 0.1);
+            overflow-x: auto;
+        }
+
+        .stack-element {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            border: 1px solid #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin: 2px 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .queue-element {
+            min-width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            border: 1px solid #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .stack-element.top {
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.4);
+        }
+
+        .queue-element.front {
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.4);
+        }
+
+        .queue-element.rear {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            box-shadow: 0 2px 10px rgba(155, 89, 182, 0.4);
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            color: #f39c12;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .top-pointer {
+            top: -25px;
+            right: 10px;
+        }
+
+        .front-pointer {
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .rear-pointer {
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-group.stack-controls {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .control-group.queue-controls {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #9b59b6;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        button.stack-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        button.stack-btn:hover {
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        button.queue-btn {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+        button.queue-btn:hover {
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .complexity-box {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .example-box {
+            background: rgba(241, 196, 15, 0.1);
+            border-left: 4px solid #f1c40f;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .operation-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .comparison-table {
+            overflow-x: auto;
+            margin: 25px 0;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            color: #9b59b6;
+        }
+
+        @media (max-width: 768px) {
+            .data-structure-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stack-container, .queue-container {
+                min-width: 280px;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Stacks & Queues</h1>
+        
+        <div class="lesson-nav">
+            <button class="nav-button active" onclick="showSection('overview')">🎯 Overview</button>
+            <button class="nav-button" onclick="showSection('stacks')">📚 Stacks</button>
+            <button class="nav-button" onclick="showSection('queues')">🔄 Queues</button>
+            <button class="nav-button" onclick="showSection('interactive')">🎮 Interactive</button>
+            <button class="nav-button" onclick="showSection('applications')">🌟 Applications</button>
+            <button class="nav-button" onclick="showSection('comparison')">⚖️ Comparison</button>
+        </div>
+
+        <!-- OVERVIEW SECTION -->
+        <div id="overview" class="lesson-section active">
+            <div class="introduction">
+                <h2>🎯 Stacks & Queues - Abstract Data Types</h2>
+                <p><strong>Stacks</strong> and <strong>Queues</strong> are fundamental Abstract Data Types (ADTs) that provide specific ways to add and remove elements.</p>
+                <p>🏆 <strong>Key Concepts:</strong></p>
+                <ul>
+                    <li><strong>📚 Stack (LIFO):</strong> Last In, First Out - like a stack of books</li>
+                    <li><strong>🔄 Queue (FIFO):</strong> First In, First Out - like a line of people</li>
+                    <li><strong>🎯 Abstract:</strong> Defined by operations, not implementation</li>
+                    <li><strong>⚡ Efficient:</strong> O(1) operations for add/remove</li>
+                </ul>
+            </div>
+
+            <div class="data-structure-container">
+                <div class="stack-container">
+                    <h3>📚 Stack (LIFO)</h3>
+                    <div class="stack-visualization" id="demoStack">
+                        <div class="stack-element top">
+                            30
+                            <div class="pointer top-pointer">TOP</div>
+                        </div>
+                        <div class="stack-element">20</div>
+                        <div class="stack-element">10</div>
+                    </div>
+                    <p><strong>Operations:</strong> Push (add to top), Pop (remove from top)</p>
+                    <p><strong>Analogy:</strong> Stack of plates - add/remove from top only</p>
+                </div>
+
+                <div class="queue-container">
+                    <h3>🔄 Queue (FIFO)</h3>
+                    <div class="queue-visualization" id="demoQueue">
+                        <div class="queue-element front">
+                            10
+                            <div class="pointer front-pointer">FRONT</div>
+                        </div>
+                        <div class="queue-element">20</div>
+                        <div class="queue-element rear">
+                            30
+                            <div class="pointer rear-pointer">REAR</div>
+                        </div>
+                    </div>
+                    <p><strong>Operations:</strong> Enqueue (add to rear), Dequeue (remove from front)</p>
+                    <p><strong>Analogy:</strong> Line at store - first person served first</p>
+                </div>
+            </div>
+
+            <div class="grid-layout">
+                <div class="example-box">
+                    <h3>🌟 Real-world Examples</h3>
+                    <h4>📚 Stacks:</h4>
+                    <ul>
+                        <li><strong>Function Calls:</strong> Call stack in programming</li>
+                        <li><strong>Undo Operations:</strong> Ctrl+Z functionality</li>
+                        <li><strong>Browser History:</strong> Back button navigation</li>
+                        <li><strong>Expression Evaluation:</strong> Parentheses matching</li>
+                    </ul>
+                    
+                    <h4>🔄 Queues:</h4>
+                    <ul>
+                        <li><strong>CPU Scheduling:</strong> Process scheduling</li>
+                        <li><strong>Print Queue:</strong> Document printing order</li>
+                        <li><strong>BFS Algorithm:</strong> Breadth-first search</li>
+                        <li><strong>Customer Service:</strong> First come, first served</li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h3>⚡ Implementation Options</h3>
+                    <h4>Both can be implemented using:</h4>
+                    <ul>
+                        <li><strong>📊 Arrays:</strong> Fixed size, simple implementation</li>
+                        <li><strong>🔗 Linked Lists:</strong> Dynamic size, pointer-based</li>
+                        <li><strong>🎯 Dynamic Arrays:</strong> Resizable, best of both worlds</li>
+                    </ul>
+                    
+                    <h4>Trade-offs:</h4>
+                    <ul>
+                        <li><strong>Arrays:</strong> Cache-friendly, size limitations</li>
+                        <li><strong>Linked Lists:</strong> No size limit, pointer overhead</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- STACKS SECTION -->
+        <div id="stacks" class="lesson-section">
+            <div class="theory-section">
+                <h2>📚 Stack Data Structure</h2>
+                <p><strong>Stack</strong> follows the LIFO (Last In, First Out) principle. The element added most recently is the first one to be removed.</p>
+
+                <div class="example-box">
+                    <h3>🔧 Stack Operations</h3>
+                    <div class="code-block">
+// Stack ADT Interface
+class Stack {
+public:
+    void push(int data);    // Add element to top
+    int pop();              // Remove and return top element
+    int top();              // Return top element without removing
+    bool isEmpty();         // Check if stack is empty
+    int size();            // Return number of elements
+};
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>📊 Array Implementation</h4>
+                        <div class="code-block">
+class ArrayStack {
+private:
+    int* arr;
+    int topIndex;
+    int capacity;
+
+public:
+    ArrayStack(int size) {
+        arr = new int[size];
+        capacity = size;
+        topIndex = -1;
+    }
+    
+    void push(int data) {
+        if (topIndex >= capacity - 1) {
+            throw overflow_error("Stack overflow");
+        }
+        arr[++topIndex] = data;
+    }
+    
+    int pop() {
+        if (isEmpty()) {
+            throw underflow_error("Stack underflow");
+        }
+        return arr[topIndex--];
+    }
+    
+    int top() {
+        if (isEmpty()) {
+            throw underflow_error("Stack is empty");
+        }
+        return arr[topIndex];
+    }
+    
+    bool isEmpty() {
+        return topIndex == -1;
+    }
+};
+                        </div>
+                        <p><strong>Time Complexity:</strong> All operations O(1)</p>
+                        <p><strong>Space Complexity:</strong> O(n) for storage</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🔗 Linked List Implementation</h4>
+                        <div class="code-block">
+struct Node {
+    int data;
+    Node* next;
+    Node(int val) : data(val), next(nullptr) {}
+};
+
+class LinkedStack {
+private:
+    Node* topNode;
+    int count;
+
+public:
+    LinkedStack() : topNode(nullptr), count(0) {}
+    
+    void push(int data) {
+        Node* newNode = new Node(data);
+        newNode->next = topNode;
+        topNode = newNode;
+        count++;
+    }
+    
+    int pop() {
+        if (isEmpty()) {
+            throw underflow_error("Stack underflow");
+        }
+        Node* temp = topNode;
+        int data = temp->data;
+        topNode = topNode->next;
+        delete temp;
+        count--;
+        return data;
+    }
+    
+    int top() {
+        if (isEmpty()) {
+            throw underflow_error("Stack is empty");
+        }
+        return topNode->data;
+    }
+    
+    bool isEmpty() {
+        return topNode == nullptr;
+    }
+};
+                        </div>
+                        <p><strong>Advantages:</strong> Dynamic size, no overflow</p>
+                        <p><strong>Disadvantages:</strong> Extra memory for pointers</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>🎯 Classic Stack Applications</h3>
+                    
+                    <h4>1. Parentheses Matching</h4>
+                    <div class="code-block">
+bool isBalanced(string expr) {
+    stack&lt;char&gt; s;
+    
+    for (char c : expr) {
+        if (c == '(' || c == '{' || c == '[') {
+            s.push(c);
+        }
+        else if (c == ')' || c == '}' || c == ']') {
+            if (s.empty()) return false;
+            
+            char top = s.top();
+            s.pop();
+            
+            if ((c == ')' && top != '(') ||
+                (c == '}' && top != '{') ||
+                (c == ']' && top != '[')) {
+                return false;
+            }
+        }
+    }
+    
+    return s.empty();
+}
+                    </div>
+
+                    <h4>2. Infix to Postfix Conversion</h4>
+                    <div class="code-block">
+string infixToPostfix(string infix) {
+    stack&lt;char&gt; s;
+    string postfix = "";
+    
+    for (char c : infix) {
+        if (isalnum(c)) {
+            postfix += c;
+        }
+        else if (c == '(') {
+            s.push(c);
+        }
+        else if (c == ')') {
+            while (!s.empty() && s.top() != '(') {
+                postfix += s.top();
+                s.pop();
+            }
+            s.pop(); // Remove '('
+        }
+        else { // Operator
+            while (!s.empty() && 
+                   precedence(s.top()) >= precedence(c)) {
+                postfix += s.top();
+                s.pop();
+            }
+            s.push(c);
+        }
+    }
+    
+    while (!s.empty()) {
+        postfix += s.top();
+        s.pop();
+    }
+    
+    return postfix;
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUEUES SECTION -->
+        <div id="queues" class="lesson-section">
+            <div class="theory-section">
+                <h2>🔄 Queue Data Structure</h2>
+                <p><strong>Queue</strong> follows the FIFO (First In, First Out) principle. The element added first is the first one to be removed.</p>
+
+                <div class="example-box">
+                    <h3>🔧 Queue Operations</h3>
+                    <div class="code-block">
+// Queue ADT Interface
+class Queue {
+public:
+    void enqueue(int data);  // Add element to rear
+    int dequeue();           // Remove and return front element
+    int front();             // Return front element without removing
+    int rear();              // Return rear element without removing
+    bool isEmpty();          // Check if queue is empty
+    int size();             // Return number of elements
+};
+                    </div>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h4>📊 Circular Array Implementation</h4>
+                        <div class="code-block">
+class CircularQueue {
+private:
+    int* arr;
+    int frontIndex;
+    int rearIndex;
+    int capacity;
+    int count;
+
+public:
+    CircularQueue(int size) {
+        arr = new int[size];
+        capacity = size;
+        frontIndex = 0;
+        rearIndex = -1;
+        count = 0;
+    }
+    
+    void enqueue(int data) {
+        if (count >= capacity) {
+            throw overflow_error("Queue overflow");
+        }
+        rearIndex = (rearIndex + 1) % capacity;
+        arr[rearIndex] = data;
+        count++;
+    }
+    
+    int dequeue() {
+        if (isEmpty()) {
+            throw underflow_error("Queue underflow");
+        }
+        int data = arr[frontIndex];
+        frontIndex = (frontIndex + 1) % capacity;
+        count--;
+        return data;
+    }
+    
+    int front() {
+        if (isEmpty()) {
+            throw underflow_error("Queue is empty");
+        }
+        return arr[frontIndex];
+    }
+    
+    bool isEmpty() {
+        return count == 0;
+    }
+    
+    bool isFull() {
+        return count == capacity;
+    }
+};
+                        </div>
+                        <p><strong>Advantage:</strong> Efficient use of array space</p>
+                        <p><strong>Key Insight:</strong> Use modular arithmetic for wraparound</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h4>🔗 Linked List Implementation</h4>
+                        <div class="code-block">
+struct QueueNode {
+    int data;
+    QueueNode* next;
+    QueueNode(int val) : data(val), next(nullptr) {}
+};
+
+class LinkedQueue {
+private:
+    QueueNode* frontNode;
+    QueueNode* rearNode;
+    int count;
+
+public:
+    LinkedQueue() : frontNode(nullptr), rearNode(nullptr), count(0) {}
+    
+    void enqueue(int data) {
+        QueueNode* newNode = new QueueNode(data);
+        
+        if (isEmpty()) {
+            frontNode = rearNode = newNode;
+        } else {
+            rearNode->next = newNode;
+            rearNode = newNode;
+        }
+        count++;
+    }
+    
+    int dequeue() {
+        if (isEmpty()) {
+            throw underflow_error("Queue underflow");
+        }
+        
+        QueueNode* temp = frontNode;
+        int data = temp->data;
+        frontNode = frontNode->next;
+        
+        if (frontNode == nullptr) {
+            rearNode = nullptr;
+        }
+        
+        delete temp;
+        count--;
+        return data;
+    }
+    
+    int front() {
+        if (isEmpty()) {
+            throw underflow_error("Queue is empty");
+        }
+        return frontNode->data;
+    }
+    
+    bool isEmpty() {
+        return frontNode == nullptr;
+    }
+};
+                        </div>
+                        <p><strong>Advantages:</strong> Dynamic size, no size limits</p>
+                        <p><strong>Note:</strong> Maintain both front and rear pointers</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>🌟 Queue Variants</h3>
+                    
+                    <h4>1. Priority Queue</h4>
+                    <p>Elements have priorities; highest priority dequeued first</p>
+                    <div class="code-block">
+// Priority Queue using heap
+priority_queue&lt;int&gt; maxHeap;         // Max heap
+priority_queue&lt;int, vector&lt;int&gt;, greater&lt;int&gt;&gt; minHeap; // Min heap
+
+maxHeap.push(30);
+maxHeap.push(10);
+maxHeap.push(20);
+cout &lt;&lt; maxHeap.top(); // 30 (highest priority)
+                    </div>
+
+                    <h4>2. Deque (Double-ended Queue)</h4>
+                    <p>Can add/remove from both ends</p>
+                    <div class="code-block">
+deque&lt;int&gt; dq;
+dq.push_front(10);  // Add to front
+dq.push_back(20);   // Add to rear
+dq.pop_front();     // Remove from front
+dq.pop_back();      // Remove from rear
+                    </div>
+
+                    <h4>3. Circular Queue</h4>
+                    <p>Rear connects to front, efficient use of space</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE SECTION -->
+        <div id="interactive" class="lesson-section">
+            <div class="visualization-area">
+                <h3>🎮 Interactive Stack & Queue Operations</h3>
+                
+                <div class="data-structure-container">
+                    <div class="stack-container">
+                        <h3>📚 Stack Operations</h3>
+                        <div class="stack-visualization" id="interactiveStack">
+                            <!-- Stack elements will be added here -->
+                        </div>
+                        <p><strong>Size:</strong> <span id="stackSize">0</span> | <strong>Top:</strong> <span id="stackTop">Empty</span></p>
+                    </div>
+
+                    <div class="queue-container">
+                        <h3>🔄 Queue Operations</h3>
+                        <div class="queue-visualization" id="interactiveQueue">
+                            <!-- Queue elements will be added here -->
+                        </div>
+                        <p><strong>Size:</strong> <span id="queueSize">0</span> | <strong>Front:</strong> <span id="queueFront">Empty</span> | <strong>Rear:</strong> <span id="queueRear">Empty</span></p>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group stack-controls">
+                        <label>Stack Operations</label>
+                        <input type="number" id="stackInput" placeholder="Enter value" min="1" max="99">
+                        <button class="stack-btn" onclick="pushStack()">📚 Push</button>
+                        <button class="stack-btn" onclick="popStack()">⬆️ Pop</button>
+                        <button class="stack-btn" onclick="peekStack()">👁️ Peek Top</button>
+                        <button class="stack-btn" onclick="clearStack()">🧹 Clear</button>
+                    </div>
+
+                    <div class="control-group queue-controls">
+                        <label>Queue Operations</label>
+                        <input type="number" id="queueInput" placeholder="Enter value" min="1" max="99">
+                        <button class="queue-btn" onclick="enqueueQueue()">➕ Enqueue</button>
+                        <button class="queue-btn" onclick="dequeueQueue()">➖ Dequeue</button>
+                        <button class="queue-btn" onclick="peekQueue()">👁️ Peek Front</button>
+                        <button class="queue-btn" onclick="clearQueue()">🧹 Clear</button>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Demonstrations</label>
+                        <button onclick="demonstrateParentheses()">🔍 Parentheses Check</button>
+                        <button onclick="demonstrateBFS()">🌐 BFS Simulation</button>
+                        <button onclick="demonstrateCallStack()">📞 Function Calls</button>
+                        <button onclick="demonstratePrintQueue()">🖨️ Print Queue</button>
+                    </div>
+                </div>
+
+                <div class="operation-log" id="operationLog">
+                    <strong>Operation Log:</strong><br>
+                    Ready for stack and queue operations...
+                </div>
+            </div>
+        </div>
+
+        <!-- APPLICATIONS SECTION -->
+        <div id="applications" class="lesson-section">
+            <div class="theory-section">
+                <h2>🌟 Real-world Applications</h2>
+
+                <div class="grid-layout">
+                    <div class="example-box">
+                        <h3>📚 Stack Applications</h3>
+                        
+                        <h4>1. Function Call Management</h4>
+                        <div class="code-block">
+void functionA() {
+    int x = 10;
+    functionB();  // Push return address
+    // When B returns, pop and continue here
+}
+
+void functionB() {
+    int y = 20;
+    functionC();  // Push return address
+    // When C returns, pop and continue here
+}
+
+void functionC() {
+    int z = 30;
+    return;  // Pop and return to B
+}
+                        </div>
+
+                        <h4>2. Memory Management</h4>
+                        <ul>
+                            <li><strong>Activation Records:</strong> Function parameters and local variables</li>
+                            <li><strong>Stack Frame:</strong> Each function call creates a frame</li>
+                            <li><strong>Automatic Cleanup:</strong> Variables destroyed when function ends</li>
+                        </ul>
+
+                        <h4>3. Expression Evaluation</h4>
+                        <ul>
+                            <li><strong>Postfix Evaluation:</strong> Use stack to evaluate RPN</li>
+                            <li><strong>Operator Precedence:</strong> Handle operator priorities</li>
+                            <li><strong>Syntax Parsing:</strong> Compiler design</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box">
+                        <h3>🔄 Queue Applications</h3>
+                        
+                        <h4>1. Operating System Scheduling</h4>
+                        <div class="code-block">
+// Process scheduling using queue
+class ProcessScheduler {
+    queue&lt;Process&gt; readyQueue;
+    
+public:
+    void addProcess(Process p) {
+        readyQueue.push(p);
+    }
+    
+    Process getNextProcess() {
+        if (!readyQueue.empty()) {
+            Process p = readyQueue.front();
+            readyQueue.pop();
+            return p;
+        }
+        // No process to run
+    }
+};
+                        </div>
+
+                        <h4>2. Breadth-First Search</h4>
+                        <div class="code-block">
+void BFS(Graph g, int start) {
+    queue&lt;int&gt; q;
+    vector&lt;bool&gt; visited(g.vertices, false);
+    
+    q.push(start);
+    visited[start] = true;
+    
+    while (!q.empty()) {
+        int vertex = q.front();
+        q.pop();
+        
+        cout &lt;&lt; vertex &lt;&lt; " ";
+        
+        for (int neighbor : g.getNeighbors(vertex)) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+        }
+    }
+}
+                        </div>
+
+                        <h4>3. Buffer for Data Streams</h4>
+                        <ul>
+                            <li><strong>Keyboard Buffer:</strong> Store keystrokes in order</li>
+                            <li><strong>Print Spooling:</strong> Queue print jobs</li>
+                            <li><strong>Network Packets:</strong> Handle network traffic</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="complexity-box">
+                    <h3>🏭 Industrial Applications</h3>
+                    
+                    <div class="grid-layout">
+                        <div>
+                            <h4>🎮 Game Development</h4>
+                            <ul>
+                                <li><strong>Undo System:</strong> Stack of game states</li>
+                                <li><strong>AI Pathfinding:</strong> Queue for BFS/Dijkstra</li>
+                                <li><strong>Event System:</strong> Queue of game events</li>
+                                <li><strong>Animation:</strong> Stack of animation frames</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h4>🌐 Web Development</h4>
+                            <ul>
+                                <li><strong>Browser History:</strong> Stack of visited pages</li>
+                                <li><strong>Request Queue:</strong> Handle HTTP requests</li>
+                                <li><strong>Task Queue:</strong> JavaScript event loop</li>
+                                <li><strong>Session Management:</strong> Stack of user actions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARISON SECTION -->
+        <div id="comparison" class="lesson-section">
+            <div class="theory-section">
+                <h2>⚖️ Stack vs Queue Comparison</h2>
+
+                <div class="comparison-table">
+                    <table>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Stack (LIFO)</th>
+                            <th>Queue (FIFO)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>Insertion</strong></td>
+                            <td>Push at top</td>
+                            <td>Enqueue at rear</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deletion</strong></td>
+                            <td>Pop from top</td>
+                            <td>Dequeue from front</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Access Pattern</strong></td>
+                            <td>Last In, First Out</td>
+                            <td>First In, First Out</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Peek Operation</strong></td>
+                            <td>View top element</td>
+                            <td>View front element</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Main Applications</strong></td>
+                            <td>Function calls, Undo operations, Expression evaluation</td>
+                            <td>Process scheduling, BFS, Print queue</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Implementation</strong></td>
+                            <td>Array or Linked List</td>
+                            <td>Circular Array or Linked List</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Time Complexity</strong></td>
+                            <td>O(1) for all operations</td>
+                            <td>O(1) for all operations</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Space Complexity</strong></td>
+                            <td>O(n)</td>
+                            <td>O(n)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="complexity-box">
+                        <h3>🎯 When to Use Stack</h3>
+                        <ul>
+                            <li><strong>Recursive Algorithms:</strong> Simulate recursion</li>
+                            <li><strong>Undo Operations:</strong> Reverse order of actions</li>
+                            <li><strong>Parser Design:</strong> Handle nested structures</li>
+                            <li><strong>Memory Management:</strong> Function call frames</li>
+                            <li><strong>Backtracking:</strong> Explore and retreat</li>
+                        </ul>
+                        
+                        <p><strong>Pattern Recognition:</strong> When you need to process elements in reverse order of arrival</p>
+                    </div>
+
+                    <div class="complexity-box">
+                        <h3>🎯 When to Use Queue</h3>
+                        <ul>
+                            <li><strong>Scheduling:</strong> Fair order processing</li>
+                            <li><strong>BFS Algorithms:</strong> Level-order traversal</li>
+                            <li><strong>Buffer Management:</strong> Handle data streams</li>
+                            <li><strong>Simulation:</strong> Model real-world queues</li>
+                            <li><strong>Asynchronous Processing:</strong> Handle requests</li>
+                        </ul>
+                        
+                        <p><strong>Pattern Recognition:</strong> When you need to process elements in order of arrival</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h3>📊 Performance Comparison</h3>
+                    
+                    <div class="comparison-table">
+                        <table>
+                            <tr>
+                                <th>Implementation</th>
+                                <th>Insertion</th>
+                                <th>Deletion</th>
+                                <th>Search</th>
+                                <th>Space</th>
+                                <th>Cache Performance</th>
+                            </tr>
+                            <tr>
+                                <td><strong>Array-based</strong></td>
+                                <td>O(1)</td>
+                                <td>O(1)</td>
+                                <td>O(n)</td>
+                                <td>O(n)</td>
+                                <td>Excellent</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Linked List-based</strong></td>
+                                <td>O(1)</td>
+                                <td>O(1)</td>
+                                <td>O(n)</td>
+                                <td>O(n) + pointer overhead</td>
+                                <td>Poor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dynamic Array</strong></td>
+                                <td>O(1) amortized</td>
+                                <td>O(1)</td>
+                                <td>O(n)</td>
+                                <td>O(n)</td>
+                                <td>Good</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stack and Queue implementations
+        class Stack {
+            constructor() {
+                this.items = [];
+            }
+
+            push(element) {
+                this.items.push(element);
+            }
+
+            pop() {
+                if (this.isEmpty()) {
+                    throw new Error("Stack underflow");
+                }
+                return this.items.pop();
+            }
+
+            peek() {
+                if (this.isEmpty()) {
+                    throw new Error("Stack is empty");
+                }
+                return this.items[this.items.length - 1];
+            }
+
+            isEmpty() {
+                return this.items.length === 0;
+            }
+
+            size() {
+                return this.items.length;
+            }
+
+            clear() {
+                this.items = [];
+            }
+
+            toArray() {
+                return [...this.items];
+            }
+        }
+
+        class Queue {
+            constructor() {
+                this.items = [];
+            }
+
+            enqueue(element) {
+                this.items.push(element);
+            }
+
+            dequeue() {
+                if (this.isEmpty()) {
+                    throw new Error("Queue underflow");
+                }
+                return this.items.shift();
+            }
+
+            front() {
+                if (this.isEmpty()) {
+                    throw new Error("Queue is empty");
+                }
+                return this.items[0];
+            }
+
+            rear() {
+                if (this.isEmpty()) {
+                    throw new Error("Queue is empty");
+                }
+                return this.items[this.items.length - 1];
+            }
+
+            isEmpty() {
+                return this.items.length === 0;
+            }
+
+            size() {
+                return this.items.length;
+            }
+
+            clear() {
+                this.items = [];
+            }
+
+            toArray() {
+                return [...this.items];
+            }
+        }
+
+        // Global instances
+        let interactiveStack = new Stack();
+        let interactiveQueue = new Queue();
+
+        // Show/hide sections
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.lesson-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            const buttons = document.querySelectorAll('.nav-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionId === 'interactive') {
+                renderStack();
+                renderQueue();
+            }
+        }
+
+        // Render stack visualization
+        function renderStack() {
+            const container = document.getElementById('interactiveStack');
+            container.innerHTML = '';
+            
+            const stackArray = interactiveStack.toArray();
+            
+            if (stackArray.length === 0) {
+                container.innerHTML = '<div style="color: #95a5a6; padding: 20px;">Empty Stack</div>';
+            } else {
+                stackArray.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'stack-element';
+                    element.textContent = value;
+                    
+                    if (index === stackArray.length - 1) {
+                        element.classList.add('top');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer top-pointer';
+                        pointer.textContent = 'TOP';
+                        element.appendChild(pointer);
+                    }
+                    
+                    container.appendChild(element);
+                });
+            }
+            
+            // Update info
+            document.getElementById('stackSize').textContent = interactiveStack.size();
+            document.getElementById('stackTop').textContent = 
+                interactiveStack.isEmpty() ? 'Empty' : interactiveStack.peek();
+        }
+
+        // Render queue visualization
+        function renderQueue() {
+            const container = document.getElementById('interactiveQueue');
+            container.innerHTML = '';
+            
+            const queueArray = interactiveQueue.toArray();
+            
+            if (queueArray.length === 0) {
+                container.innerHTML = '<div style="color: #95a5a6; padding: 20px;">Empty Queue</div>';
+            } else {
+                queueArray.forEach((value, index) => {
+                    const element = document.createElement('div');
+                    element.className = 'queue-element';
+                    element.textContent = value;
+                    
+                    if (index === 0) {
+                        element.classList.add('front');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer front-pointer';
+                        pointer.textContent = 'FRONT';
+                        element.appendChild(pointer);
+                    }
+                    
+                    if (index === queueArray.length - 1) {
+                        element.classList.add('rear');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer rear-pointer';
+                        pointer.textContent = 'REAR';
+                        element.appendChild(pointer);
+                    }
+                    
+                    container.appendChild(element);
+                });
+            }
+            
+            // Update info
+            document.getElementById('queueSize').textContent = interactiveQueue.size();
+            document.getElementById('queueFront').textContent = 
+                interactiveQueue.isEmpty() ? 'Empty' : interactiveQueue.front();
+            document.getElementById('queueRear').textContent = 
+                interactiveQueue.isEmpty() ? 'Empty' : interactiveQueue.rear();
+        }
+
+        // Stack operations
+        function pushStack() {
+            const input = document.getElementById('stackInput');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number for stack');
+                return;
+            }
+            
+            if (interactiveStack.size() >= 8) {
+                logOperation('❌ Stack overflow! Maximum size reached');
+                return;
+            }
+            
+            interactiveStack.push(value);
+            renderStack();
+            logOperation(`📚 Pushed ${value} onto stack`);
+            input.value = '';
+        }
+
+        function popStack() {
+            try {
+                const value = interactiveStack.pop();
+                renderStack();
+                logOperation(`⬆️ Popped ${value} from stack`);
+            } catch (error) {
+                logOperation('❌ Stack underflow! Cannot pop from empty stack');
+            }
+        }
+
+        function peekStack() {
+            try {
+                const value = interactiveStack.peek();
+                logOperation(`👁️ Top element is ${value}`);
+            } catch (error) {
+                logOperation('❌ Stack is empty! Nothing to peek');
+            }
+        }
+
+        function clearStack() {
+            interactiveStack.clear();
+            renderStack();
+            logOperation('🧹 Stack cleared');
+        }
+
+        // Queue operations
+        function enqueueQueue() {
+            const input = document.getElementById('queueInput');
+            const value = parseInt(input.value);
+            
+            if (isNaN(value)) {
+                logOperation('❌ Please enter a valid number for queue');
+                return;
+            }
+            
+            if (interactiveQueue.size() >= 8) {
+                logOperation('❌ Queue overflow! Maximum size reached');
+                return;
+            }
+            
+            interactiveQueue.enqueue(value);
+            renderQueue();
+            logOperation(`➕ Enqueued ${value} to queue`);
+            input.value = '';
+        }
+
+        function dequeueQueue() {
+            try {
+                const value = interactiveQueue.dequeue();
+                renderQueue();
+                logOperation(`➖ Dequeued ${value} from queue`);
+            } catch (error) {
+                logOperation('❌ Queue underflow! Cannot dequeue from empty queue');
+            }
+        }
+
+        function peekQueue() {
+            try {
+                const value = interactiveQueue.front();
+                logOperation(`👁️ Front element is ${value}`);
+            } catch (error) {
+                logOperation('❌ Queue is empty! Nothing to peek');
+            }
+        }
+
+        function clearQueue() {
+            interactiveQueue.clear();
+            renderQueue();
+            logOperation('🧹 Queue cleared');
+        }
+
+        // Demonstration functions
+        function demonstrateParentheses() {
+            const expressions = [
+                "((()))",      // Balanced
+                "((())",       // Unbalanced
+                "{[()]}",      // Balanced
+                "{[(])}",      // Unbalanced
+            ];
+            
+            logOperation('🔍 Demonstrating Parentheses Matching using Stack:');
+            
+            expressions.forEach((expr, index) => {
+                setTimeout(() => {
+                    const result = checkParentheses(expr);
+                    logOperation(`"${expr}" → ${result ? '✅ Balanced' : '❌ Unbalanced'}`);
+                }, index * 1000);
+            });
+        }
+
+        function checkParentheses(expr) {
+            const stack = new Stack();
+            const pairs = {'(': ')', '{': '}', '[': ']'};
+            
+            for (let char of expr) {
+                if (char in pairs) {
+                    stack.push(char);
+                } else if (Object.values(pairs).includes(char)) {
+                    if (stack.isEmpty()) return false;
+                    const last = stack.pop();
+                    if (pairs[last] !== char) return false;
+                }
+            }
+            
+            return stack.isEmpty();
+        }
+
+        function demonstrateBFS() {
+            logOperation('🌐 Demonstrating BFS Traversal using Queue:');
+            
+            // Simulate a simple graph traversal
+            const graph = {
+                'A': ['B', 'C'],
+                'B': ['D', 'E'],
+                'C': ['F'],
+                'D': [],
+                'E': ['F'],
+                'F': []
+            };
+            
+            const queue = new Queue();
+            const visited = new Set();
+            const start = 'A';
+            
+            queue.enqueue(start);
+            visited.add(start);
+            
+            let step = 1;
+            const bfsStep = () => {
+                if (!queue.isEmpty()) {
+                    const current = queue.dequeue();
+                    logOperation(`Step ${step}: Visit ${current}`);
+                    
+                    graph[current].forEach(neighbor => {
+                        if (!visited.has(neighbor)) {
+                            visited.add(neighbor);
+                            queue.enqueue(neighbor);
+                            logOperation(`  → Add ${neighbor} to queue`);
+                        }
+                    });
+                    
+                    step++;
+                    setTimeout(bfsStep, 1000);
+                } else {
+                    logOperation('🎉 BFS traversal complete!');
+                }
+            };
+            
+            setTimeout(bfsStep, 500);
+        }
+
+        function demonstrateCallStack() {
+            logOperation('📞 Demonstrating Function Call Stack:');
+            
+            const calls = [
+                'main() calls functionA()',
+                'functionA() calls functionB()',
+                'functionB() calls functionC()',
+                'functionC() returns to functionB()',
+                'functionB() returns to functionA()',
+                'functionA() returns to main()'
+            ];
+            
+            calls.forEach((call, index) => {
+                setTimeout(() => {
+                    logOperation(`${index + 1}. ${call}`);
+                }, index * 800);
+            });
+        }
+
+        function demonstratePrintQueue() {
+            logOperation('🖨️ Demonstrating Print Queue:');
+            
+            const jobs = ['Document1.pdf', 'Image.jpg', 'Report.docx', 'Presentation.pptx'];
+            
+            logOperation('Adding print jobs to queue...');
+            jobs.forEach((job, index) => {
+                setTimeout(() => {
+                    logOperation(`➕ Added: ${job}`);
+                }, index * 500);
+            });
+            
+            setTimeout(() => {
+                logOperation('Processing print jobs...');
+                jobs.forEach((job, index) => {
+                    setTimeout(() => {
+                        logOperation(`🖨️ Printing: ${job}`);
+                    }, (index * 1000) + 1000);
+                });
+            }, jobs.length * 500);
+        }
+
+        // Log operation
+        function logOperation(message) {
+            const log = document.getElementById('operationLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.innerHTML += `<br>[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderStack();
+            renderQueue();
+        });
+    </script>
+</body>
+</html>

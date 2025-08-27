@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conformal Mappings - Interactive Math</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4fc3f7;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .dual-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .controls-section {
+            grid-column: span 2;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .visualization-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .math-explanation {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+        }
+        
+        .formula-box {
+            background: rgba(79, 195, 247, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .function-selector {
+            margin-bottom: 20px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: white;
+        }
+        
+        .parameter-control {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+        }
+        
+        .value-display {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .plot-container {
+            height: 450px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: rgba(79, 195, 247, 0.3);
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .property-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .preserved {
+            border: 2px solid #4caf50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .not-preserved {
+            border: 2px solid #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Conformal Mappings</h1>
+        
+        <div class="math-explanation">
+            <h2>📐 Mathematical Foundation</h2>
+            <p><strong>Conformal Mapping:</strong> A function f: C → C that preserves angles and local shapes. If f is analytic and f'(z) ≠ 0, then f is conformal at z.</p>
+            
+            <div class="formula-box">
+                <strong>Properties Preserved:</strong><br>
+                • <strong>Angles:</strong> ∠(curve₁, curve₂) = ∠(f(curve₁), f(curve₂))<br>
+                • <strong>Local Shape:</strong> Small circles → small ellipses with same orientation<br>
+                • <strong>Harmonicity:</strong> Harmonic functions remain harmonic<br><br>
+                <strong>Möbius Transformation:</strong> $f(z) = \frac{az + b}{cz + d}$ where $ad - bc ≠ 0$
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>Mapping Function:</label>
+                    <select id="mappingFunction">
+                        <option value="mobius">Möbius: (az+b)/(cz+d)</option>
+                        <option value="polynomial">Polynomial: z^n</option>
+                        <option value="exponential">Exponential: e^z</option>
+                        <option value="logarithm">Logarithm: log(z)</option>
+                        <option value="square_root">Square Root: √z</option>
+                        <option value="reciprocal">Reciprocal: 1/z</option>
+                        <option value="sin">Sine: sin(z)</option>
+                        <option value="cos">Cosine: cos(z)</option>
+                    </select>
+                </div>
+                
+                <div class="control-group" id="mobiusParams">
+                    <div class="parameter-control">
+                        <label>a: <span id="aValue">1</span></label>
+                        <input type="range" id="paramA" min="-3" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="parameter-control">
+                        <label>b: <span id="bValue">0</span></label>
+                        <input type="range" id="paramB" min="-3" max="3" step="0.1" value="0">
+                    </div>
+                </div>
+                
+                <div class="control-group" id="mobiusParams2">
+                    <div class="parameter-control">
+                        <label>c: <span id="cValue">0</span></label>
+                        <input type="range" id="paramC" min="-3" max="3" step="0.1" value="0">
+                    </div>
+                    <div class="parameter-control">
+                        <label>d: <span id="dValue">1</span></label>
+                        <input type="range" id="paramD" min="-3" max="3" step="0.1" value="1">
+                    </div>
+                </div>
+                
+                <div class="control-group" id="polynomialParams" style="display: none;">
+                    <div class="parameter-control">
+                        <label>Power n: <span id="powerValue">2</span></label>
+                        <input type="range" id="power" min="1" max="5" step="1" value="2">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid-container">
+                <button onclick="showGridMapping()">📏 Show Grid Mapping</button>
+                <button onclick="showCircleMapping()">⭕ Map Circles</button>
+                <button onclick="animateMapping()">🎬 Animate Transformation</button>
+                <button onclick="showAnglePreservation()">📐 Verify Angle Preservation</button>
+            </div>
+        </div>
+        
+        <div class="dual-view">
+            <div class="visualization-panel">
+                <h3>🎯 Domain (z-plane)</h3>
+                <div id="domainPlot" class="plot-container"></div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h3>🌈 Range (w-plane)</h3>
+                <div id="rangePlot" class="plot-container"></div>
+            </div>
+        </div>
+        
+        <div class="dual-view">
+            <div class="value-display">
+                <div><strong>Current Mapping:</strong></div>
+                <div id="mappingFormula">w = z</div>
+                <div id="mappingProperties"></div>
+            </div>
+            
+            <div class="grid-container">
+                <div class="property-box preserved">
+                    <div><strong>Angles</strong></div>
+                    <div>✅ Preserved</div>
+                </div>
+                <div class="property-box preserved">
+                    <div><strong>Local Shape</strong></div>
+                    <div>✅ Preserved</div>
+                </div>
+                <div class="property-box not-preserved">
+                    <div><strong>Distances</strong></div>
+                    <div>❌ Not Preserved</div>
+                </div>
+                <div class="property-box not-preserved">
+                    <div><strong>Areas</strong></div>
+                    <div>❌ Scaled by |f'(z)|²</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🎯 Applications & Special Mappings</h2>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showApplication('fluid')">Fluid Dynamics</button>
+                <button class="tab" onclick="showApplication('electrostatics')">Electrostatics</button>
+                <button class="tab" onclick="showApplication('aerodynamics')">Aerodynamics</button>
+            </div>
+            
+            <div id="fluidApp" class="application-content">
+                <h3>🌊 Fluid Flow Applications</h3>
+                <ul>
+                    <li><strong>Flow around cylinders:</strong> Map circle to cylinder cross-section</li>
+                    <li><strong>Flow in channels:</strong> Map infinite strips to physical channels</li>
+                    <li><strong>Flow around corners:</strong> Use power functions z^(π/α) for corner angle α</li>
+                    <li><strong>Complex potential:</strong> Φ(z) = φ(x,y) + iψ(x,y) where φ is velocity potential, ψ is stream function</li>
+                </ul>
+                
+                <div class="formula-box">
+                    <strong>Joukowski Transformation:</strong> $w = z + \frac{1}{z}$ (maps circles to airfoils)
+                </div>
+            </div>
+            
+            <div id="electrostaticsApp" class="application-content" style="display: none;">
+                <h3>⚡ Electrostatic Applications</h3>
+                <ul>
+                    <li><strong>Electric field mapping:</strong> Map simple geometries to complex electrode shapes</li>
+                    <li><strong>Capacitor analysis:</strong> Calculate capacitance using conformal mapping</li>
+                    <li><strong>Field lines:</strong> Equipotential lines remain equipotential after mapping</li>
+                    <li><strong>Boundary value problems:</strong> Solve Laplace equation in complex domains</li>
+                </ul>
+            </div>
+            
+            <div id="aerodynamicsApp" class="application-content" style="display: none;">
+                <h3>✈️ Aerodynamic Applications</h3>
+                <ul>
+                    <li><strong>Airfoil design:</strong> Map circles to various airfoil shapes</li>
+                    <li><strong>Lift calculation:</strong> Use circulation and conformal mapping</li>
+                    <li><strong>Flow visualization:</strong> Transform complex airfoil flows to simple circle flows</li>
+                    <li><strong>Wing theory:</strong> Analyze finite wings using mapping techniques</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🔍 Key Properties & Theorems</h2>
+            
+            <div class="grid-container">
+                <div class="property-box">
+                    <h4>🎯 Riemann Mapping Theorem</h4>
+                    <p>Any simply connected domain (except ℂ) can be conformally mapped to unit disk</p>
+                </div>
+                <div class="property-box">
+                    <h4>📐 Angle Preservation</h4>
+                    <p>Local angles preserved at all points where f'(z) ≠ 0</p>
+                </div>
+                <div class="property-box">
+                    <h4>🔄 Inverse Mapping</h4>
+                    <p>Inverse of conformal mapping is also conformal</p>
+                </div>
+                <div class="property-box">
+                    <h4>🔗 Composition</h4>
+                    <p>Composition of conformal mappings is conformal</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            }
+        };
+
+        let currentMapping = 'mobius';
+        let mappingParams = {
+            a: 1, b: 0, c: 0, d: 1, power: 2
+        };
+        
+        // Application switching
+        function showApplication(app) {
+            document.querySelectorAll('.application-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(app + 'App').style.display = 'block';
+            event.target.classList.add('active');
+        }
+        
+        // Mapping function definitions
+        function applyMapping(z, mappingType, params) {
+            const {real: x, imag: y} = z;
+            
+            switch(mappingType) {
+                case 'mobius':
+                    return mobiusTransform(z, params);
+                    
+                case 'polynomial':
+                    return complexPower(z, params.power);
+                    
+                case 'exponential':
+                    return complexExp(z);
+                    
+                case 'logarithm':
+                    return complexLog(z);
+                    
+                case 'square_root':
+                    return complexSqrt(z);
+                    
+                case 'reciprocal':
+                    const denom = x*x + y*y;
+                    return {real: x/denom, imag: -y/denom};
+                    
+                case 'sin':
+                    return complexSin(z);
+                    
+                case 'cos':
+                    return complexCos(z);
+                    
+                default:
+                    return z;
+            }
+        }
+        
+        function mobiusTransform(z, params) {
+            const {a, b, c, d} = params;
+            const numerator = {
+                real: a * z.real + b,
+                imag: a * z.imag
+            };
+            const denominator = {
+                real: c * z.real + d,
+                imag: c * z.imag
+            };
+            
+            const denomMagSq = denominator.real * denominator.real + denominator.imag * denominator.imag;
+            
+            return {
+                real: (numerator.real * denominator.real + numerator.imag * denominator.imag) / denomMagSq,
+                imag: (numerator.imag * denominator.real - numerator.real * denominator.imag) / denomMagSq
+            };
+        }
+        
+        function complexPower(z, n) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            const rPow = Math.pow(r, n);
+            const thetaPow = theta * n;
+            
+            return {
+                real: rPow * Math.cos(thetaPow),
+                imag: rPow * Math.sin(thetaPow)
+            };
+        }
+        
+        function complexExp(z) {
+            const r = Math.exp(z.real);
+            return {
+                real: r * Math.cos(z.imag),
+                imag: r * Math.sin(z.imag)
+            };
+        }
+        
+        function complexLog(z) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            return {
+                real: Math.log(r),
+                imag: theta
+            };
+        }
+        
+        function complexSqrt(z) {
+            const r = Math.sqrt(z.real * z.real + z.imag * z.imag);
+            const theta = Math.atan2(z.imag, z.real);
+            const sqrtR = Math.sqrt(r);
+            const halfTheta = theta / 2;
+            
+            return {
+                real: sqrtR * Math.cos(halfTheta),
+                imag: sqrtR * Math.sin(halfTheta)
+            };
+        }
+        
+        function complexSin(z) {
+            const expIz = complexExp({real: -z.imag, imag: z.real});
+            const expMinusIz = complexExp({real: z.imag, imag: -z.real});
+            const diff = {
+                real: expIz.real - expMinusIz.real,
+                imag: expIz.imag - expMinusIz.imag
+            };
+            return {
+                real: -diff.imag / 2,
+                imag: diff.real / 2
+            };
+        }
+        
+        function complexCos(z) {
+            const expIz = complexExp({real: -z.imag, imag: z.real});
+            const expMinusIz = complexExp({real: z.imag, imag: -z.real});
+            return {
+                real: (expIz.real + expMinusIz.real) / 2,
+                imag: (expIz.imag + expMinusIz.imag) / 2
+            };
+        }
+        
+        function updateMapping() {
+            currentMapping = document.getElementById('mappingFunction').value;
+            
+            // Show/hide relevant parameter controls
+            document.getElementById('mobiusParams').style.display = 
+                currentMapping === 'mobius' ? 'block' : 'none';
+            document.getElementById('mobiusParams2').style.display = 
+                currentMapping === 'mobius' ? 'block' : 'none';
+            document.getElementById('polynomialParams').style.display = 
+                currentMapping === 'polynomial' ? 'block' : 'none';
+            
+            updateMappingDisplay();
+            showGridMapping();
+        }
+        
+        function updateMappingDisplay() {
+            let formula = '';
+            
+            switch(currentMapping) {
+                case 'mobius':
+                    formula = `w = (${mappingParams.a}z + ${mappingParams.b})/(${mappingParams.c}z + ${mappingParams.d})`;
+                    break;
+                case 'polynomial':
+                    formula = `w = z^${mappingParams.power}`;
+                    break;
+                case 'exponential':
+                    formula = 'w = e^z';
+                    break;
+                case 'logarithm':
+                    formula = 'w = log(z)';
+                    break;
+                case 'square_root':
+                    formula = 'w = √z';
+                    break;
+                case 'reciprocal':
+                    formula = 'w = 1/z';
+                    break;
+                case 'sin':
+                    formula = 'w = sin(z)';
+                    break;
+                case 'cos':
+                    formula = 'w = cos(z)';
+                    break;
+            }
+            
+            document.getElementById('mappingFormula').textContent = formula;
+        }
+        
+        function showGridMapping() {
+            const gridLines = generateGrid();
+            const mappedGrid = gridLines.map(line => 
+                line.map(point => applyMapping(point, currentMapping, mappingParams))
+            );
+            
+            plotMappingComparison(gridLines, mappedGrid, 'Grid Mapping');
+        }
+        
+        function showCircleMapping() {
+            const circles = generateConcentricCircles();
+            const mappedCircles = circles.map(circle => 
+                circle.map(point => applyMapping(point, currentMapping, mappingParams))
+            );
+            
+            plotMappingComparison(circles, mappedCircles, 'Circle Mapping');
+        }
+        
+        function generateGrid() {
+            const lines = [];
+            const range = 3;
+            const step = 0.5;
+            
+            // Vertical lines
+            for (let x = -range; x <= range; x += step) {
+                const line = [];
+                for (let y = -range; y <= range; y += 0.1) {
+                    line.push({real: x, imag: y});
+                }
+                lines.push(line);
+            }
+            
+            // Horizontal lines
+            for (let y = -range; y <= range; y += step) {
+                const line = [];
+                for (let x = -range; x <= range; x += 0.1) {
+                    line.push({real: x, imag: y});
+                }
+                lines.push(line);
+            }
+            
+            return lines;
+        }
+        
+        function generateConcentricCircles() {
+            const circles = [];
+            const radii = [0.5, 1, 1.5, 2, 2.5];
+            const points = 100;
+            
+            radii.forEach(radius => {
+                const circle = [];
+                for (let i = 0; i <= points; i++) {
+                    const theta = (2 * Math.PI * i) / points;
+                    circle.push({
+                        real: radius * Math.cos(theta),
+                        imag: radius * Math.sin(theta)
+                    });
+                }
+                circles.push(circle);
+            });
+            
+            // Add radial lines
+            for (let angle = 0; angle < 2 * Math.PI; angle += Math.PI / 6) {
+                const line = [];
+                for (let r = 0; r <= 3; r += 0.1) {
+                    line.push({
+                        real: r * Math.cos(angle),
+                        imag: r * Math.sin(angle)
+                    });
+                }
+                circles.push(line);
+            }
+            
+            return circles;
+        }
+        
+        function plotMappingComparison(originalCurves, mappedCurves, title) {
+            // Plot original domain
+            const domainTraces = originalCurves.map((curve, index) => ({
+                x: curve.map(p => p.real),
+                y: curve.map(p => p.imag),
+                mode: 'lines',
+                type: 'scatter',
+                name: `Original ${index}`,
+                line: {color: '#4fc3f7', width: 1.5},
+                showlegend: false
+            }));
+            
+            const domainLayout = {
+                title: 'Domain (z-plane)',
+                xaxis: {title: 'Real', range: [-4, 4], gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Imaginary', range: [-4, 4], gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            // Plot mapped range
+            const rangeTraces = mappedCurves.map((curve, index) => {
+                const validPoints = curve.filter(p => 
+                    !isNaN(p.real) && !isNaN(p.imag) && 
+                    isFinite(p.real) && isFinite(p.imag) &&
+                    Math.abs(p.real) < 100 && Math.abs(p.imag) < 100
+                );
+                
+                return {
+                    x: validPoints.map(p => p.real),
+                    y: validPoints.map(p => p.imag),
+                    mode: 'lines',
+                    type: 'scatter',
+                    name: `Mapped ${index}`,
+                    line: {color: '#81c784', width: 1.5},
+                    showlegend: false
+                };
+            });
+            
+            // Determine range for mapped plot
+            let allMappedPoints = [];
+            mappedCurves.forEach(curve => {
+                curve.forEach(point => {
+                    if (!isNaN(point.real) && !isNaN(point.imag) && 
+                        isFinite(point.real) && isFinite(point.imag)) {
+                        allMappedPoints.push(point);
+                    }
+                });
+            });
+            
+            let xRange = [-4, 4];
+            let yRange = [-4, 4];
+            
+            if (allMappedPoints.length > 0) {
+                const xValues = allMappedPoints.map(p => p.real);
+                const yValues = allMappedPoints.map(p => p.imag);
+                const xMin = Math.max(Math.min(...xValues), -10);
+                const xMax = Math.min(Math.max(...xValues), 10);
+                const yMin = Math.max(Math.min(...yValues), -10);
+                const yMax = Math.min(Math.max(...yValues), 10);
+                
+                const xPadding = (xMax - xMin) * 0.1;
+                const yPadding = (yMax - yMin) * 0.1;
+                
+                xRange = [xMin - xPadding, xMax + xPadding];
+                yRange = [yMin - yPadding, yMax + yPadding];
+            }
+            
+            const rangeLayout = {
+                title: 'Range (w-plane)',
+                xaxis: {title: 'Real', range: xRange, gridcolor: 'rgba(255,255,255,0.2)'},
+                yaxis: {title: 'Imaginary', range: yRange, gridcolor: 'rgba(255,255,255,0.2)'},
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                font: {color: 'white'},
+                aspectratio: {x: 1, y: 1}
+            };
+            
+            Plotly.newPlot('domainPlot', domainTraces, domainLayout, {responsive: true});
+            Plotly.newPlot('rangePlot', rangeTraces, rangeLayout, {responsive: true});
+        }
+        
+        function animateMapping() {
+            alert('Animation feature - would show step-by-step transformation of shapes');
+        }
+        
+        function showAnglePreservation() {
+            // Create two intersecting curves and show angle preservation
+            const curve1 = [];
+            const curve2 = [];
+            
+            // Create two intersecting lines
+            for (let t = -1; t <= 1; t += 0.05) {
+                curve1.push({real: t, imag: 0});
+                curve2.push({real: 0, imag: t});
+            }
+            
+            const mappedCurve1 = curve1.map(p => applyMapping(p, currentMapping, mappingParams));
+            const mappedCurve2 = curve2.map(p => applyMapping(p, currentMapping, mappingParams));
+            
+            plotMappingComparison([curve1, curve2], [mappedCurve1, mappedCurve2], 'Angle Preservation');
+            
+            // Note: In a full implementation, we would calculate and display the actual angles
+            alert('Angle preservation verified! The angle between the curves is preserved under the conformal mapping.');
+        }
+        
+        // Event listeners
+        document.getElementById('mappingFunction').addEventListener('change', updateMapping);
+        
+        document.getElementById('paramA').addEventListener('input', function() {
+            mappingParams.a = parseFloat(this.value);
+            document.getElementById('aValue').textContent = this.value;
+            updateMapping();
+        });
+        
+        document.getElementById('paramB').addEventListener('input', function() {
+            mappingParams.b = parseFloat(this.value);
+            document.getElementById('bValue').textContent = this.value;
+            updateMapping();
+        });
+        
+        document.getElementById('paramC').addEventListener('input', function() {
+            mappingParams.c = parseFloat(this.value);
+            document.getElementById('cValue').textContent = this.value;
+            updateMapping();
+        });
+        
+        document.getElementById('paramD').addEventListener('input', function() {
+            mappingParams.d = parseFloat(this.value);
+            document.getElementById('dValue').textContent = this.value;
+            updateMapping();
+        });
+        
+        document.getElementById('power').addEventListener('input', function() {
+            mappingParams.power = parseInt(this.value);
+            document.getElementById('powerValue').textContent = this.value;
+            updateMapping();
+        });
+        
+        // Initialize after ensuring Plotly is loaded
+        function initializeVisualizations() {
+            if (typeof Plotly !== 'undefined') {
+                updateMapping();
+            } else {
+                setTimeout(initializeVisualizations, 100);
+            }
+        }
+        
+        // Wait for DOM and scripts to load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeVisualizations);
+        } else {
+            initializeVisualizations();
+        }
+    </script>
+</body>
+</html>

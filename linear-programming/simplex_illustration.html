@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa Thuật toán Simplex</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -337,6 +339,12 @@
         function updateTableau() {
             const container = document.getElementById('tableauContainer');
             
+            // Check if tableau exists and is not empty
+            if (!simplexState.tableau || simplexState.tableau.length === 0) {
+                container.innerHTML = '<p>Tableau not initialized. Click "Setup Problem" to begin.</p>';
+                return;
+            }
+            
             let html = '<table><thead><tr>';
             html += '<th>Basis</th><th>C_B</th>';
             html += '<th>x₁</th><th>x₂</th>';
@@ -348,6 +356,9 @@
             for (let i = 0; i < simplexState.basicVariables.length; i++) {
                 const basicVar = simplexState.basicVariables[i];
                 const row = simplexState.tableau[i];
+                
+                // Safety check for row existence
+                if (!row) continue;
                 
                 html += '<tr>';
                 html += `<td>${basicVar}</td>`;
@@ -388,16 +399,18 @@
             
             // Z row
             const zRow = simplexState.tableau[simplexState.tableau.length - 1];
-            html += '<tr style="background: rgba(255, 255, 255, 0.2);">';
-            html += '<td>Z</td>';
-            html += '<td>-</td>';
-            
-            for (let j = 0; j < zRow.length - 1; j++) {
-                html += `<td>${zRow[j].toFixed(2)}</td>`;
+            if (zRow) {
+                html += '<tr style="background: rgba(255, 255, 255, 0.2);">';
+                html += '<td>Z</td>';
+                html += '<td>-</td>';
+                
+                for (let j = 0; j < zRow.length - 1; j++) {
+                    html += `<td>${zRow[j].toFixed(2)}</td>`;
+                }
+                html += `<td>${zRow[zRow.length - 1].toFixed(2)}</td>`;
+                html += '<td>-</td>';
+                html += '</tr>';
             }
-            html += `<td>${zRow[zRow.length - 1].toFixed(2)}</td>`;
-            html += '<td>-</td>';
-            html += '</tr>';
             
             html += '</tbody></table>';
             container.innerHTML = html;
@@ -405,7 +418,14 @@
         
         // Check if current solution is optimal
         function checkOptimality() {
+            // Safety check for tableau existence
+            if (!simplexState.tableau || simplexState.tableau.length === 0) {
+                return false;
+            }
+            
             const zRow = simplexState.tableau[simplexState.tableau.length - 1];
+            if (!zRow) return false;
+            
             for (let j = 0; j < zRow.length - 1; j++) {
                 if (zRow[j] > 0.001) { // Allow small numerical errors
                     return false;
@@ -416,7 +436,14 @@
         
         // Find entering variable (most positive Cj-Zj)
         function findEnteringVariable() {
+            // Safety check for tableau existence
+            if (!simplexState.tableau || simplexState.tableau.length === 0) {
+                return -1;
+            }
+            
             const zRow = simplexState.tableau[simplexState.tableau.length - 1];
+            if (!zRow) return -1;
+            
             let maxValue = 0;
             let enteringCol = -1;
             
@@ -432,13 +459,21 @@
         
         // Find leaving variable (minimum ratio test)
         function findLeavingVariable(enteringCol) {
+            // Safety check for tableau existence
+            if (!simplexState.tableau || simplexState.tableau.length === 0) {
+                return -1;
+            }
+            
             let minRatio = Infinity;
             let leavingRow = -1;
             
             for (let i = 0; i < simplexState.tableau.length - 1; i++) {
-                const pivotVal = simplexState.tableau[i][enteringCol];
+                const row = simplexState.tableau[i];
+                if (!row) continue;
+                
+                const pivotVal = row[enteringCol];
                 if (pivotVal > 0) {
-                    const ratio = simplexState.tableau[i][simplexState.tableau[i].length - 1] / pivotVal;
+                    const ratio = row[row.length - 1] / pivotVal;
                     if (ratio < minRatio) {
                         minRatio = ratio;
                         leavingRow = i;
@@ -544,8 +579,8 @@
                 isUnbounded: false
             };
             
-            updateTableau();
-            updateStepInfo();
+            // Setup the problem with initial tableau
+            setupProblem();
         }
         
         // Update step information

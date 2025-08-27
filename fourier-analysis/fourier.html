@@ -1,73 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Fourier Series Visualization</title>
-  <style>
-    canvas {
-      border: 1px solid #ccc;
-      background: #fdfdfd;
-      display: block;
-      margin: 0 auto;
-    }
-    body {
-      font-family: sans-serif;
-      text-align: center;
-    }
-  </style>
-
-
-
-
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuỗi Fourier - Minh Họa Tương Tác</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            -webkit-appearance: none;
+        }
+        
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .wave-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #2196f3;
+            text-align: center;
+        }
+        
+        .info-card h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .wave-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .wave-btn {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .wave-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .wave-btn.active {
+            background: linear-gradient(45deg, #4caf50, #2e7d32);
+        }
+    </style>
 </head>
 <body>
-  <h2>Fourier Series - Square Wave Approximation</h2>
-  <label>Number of Terms: <input type="range" id="slider" min="1" max="50" value="5" /></label>
-  <canvas id="canvas" width="800" height="400"></canvas>
+    <div class="main-container">
+        <div class="header">
+            <h1>Chuỗi Fourier</h1>
+            <p>Khám phá tương tác về lý thuyết và ứng dụng của chuỗi Fourier</p>
+        </div>
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const slider = document.getElementById("slider");
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Chuỗi Fourier</h3>
+                    <p><strong>Định nghĩa:</strong> Chuỗi Fourier của hàm tuần hoàn $f(x)$ với chu kỳ $2L$ là:</p>
+                    $$f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos\left(\frac{n\pi x}{L}\right) + b_n \sin\left(\frac{n\pi x}{L}\right) \right]$$
+                    
+                    <div class="concept-box">
+                        <h4>Hệ số Fourier:</h4>
+                        $$a_0 = \frac{1}{L} \int_{-L}^{L} f(x) dx$$
+                        $$a_n = \frac{1}{L} \int_{-L}^{L} f(x) \cos\left(\frac{n\pi x}{L}\right) dx$$
+                        $$b_n = \frac{1}{L} \int_{-L}^{L} f(x) \sin\left(\frac{n\pi x}{L}\right) dx$$
+                    </div>
+                </div>
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerY = height / 2;
+                <div class="math-content">
+                    <h3>2. Dạng Phức của Chuỗi Fourier</h3>
+                    <p><strong>Biểu diễn phức:</strong></p>
+                    $$f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i n \pi x / L}$$
+                    
+                    <p>với hệ số phức:</p>
+                    $$c_n = \frac{1}{2L} \int_{-L}^{L} f(x) e^{-i n \pi x / L} dx$$
+                    
+                    <div class="concept-box">
+                        <h4>Mối liên hệ giữa các hệ số:</h4>
+                        <ul>
+                            <li>$c_0 = \frac{a_0}{2}$</li>
+                            <li>$c_n = \frac{a_n - ib_n}{2}$ (với $n > 0$)</li>
+                            <li>$c_{-n} = \frac{a_n + ib_n}{2} = \overline{c_n}$</li>
+                        </ul>
+                    </div>
+                </div>
 
-    function drawFourierSeries(terms) {
-      ctx.clearRect(0, 0, width, height);
+                <div class="math-content">
+                    <h3>3. Điều Kiện Hội Tụ Dirichlet</h3>
+                    <p>Chuỗi Fourier hội tụ tại $x$ nếu:</p>
+                    
+                    <div class="concept-box">
+                        <h4>Điều kiện Dirichlet:</h4>
+                        <ul>
+                            <li><strong>Liên tục từng khúc:</strong> $f$ có hữu hạn điểm gián đoạn</li>
+                            <li><strong>Biến phân bị chặn:</strong> $f$ có hữu hạn cực trị địa phương</li>
+                            <li><strong>Tích phân hội tụ:</strong> $\int_{-L}^{L} |f(x)| dx < \infty$</li>
+                        </ul>
+                        
+                        <p>Khi đó: $$S(x) = \frac{f(x^+) + f(x^-)}{2}$$</p>
+                    </div>
+                </div>
 
-      ctx.beginPath();
-      ctx.moveTo(0, centerY);
+                <div class="math-content">
+                    <h3>4. Ví Dụ Chuỗi Fourier Cổ Điển</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Sóng vuông (Square Wave):</h4>
+                        $$f(x) = \begin{cases} 1 & \text{if } 0 < x < \pi \\ -1 & \text{if } -\pi < x < 0 \end{cases}$$
+                        $$f(x) = \frac{4}{\pi} \sum_{n=1,3,5,...}^{\infty} \frac{\sin(nx)}{n}$$
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Sóng răng cưa (Sawtooth Wave):</h4>
+                        $$f(x) = x \text{ for } x \in (-\pi, \pi)$$
+                        $$f(x) = 2 \sum_{n=1}^{\infty} \frac{(-1)^{n+1}}{n} \sin(nx)$$
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Sóng tam giác (Triangle Wave):</h4>
+                        $$f(x) = \frac{8}{\pi^2} \sum_{n=1,3,5,...}^{\infty} \frac{(-1)^{(n-1)/2}}{n^2} \cos(nx)$$
+                    </div>
+                </div>
 
-      for (let x = 0; x < width; x++) {
-        const t = (x / width) * 2 * Math.PI; // Scale x to [0, 2π]
-        let y = 0;
+                <div class="math-content">
+                    <h3>5. Ứng Dụng của Chuỗi Fourier</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Xử lý tín hiệu:</h4>
+                        <ul>
+                            <li><strong>Phân tích tần số:</strong> Tách tín hiệu thành các thành phần tần số</li>
+                            <li><strong>Lọc tín hiệu:</strong> Loại bỏ nhiễu và các tần số không mong muốn</li>
+                            <li><strong>Nén dữ liệu:</strong> Biểu diễn tín hiệu bằng ít hệ số hơn</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Giải phương trình vi phân:</h4>
+                        <ul>
+                            <li><strong>Phương trình nhiệt:</strong> $\frac{\partial u}{\partial t} = k \frac{\partial^2 u}{\partial x^2}$</li>
+                            <li><strong>Phương trình sóng:</strong> $\frac{\partial^2 u}{\partial t^2} = c^2 \frac{\partial^2 u}{\partial x^2}$</li>
+                            <li><strong>Điều kiện biên tuần hoàn:</strong> Sử dụng tính chất trực giao</li>
+                        </ul>
+                    </div>
+                </div>
 
-        for (let n = 1; n <= terms * 2; n += 2) { // Only odd harmonics
-          y += (4 / (n * Math.PI)) * Math.sin(n * t);
+                <div class="math-content" style="background: rgba(255, 215, 0, 0.1); border-left: 4px solid #FFD700; margin-top: 20px;">
+                    <h3>📚 Lịch Sử Chuỗi Fourier</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                        <div style="background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px;">
+                            <h4>🎭 Joseph Fourier (1768-1830)</h4>
+                            <p><strong>Bài toán truyền nhiệt (1807):</strong> Fourier nghiên cứu sự truyền nhiệt trong thanh kim loại, phát hiện rằng bất kỳ hàm số tuần hoàn nào cũng có thể biểu diễn bằng tổng vô hạn các hàm sin và cos.</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.8); padding: 15px; border-radius: 8px;">
+                            <h4>⚡ Tranh cãi ban đầu</h4>
+                            <p><strong>Các nhà toán học đương thời</strong> như Lagrange và Laplace ban đầu hoài nghi về tính đúng đắn của ý tưởng này, đặc biệt với các hàm không liên tục.</p>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0, 150, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h4>🔬 Phát triển lý thuyết</h4>
+                        <ul>
+                            <li><strong>Dirichlet (1829):</strong> Đưa ra điều kiện hội tụ nghiêm ngặt</li>
+                            <li><strong>Riemann (1850s):</strong> Phát triển lý thuyết tích phân liên quan</li>
+                            <li><strong>Fejér (1900):</strong> Chứng minh tính hội tụ trong trường hợp tổng quát</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 8px;">
+                        <h4>🌟 Tác động lịch sử</h4>
+                        <p>Chuỗi Fourier đã mở ra kỷ nguyên mới trong toán học và vật lý, trở thành nền tảng cho phân tích harmonic hiện đại và xử lý tín hiệu số.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>📊 <strong>Chọn loại sóng:</strong> Square, Sawtooth, Triangle</li>
+                        <li>🔢 <strong>Điều chỉnh số hạng:</strong> Xem sự hội tụ của chuỗi</li>
+                        <li>⚡ <strong>Tốc độ animation:</strong> Quan sát quá trình xấp xỉ</li>
+                        <li>🎯 <strong>Phân tích phổ:</strong> Xem biên độ các harmonic</li>
+                    </ul>
+                    
+                    <div class="controls">
+                        <div class="wave-selector">
+                            <button class="wave-btn active" onclick="setWaveType('square')">Sóng Vuông</button>
+                            <button class="wave-btn" onclick="setWaveType('sawtooth')">Sóng Răng Cưa</button>
+                            <button class="wave-btn" onclick="setWaveType('triangle')">Sóng Tam Giác</button>
+                            <button class="wave-btn" onclick="setWaveType('custom')">Tùy Chỉnh</button>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Số hạng chuỗi Fourier:</label>
+                                <input type="range" id="termsSlider" min="1" max="50" value="5">
+                                <div class="value-display" id="termsValue">5</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Tốc độ animation:</label>
+                                <input type="range" id="speedSlider" min="0.1" max="2" step="0.1" value="1">
+                                <div class="value-display" id="speedValue">1.0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Biên độ:</label>
+                                <input type="range" id="amplitudeSlider" min="0.5" max="3" step="0.1" value="1">
+                                <div class="value-display" id="amplitudeValue">1.0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas" width="800" height="400"></canvas>
+                    
+                    <div class="wave-info">
+                        <div class="info-card">
+                            <h4>Hàm Gốc</h4>
+                            <p id="originalFunction">f(x) = square wave</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Số Hạng Hiện Tại</h4>
+                            <p id="currentTerms">N = 5</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Sai Số RMS</h4>
+                            <p id="rmsError">0.000</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Hội Tụ</h4>
+                            <p id="convergenceStatus">Đang hội tụ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const termsSlider = document.getElementById("termsSlider");
+        const speedSlider = document.getElementById("speedSlider");
+        const amplitudeSlider = document.getElementById("amplitudeSlider");
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerY = height / 2;
+        
+        let currentWave = 'square';
+        let animationSpeed = 1.0;
+        let amplitude = 1.0;
+        let animationId;
+        let time = 0;
+        
+        // Wave type definitions
+        const waveTypes = {
+            square: {
+                name: 'Sóng Vuông',
+                formula: 'f(x) = 4/π ∑ sin(nx)/n (n lẻ)',
+                fourierSeries: (x, terms) => {
+                    let sum = 0;
+                    for (let n = 1; n <= terms * 2; n += 2) {
+                        sum += (4 / (n * Math.PI)) * Math.sin(n * x);
+                    }
+                    return sum;
+                },
+                original: (x) => {
+                    const period = 2 * Math.PI;
+                    const phase = ((x % period) + period) % period;
+                    return phase < Math.PI ? 1 : -1;
+                }
+            },
+            sawtooth: {
+                name: 'Sóng Răng Cưa',
+                formula: 'f(x) = 2 ∑ (-1)^(n+1) sin(nx)/n',
+                fourierSeries: (x, terms) => {
+                    let sum = 0;
+                    for (let n = 1; n <= terms; n++) {
+                        sum += (2 * Math.pow(-1, n + 1) / n) * Math.sin(n * x);
+                    }
+                    return sum;
+                },
+                original: (x) => {
+                    const period = 2 * Math.PI;
+                    const phase = ((x % period) + period) % period;
+                    return (phase / Math.PI) - 1;
+                }
+            },
+            triangle: {
+                name: 'Sóng Tam Giác',
+                formula: 'f(x) = 8/π² ∑ (-1)^((n-1)/2) cos(nx)/n²',
+                fourierSeries: (x, terms) => {
+                    let sum = 0;
+                    for (let n = 1; n <= terms * 2; n += 2) {
+                        const sign = Math.pow(-1, (n - 1) / 2);
+                        sum += (8 / (Math.PI * Math.PI * n * n)) * sign * Math.cos(n * x);
+                    }
+                    return sum;
+                },
+                original: (x) => {
+                    const period = 2 * Math.PI;
+                    const phase = ((x % period) + period) % period;
+                    return phase < Math.PI ? (2 * phase / Math.PI) - 1 : 3 - (2 * phase / Math.PI);
+                }
+            }
+        };
+        
+        function setWaveType(type) {
+            currentWave = type;
+            
+            // Update button states
+            document.querySelectorAll('.wave-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update info
+            updateWaveInfo();
+            drawFourierSeries();
         }
-
-        const scaledY = centerY - y * 100; // Scale amplitude
-        ctx.lineTo(x, scaledY);
-      }
-
-      ctx.strokeStyle = "#007acc";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.fillStyle = "#000";
-      ctx.fillText(`Terms: ${terms}`, 20, 20);
-    }
-
-    slider.addEventListener("input", () => {
-      const terms = parseInt(slider.value);
-      drawFourierSeries(terms);
-    });
-
-    drawFourierSeries(parseInt(slider.value));
-  </script>
+        
+        function updateWaveInfo() {
+            const wave = waveTypes[currentWave];
+            document.getElementById('originalFunction').textContent = wave.formula;
+            document.getElementById('currentTerms').textContent = `N = ${termsSlider.value}`;
+        }
+        
+        function drawAxes() {
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, height);
+            ctx.stroke();
+            
+            // Grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 1; i < 8; i++) {
+                const x = (i * width) / 8;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            for (let i = 1; i < 4; i++) {
+                const y = (i * height) / 4;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.fillText('-2π', 10, centerY - 10);
+            ctx.fillText('0', width/2 - 10, centerY - 10);
+            ctx.fillText('2π', width - 30, centerY - 10);
+        }
+        
+        function drawOriginalFunction() {
+            if (!waveTypes[currentWave]) return;
+            
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.globalAlpha = 0.7;
+            
+            ctx.beginPath();
+            for (let x = 0; x < width; x++) {
+                const t = ((x / width) - 0.5) * 4 * Math.PI; // Scale to [-2π, 2π]
+                const y = waveTypes[currentWave].original(t) * amplitude;
+                const scaledY = centerY - y * 80;
+                
+                if (x === 0) {
+                    ctx.moveTo(x, scaledY);
+                } else {
+                    ctx.lineTo(x, scaledY);
+                }
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawFourierSeries() {
+            const terms = parseInt(termsSlider.value);
+            
+            ctx.clearRect(0, 0, width, height);
+            drawAxes();
+            drawOriginalFunction();
+            
+            if (!waveTypes[currentWave]) return;
+            
+            // Draw Fourier series approximation
+            ctx.strokeStyle = '#007acc';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            let rmsError = 0;
+            let pointCount = 0;
+            
+            for (let x = 0; x < width; x++) {
+                const t = ((x / width) - 0.5) * 4 * Math.PI; // Scale to [-2π, 2π]
+                const fourierY = waveTypes[currentWave].fourierSeries(t, terms) * amplitude;
+                const originalY = waveTypes[currentWave].original(t) * amplitude;
+                
+                const scaledY = centerY - fourierY * 80;
+                
+                if (x === 0) {
+                    ctx.moveTo(x, scaledY);
+                } else {
+                    ctx.lineTo(x, scaledY);
+                }
+                
+                // Calculate RMS error
+                if (x % 4 === 0) { // Sample every 4 pixels
+                    rmsError += Math.pow(fourierY - originalY, 2);
+                    pointCount++;
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Update RMS error display
+            rmsError = Math.sqrt(rmsError / pointCount);
+            document.getElementById('rmsError').textContent = rmsError.toFixed(3);
+            
+            // Update convergence status
+            const convergenceStatus = rmsError < 0.1 ? 'Đã hội tụ tốt' : 
+                                     rmsError < 0.5 ? 'Đang hội tụ' : 'Chưa hội tụ';
+            document.getElementById('convergenceStatus').textContent = convergenceStatus;
+        }
+        
+        function updateSliderValues() {
+            document.getElementById('termsValue').textContent = termsSlider.value;
+            document.getElementById('speedValue').textContent = parseFloat(speedSlider.value).toFixed(1);
+            document.getElementById('amplitudeValue').textContent = parseFloat(amplitudeSlider.value).toFixed(1);
+            
+            animationSpeed = parseFloat(speedSlider.value);
+            amplitude = parseFloat(amplitudeSlider.value);
+        }
+        
+        // Event listeners
+        termsSlider.addEventListener('input', () => {
+            updateSliderValues();
+            updateWaveInfo();
+            drawFourierSeries();
+        });
+        
+        speedSlider.addEventListener('input', updateSliderValues);
+        amplitudeSlider.addEventListener('input', () => {
+            updateSliderValues();
+            drawFourierSeries();
+        });
+        
+        // Initialize
+        updateSliderValues();
+        updateWaveInfo();
+        drawFourierSeries();
+    </script>
 </body>
 </html>
-

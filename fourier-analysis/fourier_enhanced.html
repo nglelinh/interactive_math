@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chuỗi Fourier Nâng Cao</title>
+    <script src="../mathjax-config.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 1.1rem;
+        }
+        
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .theory-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #2196f3;
+        }
+        
+        .theory-section h2 {
+            color: #1976d2;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .interactive-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .interactive-section h2 {
+            color: #2e7d32;
+            margin: 0 0 20px 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .math-content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+        
+        .concept-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .concept-box h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        .visualization-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            -webkit-appearance: none;
+        }
+        
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #2196f3;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #2196f3;
+        }
+        
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .wave-info {
+            background: rgba(33, 150, 243, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #2196f3;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .wave-info h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #2196f3, #1976d2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #1976d2, #1565c0);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .checkbox-group {
+            margin: 10px 0;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+        
+        .applications-section {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .app-card {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .app-card h4 {
+            color: #27ae60;
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>Chuỗi Fourier - Phân Tích Nâng Cao</h1>
+            <p>Khám phá sâu về lý thuyết và ứng dụng của chuỗi Fourier với visualization tương tác</p>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="theory-section">
+                <h2>📖 LÝ THUYẾT</h2>
+                
+                <div class="math-content">
+                    <h3>1. Công Thức Tổng Quát</h3>
+                    <p><strong>Ý tưởng cốt lõi:</strong> Mọi hàm tuần hoàn có thể biểu diễn như tổng vô hạn các sóng sin và cos!</p>
+                    
+                    <div class="concept-box">
+                        <h4>Chuỗi Fourier Tổng Quát:</h4>
+                        $$f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos(n\omega t) + b_n \sin(n\omega t) \right]$$
+                        <p>với $\omega = \frac{2\pi}{T}$ là tần số cơ bản</p>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>2. Hệ Số Fourier</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Công thức tính hệ số:</h4>
+                        $$a_0 = \frac{2}{T} \int_0^T f(t) dt \quad \text{(Giá trị trung bình)}$$
+                        $$a_n = \frac{2}{T} \int_0^T f(t) \cos(n\omega t) dt$$
+                        $$b_n = \frac{2}{T} \int_0^T f(t) \sin(n\omega t) dt$$
+                    </div>
+                    
+                    <div class="concept-box">
+                        <h4>Sóng Vuông - Trường hợp đặc biệt:</h4>
+                        <ul>
+                            <li><strong>$a_0 = 0$:</strong> Không có thành phần DC</li>
+                            <li><strong>$a_n = 0$:</strong> Không có cosine (hàm lẻ)</li>
+                            <li><strong>$b_n = \frac{4A}{n\pi}$:</strong> Chỉ với n lẻ</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="math-content">
+                    <h3>3. Hiện Tượng Gibbs</h3>
+                    
+                    <div class="concept-box">
+                        <h4>Overshoot tại các điểm gián đoạn:</h4>
+                        <ul>
+                            <li><strong>Giá trị overshoot:</strong> Khoảng 9% độ nhảy</li>
+                            <li><strong>Không biến mất:</strong> Dù số hạng tăng lên</li>
+                            <li><strong>Nguyên nhân:</strong> Tính chất hội tụ của chuỗi Fourier</li>
+                        </ul>
+                        $$\text{Overshoot} \approx 0.089 \times \text{Jump magnitude}$$
+                    </div>
+                </div>
+
+                <div class="applications-section">
+                    <div class="app-card">
+                        <h4>🎵 Xử Lý Âm Thanh</h4>
+                        <ul>
+                            <li>Nén MP3, AAC</li>
+                            <li>Synthesizer âm thanh</li>
+                            <li>Equalizer và filter</li>
+                            <li>Phân tích phổ tần</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="app-card">
+                        <h4>📷 Xử Lý Hình Ảnh</h4>
+                        <ul>
+                            <li>Nén JPEG (2D DCT)</li>
+                            <li>Lọc nhiễu và làm mịn</li>
+                            <li>Phát hiện cạnh</li>
+                            <li>Y học: CT, MRI</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-section">
+                <h2>🎮 MINH HỌA TƯƠNG TÁC</h2>
+                
+                <div class="visualization-container">
+                    <p><strong>Hướng dẫn sử dụng:</strong></p>
+                    <ul>
+                        <li>🔢 <strong>Số hạng:</strong> Điều chỉnh độ chính xác của xấp xỉ</li>
+                        <li>📊 <strong>Biên độ & tần số:</strong> Thay đổi đặc tính sóng</li>
+                        <li>👁️ <strong>Hiển thị:</strong> Bật/tắt sóng gốc và harmonics</li>
+                        <li>🎬 <strong>Animation:</strong> Xem quá trình xây dựng chuỗi</li>
+                    </ul>
+                    
+                    <div class="controls">
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Số hạng chuỗi Fourier:</label>
+                                <input type="range" id="termsSlider" min="1" max="50" value="5">
+                                <div class="value-display" id="termsDisplay">5</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Biên độ:</label>
+                                <input type="range" id="amplitudeSlider" min="0.5" max="3" step="0.1" value="1">
+                                <div class="value-display" id="amplitudeDisplay">1.0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <div class="control-row">
+                                <label>Tần số (Hz):</label>
+                                <input type="range" id="frequencySlider" min="0.1" max="3" step="0.1" value="1">
+                                <div class="value-display" id="frequencyDisplay">1.0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Tùy chọn hiển thị:</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="showOriginal" checked> Hiển thị sóng vuông gốc</label>
+                                <label><input type="checkbox" id="showHarmonics"> Hiển thị từng harmonic</label>
+                            </div>
+                            <button onclick="animateConstruction()">🎬 Animation Xây Dựng</button>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas" width="900" height="400"></canvas>
+                    
+                    <div class="wave-info">
+                        <h4>📊 Thông Tin Xấp Xỉ Hiện Tại:</h4>
+                        <div id="waveInfo">
+                            <strong>Terms:</strong> 5<br/>
+                            <strong>Gibbs Overshoot:</strong> ~9% at discontinuities<br/>
+                            <strong>RMS Error:</strong> 0.180<br/>
+                            <strong>Convergence:</strong> 1/n for square waves<br/>
+                            <strong>Energy captured:</strong> 85.5%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerY = height / 2;
+        
+        let terms = 5;
+        let amplitude = 1;
+        let frequency = 1;
+        let showOriginal = true;
+        let showHarmonics = false;
+        let animating = false;
+        
+        function updateParameters() {
+            terms = parseInt(document.getElementById('termsSlider').value);
+            amplitude = parseFloat(document.getElementById('amplitudeSlider').value);
+            frequency = parseFloat(document.getElementById('frequencySlider').value);
+            showOriginal = document.getElementById('showOriginal').checked;
+            showHarmonics = document.getElementById('showHarmonics').checked;
+            
+            document.getElementById('termsDisplay').textContent = terms;
+            document.getElementById('amplitudeDisplay').textContent = amplitude.toFixed(1);
+            document.getElementById('frequencyDisplay').textContent = frequency.toFixed(1);
+            
+            updateWaveInfo();
+            drawFourierSeries();
+        }
+        
+        function updateWaveInfo() {
+            const rmsError = amplitude * Math.sqrt(8) / (Math.PI * Math.sqrt(terms));
+            const gibbsOvershoot = 0.089 * amplitude;
+            const energyCaptured = (1 - 8/(Math.PI*Math.PI) * (1/terms)) * 100;
+            
+            document.getElementById('waveInfo').innerHTML = `
+                <strong>Terms:</strong> ${terms}<br/>
+                <strong>Gibbs Overshoot:</strong> ±${gibbsOvershoot.toFixed(3)} (~9% của jump)<br/>
+                <strong>RMS Error:</strong> ${rmsError.toFixed(3)}<br/>
+                <strong>Convergence:</strong> 1/n cho sóng vuông<br/>
+                <strong>Energy captured:</strong> ${energyCaptured.toFixed(1)}%
+            `;
+        }
+
+        function drawFourierSeries() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            drawGrid();
+            
+            const periods = 2;
+            const dt = (periods / frequency) / width;
+            
+            // Draw original square wave
+            if (showOriginal) {
+                ctx.strokeStyle = "#e74c3c";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                
+                for (let x = 0; x < width; x++) {
+                    const t = x * dt;
+                    const y = amplitude * Math.sign(Math.sin(2 * Math.PI * frequency * t));
+                    const scaledY = centerY - y * (height / 6);
+                    
+                    if (x === 0) {
+                        ctx.moveTo(x, scaledY);
+                    } else {
+                        ctx.lineTo(x, scaledY);
+                    }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
+            }
+            
+            // Draw individual harmonics
+            if (showHarmonics) {
+                ctx.globalAlpha = 0.4;
+                for (let n = 1; n <= Math.min(terms, 10); n += 2) {
+                    const harmonicAmplitude = (4 * amplitude) / (n * Math.PI);
+                    
+                    ctx.strokeStyle = "#2ecc71";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    
+                    for (let x = 0; x < width; x++) {
+                        const t = x * dt;
+                        const y = harmonicAmplitude * Math.sin(2 * Math.PI * n * frequency * t);
+                        const scaledY = centerY - y * (height / 6);
+                        
+                        if (x === 0) {
+                            ctx.moveTo(x, scaledY);
+                        } else {
+                            ctx.lineTo(x, scaledY);
+                        }
+                    }
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+            
+            // Draw Fourier series approximation
+            ctx.strokeStyle = "#2196f3";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            for (let x = 0; x < width; x++) {
+                const t = x * dt;
+                let y = 0;
+
+                for (let n = 1; n <= terms * 2; n += 2) {
+                    y += (4 * amplitude / (n * Math.PI)) * Math.sin(2 * Math.PI * n * frequency * t);
+                }
+
+                const scaledY = centerY - y * (height / 6);
+                
+                if (x === 0) {
+                    ctx.moveTo(x, scaledY);
+                } else {
+                    ctx.lineTo(x, scaledY);
+                }
+            }
+
+            ctx.stroke();
+            
+            // Add labels
+            drawLabels();
+        }
+        
+        function drawGrid() {
+            ctx.strokeStyle = "#f0f0f0";
+            ctx.lineWidth = 0.5;
+            
+            // Horizontal lines
+            for (let y = 0; y <= height; y += height/6) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Vertical lines
+            for (let x = 0; x <= width; x += width/8) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Center line
+            ctx.strokeStyle = "#ddd";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+        }
+        
+        function drawLabels() {
+            ctx.fillStyle = "#666";
+            ctx.font = "12px Arial";
+            
+            // Y-axis labels
+            ctx.textAlign = "right";
+            ctx.fillText(`+${amplitude}`, 45, centerY - height/6 + 5);
+            ctx.fillText("0", 45, centerY + 5);
+            ctx.fillText(`-${amplitude}`, 45, centerY + height/6 + 5);
+            
+            // X-axis labels
+            ctx.textAlign = "center";
+            for (let i = 0; i <= 4; i++) {
+                const x = (i * width) / 4;
+                const timeLabel = (i * 2 / frequency).toFixed(1);
+                ctx.fillText(`${timeLabel}s`, x, height - 10);
+            }
+        }
+        
+        function animateConstruction() {
+            if (animating) return;
+            
+            animating = true;
+            let currentTerms = 1;
+            const originalTerms = terms;
+            
+            function step() {
+                if (!animating) {
+                    terms = originalTerms;
+                    updateParameters();
+                    return;
+                }
+                
+                terms = currentTerms;
+                updateParameters();
+                
+                currentTerms += 1;
+                if (currentTerms > originalTerms) {
+                    currentTerms = 1;
+                }
+                
+                setTimeout(step, 500);
+            }
+            
+            step();
+            
+            // Stop animation after showing all terms twice
+            setTimeout(() => {
+                animating = false;
+                terms = originalTerms;
+                updateParameters();
+            }, originalTerms * 1000);
+        }
+
+        // Event listeners
+        document.getElementById('termsSlider').addEventListener('input', updateParameters);
+        document.getElementById('amplitudeSlider').addEventListener('input', updateParameters);
+        document.getElementById('frequencySlider').addEventListener('input', updateParameters);
+        document.getElementById('showOriginal').addEventListener('change', updateParameters);
+        document.getElementById('showHarmonics').addEventListener('change', updateParameters);
+
+        // Initialize
+        updateParameters();
+    </script>
+</body>
+</html>

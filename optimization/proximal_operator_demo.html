@@ -1,8 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Proximal Operator Interactive Demo</title>
+  <title>Interactive Proximal Operator Demo - Toán tử Proximal</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../math-simple.js"></script>
   <style>
     body { margin: 0; overflow: hidden; background: #111; font-family: Arial, sans-serif; }
     #container {
@@ -36,15 +51,47 @@
       background: rgba(255, 255, 255, 0.1);
       border-radius: 6px;
     }
-    .definition-section {
+    .theory-section {
+      background: rgba(33, 150, 243, 0.15);
       border-left: 4px solid #2196F3;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
     }
-    .examples-section {
-      border-left: 4px solid #FF9800;
-    }
-    .computation-section {
+    
+    .algorithm-section {
+      background: rgba(156, 39, 176, 0.15);
       border-left: 4px solid #9C27B0;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
     }
+    
+    .application-section {
+      background: rgba(76, 175, 80, 0.15);
+      border-left: 4px solid #4CAF50;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    
+    .formula-box {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 6px;
+      padding: 12px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      border-left: 3px solid #FF6B6B;
+    }
+    
+    .convergence-section {
+      background: rgba(255, 152, 0, 0.15);
+      border-left: 4px solid #FF9800;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    
     .interpretation-section {
       border-left: 4px solid #4CAF50;
     }
@@ -202,121 +249,192 @@
     </div>
     
     <div id="info">
-      <h3>Proximal Operator Demo</h3>
+      <h3>🎯 Demo Toán tử Proximal Interactive</h3>
       
-      <div class="section definition-section">
-        <h4>Definition</h4>
-        <div>For a function <em>g</em> and parameter <em>λ > 0</em>, the <strong>proximal operator</strong> is:</div>
-        <div class="math-formula">
-          prox<sub>λg</sub>(v) = argmin<sub>x</sub> { g(x) + (1/2λ)||x - v||² }
+      <div class="section theory-section">
+        <h4>📐 Định nghĩa & Lý thuyết</h4>
+        <div>Cho hàm $g: \mathbb{R}^n \to \mathbb{R} \cup \{+\infty\}$ và tham số $\lambda > 0$, <strong>toán tử proximal</strong> được định nghĩa:</div>
+        <div class="formula-box">
+          $$\text{prox}_{\lambda g}(v) = \underset{x}{\arg\min} \left\{ g(x) + \frac{1}{2\lambda}\|x - v\|^2 \right\}$$
         </div>
-        <div>It finds the point that best balances:</div>
-        <div>• Minimizing <em>g(x)</em> (staying in low-cost regions)</div>
-        <div>• Staying close to input point <em>v</em> (proximity penalty)</div>
+        <div><strong>Ý nghĩa hình học:</strong></div>
+        <div>• Tìm điểm $x$ cân bằng giữa việc minimize $g(x)$ và gần với $v$</div>
+        <div>• $\lambda$ điều khiển độ "mượt" của phép chiếu</div>
+        <div>• Khi $\lambda \to 0$: $\text{prox}_{\lambda g}(v) \to v$</div>
+        <div>• Khi $\lambda \to \infty$: $\text{prox}_{\lambda g}(v) \to \arg\min g$</div>
+        
+        <div class="formula-box">
+          <strong>Định lý Moreau-Yosida:</strong><br>
+          Moreau envelope: $g_\lambda(v) = \inf_x \left\{ g(x) + \frac{1}{2\lambda}\|x-v\|^2 \right\}$<br>
+          Moreau decomposition: $v = \text{prox}_{\lambda g}(v) + \lambda \cdot \text{prox}_{g^*/\lambda}(v/\lambda)$<br>
+          where $g^*$ is conjugate function of $g$
+        </div>
+      </div>
+
+      <div class="section algorithm-section">
+        <h4>🔬 Thuật toán & Tính chất</h4>
+        <div class="formula-box">
+          <strong>1. Firmly Non-expansive:</strong><br>
+          $\|\text{prox}_{\lambda g}(u) - \text{prox}_{\lambda g}(v)\| \leq \|u - v\|$<br><br>
+          
+          <strong>2. Resolvent Identity:</strong><br>
+          $\text{prox}_{\lambda g} = (I + \lambda \partial g)^{-1}$<br><br>
+          
+          <strong>3. Fixed Point Characterization:</strong><br>
+          $x^* = \text{prox}_{\lambda g}(x^*) \iff 0 \in \partial g(x^*)$<br><br>
+          
+          <strong>4. Scaling Property:</strong><br>
+          $\text{prox}_{\lambda g}(\alpha v) = \alpha \cdot \text{prox}_{\lambda g/\alpha^2}(v)$ (for $g$ homogeneous)
+        </div>
       </div>
 
       <div class="section examples-section">
-        <h4>Function Selection</h4>
+        <h4>📊 Lựa chọn Hàm & Tham số</h4>
         <div class="control-group">
-          <label>Function g(x):</label>
+          <label>Hàm g(x):</label>
           <select id="functionSelect">
-            <option value="l1">L1 Norm: |x|</option>
-            <option value="l2">L2 Norm: ½x²</option>
-            <option value="huber">Huber Loss</option>
-            <option value="hinge">Hinge Loss: max(0, 1-x)</option>
-            <option value="indicator">Indicator: I[−1,1](x)</option>
-            <option value="elastic">Elastic Net: |x| + ½x²</option>
-            <option value="logistic">Logistic: log(1+exp(x))</option>
-            <option value="quadratic">Quadratic: x² + x + 1</option>
+            <option value="l1">L1 Norm: |x| (Soft Thresholding)</option>
+            <option value="l2">L2 Norm: ½x² (Shrinkage)</option>
+            <option value="huber">Huber Loss (Robust Regression)</option>
+            <option value="hinge">Hinge Loss: max(0, 1-x) (SVM)</option>
+            <option value="indicator">Indicator: I[−1,1](x) (Projection)</option>
+            <option value="elastic">Elastic Net: |x| + ½x² (LASSO+Ridge)</option>
+            <option value="logistic">Logistic: log(1+exp(x)) (Classification)</option>
+            <option value="quadratic">Quadratic: x² + x + 1 (General Quadratic)</option>
+            <option value="nuclear">Nuclear Norm Approximation</option>
+            <option value="group">Group LASSO Approximation</option>
           </select>
         </div>
         
         <div class="control-group">
-          <label>Input Point (v):</label>
-          <input type="range" id="inputPoint" min="-3" max="3" step="0.1" value="1.5">
-          <span id="inputPointValue">1.5</span>
+          <label>Điểm đầu vào (v):</label>
+          <input type="range" id="inputPoint" min="-4" max="4" step="0.05" value="2.0">
+          <span id="inputPointValue">2.0</span>
         </div>
         
         <div class="control-group">
-          <label>Lambda (λ):</label>
-          <input type="range" id="lambda" min="0.1" max="2" step="0.1" value="0.5">
+          <label>Tham số Proximal (λ):</label>
+          <input type="range" id="lambda" min="0.01" max="3" step="0.01" value="0.5">
           <span id="lambdaValue">0.5</span>
         </div>
         
         <div class="control-group">
-          <button id="computeBtn" class="compute-btn">Compute Proximal Operator</button>
-          <button id="animateBtn">Animate λ</button>
-          <button id="resetBtn" class="reset-btn">Reset</button>
+          <label>Số lượng iterations (cho animation):</label>
+          <input type="range" id="iterations" min="10" max="100" step="5" value="50">
+          <span id="iterationsValue">50</span>
+        </div>
+        
+        <div class="control-group">
+          <button id="computeBtn" class="compute-btn">🔍 Tính Proximal Operator</button>
+          <button id="animateBtn">🎬 Animate λ</button>
+          <button id="convergenceBtn">📈 Hiển thị hội tụ</button>
+          <button id="resetBtn" class="reset-btn">🔄 Reset</button>
         </div>
       </div>
 
       <div class="section computation-section">
-        <h4>Current Computation</h4>
+        <h4>💻 Tính toán Hiện tại</h4>
         <div id="functionInfo">
-          <div><strong>Function:</strong> <span id="functionName">|x|</span></div>
-          <div><strong>Input (v):</strong> <span id="currentInput" class="value-display">1.5</span></div>
+          <div><strong>Hàm:</strong> <span id="functionName">|x|</span></div>
+          <div><strong>Điểm đầu vào (v):</strong> <span id="currentInput" class="value-display">2.0</span></div>
           <div><strong>Lambda (λ):</strong> <span id="currentLambda" class="value-display">0.5</span></div>
         </div>
         
         <div class="result-info">
-          <div><strong>Proximal Point:</strong> <span id="proximalResult" class="value-display">-</span></div>
-          <div><strong>Objective Value:</strong> <span id="objectiveValue" class="value-display">-</span></div>
-          <div><strong>Distance to Input:</strong> <span id="distanceValue" class="value-display">-</span></div>
+          <div><strong>Kết quả Proximal:</strong> <span id="proximalResult" class="value-display">-</span></div>
+          <div><strong>Giá trị Objective:</strong> <span id="objectiveValue" class="value-display">-</span></div>
+          <div><strong>Khoảng cách đến Input:</strong> <span id="distanceValue" class="value-display">-</span></div>
+          <div><strong>Shrinkage Factor:</strong> <span id="shrinkageValue" class="value-display">-</span></div>
         </div>
         
-        <div class="math-formula" id="closedFormula">
-          <div><strong>Closed Form:</strong></div>
-          <div id="formulaText">Select a function to see formula</div>
+        <div class="formula-box" id="closedFormula">
+          <div><strong>Closed Form Solution:</strong></div>
+          <div id="formulaText">Chọn một hàm để xem công thức</div>
+        </div>
+        
+        <div class="formula-box" id="subdifferentialInfo">
+          <div><strong>Subdifferential Analysis:</strong></div>
+          <div id="subdifferentialText">Phân tích subdifferential sẽ hiển thị ở đây</div>
+        </div>
+      </div>
+
+      <div class="section application-section">
+        <h4>🚀 Ứng dụng trong Machine Learning</h4>
+        <div class="formula-box">
+          <strong>1. FISTA (Fast Iterative Shrinkage-Thresholding):</strong><br>
+          $x_{k+1} = \text{prox}_{\lambda R}(y_k - \lambda \nabla f(y_k))$<br>
+          $y_{k+1} = x_{k+1} + \frac{t_k - 1}{t_{k+1}}(x_{k+1} - x_k)$<br><br>
+          
+          <strong>2. ADMM (Alternating Direction Method of Multipliers):</strong><br>
+          $x^{k+1} = \text{prox}_{f/\rho}(z^k - u^k)$<br>
+          $z^{k+1} = \text{prox}_{g/\rho}(x^{k+1} + u^k)$<br>
+          $u^{k+1} = u^k + x^{k+1} - z^{k+1}$<br><br>
+          
+          <strong>3. Proximal Gradient Method:</strong><br>
+          $x_{k+1} = \text{prox}_{\lambda g}(x_k - \lambda \nabla f(x_k))$
+        </div>
+        
+        <div style="font-size: 12px; margin-top: 10px;">
+          <div><strong>• LASSO Regression:</strong> prox của L1 norm (soft thresholding)</div>
+          <div><strong>• Image Denoising:</strong> prox của Total Variation</div>
+          <div><strong>• Matrix Completion:</strong> prox của Nuclear norm</div>
+          <div><strong>• Support Vector Machines:</strong> prox của Hinge loss</div>
+          <div><strong>• Group LASSO:</strong> prox của Group L1 norm</div>
+          <div><strong>• Elastic Net:</strong> prox của L1 + L2 regularization</div>
+        </div>
+      </div>
+
+      <div class="section convergence-section">
+        <h4>📈 Phân tích Hội tụ</h4>
+        <div class="formula-box">
+          <strong>Proximal Gradient Convergence:</strong><br>
+          For $f$ convex with $L$-smooth gradient, $g$ convex:<br>
+          $f(x_k) + g(x_k) - f(x^*) - g(x^*) \leq \frac{L\|x_0 - x^*\|^2}{2k}$<br><br>
+          
+          <strong>FISTA Acceleration:</strong><br>
+          $f(x_k) + g(x_k) - f(x^*) - g(x^*) \leq \frac{2L\|x_0 - x^*\|^2}{(k+1)^2}$<br><br>
+          
+          <strong>Strong Convexity ($\mu$-strongly convex):</strong><br>
+          $\|x_k - x^*\| \leq \left(1 - \frac{\mu}{L}\right)^k \|x_0 - x^*\|$
         </div>
       </div>
 
       <div class="section interpretation-section">
-        <h4>Geometric Interpretation</h4>
+        <h4>🎨 Giải thích Hình học</h4>
         <div class="proximity-interpretation">
-          <div><strong>What the proximal operator does:</strong></div>
-          <div>• <span style="color: #f44336;">Red point</span>: Input v</div>
-          <div>• <span style="color: #4CAF50;">Green point</span>: Proximal operator result</div>
-          <div>• <span style="color: #2196F3;">Blue curve</span>: Original function g(x)</div>
-          <div>• <span style="color: #FF9800;">Orange curve</span>: Moreau envelope (smoothed g)</div>
-          <div>• <span style="color: #9C27B0;">Purple curve</span>: Quadratic penalty term</div>
-          <div>• <span style="color: #FFEB3B;">Yellow line</span>: Connection showing "shrinkage"</div>
+          <div><strong>Ý nghĩa của các thành phần trong visualization:</strong></div>
+          <div>• <span style="color: #f44336;">Điểm đỏ</span>: Điểm đầu vào v</div>
+          <div>• <span style="color: #4CAF50;">Điểm xanh</span>: Kết quả proximal operator</div>
+          <div>• <span style="color: #2196F3;">Đường cong xanh</span>: Hàm gốc g(x)</div>
+          <div>• <span style="color: #FF9800;">Đường cong cam</span>: Moreau envelope (g làm mượt)</div>
+          <div>• <span style="color: #9C27B0;">Đường cong tím</span>: Quadratic penalty term</div>
+          <div>• <span style="color: #FFEB3B;">Đường vàng</span>: Kết nối thể hiện "shrinkage"</div>
+          <div>• <span style="color: #E91E63;">Mũi tên hồng</span>: Gradient tại điểm proximal</div>
         </div>
         
         <div id="interpretationText">
-          The proximal operator "shrinks" or "projects" the input point toward regions where g(x) is small, balanced by staying close to the original point.
+          Toán tử proximal "co" hoặc "chiếu" điểm đầu vào về vùng có g(x) nhỏ, 
+          cân bằng với việc giữ gần điểm gốc. Tham số λ điều khiển độ mạnh của phép co này.
         </div>
       </div>
 
       <div class="section">
-        <h4>Key Properties</h4>
-        <div style="font-size: 11px;">
-          <div><strong>1. Firmly Non-expansive:</strong> ||prox(u) - prox(v)|| ≤ ||u - v||</div>
-          <div><strong>2. Moreau Decomposition:</strong> v = prox<sub>λg</sub>(v) + λ·prox<sub>g*/λ</sub>(v/λ)</div>
-          <div><strong>3. Fixed Points:</strong> x* = prox<sub>λg</sub>(x*) ⟺ 0 ∈ ∂g(x*)</div>
-          <div><strong>4. Resolvent:</strong> prox<sub>λg</sub> = (I + λ∂g)⁻¹</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h4>Applications</h4>
-        <div style="font-size: 11px;">
-          <div><strong>• FISTA:</strong> Fast proximal gradient method</div>
-          <div><strong>• ADMM:</strong> Alternating direction method of multipliers</div>
-          <div><strong>• Denoising:</strong> prox of L1 norm (soft thresholding)</div>
-          <div><strong>• Projection:</strong> prox of indicator function</div>
-          <div><strong>• Regularization:</strong> Sparse optimization with L1/L2 penalties</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h4>Visualization Controls</h4>
+        <h4>🎛️ Điều khiển Visualization</h4>
         <div class="control-group">
-          <input type="checkbox" id="showOriginal" checked> Show Original Function g(x)
-          <input type="checkbox" id="showQuadratic" checked> Show Quadratic Term
-          <input type="checkbox" id="showMoreau" checked> Show Moreau Envelope
-          <input type="checkbox" id="showGradient"> Show Gradient at Proximal Point
-          <input type="checkbox" id="showLevelCurves"> Show Level Curves
-          <input type="checkbox" id="showGrid"> Show Grid
+          <div><input type="checkbox" id="showOriginal" checked> Hiển thị hàm gốc g(x)</div>
+          <div><input type="checkbox" id="showQuadratic" checked> Hiển thị quadratic term</div>
+          <div><input type="checkbox" id="showMoreau" checked> Hiển thị Moreau envelope</div>
+          <div><input type="checkbox" id="showGradient"> Hiển thị gradient tại proximal point</div>
+          <div><input type="checkbox" id="showLevelCurves"> Hiển thị level curves</div>
+          <div><input type="checkbox" id="showGrid" checked> Hiển thị lưới tọa độ</div>
+          <div><input type="checkbox" id="showSubdifferential"> Hiển thị subdifferential</div>
+          <div><input type="checkbox" id="showConvergence"> Hiển thị quá trình hội tụ</div>
+        </div>
+        
+        <div class="control-group">
+          <label>Zoom level:</label>
+          <input type="range" id="zoomLevel" min="0.5" max="3" step="0.1" value="1">
+          <span id="zoomValue">1.0</span>
         </div>
       </div>
     </div>
@@ -333,26 +451,36 @@
     let proximalPoint = null;
     let isAnimating = false;
 
-    // Function definitions
+    // Enhanced function definitions with more comprehensive examples
     const functions = {
       l1: {
         name: '|x|',
         f: x => Math.abs(x),
         prox: (v, lam) => Math.sign(v) * Math.max(0, Math.abs(v) - lam),
-        formula: 'prox_λ|·|(v) = sign(v) · max(0, |v| - λ)',
-        description: 'Soft thresholding operator - shrinks toward zero',
-        subdifferential: x => x > 0 ? 1 : (x < 0 ? -1 : [-1, 1])
+        formula: '$$\\text{prox}_{\\lambda|\\cdot|}(v) = \\text{sign}(v) \\cdot \\max(0, |v| - \\lambda)$$',
+        description: 'Soft thresholding operator - tạo sparsity, dùng trong LASSO',
+        subdifferential: x => x > 0 ? [1] : (x < 0 ? [-1] : [-1, 1]),
+        moreauEnvelope: (v, lam) => {
+          const prox = Math.sign(v) * Math.max(0, Math.abs(v) - lam);
+          return Math.abs(prox) + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'LASSO regression, sparse coding, compressed sensing'
       },
       l2: {
         name: '½x²',
         f: x => 0.5 * x * x,
         prox: (v, lam) => v / (1 + lam),
-        formula: 'prox_λ(½|·|²)(v) = v / (1 + λ)',
-        description: 'Shrinkage toward zero with scaling factor',
-        subdifferential: x => x
+        formula: '$$\\text{prox}_{\\lambda \\frac{1}{2}|\\cdot|^2}(v) = \\frac{v}{1 + \\lambda}$$',
+        description: 'Shrinkage operator - thu nhỏ về 0 với tỷ lệ cố định',
+        subdifferential: x => [x],
+        moreauEnvelope: (v, lam) => {
+          const prox = v / (1 + lam);
+          return 0.5 * prox * prox + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Ridge regression, Tikhonov regularization'
       },
       huber: {
-        name: 'Huber(x)',
+        name: 'Huber(x, δ=1)',
         f: x => Math.abs(x) <= 1 ? 0.5 * x * x : Math.abs(x) - 0.5,
         prox: (v, lam) => {
           if (Math.abs(v) <= lam + 1) {
@@ -361,9 +489,14 @@
             return Math.sign(v) * (Math.abs(v) - lam);
           }
         },
-        formula: 'Combination of L2 (smooth) and L1 (robust)',
-        description: 'Smooth for small values, linear for large values',
-        subdifferential: x => Math.abs(x) < 1 ? x : (x > 0 ? 1 : -1)
+        formula: '$$\\text{prox}_{\\lambda \\text{Huber}}(v) = \\begin{cases} \\frac{v}{1+\\lambda} & |v| \\leq \\lambda + 1 \\\\ \\text{sign}(v)(|v| - \\lambda) & |v| > \\lambda + 1 \\end{cases}$$',
+        description: 'Robust loss function - L2 cho small errors, L1 cho large errors',
+        subdifferential: x => Math.abs(x) < 1 ? [x] : (x > 0 ? [1] : [-1]),
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.huber.prox(v, lam);
+          return functions.huber.f(prox) + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Robust regression, outlier detection'
       },
       hinge: {
         name: 'max(0, 1-x)',
@@ -373,17 +506,27 @@
           if (v <= 1) return v;
           return 1;
         },
-        formula: 'Projection-like behavior around x = 1',
-        description: 'Used in SVM, creates margin around x = 1',
-        subdifferential: x => x < 1 ? -1 : (x > 1 ? 0 : [-1, 0])
+        formula: '$$\\text{prox}_{\\lambda \\max(0,1-\\cdot)}(v) = \\begin{cases} v - \\lambda & v \\geq 1 + \\lambda \\\\ 1 & 1 < v < 1 + \\lambda \\\\ v & v \\leq 1 \\end{cases}$$',
+        description: 'Hinge loss - dùng trong SVM, tạo margin tại x = 1',
+        subdifferential: x => x < 1 ? [-1] : (x > 1 ? [0] : [-1, 0]),
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.hinge.prox(v, lam);
+          return Math.max(0, 1 - prox) + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Support Vector Machines, margin-based classification'
       },
       indicator: {
-        name: 'I[-1,1](x)',
+        name: 'I_{[-1,1]}(x)',
         f: x => Math.abs(x) <= 1 ? 0 : Infinity,
         prox: (v, lam) => Math.max(-1, Math.min(1, v)),
-        formula: 'prox_λI_C(v) = Proj_C(v) = max(-1, min(1, v))',
-        description: 'Projection onto interval [-1, 1]',
-        subdifferential: x => Math.abs(x) < 1 ? 0 : (x > 1 ? [0, Infinity] : [-Infinity, 0])
+        formula: '$$\\text{prox}_{\\lambda I_C}(v) = \\text{Proj}_C(v) = \\max(-1, \\min(1, v))$$',
+        description: 'Projection operator - chiếu lên constraint set [-1,1]',
+        subdifferential: x => Math.abs(x) < 1 ? [0] : (x > 1 ? [0, Infinity] : [-Infinity, 0]),
+        moreauEnvelope: (v, lam) => {
+          const prox = Math.max(-1, Math.min(1, v));
+          return (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Constrained optimization, feasible set projection'
       },
       elastic: {
         name: '|x| + ½x²',
@@ -392,37 +535,89 @@
           const denom = 1 + lam;
           return Math.sign(v) * Math.max(0, Math.abs(v) - lam) / denom;
         },
-        formula: 'Elastic net regularization',
-        description: 'Combines L1 sparsity with L2 stability',
-        subdifferential: x => (x > 0 ? 1 : (x < 0 ? -1 : [-1, 1])) + x
+        formula: '$$\\text{prox}_{\\lambda(|\\cdot| + \\frac{1}{2}|\\cdot|^2)}(v) = \\frac{\\text{sign}(v) \\max(0, |v| - \\lambda)}{1 + \\lambda}$$',
+        description: 'Elastic Net - kết hợp sparsity (L1) và stability (L2)',
+        subdifferential: x => {
+          const l1_sub = x > 0 ? [1] : (x < 0 ? [-1] : [-1, 1]);
+          return l1_sub.map(s => s + x);
+        },
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.elastic.prox(v, lam);
+          return Math.abs(prox) + 0.5 * prox * prox + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Elastic Net regression, feature selection with grouping'
       },
       logistic: {
         name: 'log(1+exp(x))',
-        f: x => Math.log(1 + Math.exp(Math.min(x, 700))), // Prevent overflow
+        f: x => Math.log(1 + Math.exp(Math.min(x, 700))),
         prox: (v, lam) => {
-          // Numerical solution needed - approximate with Newton's method
+          // Newton's method for numerical solution
           let x = v;
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 15; i++) {
             const expx = Math.exp(Math.min(x, 700));
-            const grad = expx / (1 + expx) + (x - v) / lam;
-            const hess = expx / ((1 + expx) * (1 + expx)) + 1 / lam;
+            const sigmoid = expx / (1 + expx);
+            const grad = sigmoid + (x - v) / lam;
+            const hess = sigmoid * (1 - sigmoid) + 1 / lam;
             const step = grad / hess;
             x -= step;
-            if (Math.abs(step) < 1e-8) break;
+            if (Math.abs(step) < 1e-10) break;
           }
           return x;
         },
-        formula: 'Numerical solution via Newton method',
-        description: 'Smooth approximation to hinge loss',
-        subdifferential: x => Math.exp(x) / (1 + Math.exp(x))
+        formula: '$$\\text{Numerical solution via Newton method}$$<br>$$\\frac{d}{dx}\\log(1+e^x) = \\sigma(x) = \\frac{e^x}{1+e^x}$$',
+        description: 'Logistic loss - smooth approximation của hinge loss',
+        subdifferential: x => [Math.exp(Math.min(x, 700)) / (1 + Math.exp(Math.min(x, 700)))],
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.logistic.prox(v, lam);
+          return Math.log(1 + Math.exp(Math.min(prox, 700))) + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Logistic regression, neural networks, smooth classification'
       },
       quadratic: {
         name: 'x² + x + 1',
         f: x => x * x + x + 1,
-        prox: (v, lam) => (v - lam * 1) / (1 + 2 * lam),
-        formula: 'prox_λ(x²+x+c)(v) = (v - λ) / (1 + 2λ)',
-        description: 'General quadratic with linear term',
-        subdifferential: x => 2 * x + 1
+        prox: (v, lam) => (v - lam) / (1 + 2 * lam),
+        formula: '$$\\text{prox}_{\\lambda(x^2 + x + c)}(v) = \\frac{v - \\lambda}{1 + 2\\lambda}$$',
+        description: 'General quadratic function với linear term',
+        subdifferential: x => [2 * x + 1],
+        moreauEnvelope: (v, lam) => {
+          const prox = (v - lam) / (1 + 2 * lam);
+          return prox * prox + prox + 1 + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Quadratic programming, second-order methods'
+      },
+      nuclear: {
+        name: 'Nuclear Norm Approx',
+        f: x => Math.sqrt(x * x + 0.01), // Smooth approximation
+        prox: (v, lam) => {
+          const norm = Math.sqrt(v * v + 0.01);
+          return v * Math.max(0, 1 - lam / norm);
+        },
+        formula: '$$\\text{prox}_{\\lambda\\|\\cdot\\|_*}(v) \\approx v \\cdot \\max\\left(0, 1 - \\frac{\\lambda}{\\|v\\|_2}\\right)$$',
+        description: 'Nuclear norm approximation - low-rank promotion',
+        subdifferential: x => [x / Math.sqrt(x * x + 0.01)],
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.nuclear.prox(v, lam);
+          return Math.sqrt(prox * prox + 0.01) + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Matrix completion, low-rank approximation'
+      },
+      group: {
+        name: 'Group LASSO Approx',
+        f: x => Math.abs(x) + 0.1 * x * x, // Group penalty approximation
+        prox: (v, lam) => {
+          const group_norm = Math.abs(v);
+          const shrink_factor = Math.max(0, 1 - lam / group_norm);
+          return v * shrink_factor / (1 + 0.1 * lam);
+        },
+        formula: '$$\\text{Group shrinkage with quadratic correction}$$',
+        description: 'Group LASSO approximation - group sparsity',
+        subdifferential: x => [Math.sign(x) + 0.2 * x],
+        moreauEnvelope: (v, lam) => {
+          const prox = functions.group.prox(v, lam);
+          return Math.abs(prox) + 0.1 * prox * prox + (1/(2*lam)) * (v - prox) * (v - prox);
+        },
+        applications: 'Group feature selection, structured sparsity'
       }
     };
 

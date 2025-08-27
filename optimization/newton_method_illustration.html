@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minh họa Newton's Method</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="../math-simple.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -152,6 +154,38 @@
 <body>
     <div class="container">
         <h1>🔬 Minh họa Newton's Method</h1>
+        
+        <!-- Historical Section -->
+        <div style="background: linear-gradient(135deg, #2d1b69 0%, #11998e 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 2px solid rgba(255, 255, 255, 0.1);">
+            <h2 style="color: #FFD700; text-align: center; margin-bottom: 25px;">📚 Lịch Sử Newton's Method</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #00d4ff; margin-bottom: 15px;">🍎 Isaac Newton (1643-1727)</h4>
+                    <p><strong>Method of Fluxions (1669):</strong> Newton phát triển phương pháp này khi nghiên cứu về phương trình đại số. Ban đầu ông gọi là "method of successive approximations".</p>
+                    <p><strong>Ý tưởng gốc:</strong> Sử dụng đường tiếp tuyến để xấp xỉ nghiệm của phương trình.</p>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px;">
+                    <h4 style="color: #ff6b6b; margin-bottom: 15px;">📐 Joseph Raphson (1648-1715)</h4>
+                    <p><strong>Cải tiến công thức (1690):</strong> Raphson đơn giản hóa phương pháp của Newton, tạo ra công thức hiện đại:</p>
+                    <p style="text-align: center; font-weight: bold;">x₁ = x₀ - f(x₀)/f'(x₀)</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                <h4 style="color: #FFD700; margin-bottom: 15px;">⚡ Phát triển hiện đại</h4>
+                <ul style="color: #ffffff; line-height: 1.8;">
+                    <li><strong>Thế kỷ 18-19:</strong> Mở rộng cho hệ phương trình và tối ưu hóa đa biến</li>
+                    <li><strong>Kantorovich (1940s):</strong> Phân tích hội tụ nghiêm ngặt đầu tiên</li>
+                    <li><strong>Kỷ nguyên máy tính:</strong> Trở thành nền tảng cho nhiều thuật toán tối ưu hiện đại</li>
+                </ul>
+            </div>
+
+            <div style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px;">
+                <h4 style="color: #4caf50; margin-bottom: 15px;">🌟 Tác động lịch sử</h4>
+                <p>Từ việc giải phương trình trong thế kỷ 17, Newton's Method đã trở thành một trong những thuật toán quan trọng nhất trong toán học tính toán và machine learning hiện đại.</p>
+            </div>
+        </div>
         
         <div class="controls">
             <div class="control-group">
