@@ -20,5 +20,14 @@ This project is set up to help you learn and experiment with interactive numeric
 - `index.js` — Main entry point for your code
 - `public/` — (Optional) Static files for web-based demos
 
+## Research notes
+
+The course itself is the static HTML/JS demos linked from [`index.html`](index.html). Recent (≈2022–2026) papers that *attach* to those demos — citations plus a short “why this matters” — live in:
+
+- [`RESEARCH_NOTES.md`](RESEARCH_NOTES.md) — hub and topic inventory
+- [`notes/`](notes/README.md) — one markdown file per major topic
+
+These notes do not replace or regenerate the demos.
+
 ## License
 ISC
