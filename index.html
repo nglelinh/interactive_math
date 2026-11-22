@@ -3,19 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minh họa tương tác - Toán học cơ bản và Machine Learning</title>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-  <script src="./math-simple.js"></script>
+    <title>Interactive Mathematics - Toán học tương tác cho Machine Learning</title>
+    <script src="./mathjax-config.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="./math-simple.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 30px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #ffffff;
+            color: white;
+            line-height: 1.6;
             min-height: 100vh;
-            font-size: 18px;
-            line-height: 1.8;
+        }
+
+        /* Navigation Styles */
+        .nav-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab.active {
+            color: #4fc3f7;
+            border-bottom-color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.1);
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .container {
             max-width: 1200px;
@@ -462,6 +521,14 @@
                         Noise cancellation thực tế với Spectral Subtraction - Công nghệ trong tai nghe AirPods Pro!
                     </div>
                 </div>
+                
+                <div class="illustration-card" onclick="openIllustration('fourier-analysis/fourier_series_vs_transform.html')">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-title">Fourier Series vs Fourier Transform</div>
+                    <div class="card-description">
+                        So sánh chi tiết, công thức, ví dụ và chuyển tiếp giữa hai khái niệm
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -631,6 +698,14 @@
                     <div class="card-title">Gradient Descent Demo</div>
                     <div class="card-description">
                         Minh họa tương tác
+                    </div>
+                </div>
+
+                <div class="illustration-card special-card" onclick="openIllustration('optimization/backtracking_line_search.html')">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title">🆕 Backtracking Line Search</div>
+                    <div class="card-description">
+                        <strong>NEW!</strong> Kỹ thuật chọn step size thích ứng trong gradient descent. Tự động tối ưu learning rate với Armijo condition và backtracking algorithm. Interactive demo với visualization chi tiết!
                     </div>
                 </div>
                 
@@ -1224,4 +1299,4 @@
 <script src="js/site-nav-data.js" data-site-nav="data"></script>
 <script src="js/site-nav.js" data-site-nav="boot"></script>
 </body>
-</html> 
+</html>

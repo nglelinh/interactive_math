@@ -232,38 +232,8 @@
             <div class="formula-box">
                 $$\oint_C f(z) \, dz = 2\pi i \sum \text{Res}(f, z_k)$$
                 <br><br>
-                <strong>Residue at Simple Pole:</strong> $\text{Res}(f, a) = \lim_{z \to a} (z-a)f(z)$<br>
-                <strong>Residue at Pole of Order n:</strong> $\text{Res}(f, a) = \frac{1}{(n-1)!} \lim_{z \to a} \frac{d^{n-1}}{dz^{n-1}}[(z-a)^n f(z)]$
-            </div>
-        </div>
-        
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('basic')">Basic Integration</button>
-            <button class="tab" onclick="showTab('residues')">Residue Calculation</button>
-            <button class="tab" onclick="showTab('applications')">Real Integrals</button>
-        </div>
-        
-        <div id="basic" class="tab-content active">
-            <div class="content-grid">
-                <div class="controls-panel">
-                    <h3>🎮 Contour Integration</h3>
-                    
-                    <div class="function-selector">
-                        <label>Select Function:</label>
-                        <select id="functionSelect">
-                            <option value="simple_pole">1/(z-1) - Simple pole</option>
-                            <option value="double_pole">1/(z-1)² - Double pole</option>
-                            <option value="multiple_poles">1/((z-1)(z+1)) - Two simple poles</option>
-                            <option value="essential">e^(1/z) - Essential singularity</option>
-                            <option value="polynomial">z² + 1 - Polynomial</option>
-                            <option value="rational">z/(z²+1) - Rational function</option>
-                            <option value="trig">sin(z)/z - Trigonometric</option>
-                        </select>
-                    </div>
-                    
-                    <div class="parameter-control">
-                        <label>Contour Type:</label>
-                        <select id="contourType">
+                <strong>Residue at Simple Pole:</strong> \(\text{Res}(f, a) = \lim_{z \to a} (z-a)f(z)\)<br>
+                <strong>Residue at Pole of Order n:</strong> \(\text{Res}(f, a) = \frac{1}{(n-1)!} \lim_{z \to a} \frac{d^{n-1}}{dz^{n-1}}[(z-a)^n f(z)]\)
                             <option value="circle">Circle</option>
                             <option value="rectangle">Rectangle</option>
                             <option value="custom">Custom Path</option>
@@ -423,6 +393,29 @@
                 • <strong>Rectangular Contour:</strong> For periodic functions<br>
                 • <strong>Indented Contour:</strong> For poles on the real axis
             </div>
+        </div>
+        
+        <div class="math-explanation">
+            <h2>🌀 Animation: Visualizing Contour Integration</h2>
+            <p>
+                The animation feature visually demonstrates how contour integration works in the complex plane. As the integration point moves along the chosen contour (such as a circle or rectangle), you can see how the function value <em>f(z)</em> and the differential <em>dz</em> combine to produce the total integral.
+            </p>
+            <p>
+                <strong>What does the animation show?</strong><br>
+                • The path traced by the contour in the complex plane.<br>
+                • The contribution of each small segment <em>f(z)dz</em> to the total integral.<br>
+                • How poles (singularities) inside the contour affect the result via the residue theorem.<br>
+                • The accumulation of the integral as you move around the contour.
+            </p>
+            <p>
+                <strong>Why is this useful?</strong><br>
+                • It helps you build intuition for how complex integrals are computed.<br>
+                • You can see the direct connection between the geometry of the contour and the analytic properties of the function.<br>
+                • It makes the abstract residue theorem concrete and visual.
+            </p>
+            <p>
+                Try running the animation to see step-by-step how the integral is built up, and how the residues of poles inside the contour determine the final value!
+            </p>
         </div>
     </div>
 
@@ -807,25 +800,37 @@
         }
         
         // Event listeners
-        document.getElementById('functionSelect').addEventListener('change', updateContourVisualization);
-        document.getElementById('contourType').addEventListener('change', updateContourVisualization);
-        
-        document.getElementById('contourRadius').addEventListener('input', function() {
-            document.getElementById('radiusValue').textContent = this.value;
-            updateContourVisualization();
-        });
-        
-        document.getElementById('integrationSteps').addEventListener('input', function() {
-            document.getElementById('stepsValue').textContent = this.value;
-            updateContourVisualization();
-        });
-        
-        document.getElementById('parameter').addEventListener('input', function() {
-            document.getElementById('parameterValue').textContent = this.value;
-            if (document.getElementById('applications').classList.contains('active')) {
-                updateRealIntegralVisualization();
-            }
-        });
+        const functionSelectElem = document.getElementById('functionSelect');
+        if (functionSelectElem) {
+            functionSelectElem.addEventListener('change', updateContourVisualization);
+        }
+        const contourTypeElem = document.getElementById('contourType');
+        if (contourTypeElem) {
+            contourTypeElem.addEventListener('change', updateContourVisualization);
+        }
+        const contourRadiusElem = document.getElementById('contourRadius');
+        if (contourRadiusElem) {
+            contourRadiusElem.addEventListener('input', function() {
+                document.getElementById('radiusValue').textContent = this.value;
+                updateContourVisualization();
+            });
+        }
+        const integrationStepsElem = document.getElementById('integrationSteps');
+        if (integrationStepsElem) {
+            integrationStepsElem.addEventListener('input', function() {
+                document.getElementById('stepsValue').textContent = this.value;
+                updateContourVisualization();
+            });
+        }
+        const parameterElem = document.getElementById('parameter');
+        if (parameterElem) {
+            parameterElem.addEventListener('input', function() {
+                document.getElementById('parameterValue').textContent = this.value;
+                if (document.getElementById('applications') && document.getElementById('applications').classList.contains('active')) {
+                    updateRealIntegralVisualization();
+                }
+            });
+        }
         
         // Initialize after ensuring Plotly is loaded
         function initializeVisualizations() {

@@ -124,6 +124,11 @@
             background: rgba(155, 89, 182, 0.1);
         }
 
+        .topic-card.geometry {
+            border-color: #e67e22;
+            background: rgba(230, 126, 34, 0.1);
+        }
+
         .topic-header {
             display: flex;
             align-items: center;
@@ -273,11 +278,11 @@
 
         <div class="progress-section">
             <h3>📈 Learning Progress</h3>
-            <p>Overall Completion: <strong>30%</strong></p>
+            <p>Overall Completion: <strong>33%</strong></p>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 30%"></div>
+                <div class="progress-fill" style="width: 33%"></div>
             </div>
-            <p><span style="color: #2ecc71;">✅ 6 lessons completed</span> • <span style="color: #f39c12;">🔄 1 in progress</span> • <span style="color: #95a5a6;">📋 16 planned</span></p>
+            <p><span style="color: #2ecc71;">✅ 7 lessons completed</span> • <span style="color: #f39c12;">🔄 1 in progress</span> • <span style="color: #95a5a6;">📋 16 planned</span></p>
         </div>
 
         <div class="topics-grid">
@@ -377,6 +382,20 @@
                     <li><a href="drunken_bishop.html">Drunken Bishop Algorithm <span class="lesson-status completed">Complete</span></a></li>
                     <li><a href="hash_visualization.html" class="planned-item" onclick="return false;">Hash Visualization <span class="lesson-status planned">Planned</span></a></li>
                     <li><a href="merkle_trees.html" class="planned-item" onclick="return false;">Merkle Trees <span class="lesson-status planned">Planned</span></a></li>
+                </ul>
+            </div>
+
+            <div class="topic-card geometry" onclick="window.location.href='#'">
+                <div class="topic-header">
+                    <div class="topic-icon">🔺</div>
+                    <h3 class="topic-title">Computational Geometry</h3>
+                </div>
+                <p>Algorithms for solving geometric problems with points, lines, and polygons.</p>
+                <ul class="topic-lessons">
+                    <li><a href="convex_hull_algorithms.html">Convex Hull Algorithms <span class="lesson-status completed">Complete</span></a></li>
+                    <li><a href="line_intersection.html" class="planned-item" onclick="return false;">Line Intersection <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="closest_pair.html" class="planned-item" onclick="return false;">Closest Pair of Points <span class="lesson-status planned">Planned</span></a></li>
+                    <li><a href="voronoi_diagrams.html" class="planned-item" onclick="return false;">Voronoi Diagrams <span class="lesson-status planned">Planned</span></a></li>
                 </ul>
             </div>
         </div>

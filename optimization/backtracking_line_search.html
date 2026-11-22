@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtracking Line Search - Gradient Descent Tối Ưu</title>
+    <script src="../mathjax-config.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navigation Styles */
+        .nav-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-tab {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab.active {
+            color: #4ecdc4;
+            border-bottom-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Theory Section Styles */
+        .theory-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .theory-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+
+        .theory-header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theory-header p {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .theory-section {
+            margin-bottom: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .theory-section h2 {
+            color: #4ecdc4;
+            font-size: 2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .theory-section h3 {
+            color: #44a08d;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+
+        .definition, .theorem, .example, .algorithm {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 4px solid #4ecdc4;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .definition h4, .theorem h4, .example h4, .algorithm h4 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .algorithm-steps {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.2);
+        }
+
+        .comparison-card h4 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .pros, .cons {
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .pros {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .cons {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .pros h5 {
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .cons h5 {
+            color: #f44336;
+            margin-bottom: 5px;
+        }
+
+        /* Interactive Section Styles */
+        .interactive-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            min-height: calc(100vh - 60px);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .control-group h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .control-row label {
+            min-width: 120px;
+            margin-right: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+            accent-color: #4ecdc4;
+        }
+        
+        input[type="number"], select {
+            width: 80px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        select {
+            width: 100%;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: rgba(100, 100, 100, 0.5);
+            transform: none;
+            cursor: not-allowed;
+        }
+        
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        canvas {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .info-panel h3 {
+            margin-top: 0;
+            color: #4ecdc4;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .metric-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .step-details {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .step-details .step-header {
+            color: #4ecdc4;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('theory')">📚 Lý Thuyết</button>
+            <button class="nav-tab" onclick="showSection('interactive')">🎮 Tương Tác</button>
+            <button class="nav-tab" onclick="showSection('comparison')">⚖️ So Sánh</button>
+        </div>
+    </div>
+
+    <!-- Theory Section -->
+    <div id="theory" class="section active">
+        <div class="theory-content">
+            <div class="theory-header">
+                <h1>Backtracking Line Search</h1>
+                <p>Kỹ thuật chọn độ dài bước thích ứng trong Gradient Descent</p>
+            </div>
+
+            <div class="theory-section">
+                <h2>1. Vấn đề cốt lõi</h2>
+                
+                <div class="definition">
+                    <h4>Tại sao cần Backtracking Line Search?</h4>
+                    <p>Trong gradient descent cơ bản, chúng ta sử dụng <strong>learning rate cố định</strong>:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$x_{k+1} = x_k - \alpha \nabla f(x_k)$$
+                    </div>
+                    <p><strong>Vấn đề:</strong> Chọn $\alpha$ như thế nào?</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>🐌 <strong>$\alpha$ quá nhỏ:</strong> Hội tụ chậm, mất nhiều thời gian</li>
+                        <li>🚀 <strong>$\alpha$ quá lớn:</strong> Dao động, phân kỳ, không ổn định</li>
+                        <li>🎯 <strong>$\alpha$ tối ưu:</strong> Thay đổi theo từng bước và vị trí!</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <h4>Ví dụ minh họa</h4>
+                    <p>Hãy tưởng tượng bạn đang xuống núi trong sương mù:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Sườn dốc:</strong> Có thể bước lớn an toàn</li>
+                        <li><strong>Gần vách đá:</strong> Phải bước nhỏ cẩn thận</li>
+                        <li><strong>Đường hẹp:</strong> Cần điều chỉnh từng bước</li>
+                    </ul>
+                    <p><strong>Backtracking Line Search</strong> như một "cảm biến thông minh" giúp chọn kích thước bước phù hợp!</p>
+                </div>
+
+                <h3>Armijo Condition - Điều kiện chấp nhận bước</h3>
+                <div class="theorem">
+                    <h4>Nguyên lý Armijo</h4>
+                    <p>Một bước được chấp nhận nếu nó đảm bảo <strong>giảm đầy đủ</strong> hàm mục tiêu:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$f(x_k - \alpha \nabla f(x_k)) \leq f(x_k) - c_1 \alpha \|\nabla f(x_k)\|^2$$
+                    </div>
+                    <p><strong>Các tham số:</strong></p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>$c_1 \in (0, 1)$:</strong> Hằng số Armijo (thường $c_1 = 10^{-4}$)</li>
+                        <li><strong>Vế trái:</strong> Giá trị thực tế sau bước nhảy</li>
+                        <li><strong>Vế phải:</strong> Giá trị mong đợi (giảm tuyến tính)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>2. Thuật toán Backtracking</h2>
+
+                <div class="algorithm">
+                    <h4>Thuật toán chi tiết</h4>
+                    <div class="algorithm-steps">
+                        <p><strong>Khởi tạo:</strong></p>
+                        <ul style="margin: 5px 0 15px 20px;">
+                            <li>$\alpha_0 > 0$: Learning rate ban đầu (ví dụ: 1.0)</li>
+                            <li>$c_1 \in (0, 1)$: Hằng số Armijo (ví dụ: $10^{-4}$)</li>
+                            <li>$\rho \in (0, 1)$: Hệ số thu nhỏ (ví dụ: 0.5)</li>
+                        </ul>
+
+                        <p><strong>Tại mỗi iteration:</strong></p>
+                        <ol style="margin: 10px 0 0 20px;">
+                            <li><strong>Bước 1:</strong> Tính gradient $g_k = \nabla f(x_k)$</li>
+                            <li><strong>Bước 2:</strong> Khởi tạo $\alpha = \alpha_0$</li>
+                            <li><strong>Bước 3:</strong> Lặp cho đến khi thỏa mãn Armijo:
+                                <ul style="margin: 5px 0 0 20px;">
+                                    <li>Tính $x_{new} = x_k - \alpha g_k$</li>
+                                    <li><strong>Nếu</strong> $f(x_{new}) \leq f(x_k) - c_1 \alpha \|g_k\|^2$: <strong>CHẤP NHẬN</strong></li>
+                                    <li><strong>Ngược lại</strong>: $\alpha \leftarrow \rho \alpha$ và thử lại</li>
+                                </ul>
+                            </li>
+                            <li><strong>Bước 4:</strong> Cập nhật $x_{k+1} = x_k - \alpha g_k$</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="example">
+                    <h4>Ví dụ tính toán cụ thể</h4>
+                    <p><strong>Minimizing $f(x) = x^2$, starting from $x_0 = 2$</strong></p>
+                    
+                    <p><strong>Iteration 1:</strong></p>
+                    <ul style="margin: 10px 0 0 20px; font-family: monospace;">
+                        <li>$g_1 = f'(2) = 4$</li>
+                        <li>$f(2) = 4$</li>
+                        <li>Thử $\alpha = 1.0$: $x_{new} = 2 - 1.0 \times 4 = -2$</li>
+                        <li>$f(-2) = 4$ không thỏa mãn $f(-2) \leq 4 - 0.0001 \times 1.0 \times 16 = 3.9984$</li>
+                        <li>Thu nhỏ: $\alpha = 0.5$, $x_{new} = 2 - 0.5 \times 4 = 0$</li>
+                        <li>$f(0) = 0 \leq 3.9992$ ✓ CHẤP NHẬN!</li>
+                    </ul>
+                </div>
+
+                <h3>Ý nghĩa hình học</h3>
+                <div class="theorem">
+                    <h4>Giải thích trực quan</h4>
+                    <p>Armijo condition yêu cầu hàm số giảm <strong>ít nhất một lượng tỷ lệ</strong> với độ dốc:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Nếu gradient lớn:</strong> Kỳ vọng giảm nhiều</li>
+                        <li><strong>Nếu gradient nhỏ:</strong> Kỳ vọng giảm ít</li>
+                        <li><strong>$c_1$ nhỏ:</strong> Dễ chấp nhận, ít backtrack</li>
+                        <li><strong>$c_1$ lớn:</strong> Khắt khe hơn, nhiều backtrack hơn</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>3. Phân tích lý thuyết</h2>
+
+                <h3>Tính chất hội tụ</h3>
+                <div class="theorem">
+                    <h4>Định lý hội tụ</h4>
+                    <p>Với <strong>hàm khả vi liên tục</strong> và <strong>bị chặn dưới</strong>:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>✅ Backtracking line search <strong>luôn terminates</strong> trong số hữu hạn bước</li>
+                        <li>✅ Gradient descent với BLS <strong>hội tụ</strong> về điểm stagnant</li>
+                        <li>✅ Đối với hàm <strong>convex</strong>: hội tụ về global minimum</li>
+                        <li>✅ Tốc độ hội tụ: $O(1/k)$ cho hàm convex, tuyến tính cho strongly convex</li>
+                    </ul>
+                </div>
+
+                <h3>Độ phức tạp tính toán</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h4>Mỗi iteration</h4>
+                        <p><strong>Function evaluations:</strong> Trung bình 2-5 lần</p>
+                        <p><strong>Worst case:</strong> $O(\log(1/\alpha_{min}))$ evaluations</p>
+                        <p><strong>Overhead:</strong> Nhỏ so với việc tính gradient</p>
+                    </div>
+
+                    <div class="comparison-card">
+                        <h4>Toàn bộ thuật toán</h4>
+                        <p><strong>Function evaluations:</strong> Tăng factor 2-3x</p>
+                        <p><strong>Iterations:</strong> Thường giảm 2-10x</p>
+                        <p><strong>Total cost:</strong> Thường tốt hơn fixed step size</p>
+                    </div>
+                </div>
+
+                <div class="example">
+                    <h4>Ứng dụng thực tế</h4>
+                    <p>Backtracking line search được sử dụng rộng rãi trong:</p>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>Optimization packages:</strong> SciPy, MATLAB, CVX</li>
+                        <li><strong>Machine learning:</strong> Training neural networks, logistic regression</li>
+                        <li><strong>Computer graphics:</strong> Shape optimization, mesh deformation</li>
+                        <li><strong>Engineering:</strong> Structural design, control systems</li>
+                        <li><strong>Finance:</strong> Portfolio optimization, risk management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>4. Biến thể và mở rộng</h2>
+
+                <h3>Strong Wolfe Conditions</h3>
+                <div class="theorem">
+                    <h4>Điều kiện Wolfe mạnh</h4>
+                    <p>Kết hợp Armijo với điều kiện curvature:</p>
+                    <div style="text-align: center; margin: 15px 0;">
+                        $$f(x_k + \alpha p_k) \leq f(x_k) + c_1 \alpha \nabla f(x_k)^T p_k$$
+                        $$|\nabla f(x_k + \alpha p_k)^T p_k| \leq c_2 |\nabla f(x_k)^T p_k|$$
+                    </div>
+                    <p>với $0 < c_1 < c_2 < 1$ và $p_k$ là hướng tìm kiếm.</p>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h4>Zoom Line Search</h4>
+                        <p>Sử dụng interpolation để tìm step size tốt hơn</p>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h5>Ưu điểm</h5>
+                                <ul>
+                                    <li>Ít function evaluations</li>
+                                    <li>Step size tốt hơn</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h5>Nhược điểm</h5>
+                                <ul>
+                                    <li>Phức tạp hơn</li>
+                                    <li>Tính toán nặng hơn</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-card">
+                        <h4>Adaptive Backtracking</h4>
+                        <p>Điều chỉnh $\alpha_0$ dựa trên lịch sử</p>
+                        <div class="pros-cons">
+                            <div class="pros">
+                                <h5>Ưu điểm</h5>
+                                <ul>
+                                    <li>Học từ các bước trước</li>
+                                    <li>Hiệu quả hơn</li>
+                                </ul>
+                            </div>
+                            <div class="cons">
+                                <h5>Nhược điểm</h5>
+                                <ul>
+                                    <li>Thêm tham số</li>
+                                    <li>Logic phức tạp</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Section -->
+    <div id="interactive" class="section">
+        <div class="interactive-container">
+            <h1>🎮 Backtracking Line Search Interactive Demo</h1>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🎯 Hàm mục tiêu</h3>
+                    <div class="control-row">
+                        <label>Hàm:</label>
+                        <select id="functionSelect" onchange="updateFunction()">
+                            <option value="quadratic">Quadratic: x² + y²</option>
+                            <option value="rosenbrock">Rosenbrock Function</option>
+                            <option value="himmelblau">Himmelblau Function</option>
+                            <option value="rastrigin">Rastrigin Function</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>Vị trí bắt đầu X:</label>
+                        <input type="range" id="startXSlider" min="-3" max="3" step="0.1" value="2" oninput="updateStartPosition()">
+                        <input type="number" id="startXInput" min="-3" max="3" step="0.1" value="2" onchange="updateStartPosition()">
+                    </div>
+                    <div class="control-row">
+                        <label>Vị trí bắt đầu Y:</label>
+                        <input type="range" id="startYSlider" min="-3" max="3" step="0.1" value="2" oninput="updateStartPosition()">
+                        <input type="number" id="startYInput" min="-3" max="3" step="0.1" value="2" onchange="updateStartPosition()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>⚙️ Tham số Backtracking</h3>
+                    <div class="control-row">
+                        <label>α₀ (Learning rate ban đầu):</label>
+                        <input type="range" id="alpha0Slider" min="0.1" max="2.0" step="0.1" value="1.0" oninput="updateAlpha0()">
+                        <input type="number" id="alpha0Input" min="0.1" max="2.0" step="0.1" value="1.0" onchange="updateAlpha0()">
+                    </div>
+                    <div class="control-row">
+                        <label>c₁ (Hằng số Armijo):</label>
+                        <input type="range" id="c1Slider" min="0.0001" max="0.1" step="0.0001" value="0.0001" oninput="updateC1()">
+                        <input type="number" id="c1Input" min="0.0001" max="0.1" step="0.0001" value="0.0001" onchange="updateC1()">
+                    </div>
+                    <div class="control-row">
+                        <label>ρ (Hệ số thu nhỏ):</label>
+                        <input type="range" id="rhoSlider" min="0.1" max="0.9" step="0.05" value="0.5" oninput="updateRho()">
+                        <input type="number" id="rhoInput" min="0.1" max="0.9" step="0.05" value="0.5" onchange="updateRho()">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎮 Điều khiển</h3>
+                    <div style="text-align: center;">
+                        <button onclick="startOptimization()">▶️ Bắt đầu</button>
+                        <button onclick="stepOptimization()">⏩ Một bước</button>
+                        <button onclick="pauseOptimization()">⏸️ Tạm dừng</button>
+                        <button onclick="resetOptimization()">🔄 Đặt lại</button>
+                    </div>
+                    <div class="control-row">
+                        <label>Tốc độ animation:</label>
+                        <input type="range" id="speedSlider" min="1" max="10" step="1" value="3" oninput="updateSpeed()">
+                        <span id="speedValue">3</span>
+                    </div>
+                    <div class="control-row">
+                        <label>Hiện đường đi:</label>
+                        <input type="checkbox" id="showPathCheckbox" checked onchange="updateVisualization()">
+                    </div>
+                    <div class="control-row">
+                        <label>Hiện backtrack steps:</label>
+                        <input type="checkbox" id="showBacktrackCheckbox" checked onchange="updateVisualization()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="optimizationCanvas" width="800" height="600"></canvas>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4ecdc4;"></div>
+                        <span>Đường đi chính</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff6b6b;"></div>
+                        <span>Backtrack attempts</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #44a08d;"></div>
+                        <span>Vị trí hiện tại</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f39c12;"></div>
+                        <span>Mục tiêu</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="performance-metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="currentIteration">0</div>
+                    <div class="metric-label">Iteration</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="currentLoss">0.00</div>
+                    <div class="metric-label">Function Value</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="gradientNorm">0.00</div>
+                    <div class="metric-label">Gradient Norm</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="currentAlpha">1.00</div>
+                    <div class="metric-label">Step Size</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="backtrackCount">0</div>
+                    <div class="metric-label">Backtracks</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="convergenceStatus">Sẵn sàng</div>
+                    <div class="metric-label">Trạng thái</div>
+                </div>
+            </div>
+
+            <div class="step-details" id="stepDetails">
+                <div class="step-header">Chi tiết bước hiện tại:</div>
+                <div>Nhấn "Bắt đầu" để xem quá trình backtracking line search...</div>
+            </div>
+
+            <div class="info-panel">
+                <h3>📊 Phân tích thời gian thực</h3>
+                <div id="analysisText">
+                    Nhấn "Bắt đầu" để theo dõi quá trình tối ưu hóa với backtracking line search!
+                </div>
+                
+                <h4>📈 Biểu đồ hội tụ</h4>
+                <div style="height: 200px; margin: 10px 0;">
+                    <canvas id="lossChart" width="600" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Section -->
+    <div id="comparison" class="section">
+        <div class="theory-content">
+            <div class="theory-header">
+                <h1>So sánh các phương pháp Line Search</h1>
+                <p>Fixed Step Size vs Backtracking vs Advanced Methods</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>Fixed Step Size</h4>
+                    <p><strong>α cố định trong suốt quá trình</strong></p>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Ưu điểm</h5>
+                            <ul>
+                                <li>Đơn giản, dễ implement</li>
+                                <li>Chi phí tính toán thấp</li>
+                                <li>Không cần function evaluation thêm</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Nhược điểm</h5>
+                            <ul>
+                                <li>Khó chọn α phù hợp</li>
+                                <li>Không thích ứng với địa hình</li>
+                                <li>Có thể hội tụ chậm hoặc phân kỳ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-card">
+                    <h4>Backtracking Line Search</h4>
+                    <p><strong>Tự động điều chỉnh α mỗi bước</strong></p>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Ưu điểm</h5>
+                            <ul>
+                                <li>Thích ứng với địa hình</li>
+                                <li>Đảm bảo sufficient decrease</li>
+                                <li>Robust, ít thất bại</li>
+                                <li>Cân bằng tốc độ và ổn định</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Nhược điểm</h5>
+                            <ul>
+                                <li>Thêm function evaluations</li>
+                                <li>Phức tạp hơn về code</li>
+                                <li>Có thể chậm khi backtrack nhiều</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-card">
+                    <h4>Wolfe Line Search</h4>
+                    <p><strong>Điều kiện Armijo + Curvature</strong></p>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Ưu điểm</h5>
+                            <ul>
+                                <li>Step size chất lượng cao</li>
+                                <li>Lý thuyết hội tụ mạnh</li>
+                                <li>Hiệu quả với quasi-Newton</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Nhược điểm</h5>
+                            <ul>
+                                <li>Phức tạp nhất</li>
+                                <li>Nhiều function evaluations</li>
+                                <li>Cần tính gradient thêm</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-card">
+                    <h4>Adaptive Methods (Adam, RMSprop)</h4>
+                    <p><strong>Learning rate per-parameter</strong></p>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Ưu điểm</h5>
+                            <ul>
+                                <li>Hiệu quả với high-dim problems</li>
+                                <li>Ít hyperparameter tuning</li>
+                                <li>Phổ biến trong deep learning</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Nhược điểm</h5>
+                            <ul>
+                                <li>Có thể không hội tụ đúng</li>
+                                <li>Memory overhead</li>
+                                <li>Hyperparameter sensitivity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>Benchmark Performance</h2>
+                
+                <div class="example">
+                    <h4>Kết quả thực nghiệm trên các hàm test</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background: rgba(78, 205, 196, 0.2);">
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Function</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Fixed α=0.01</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Fixed α=0.1</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Backtracking</th>
+                                <th style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Wolfe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>Quadratic</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">1000 iter</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">10 iter</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>8 iter</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">12 iter</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>Rosenbrock</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">5000+ iter</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Diverge</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>1500 iter</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">800 iter</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>Himmelblau</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">2000 iter</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">Oscillate</td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);"><strong>300 iter</strong></td>
+                                <td style="padding: 10px; border: 1px solid rgba(255,255,255,0.3);">250 iter</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="theorem">
+                    <h4>Kết luận</h4>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>🎯 <strong>Backtracking</strong> là lựa chọn tốt nhất cho <strong>hầu hết ứng dụng</strong></li>
+                        <li>⚡ <strong>Fixed step size</strong> chỉ tốt khi đã biết trước optimal α</li>
+                        <li>🔬 <strong>Wolfe conditions</strong> tốt cho các bài toán <strong>high-precision</strong></li>
+                        <li>🤖 <strong>Adaptive methods</strong> ưu việt trong <strong>machine learning</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        function showSection(sectionName) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (sectionName === 'theory' && window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+
+        // Optimization visualization variables
+        let canvas, ctx, lossCanvas, lossCtx;
+        let currentFunction = 'quadratic';
+        let currentPosition = { x: 2, y: 2 };
+        let startPosition = { x: 2, y: 2 };
+        let alpha0 = 1.0;
+        let c1 = 0.0001;
+        let rho = 0.5;
+        let animationSpeed = 3;
+        let isRunning = false;
+        let iteration = 0;
+        let path = [];
+        let backtrackAttempts = [];
+        let lossHistory = [];
+        let alphaHistory = [];
+        let backtrackHistory = [];
+
+        // Function definitions
+        const functions = {
+            quadratic: {
+                name: "Quadratic Bowl",
+                f: (x, y) => x*x + y*y,
+                grad: (x, y) => ({ x: 2*x, y: 2*y }),
+                domain: { xMin: -3, xMax: 3, yMin: -3, yMax: 3 },
+                minimum: { x: 0, y: 0, value: 0 }
+            },
+            rosenbrock: {
+                name: "Rosenbrock Function",
+                f: (x, y) => Math.pow(1-x, 2) + 100*Math.pow(y-x*x, 2),
+                grad: (x, y) => ({
+                    x: -2*(1-x) - 400*x*(y-x*x),
+                    y: 200*(y-x*x)
+                }),
+                domain: { xMin: -2, xMax: 2, yMin: -1, yMax: 3 },
+                minimum: { x: 1, y: 1, value: 0 }
+            },
+            himmelblau: {
+                name: "Himmelblau's Function",
+                f: (x, y) => Math.pow(x*x + y - 11, 2) + Math.pow(x + y*y - 7, 2),
+                grad: (x, y) => ({
+                    x: 4*x*(x*x + y - 11) + 2*(x + y*y - 7),
+                    y: 2*(x*x + y - 11) + 4*y*(x + y*y - 7)
+                }),
+                domain: { xMin: -5, xMax: 5, yMin: -5, yMax: 5 },
+                minimum: { x: 3, y: 2, value: 0 }
+            },
+            rastrigin: {
+                name: "Rastrigin Function",
+                f: (x, y) => 20 + x*x + y*y - 10*Math.cos(2*Math.PI*x) - 10*Math.cos(2*Math.PI*y),
+                grad: (x, y) => ({
+                    x: 2*x + 20*Math.PI*Math.sin(2*Math.PI*x),
+                    y: 2*y + 20*Math.PI*Math.sin(2*Math.PI*y)
+                }),
+                domain: { xMin: -3, xMax: 3, yMin: -3, yMax: 3 },
+                minimum: { x: 0, y: 0, value: 0 }
+            }
+        };
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            canvas = document.getElementById('optimizationCanvas');
+            ctx = canvas.getContext('2d');
+            lossCanvas = document.getElementById('lossChart');
+            lossCtx = lossCanvas.getContext('2d');
+            
+            updateVisualization();
+            updateLossChart();
+        });
+
+        // Control functions
+        function updateFunction() {
+            currentFunction = document.getElementById('functionSelect').value;
+            resetOptimization();
+        }
+
+        function updateStartPosition() {
+            const x = parseFloat(document.getElementById('startXSlider').value);
+            const y = parseFloat(document.getElementById('startYSlider').value);
+            
+            document.getElementById('startXInput').value = x;
+            document.getElementById('startYInput').value = y;
+            document.getElementById('startXSlider').value = x;
+            document.getElementById('startYSlider').value = y;
+            
+            startPosition = { x, y };
+            currentPosition = { x, y };
+            resetOptimization();
+        }
+
+        function updateAlpha0() {
+            const alpha = parseFloat(document.getElementById('alpha0Slider').value);
+            document.getElementById('alpha0Input').value = alpha;
+            document.getElementById('alpha0Slider').value = alpha;
+            alpha0 = alpha;
+        }
+
+        function updateC1() {
+            const c1Val = parseFloat(document.getElementById('c1Slider').value);
+            document.getElementById('c1Input').value = c1Val;
+            document.getElementById('c1Slider').value = c1Val;
+            c1 = c1Val;
+        }
+
+        function updateRho() {
+            const rhoVal = parseFloat(document.getElementById('rhoSlider').value);
+            document.getElementById('rhoInput').value = rhoVal;
+            document.getElementById('rhoSlider').value = rhoVal;
+            rho = rhoVal;
+        }
+
+        function updateSpeed() {
+            animationSpeed = parseInt(document.getElementById('speedSlider').value);
+            document.getElementById('speedValue').textContent = animationSpeed;
+        }
+
+        // Backtracking line search implementation
+        function backtrackingLineSearch(x, y, gradX, gradY) {
+            const func = functions[currentFunction];
+            const f0 = func.f(x, y);
+            const gradNormSq = gradX * gradX + gradY * gradY;
+            
+            let alpha = alpha0;
+            let backtracks = 0;
+            const attempts = [];
+            
+            while (backtracks < 20) { // Giới hạn số lần backtrack
+                const newX = x - alpha * gradX;
+                const newY = y - alpha * gradY;
+                const newF = func.f(newX, newY);
+                
+                // Ghi lại attempt
+                attempts.push({
+                    x: newX, 
+                    y: newY, 
+                    alpha: alpha, 
+                    fVal: newF,
+                    accepted: false
+                });
+                
+                // Kiểm tra Armijo condition
+                const armijoRHS = f0 - c1 * alpha * gradNormSq;
+                
+                if (newF <= armijoRHS) {
+                    // Chấp nhận step
+                    attempts[attempts.length - 1].accepted = true;
+                    return {
+                        alpha: alpha,
+                        backtracks: backtracks,
+                        attempts: attempts,
+                        newX: newX,
+                        newY: newY
+                    };
+                }
+                
+                // Thu nhỏ alpha
+                alpha *= rho;
+                backtracks++;
+            }
+            
+            // Nếu không tìm được alpha phù hợp, sử dụng alpha rất nhỏ
+            const newX = x - alpha * gradX;
+            const newY = y - alpha * gradY;
+            attempts[attempts.length - 1].accepted = true;
+            
+            return {
+                alpha: alpha,
+                backtracks: backtracks,
+                attempts: attempts,
+                newX: newX,
+                newY: newY
+            };
+        }
+
+        function updatePosition() {
+            const func = functions[currentFunction];
+            const grad = func.grad(currentPosition.x, currentPosition.y);
+            
+            // Thực hiện backtracking line search
+            const result = backtrackingLineSearch(
+                currentPosition.x, currentPosition.y, grad.x, grad.y
+            );
+            
+            // Cập nhật vị trí
+            currentPosition.x = result.newX;
+            currentPosition.y = result.newY;
+            
+            // Ghi lại thông tin
+            path.push({ x: currentPosition.x, y: currentPosition.y });
+            const loss = func.f(currentPosition.x, currentPosition.y);
+            lossHistory.push(loss);
+            alphaHistory.push(result.alpha);
+            backtrackHistory.push(result.backtracks);
+            backtrackAttempts.push(...result.attempts);
+            
+            // Cập nhật metrics
+            iteration++;
+            const gradNorm = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            
+            document.getElementById('currentIteration').textContent = iteration;
+            document.getElementById('currentLoss').textContent = loss.toFixed(6);
+            document.getElementById('gradientNorm').textContent = gradNorm.toFixed(6);
+            document.getElementById('currentAlpha').textContent = result.alpha.toFixed(6);
+            document.getElementById('backtrackCount').textContent = result.backtracks;
+            
+            // Hiển thị chi tiết bước
+            updateStepDetails(result, grad, loss);
+            
+            // Kiểm tra hội tụ
+            if (gradNorm < 1e-6) {
+                pauseOptimization();
+                document.getElementById('convergenceStatus').textContent = 'Hội tụ';
+                updateAnalysis(`🎉 Đã hội tụ! Tìm thấy minimum tại (${currentPosition.x.toFixed(4)}, ${currentPosition.y.toFixed(4)}) với giá trị ${loss.toFixed(8)}`);
+            } else {
+                document.getElementById('convergenceStatus').textContent = 'Đang chạy';
+            }
+            
+            updateVisualization();
+            updateLossChart();
+            updateAnalysis();
+        }
+
+        function updateStepDetails(result, grad, loss) {
+            const details = document.getElementById('stepDetails');
+            details.innerHTML = `
+                <div class="step-header">Chi tiết Iteration ${iteration}:</div>
+                <div><strong>Gradient:</strong> ∇f = (${grad.x.toFixed(4)}, ${grad.y.toFixed(4)})</div>
+                <div><strong>Gradient norm:</strong> ||∇f|| = ${Math.sqrt(grad.x*grad.x + grad.y*grad.y).toFixed(4)}</div>
+                <div><strong>Learning rate ban đầu:</strong> α₀ = ${alpha0.toFixed(4)}</div>
+                <div><strong>Learning rate cuối cùng:</strong> α = ${result.alpha.toFixed(6)}</div>
+                <div><strong>Số lần backtrack:</strong> ${result.backtracks}</div>
+                <div><strong>Function value:</strong> f(x) = ${loss.toFixed(6)}</div>
+                <div><strong>Armijo condition:</strong> f(x-α∇f) ≤ f(x) - c₁α||∇f||²</div>
+                <div style="margin-top: 10px;"><strong>Backtrack sequence:</strong></div>
+                ${result.attempts.map((attempt, i) => 
+                    `<div style="margin-left: 20px; color: ${attempt.accepted ? '#4CAF50' : '#ff6b6b'};">
+                        ${i+1}. α=${attempt.alpha.toFixed(6)} → f=${attempt.fVal.toFixed(6)} ${attempt.accepted ? '✓' : '✗'}
+                    </div>`
+                ).join('')}
+            `;
+        }
+
+        // Optimization control functions
+        function startOptimization() {
+            if (!isRunning) {
+                isRunning = true;
+                optimizationLoop();
+            }
+        }
+
+        function optimizationLoop() {
+            if (isRunning && iteration < 1000) {
+                updatePosition();
+                setTimeout(optimizationLoop, 1000 / animationSpeed);
+            } else if (iteration >= 1000) {
+                pauseOptimization();
+                document.getElementById('convergenceStatus').textContent = 'Max Iterations';
+            }
+        }
+
+        function stepOptimization() {
+            if (iteration < 1000) {
+                updatePosition();
+            }
+        }
+
+        function pauseOptimization() {
+            isRunning = false;
+        }
+
+        function resetOptimization() {
+            isRunning = false;
+            iteration = 0;
+            currentPosition = { ...startPosition };
+            path = [{ ...startPosition }];
+            backtrackAttempts = [];
+            lossHistory = [functions[currentFunction].f(startPosition.x, startPosition.y)];
+            alphaHistory = [];
+            backtrackHistory = [];
+            
+            document.getElementById('currentIteration').textContent = '0';
+            document.getElementById('currentLoss').textContent = lossHistory[0].toFixed(6);
+            document.getElementById('gradientNorm').textContent = '0.000000';
+            document.getElementById('currentAlpha').textContent = alpha0.toFixed(6);
+            document.getElementById('backtrackCount').textContent = '0';
+            document.getElementById('convergenceStatus').textContent = 'Sẵn sàng';
+            
+            document.getElementById('stepDetails').innerHTML = `
+                <div class="step-header">Chi tiết bước hiện tại:</div>
+                <div>Nhấn "Bắt đầu" để xem quá trình backtracking line search...</div>
+            `;
+            
+            updateVisualization();
+            updateLossChart();
+            updateAnalysis('Sẵn sàng bắt đầu tối ưu hóa với backtracking line search!');
+        }
+
+        // Visualization functions
+        function updateVisualization() {
+            if (!canvas) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const func = functions[currentFunction];
+            const domain = func.domain;
+            
+            // Draw contour plot
+            drawContours(func, domain);
+            
+            // Draw backtrack attempts if enabled
+            if (document.getElementById('showBacktrackCheckbox').checked) {
+                drawBacktrackAttempts();
+            }
+            
+            // Draw path if enabled
+            if (document.getElementById('showPathCheckbox').checked) {
+                drawPath();
+            }
+            
+            // Draw current position
+            drawCurrentPosition();
+            
+            // Draw minimum
+            drawMinimum(func);
+        }
+
+        function drawContours(func, domain) {
+            const resolution = 3;
+            
+            // Create contour map with colors
+            for (let i = 0; i < canvas.width; i += resolution) {
+                for (let j = 0; j < canvas.height; j += resolution) {
+                    const x = domain.xMin + (i / canvas.width) * (domain.xMax - domain.xMin);
+                    const y = domain.yMax - (j / canvas.height) * (domain.yMax - domain.yMin);
+                    const val = func.f(x, y);
+                    
+                    // Color based on function value
+                    const intensity = Math.min(1, Math.log(val + 1) / 5);
+                    const alpha = 0.1 + intensity * 0.4;
+                    ctx.fillStyle = `rgba(100, 150, 255, ${alpha})`;
+                    ctx.fillRect(i, j, resolution, resolution);
+                }
+            }
+        }
+
+        function drawBacktrackAttempts() {
+            const domain = functions[currentFunction].domain;
+            
+            // Draw all backtrack attempts
+            for (let attempt of backtrackAttempts) {
+                const screenX = ((attempt.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+                const screenY = ((domain.yMax - attempt.y) / (domain.yMax - domain.yMin)) * canvas.height;
+                
+                if (screenX >= 0 && screenX <= canvas.width && screenY >= 0 && screenY <= canvas.height) {
+                    ctx.fillStyle = attempt.accepted ? 'rgba(78, 205, 196, 0.6)' : 'rgba(255, 107, 107, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY, attempt.accepted ? 6 : 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw alpha value
+                    if (attempt.accepted) {
+                        ctx.fillStyle = 'white';
+                        ctx.font = '10px Arial';
+                        ctx.fillText(`α=${attempt.alpha.toFixed(3)}`, screenX + 8, screenY - 5);
+                    }
+                }
+            }
+        }
+
+        function drawPath() {
+            if (path.length < 2) return;
+            
+            const domain = functions[currentFunction].domain;
+            
+            // Draw main path
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let i = 0; i < path.length; i++) {
+                const screenX = ((path[i].x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+                const screenY = ((domain.yMax - path[i].y) / (domain.yMax - domain.yMin)) * canvas.height;
+                
+                if (i === 0) {
+                    ctx.moveTo(screenX, screenY);
+                } else {
+                    ctx.lineTo(screenX, screenY);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw path points
+            ctx.fillStyle = '#4ecdc4';
+            for (let i = 0; i < path.length; i++) {
+                const screenX = ((path[i].x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+                const screenY = ((domain.yMax - path[i].y) / (domain.yMax - domain.yMin)) * canvas.height;
+                
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function drawCurrentPosition() {
+            const domain = functions[currentFunction].domain;
+            const screenX = ((currentPosition.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+            const screenY = ((domain.yMax - currentPosition.y) / (domain.yMax - domain.yMin)) * canvas.height;
+            
+            // Current position with glow effect
+            ctx.fillStyle = 'rgba(68, 160, 141, 0.3)';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 20, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#44a08d';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(screenX - 3, screenY - 3, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function drawMinimum(func) {
+            const domain = func.domain;
+            const min = func.minimum;
+            const screenX = ((min.x - domain.xMin) / (domain.xMax - domain.xMin)) * canvas.width;
+            const screenY = ((domain.yMax - min.y) / (domain.yMax - domain.yMin)) * canvas.height;
+            
+            // Draw target
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 15, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 8, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#f39c12';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function updateLossChart() {
+            if (!lossCanvas || lossHistory.length === 0) return;
+            
+            lossCtx.clearRect(0, 0, lossCanvas.width, lossCanvas.height);
+            
+            // Background
+            lossCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            lossCtx.fillRect(0, 0, lossCanvas.width, lossCanvas.height);
+            
+            if (lossHistory.length < 2) return;
+            
+            // Scale data
+            const minLoss = Math.min(...lossHistory);
+            const maxLoss = Math.max(...lossHistory);
+            const range = maxLoss - minLoss || 1;
+            
+            // Draw loss curve
+            lossCtx.strokeStyle = '#4ecdc4';
+            lossCtx.lineWidth = 2;
+            lossCtx.beginPath();
+            
+            for (let i = 0; i < lossHistory.length; i++) {
+                const x = (i / (lossHistory.length - 1)) * lossCanvas.width;
+                const y = lossCanvas.height - ((lossHistory[i] - minLoss) / range) * lossCanvas.height;
+                
+                if (i === 0) {
+                    lossCtx.moveTo(x, y);
+                } else {
+                    lossCtx.lineTo(x, y);
+                }
+            }
+            lossCtx.stroke();
+            
+            // Labels
+            lossCtx.fillStyle = 'white';
+            lossCtx.font = '12px Arial';
+            lossCtx.fillText('Iteration →', lossCanvas.width - 80, lossCanvas.height - 5);
+            lossCtx.fillText(`Loss: ${lossHistory[lossHistory.length-1].toFixed(6)}`, 10, 20);
+        }
+
+        function updateAnalysis(customMessage) {
+            if (customMessage) {
+                document.getElementById('analysisText').textContent = customMessage;
+                return;
+            }
+            
+            if (iteration === 0) {
+                document.getElementById('analysisText').textContent = 
+                    "Sẵn sàng bắt đầu! Thuật toán sẽ tự động điều chỉnh step size để đảm bảo sufficient decrease.";
+                return;
+            }
+            
+            const lastBacktrack = backtrackHistory[backtrackHistory.length - 1] || 0;
+            const lastAlpha = alphaHistory[alphaHistory.length - 1] || alpha0;
+            const avgBacktrack = backtrackHistory.reduce((a, b) => a + b, 0) / backtrackHistory.length || 0;
+            
+            let analysis = `Iteration ${iteration}: `;
+            
+            if (lastBacktrack === 0) {
+                analysis += `Chấp nhận ngay step size ban đầu α=${lastAlpha.toFixed(4)}. `;
+            } else if (lastBacktrack < 3) {
+                analysis += `Backtrack ${lastBacktrack} lần, step size cuối cùng α=${lastAlpha.toFixed(4)}. `;
+            } else {
+                analysis += `Nhiều backtrack (${lastBacktrack} lần) - địa hình phức tạp! α=${lastAlpha.toFixed(4)}. `;
+            }
+            
+            if (avgBacktrack < 1) {
+                analysis += "Thuật toán hoạt động hiệu quả với ít backtrack. ";
+            } else if (avgBacktrack < 3) {
+                analysis += "Mức độ backtrack trung bình, tối ưu hóa ổn định. ";
+            } else {
+                analysis += "Nhiều backtrack - có thể cần điều chỉnh tham số. ";
+            }
+            
+            document.getElementById('analysisText').textContent = analysis;
+        }
+
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuỗi Fourier vs Biến đổi Fourier - Toán Học Tương Tác</title>
+    <script src="../mathjax-config.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #64b5f6;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #b3e5fc;
+            opacity: 0.9;
+        }
+
+        h2 {
+            color: #4fc3f7;
+            font-size: 1.8em;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4fc3f7;
+        }
+
+        h3 {
+            color: #81c784;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.08);
+            margin: 30px 0;
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .math-box {
+            background: linear-gradient(135deg, #263238 0%, #37474f 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #4fc3f7;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .example {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid #7986cb;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .step {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #ffb74d;
+        }
+
+        .highlight {
+            color: #ffb74d;
+            font-weight: bold;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        }
+
+        .compare-table th {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .compare-table td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .compare-table tr:hover td {
+            background: rgba(79, 195, 247, 0.1);
+        }
+
+        .controls-panel {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-group label {
+            color: #b3e5fc;
+            font-weight: 500;
+            min-width: 120px;
+        }
+
+        .slider {
+            flex: 1;
+            min-width: 200px;
+            height: 6px;
+            border-radius: 3px;
+            background: #37474f;
+            outline: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .value-display {
+            color: #ffb74d;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 195, 247, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .canvas-container {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .canvas-wrapper {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .canvas-title {
+            text-align: center;
+            color: #4fc3f7;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: #1a1a2e;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #388e3c 0%, #4caf50 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: #b3e5fc;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #b3e5fc;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .canvas-container {
+                flex-direction: column;
+            }
+            
+            .control-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .control-group label {
+                min-width: auto;
+            }
+        }
+  </style>
+</head>
+<body>
+  <div class="container">
+        <div class="header">
+            <h1>Chuỗi Fourier vs Biến đổi Fourier</h1>
+            <p class="subtitle">Khám phá mối quan hệ giữa hai công cụ toán học quan trọng thông qua trực quan hóa tương tác</p>
+        </div>
+
+        <div class="info-box">
+            <strong>🎯 Mục tiêu bài học:</strong> Hiểu được sự khác biệt và mối quan hệ giữa Chuỗi Fourier (dành cho hàm tuần hoàn) và Biến đổi Fourier (dành cho hàm không tuần hoàn), cũng như cách chúng chuyển đổi lẫn nhau.
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('theory')">Lý thuyết cơ bản</button>
+            <button class="tab" onclick="showTab('interactive')">Minh họa tương tác</button>
+            <button class="tab" onclick="showTab('comparison')">So sánh chi tiết</button>
+            <button class="tab" onclick="showTab('applications')">Ứng dụng thực tế</button>
+        </div>
+
+        <!-- Theory Tab -->
+        <div id="theory-content" class="tab-content active">
+            <div class="section">
+                <h2>🔄 1. Chuỗi Fourier: Phân tích hàm tuần hoàn</h2>
+                
+    <div class="math-box">
+                    <strong>Công thức Chuỗi Fourier (dạng phức):</strong><br>
+      $$f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i n \omega_0 x}$$<br>
+      $$c_n = \frac{1}{T} \int_0^T f(x) e^{-i n \omega_0 x} dx$$<br>
+                    <strong>Trong đó:</strong> \(\omega_0 = \frac{2\pi}{T}\) là tần số cơ bản, \(T\) là chu kỳ.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Điều kiện áp dụng:</strong> Hàm số phải có tính tuần hoàn với chu kỳ \(T\) xác định. Chuỗi Fourier biểu diễn hàm này như tổng của các sóng hài với tần số rời rạc.
+    </div>
+
+    <div class="example">
+                    <strong>Ví dụ 1: Sóng vuông (Square Wave)</strong><br>
+                    $$f(x) = \begin{cases} 
+                    1 & \text{nếu } 0 < x < \pi \\
+                    -1 & \text{nếu } \pi < x < 2\pi 
+                    \end{cases}$$<br>
+                    <strong>Chuỗi Fourier:</strong><br>
+                    $$f(x) = \frac{4}{\pi} \sum_{n=1,3,5,...}^\infty \frac{1}{n} \sin(nx)$$<br>
+                    <em>Chỉ có các hài số lẻ, biên độ giảm theo 1/n</em>
+    </div>
+
+    <div class="example">
+                    <strong>Ví dụ 2: Sóng răng cưa (Sawtooth Wave)</strong><br>
+      $$f(x) = x,\quad x \in [-\pi, \pi]$$<br>
+                    $$f(x) = -2 \sum_{n=1}^\infty \frac{(-1)^n}{n} \sin(nx)$$<br>
+                    <em>Có tất cả các hài số, dấu xen kẽ, biên độ giảm theo 1/n</em>
+                </div>
+
+                <div class="example">
+                    <strong>Ví dụ 3: Sóng tam giác (Triangle Wave)</strong><br>
+                    $$f(x) = \frac{8}{\pi^2} \sum_{n=1,3,5,...}^\infty \frac{(-1)^{(n-1)/2}}{n^2} \sin(nx)$$<br>
+                    <em>Chỉ có hài số lẻ, biên độ giảm theo 1/n²</em>
+                </div>
+    </div>
+
+            <div class="section">
+                <h2>∞ 2. Biến đổi Fourier: Phân tích hàm không tuần hoàn</h2>
+                
+    <div class="math-box">
+                    <strong>Công thức Biến đổi Fourier:</strong><br>
+                    $$F(\omega) = \int_{-\infty}^{\infty} f(x) e^{-i \omega x} dx \quad \text{(Thuận)}$$<br>
+                    $$f(x) = \frac{1}{2\pi} \int_{-\infty}^{\infty} F(\omega) e^{i \omega x} d\omega \quad \text{(Ngược)}$$<br>
+                    <strong>Trong đó:</strong> \(\omega\) là tần số liên tục, \(F(\omega)\) là phổ tần số.
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Hiểu đơn giản:</strong> Biến đổi Fourier phân tích một hàm bất kỳ thành tổng của vô số sóng sin/cos với tần số liên tục. Nó như "công thức màu" cho âm thanh - cho biết âm thanh chứa những tần số nào và mức độ mạnh yếu ra sao.
+    </div>
+
+    <div class="example">
+                    <strong>Ví dụ 4: Hàm Gaussian</strong><br>
+      $$f(x) = e^{-a x^2}$$<br>
+                    $$F(\omega) = \sqrt{\frac{\pi}{a}} e^{-\frac{\omega^2}{4a}}$$<br>
+                    <em>Hàm Gaussian biến thành hàm Gaussian khác trong không gian tần số</em>
+    </div>
+
+    <div class="example">
+                    <strong>Ví dụ 5: Xung hình chữ nhật</strong><br>
+      $$f(x) = \begin{cases} 1, & |x| < a \\ 0, & |x| \geq a \end{cases}$$<br>
+                    $$F(\omega) = 2a \cdot \frac{\sin(a\omega)}{a\omega} = 2a \cdot \text{sinc}(a\omega)$$<br>
+                    <em>Xung vuông biến thành hàm sinc với nhiều tần số</em>
+                </div>
+
+                <div class="example">
+                    <strong>Ví dụ 6: Hàm mũ giảm</strong><br>
+                    $$f(x) = e^{-a|x|}$$<br>
+                    $$F(\omega) = \frac{2a}{a^2 + \omega^2}$$<br>
+                    <em>Hàm mũ giảm cho phổ dạng Lorentzian</em>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔗 3. Mối quan hệ: Từ Chuỗi đến Biến đổi</h2>
+                
+                                <div class="math-box">
+                    <strong>Quá trình chuyển đổi toán học:</strong><br>
+                    $$\text{Khi } T \to \infty: \quad c_n \to F(\omega), \quad \sum_n \to \int d\omega$$<br>
+                    $$\omega_0 = \frac{2\pi}{T} \to 0 \quad \text{(khoảng cách tần số tiến về 0)}$$<br><br>
+                    <strong>💡 Ý nghĩa thực tế:</strong> Khi chu kỳ T tăng từ 10 → 50 → 100, bạn sẽ thấy:<br>
+                    • Các thanh phổ rời rạc gần nhau hơn (ω₀ giảm)<br>
+                    • Phổ tần số từ "răng lược" → "đường cong liên tục"<br>
+                    • Đây chính là cách Biến đổi Fourier xuất hiện từ Chuỗi Fourier!
+    </div>
+
+    <div class="step">
+                    <span class="highlight">Bước 1:</span> Bắt đầu với Chuỗi Fourier cho hàm tuần hoàn chu kỳ \(T\)<br>
+                    <span class="highlight">Bước 2:</span> Tăng dần chu kỳ \(T\), các tần số hài sẽ gần nhau hơn<br>
+                    <span class="highlight">Bước 3:</span> Khi \(T \to \infty\), khoảng cách tần số \(\omega_0 \to 0\)<br>
+                    <span class="highlight">Bước 4:</span> Tổng rời rạc chuyển thành tích phân liên tục<br>
+                    <span class="highlight">Bước 5:</span> Ta thu được Biến đổi Fourier cho hàm không tuần hoàn
+                </div>
+
+                <div class="warning-box">
+                    <strong>🔄 Hiểu trực quan:</strong> Tưởng tượng một cây đàn piano với số phím vô hạn được đặt gần nhau đến mức liên tục. Chuỗi Fourier như chơi những nốt nhạc riêng biệt (phím piano), còn Biến đổi Fourier như chơi trên đàn violin với âm liên tục.
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Tab -->
+        <div id="interactive-content" class="tab-content">
+            <div class="section">
+                <h2>🎮 Minh họa tương tác</h2>
+                
+                <div class="controls-panel">
+                    <h3>Điều khiển tham số</h3>
+                    <div class="control-group">
+                        <label>Loại sóng:</label>
+                        <select id="waveType" onchange="updateVisualization()">
+                            <option value="square">Sóng vuông</option>
+                            <option value="sawtooth">Sóng răng cưa</option>
+                            <option value="triangle">Sóng tam giác</option>
+                            <option value="gaussian">Gaussian</option>
+                            <option value="pulse">Xung chữ nhật</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Số hài số (N):</label>
+                        <input type="range" id="harmonics" class="slider" min="1" max="50" value="10" onchange="updateVisualization()">
+                        <span id="harmonicsValue" class="value-display">10</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Chu kỳ (T):</label>
+                        <input type="range" id="period" class="slider" min="1" max="100" value="10" step="0.5" onchange="updateVisualization()">
+                        <span id="periodValue" class="value-display">10</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Tham số a:</label>
+                        <input type="range" id="paramA" class="slider" min="0.1" max="5" value="1" step="0.1" onchange="updateVisualization()">
+                        <span id="paramAValue" class="value-display">1.0</span>
+                    </div>
+                    <div class="control-group">
+                        <button class="button" onclick="animateTransition()">🎬 Xem quá trình chuyển đổi</button>
+                        <button class="button" onclick="resetVisualization()">🔄 Đặt lại</button>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <div class="canvas-wrapper">
+                        <div class="canvas-title">Hàm thời gian f(x)</div>
+                        <canvas id="timeCanvas" width="400" height="300"></canvas>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <div class="canvas-title">Phổ tần số |F(ω)|</div>
+                        <canvas id="frequencyCanvas" width="400" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Hướng dẫn sử dụng:</strong><br>
+                    • Thay đổi loại sóng để xem các dạng hàm khác nhau<br>
+                    • Tăng số hài số để thấy chuỗi Fourier hội tụ về hàm gốc<br>
+                    • <strong>Kéo chu kỳ T lên đến 100</strong> để quan sát quá trình chuyển từ chuỗi sang biến đổi<br>
+                    • Quan sát: T lớn → ω₀ nhỏ → các tần số gần nhau → phổ rời rạc → liên tục<br>
+                    • Nhấn "Xem quá trình chuyển đổi" để xem animation minh họa tự động
+                </div>
+    </div>
+    </div>
+
+        <!-- Comparison Tab -->
+        <div id="comparison-content" class="tab-content">
+            <div class="section">
+                <h2>📊 Bảng so sánh chi tiết</h2>
+                
+    <table class="compare-table">
+                    <tr><th>Đặc điểm</th><th>Chuỗi Fourier</th><th>Biến đổi Fourier</th></tr>
+                    <tr><td><strong>Miền áp dụng</strong></td><td>Hàm tuần hoàn</td><td>Hàm không tuần hoàn</td></tr>
+                    <tr><td><strong>Biểu diễn</strong></td><td>Tổng rời rạc các hài số</td><td>Tích phân liên tục theo tần số</td></tr>
+                    <tr><td><strong>Hệ số/Phổ</strong></td><td>Hệ số rời rạc \(c_n\)</td><td>Phổ liên tục \(F(\omega)\)</td></tr>
+                    <tr><td><strong>Tần số</strong></td><td>Bội số của tần số cơ bản</td><td>Tất cả tần số liên tục</td></tr>
+                    <tr><td><strong>Công thức nghịch đảo</strong></td><td>Công thức tổng</td><td>Công thức tích phân</td></tr>
+                    <tr><td><strong>Ví dụ điển hình</strong></td><td>Sóng vuông, răng cưa, tam giác</td><td>Gaussian, xung, hàm mũ</td></tr>
+                    <tr><td><strong>Ứng dụng</strong></td><td>Tín hiệu AC, rung động</td><td>Xử lý tín hiệu số, âm thanh</td></tr>
+                    <tr><td><strong>Tính toán</strong></td><td>Đơn giản hơn (hữu hạn số hạng)</td><td>Phức tạp hơn (tích phân vô hạn)</td></tr>
+                    <tr><td><strong>Hội tụ</strong></td><td>Theo từng điểm hoặc L²</td><td>Theo nghĩa phân phối</td></tr>
+    </table>
+
+                <div class="section">
+                    <h3>🔍 Phân tích sâu hơn</h3>
+                    
+    <div class="example">
+                        <strong>Quan hệ Parseval:</strong><br>
+                        <strong>Chuỗi Fourier:</strong> \(\frac{1}{T}\int_0^T |f(x)|^2 dx = \sum_{n=-\infty}^{\infty} |c_n|^2\)<br>
+                        <strong>Biến đổi Fourier:</strong> \(\int_{-\infty}^{\infty} |f(x)|^2 dx = \frac{1}{2\pi}\int_{-\infty}^{\infty} |F(\omega)|^2 d\omega\)<br>
+                        <em>Năng lượng tín hiệu được bảo toàn qua biến đổi</em>
+    </div>
+
+    <div class="example">
+                        <strong>Định lý lấy mẫu (Sampling Theorem):</strong><br>
+                        Nếu \(F(\omega) = 0\) với \(|\omega| > \omega_c\), thì:<br>
+                        $$f(x) = \sum_{n=-\infty}^{\infty} f\left(\frac{n\pi}{\omega_c}\right) \text{sinc}\left(\omega_c x - n\pi\right)$$<br>
+                        <em>Cơ sở cho việc số hóa âm thanh và hình ảnh</em>
+                    </div>
+    </div>
+    </div>
+    </div>
+
+        <!-- Applications Tab -->
+        <div id="applications-content" class="tab-content">
+            <div class="section">
+                <h2>🌟 Ứng dụng thực tế</h2>
+                
+    <div class="example">
+                    <strong>🎵 Âm thanh và Âm nhạc</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Phân tích các nốt nhạc tuần hoàn (như đàn organ, synthesizer)<br>
+                    <strong>Biến đổi Fourier:</strong> Xử lý âm thanh số, nén MP3, equalizer, noise cancellation<br>
+                    <em>Ví dụ: Spotify sử dụng FFT để phân tích và nén âm thanh, Shazam dùng để nhận diện bài hát</em>
+    </div>
+
+    <div class="example">
+                    <strong>📡 Viễn thông</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Phân tích tín hiệu sóng mang (AM/FM radio), điều chế tín hiệu<br>
+                    <strong>Biến đổi Fourier:</strong> OFDM trong WiFi/4G/5G, xử lý tín hiệu radar<br>
+                    <em>Ví dụ: OFDM trong WiFi sử dụng IFFT để truyền nhiều luồng dữ liệu song song trên các tần số khác nhau</em>
+    </div>
+
+    <div class="example">
+                    <strong>🏥 Y học</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Phân tích tín hiệu tim định kỳ (ECG), nhịp thở<br>
+                    <strong>Biến đổi Fourier:</strong> MRI, CT scan, phân tích não bộ (EEG), siêu âm<br>
+                    <em>Ví dụ: Máy MRI sử dụng 2D/3D FFT để tái tạo hình ảnh từ tín hiệu từ trường, cho phép "nhìn thấy" bên trong cơ thể</em>
+    </div>
+
+                <div class="example">
+                    <strong>🔬 Khoa học và Nghiên cứu</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Phân tích rung động, dao động thiên thể, sóng biển<br>
+                    <strong>Biến đổi Fourier:</strong> Quang phổ học, tia X, NMR, nghiên cứu vật liệu<br>
+                    <em>Ví dụ: Kính viễn vọng James Webb dùng FFT xử lý ảnh thiên văn, giúp "nhìn thấy" vũ trụ sơ khai</em>
+    </div>
+
+                <div class="example">
+                    <strong>💻 Công nghệ và AI</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Xử lý tín hiệu điều khiển, robotics, IoT<br>
+                    <strong>Biến đổi Fourier:</strong> CNN, xử lý ảnh, computer vision, nhận dạng giọng nói<br>
+                    <em>Ví dụ: Instagram sử dụng FFT trong các filter ảnh, Tesla dùng trong xử lý tín hiệu camera cho tự lái</em>
+    </div>
+
+    <div class="example">
+                    <strong>💰 Tài chính (Fintech)</strong><br>
+                    <strong>Chuỗi Fourier:</strong> Phân tích chu kỳ thị trường, patterns định kỳ<br>
+                    <strong>Biến đổi Fourier:</strong> Phân tích volatility, trading algorithms, risk management<br>
+                    <em>Ví dụ: Các quỹ hedge fund sử dụng spectral analysis để detect market anomalies và arbitrage opportunities</em>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Tại sao quan trọng?</strong><br>
+                    Fourier Transform là nền tảng của cuộc cách mạng số hiện đại. Từ smartphone đến internet, từ Netflix đến GPS, từ AI đến blockchain - tất cả đều dựa trên các thuật toán Fourier để xử lý và phân tích tín hiệu.
+                </div>
+
+                <div class="section">
+                    <h3>🚀 Tương lai và xu hướng</h3>
+                    
+                    <div class="warning-box">
+                        <strong>🔮 Các ứng dụng mới nổi:</strong><br>
+                        • <strong>Quantum Computing:</strong> Quantum FFT trong thuật toán Shor<br>
+                        • <strong>Machine Learning:</strong> Fourier Features trong Neural Networks<br>
+                        • <strong>Climate Science:</strong> Phân tích patterns biến đổi khí hậu<br>
+                        • <strong>Biotech:</strong> Protein folding, DNA sequencing<br>
+                        • <strong>Metaverse:</strong> Real-time audio processing trong VR/AR
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" style="margin-top: 40px; text-align: center;">
+            <h2>🎓 Tóm tắt</h2>
+            <p>Chuỗi Fourier và Biến đổi Fourier là hai mặt của cùng một đồng xu toán học. Chúng là chìa khóa để hiểu và xử lý thế giới tín hiệu xung quanh chúng ta, từ âm thanh đến ánh sáng, từ data đến hình ảnh, từ quantum computing đến artificial intelligence.</p>
+            <div class="info-box">
+                <strong>🚀 Tiếp theo:</strong> Hãy thử nghiệm với tab "Minh họa tương tác" để hiểu sâu hơn về cách các công cụ toán học này hoạt động trong thực tế!
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Interactive Math - Fourier Analysis | <a href="../index.html" style="color: #4fc3f7;">Quay lại trang chủ</a></p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Hệ thống quản lý tab
+         * Chuyển đổi giữa các tab khác nhau và quản lý trạng thái active
+         */
+        function showTab(tabName) {
+            // Ẩn tất cả nội dung tab
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Bỏ active từ tất cả tab buttons
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Hiển thị tab được chọn
+            document.getElementById(tabName + '-content').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Nếu chuyển sang tab tương tác, khởi tạo visualization
+            if (tabName === 'interactive') {
+                setTimeout(initializeVisualization, 100);
+            }
+        }
+
+        /**
+         * Các biến toàn cục cho visualization
+         */
+        let timeCanvas, frequencyCanvas;
+        let timeCtx, frequencyCtx;
+        let animationId;
+        
+        /**
+         * Khởi tạo visualization khi tab interactive được mở
+         */
+        function initializeVisualization() {
+            // Khởi tạo canvas elements
+            timeCanvas = document.getElementById('timeCanvas');
+            frequencyCanvas = document.getElementById('frequencyCanvas');
+            
+            if (!timeCanvas || !frequencyCanvas) return;
+            
+            timeCtx = timeCanvas.getContext('2d');
+            frequencyCtx = frequencyCanvas.getContext('2d');
+            
+            // Set kích thước canvas thực tế
+            timeCanvas.width = timeCanvas.offsetWidth * window.devicePixelRatio;
+            timeCanvas.height = timeCanvas.offsetHeight * window.devicePixelRatio;
+            frequencyCanvas.width = frequencyCanvas.offsetWidth * window.devicePixelRatio;
+            frequencyCanvas.height = frequencyCanvas.offsetHeight * window.devicePixelRatio;
+            
+            // Scale context để match device pixel ratio
+            timeCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            frequencyCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            // Vẽ visualization đầu tiên
+            updateVisualization();
+        }
+
+        /**
+         * Cập nhật visualization dựa trên tham số người dùng
+         */
+        function updateVisualization() {
+            if (!timeCtx || !frequencyCtx) return;
+            
+            // Lấy giá trị từ controls
+            const waveType = document.getElementById('waveType').value;
+            const harmonics = parseInt(document.getElementById('harmonics').value);
+            const period = parseFloat(document.getElementById('period').value);
+            const paramA = parseFloat(document.getElementById('paramA').value);
+            
+            // Cập nhật hiển thị giá trị
+            document.getElementById('harmonicsValue').textContent = harmonics;
+            document.getElementById('periodValue').textContent = period;
+            document.getElementById('paramAValue').textContent = paramA.toFixed(1);
+            
+            // Xóa canvas và vẽ lại
+            clearCanvas(timeCtx, timeCanvas);
+            clearCanvas(frequencyCtx, frequencyCanvas);
+            
+            // Vẽ hàm trong miền thời gian
+            drawTimeFunction(waveType, harmonics, period, paramA);
+            
+            // Vẽ phổ tần số
+            drawFrequencySpectrum(waveType, harmonics, period, paramA);
+        }
+
+        /**
+         * Xóa canvas và vẽ lưới nền
+         */
+        function clearCanvas(ctx, canvas) {
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            
+            // Xóa toàn bộ canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Vẽ nền
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Vẽ lưới
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 0.5;
+            
+            // Lưới dọc
+            for (let x = 0; x <= width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Lưới ngang
+            for (let y = 0; y <= height; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Vẽ trục chính
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            
+            // Trục x (horizontal)
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+            
+            // Trục y (vertical)
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, height);
+            ctx.stroke();
+        }
+
+        /**
+         * Vẽ hàm trong miền thời gian
+         */
+        function drawTimeFunction(waveType, harmonics, period, paramA) {
+            const width = timeCanvas.offsetWidth;
+            const height = timeCanvas.offsetHeight;
+            const centerY = height / 2;
+            
+            timeCtx.strokeStyle = '#4fc3f7';
+            timeCtx.lineWidth = 3;
+            timeCtx.beginPath();
+            
+            const scale = 80; // Scale factor cho visualization
+            let firstPoint = true;
+            
+            for (let px = 0; px < width; px++) {
+                const x = (px - width / 2) / scale * Math.PI;
+                let y = 0;
+                
+                // Tính giá trị hàm dựa trên loại sóng
+                if (waveType === 'square') {
+                    y = fourierSquareWave(x, harmonics, period);
+                } else if (waveType === 'sawtooth') {
+                    y = fourierSawtoothWave(x, harmonics, period);
+                } else if (waveType === 'triangle') {
+                    y = fourierTriangleWave(x, harmonics, period);
+                } else if (waveType === 'gaussian') {
+                    y = Math.exp(-paramA * x * x);
+                } else if (waveType === 'pulse') {
+                    y = Math.abs(x) < paramA ? 1 : 0;
+                }
+                
+                const py = centerY - y * scale;
+                
+                if (firstPoint) {
+                    timeCtx.moveTo(px, py);
+                    firstPoint = false;
+                } else {
+                    timeCtx.lineTo(px, py);
+                }
+            }
+            
+            timeCtx.stroke();
+        }
+
+        /**
+         * Vẽ phổ tần số
+         */
+        function drawFrequencySpectrum(waveType, harmonics, period, paramA) {
+            if (waveType === 'square' || waveType === 'sawtooth' || waveType === 'triangle') {
+                // Vẽ phổ rời rạc cho các hàm tuần hoàn (Chuỗi Fourier)
+                drawDiscreteSpectrum(waveType, harmonics, period);
+            } else {
+                // Vẽ phổ liên tục cho các hàm không tuần hoàn (Biến đổi Fourier)
+                drawContinuousSpectrum(waveType, paramA);
+            }
+        }
+
+        /**
+         * Vẽ phổ rời rạc (Chuỗi Fourier)
+         */
+        function drawDiscreteSpectrum(waveType, harmonics, period) {
+            const width = frequencyCanvas.offsetWidth;
+            const height = frequencyCanvas.offsetHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            frequencyCtx.strokeStyle = '#ff6b6b';
+            frequencyCtx.fillStyle = '#ff6b6b';
+            frequencyCtx.lineWidth = 2;
+            
+            const omega0 = 2 * Math.PI / period;
+            // Scale tự động dựa trên period để hiển thị tốt hơn
+            let scale = Math.max(5, Math.min(50, 200 / period));
+            
+            // Điều chỉnh số hài số hiển thị để tránh overcrowding khi T lớn
+            const maxDisplayHarmonics = Math.min(harmonics, Math.floor(width / (2 * scale * omega0)) || harmonics);
+            
+            for (let n = -maxDisplayHarmonics; n <= maxDisplayHarmonics; n++) {
+                if (n === 0) continue;
+                
+                let amplitude = 0;
+                
+                // Tính biên độ cho từng loại sóng
+                if (waveType === 'square') {
+                    amplitude = Math.abs(n) % 2 === 1 ? 4 / (Math.PI * Math.abs(n)) : 0;
+                } else if (waveType === 'sawtooth') {
+                    amplitude = 2 / (Math.PI * Math.abs(n));
+                } else if (waveType === 'triangle') {
+                    amplitude = Math.abs(n) % 2 === 1 ? 8 / (Math.PI * Math.PI * n * n) : 0;
+                }
+                
+                const x = centerX + n * omega0 * scale;
+                const barHeight = amplitude * 80;
+                
+                // Chỉ vẽ nếu trong phạm vi canvas và có chiều cao đáng kể
+                if (x >= 5 && x <= width - 5 && barHeight > 0.5) {
+                    // Điều chỉnh độ dày thanh dựa trên period
+                    const lineWidth = period > 50 ? 1 : period > 20 ? 1.5 : 2;
+                    frequencyCtx.lineWidth = lineWidth;
+                    
+                    // Vẽ thanh phổ
+                    frequencyCtx.beginPath();
+                    frequencyCtx.moveTo(x, centerY);
+                    frequencyCtx.lineTo(x, centerY - barHeight);
+                    frequencyCtx.stroke();
+                    
+                    // Vẽ chấm ở đầu thanh (chỉ khi period không quá lớn)
+                    if (period <= 30) {
+                        frequencyCtx.beginPath();
+                        frequencyCtx.arc(x, centerY - barHeight, Math.max(1, 3 - period/20), 0, 2 * Math.PI);
+                        frequencyCtx.fill();
+                    }
+                }
+            }
+            
+            // Thêm label để hiển thị thông tin
+            if (period > 30) {
+                frequencyCtx.fillStyle = '#ffffff';
+                frequencyCtx.font = '12px Arial';
+                frequencyCtx.fillText(`T = ${period.toFixed(1)} → ω₀ = ${(omega0).toFixed(3)}`, 10, 20);
+                frequencyCtx.fillText(`Phổ rời rạc → liên tục`, 10, 35);
+            }
+        }
+
+        /**
+         * Vẽ phổ liên tục (Biến đổi Fourier)
+         */
+        function drawContinuousSpectrum(waveType, paramA) {
+            const width = frequencyCanvas.offsetWidth;
+            const height = frequencyCanvas.offsetHeight;
+            const centerY = height / 2;
+            
+            frequencyCtx.strokeStyle = '#4caf50';
+            frequencyCtx.lineWidth = 3;
+            frequencyCtx.beginPath();
+            
+            let firstPoint = true;
+            
+            for (let px = 0; px < width; px++) {
+                const omega = (px - width / 2) / 20; // Scale tần số
+                let magnitude = 0;
+                
+                if (waveType === 'gaussian') {
+                    magnitude = Math.sqrt(Math.PI / paramA) * Math.exp(-omega * omega / (4 * paramA));
+                } else if (waveType === 'pulse') {
+                    const sincValue = omega === 0 ? 1 : Math.sin(paramA * omega) / (paramA * omega);
+                    magnitude = 2 * paramA * Math.abs(sincValue);
+                }
+                
+                const py = centerY - magnitude * 40; // Scale cho hiển thị
+                
+                if (firstPoint) {
+                    frequencyCtx.moveTo(px, py);
+                    firstPoint = false;
+                } else {
+                    frequencyCtx.lineTo(px, py);
+                }
+            }
+            
+            frequencyCtx.stroke();
+        }
+
+        /**
+         * Tính toán sóng vuông bằng chuỗi Fourier
+         * Chỉ bao gồm các hài số lẻ
+         */
+        function fourierSquareWave(x, harmonics, period) {
+            let result = 0;
+            const omega0 = 2 * Math.PI / period;
+            
+            for (let n = 1; n <= harmonics; n += 2) {
+                result += (4 / (Math.PI * n)) * Math.sin(n * omega0 * x);
+            }
+            
+            return result;
+        }
+
+        /**
+         * Tính toán sóng răng cưa bằng chuỗi Fourier
+         * Bao gồm tất cả các hài số với dấu xen kẽ
+         */
+        function fourierSawtoothWave(x, harmonics, period) {
+            let result = 0;
+            const omega0 = 2 * Math.PI / period;
+            
+            for (let n = 1; n <= harmonics; n++) {
+                result += (2 * Math.pow(-1, n + 1) / (Math.PI * n)) * Math.sin(n * omega0 * x);
+            }
+            
+            return result;
+        }
+
+        /**
+         * Tính toán sóng tam giác bằng chuỗi Fourier
+         * Chỉ hài số lẻ, biên độ giảm theo 1/n²
+         */
+        function fourierTriangleWave(x, harmonics, period) {
+            let result = 0;
+            const omega0 = 2 * Math.PI / period;
+            
+            for (let n = 1; n <= harmonics; n += 2) {
+                const sign = Math.pow(-1, (n - 1) / 2);
+                result += (8 * sign / (Math.PI * Math.PI * n * n)) * Math.sin(n * omega0 * x);
+            }
+            
+            return result;
+        }
+
+        /**
+         * Animation chuyển đổi từ chuỗi sang biến đổi
+         * Tăng dần chu kỳ để thể hiện quá trình chuyển đổi
+         */
+        function animateTransition() {
+            let currentPeriod = 2;
+            const maxPeriod = 80;
+            let step = 0.5;
+            
+            function animate() {
+                document.getElementById('period').value = currentPeriod;
+                updateVisualization();
+                
+                // Tăng step khi T lớn để animation nhanh hơn
+                if (currentPeriod > 30) {
+                    step = 1.0;
+                } else if (currentPeriod > 60) {
+                    step = 2.0;
+                }
+                
+                currentPeriod += step;
+                if (currentPeriod <= maxPeriod) {
+                    animationId = setTimeout(animate, 120);
+                }
+            }
+            
+            // Dừng animation hiện tại nếu có
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            
+            animate();
+        }
+
+        /**
+         * Đặt lại tất cả các tham số về giá trị mặc định
+         */
+        function resetVisualization() {
+            // Dừng animation nếu đang chạy
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            
+            // Reset tất cả controls về giá trị mặc định
+            document.getElementById('waveType').value = 'square';
+            document.getElementById('harmonics').value = '10';
+            document.getElementById('period').value = '10';
+            document.getElementById('paramA').value = '1';
+            
+            // Cập nhật visualization
+            updateVisualization();
+        }
+
+        /**
+         * Khởi tạo khi trang web được tải
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Khởi tạo MathJax nếu có
+            if (window.MathJax) {
+                MathJax.startup.promise.then(() => {
+                    console.log('MathJax đã được khởi tạo thành công');
+                });
+            }
+            
+            // Thêm event listeners cho responsive design
+            window.addEventListener('resize', function() {
+                if (timeCanvas && frequencyCanvas) {
+                    setTimeout(initializeVisualization, 100);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

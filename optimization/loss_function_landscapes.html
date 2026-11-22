@@ -331,25 +331,46 @@
         </div>
     </div>
 
-    <!-- Use ES6 modules with import maps -->
-    <!-- Three.js via CDN -->
-    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.158.0/examples/js/controls/OrbitControls.js"></script>    <script>
+        <!-- Use ES6 modules with import maps -->
+        <!-- Three.js via ES6 modules (official CDN) -->
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+            }
+        }
+        </script>
+        <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
         // Scene setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        
-        const container = document.getElementById('renderer');
-        const containerRect = container.getBoundingClientRect();
-        renderer.setSize(containerRect.width, containerRect.height);
-        renderer.setClearColor(0x111111);
-        container.appendChild(renderer.domElement);
 
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        camera.position.set(8, 8, 8);
-        controls.target.set(0, 0, 0);
-        controls.update();
+        const container = document.getElementById('renderer');
+        if (!container) {
+            console.error('Renderer container not found!');
+            throw new Error('Renderer container not found!');
+        }
+        const containerRect = container.getBoundingClientRect();
+
+    renderer.setSize(containerRect.width, containerRect.height);
+    renderer.setClearColor(0x111111);
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(8, 8, 8);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    // TEST: Add a simple cube to verify rendering
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const testCube = new THREE.Mesh(geometry, material);
+    scene.add(testCube);
 
         // Global variables
         let currentLossFunction = 'quadratic';
@@ -1004,6 +1025,9 @@
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
+            // TEST: Animate the cube
+            testCube.rotation.x += 0.01;
+            testCube.rotation.y += 0.01;
             renderer.render(scene, camera);
         }
 
@@ -1011,6 +1035,7 @@
         updateLossFunctionInfo();
         updateScene();
         animate();
+        
     </script>
 
 <section class="video-tham-khao" aria-label="Video tham khảo">

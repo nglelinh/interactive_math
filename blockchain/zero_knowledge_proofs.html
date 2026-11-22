@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Zero-Knowledge Proofs: Privacy Mathematics</title>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <title>🔐 Zero-Knowledge Proofs: Bằng Chứng Không Tiết Lộ Thông Tin</title>
+    <script src="../mathjax-config.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body {
@@ -400,26 +402,535 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Zero-Knowledge Proofs: Privacy Mathematics</h1>
+        <h1>🔐 Zero-Knowledge Proofs: Bằng Chứng Không Tiết Lộ Thông Tin</h1>
+        
+        <div class="intro" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 197, 94, 0.2)); border-left: 5px solid #a855f7;">
+            <h2>📚 Giải Thích Đơn Giản - "Giải thích như tôi 5 tuổi" (ELI5)</h2>
+            
+            <h3>🎭 Câu Chuyện Hang Động Ali Baba</h3>
+            <p><strong>Tưởng tượng câu chuyện này:</strong></p>
+            <p>Ali Baba phát hiện một hang động có cửa bí mật. Để mở cửa, cần nói câu thần chú "Vừng ơi mở ra!". Ali muốn chứng minh với bạn rằng anh ta biết câu thần chú, nhưng KHÔNG muốn tiết lộ câu thần chú đó là gì.</p>
+            
+            <p><strong>Giải pháp thông minh:</strong></p>
+            <ul>
+                <li>🚶 <strong>Bước 1:</strong> Ali đi vào hang động (bạn không nhìn thấy con đường nào Ali chọn)</li>
+                <li>📢 <strong>Bước 2:</strong> Bạn hét to: "Hãy ra từ cửa BÊN TRÁI!"</li>
+                <li>✅ <strong>Bước 3:</strong> Ali xuất hiện từ cửa bên trái (vì anh ta biết câu thần chú để mở cửa)</li>
+                <li>🔄 <strong>Bước 4:</strong> Lặp lại nhiều lần với các lựa chọn ngẫu nhiên khác nhau</li>
+            </ul>
+            
+            <p><strong>Tại sao điều này hoạt động?</strong></p>
+            <p>• Nếu Ali KHÔNG biết câu thần chú, anh ta chỉ đoán đúng được 50% (may mắn)</p>
+            <p>• Sau 10 lần, xác suất đoán đúng tất cả chỉ là (1/2)^10 = 0.1% - gần như không thể!</p>
+            <p>• Nhưng bạn KHÔNG HỀ biết câu thần chú là gì!</p>
+            
+            <h3>🔑 Ví Dụ Thực Tế: Chứng Minh Tuổi Mà Không Tiết Lộ Tuổi</h3>
+            <p>Bạn muốn vào quán bar (yêu cầu trên 18 tuổi):</p>
+            <ul>
+                <li>❌ <strong>Cách thông thường:</strong> Đưa CMND → họ biết chính xác tuổi của bạn (24 tuổi)</li>
+                <li>✅ <strong>Cách Zero-Knowledge:</strong> Chứng minh "Tôi > 18 tuổi" mà KHÔNG tiết lộ tuổi chính xác</li>
+            </ul>
+            
+            <h3>🎯 Ba Nguyên Tắc Vàng</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; border: 2px solid #22c55e;">
+                    <h4>1️⃣ Hoàn Chỉnh (Completeness)</h4>
+                    <p>Nếu tuyên bố ĐÚNG, người chứng minh luôn thuyết phục được</p>
+                    <p><strong>Ví dụ:</strong> Ali biết thần chú → luôn ra đúng cửa</p>
+                </div>
+                <div style="background: rgba(239, 68, 68, 0.2); padding: 15px; border-radius: 8px; border: 2px solid #ef4444;">
+                    <h4>2️⃣ Đúng Đắn (Soundness)</h4>
+                    <p>Nếu tuyên bố SAI, kẻ gian không thể lừa được (chỉ may mắn rất thấp)</p>
+                    <p><strong>Ví dụ:</strong> Không biết thần chú → chỉ đoán đúng ~0.1%</p>
+                </div>
+                <div style="background: rgba(168, 85, 247, 0.2); padding: 15px; border-radius: 8px; border: 2px solid #a855f7;">
+                    <h4>3️⃣ Không Tiết Lộ (Zero-Knowledge)</h4>
+                    <p>Người xác minh KHÔNG học được gì về bí mật</p>
+                    <p><strong>Ví dụ:</strong> Bạn tin Ali nhưng vẫn không biết câu thần chú</p>
+                </div>
+            </div>
+        </div>
         
         <div class="intro">
-            <h2>Zero-Knowledge Proof Systems</h2>
-            <p><strong>Zero-Knowledge Proofs</strong> allow one party (the prover) to prove to another party (the verifier) that they know a value x, without conveying any information apart from the fact that they know the value x.</p>
-            <p>The three fundamental properties are: <strong>Completeness</strong>, <strong>Soundness</strong>, and <strong>Zero-Knowledge</strong>.</p>
+            <h2>📖 Lịch Sử Phát Triển Zero-Knowledge Proofs</h2>
+            <div style="position: relative; padding: 20px 0;">
+                <div style="border-left: 3px solid #a855f7; padding-left: 30px; margin-left: 20px;">
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #22c55e; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #22c55e;">1985 - Khởi Nguồn</h4>
+                        <p><strong>Goldwasser, Micali, Rackoff</strong> giới thiệu khái niệm Zero-Knowledge trong paper "The Knowledge Complexity of Interactive Proof Systems"</p>
+                        <p>📝 Đây là nền tảng lý thuyết, định nghĩa formal đầu tiên về ZKP</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #06b6d4; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #06b6d4;">1989 - Schnorr Protocol</h4>
+                        <p><strong>Claus Schnorr</strong> phát triển giao thức chứng minh danh tính dựa trên discrete logarithm</p>
+                        <p>🔑 Đơn giản, hiệu quả, trở thành nền tảng cho nhiều hệ thống sau này</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #f59e0b; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #f59e0b;">1991 - ZK cho NP-Complete</h4>
+                        <p><strong>Goldreich, Micali, Wigderson</strong> chứng minh ZKP tồn tại cho MỌI bài toán NP</p>
+                        <p>🎨 Ví dụ kinh điển: Graph 3-Coloring</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #a855f7; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #a855f7;">2010s - zk-SNARKs Revolution</h4>
+                        <p><strong>Groth, Sasson, Ben-Sasson, et al.</strong> phát triển zk-SNARKs (Zero-Knowledge Succinct Non-Interactive Arguments)</p>
+                        <p>⚡ Proofs cực nhỏ (200 bytes), verification cực nhanh (ms)</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #ef4444; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #ef4444;">2016 - Zcash Launch</h4>
+                        <p>Cryptocurrency đầu tiên sử dụng zk-SNARKs cho giao dịch riêng tư hoàn toàn</p>
+                        <p>💰 Ẩn cả người gửi, người nhận, và số tiền</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #22c55e; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #22c55e;">2018 - zk-STARKs</h4>
+                        <p><strong>Ben-Sasson et al.</strong> giới thiệu STARKs: Transparent (không cần trusted setup) và Post-quantum secure</p>
+                        <p>🔮 Proof lớn hơn SNARKs nhưng an toàn hơn trong tương lai</p>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="position: absolute; left: 11px; width: 20px; height: 20px; background: #06b6d4; border-radius: 50%; border: 3px solid #1a1a2e;"></div>
+                        <h4 style="color: #06b6d4;">2020s - ZK-Rollups & Scalability</h4>
+                        <p>ZKP được áp dụng rộng rãi cho blockchain scalability (zkSync, StarkNet, Polygon zkEVM)</p>
+                        <p>🚀 Giảm chi phí gas 40-100x, tăng throughput hàng trăm lần</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="intro">
+            <h2>🎓 Nền Tảng Toán Học - Zero-Knowledge Proof Systems</h2>
+            <p><strong>Zero-Knowledge Proofs (ZKP)</strong> là các giao thức mật mã học cho phép một bên (người <em>chứng minh</em> - <strong>Prover</strong> \(\mathcal{P}\)) chứng minh với bên kia (người <em>xác minh</em> - <strong>Verifier</strong> \(\mathcal{V}\)) rằng một mệnh đề là đúng, mà KHÔNG tiết lộ bất kỳ thông tin nào ngoài sự đúng đắn của mệnh đề đó.</p>
+            
+            <h3>🧮 Nền Tảng Lý Thuyết Độ Phức Tạp (Complexity Theory)</h3>
+            <p>Zero-knowledge proofs có mối liên hệ chặt chẽ với lý thuyết độ phức tạp tính toán. Chúng ta làm việc với <strong>quan hệ NP (NP relations)</strong>:</p>
+            
+            <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p><strong>Định nghĩa Formal:</strong> Một quan hệ nhị phân \(R \subseteq \{0,1\}^* \times \{0,1\}^*\) thuộc NP nếu tồn tại thuật toán thời gian đa thức \(V_R\) sao cho:</p>
+                <p>\[(x, w) \in R \Leftrightarrow V_R(x, w) = 1 \text{ và } |w| \leq \text{poly}(|x|)\]</p>
+                <p>Trong đó:</p>
+                <ul>
+                    <li>\(x\) là <strong>tuyên bố</strong> (statement) - điều cần chứng minh</li>
+                    <li>\(w\) là <strong>chứng cứ</strong> (witness) - bí mật mà prover biết</li>
+                    <li>Ngôn ngữ \(L_R = \{x : \exists w, (x,w) \in R\}\)</li>
+                </ul>
+            </div>
+            
+            <p><strong>Ví dụ Cụ Thể: Graph 3-Coloring (Tô màu đồ thị)</strong></p>
+            <div style="background: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p>• <strong>Tuyên bố \(x\):</strong> Đồ thị \(G = (V, E)\) có thể tô được bằng 3 màu</p>
+                <p>• <strong>Chứng cứ \(w\):</strong> Một cách tô màu hợp lệ \(c: V \rightarrow \{Đỏ, Xanh lá, Xanh dương\}\)</p>
+                <p>• <strong>Quan hệ:</strong> \((G, c) \in R\) nếu với mọi cạnh \((u,v) \in E\): \(c(u) \neq c(v)\)</p>
+                <p>• <strong>Tính chất:</strong> Bài toán NP-complete - không có thuật toán nhanh được biết</p>
+            </div>
+            
+            <h3>Formal Definition of Zero-Knowledge Proof System</h3>
+            <p>A zero-knowledge proof system for a language \(L \subseteq \{0,1\}^*\) is a two-party protocol between prover \(\mathcal{P}\) and verifier \(\mathcal{V}\) that satisfies three fundamental properties:</p>
         </div>
         
         <div class="math-formula">
-            <h3>🧮 Zero-Knowledge Mathematics</h3>
-            <p><strong>Completeness:</strong> If statement is true, honest verifier will be convinced</p>
-            <p><strong>Soundness:</strong> If statement is false, no cheating prover can convince verifier</p>
-            <p><strong>Zero-Knowledge:</strong> If statement is true, verifier learns nothing beyond this fact</p>
-            <p><strong>Schnorr Protocol:</strong> Prove knowledge of discrete log x where y = g^x mod p</p>
-            <p><strong>Commitment:</strong> C = g^r × h^m (Pedersen commitment)</p>
+            <h3>🧮 The Three Pillars of Zero-Knowledge</h3>
+            
+            <h4>1. Completeness (Correctness)</h4>
+            <p>If the statement is true and both parties follow the protocol, the verifier will be convinced:</p>
+            <p>\[\forall x \in L: \Pr[\langle \mathcal{P}(w), \mathcal{V} \rangle(x) = \text{accept}] \geq 1 - \text{negl}(\lambda)\]</p>
+            <p>where \(w\) is the witness (secret knowledge), \(\lambda\) is the security parameter, and negl denotes a negligible function.</p>
+            
+            <h4>2. Soundness (Security)</h4>
+            <p>If the statement is false, no cheating prover can convince the verifier, except with negligible probability:</p>
+            <p>\[\forall x \notin L, \forall \mathcal{P}^*: \Pr[\langle \mathcal{P}^*, \mathcal{V} \rangle(x) = \text{accept}] \leq \text{negl}(\lambda)\]</p>
+            <p>For interactive proofs, we often have <em>computational soundness</em> (argument systems) where the bound holds against polynomial-time adversaries.</p>
+            
+            <h4>3. Zero-Knowledge Property</h4>
+            <p>The interaction reveals nothing beyond the truth of the statement. Formally, there exists a simulator \(\mathcal{S}\) such that for all \(x \in L\):</p>
+            <p>\[\{\text{View}_{\mathcal{V}^*}[\langle \mathcal{P}(w), \mathcal{V}^* \rangle(x)]\} \approx \{\mathcal{S}(x)\}\]</p>
+            <p>where \(\text{View}_{\mathcal{V}^*}\) is the view of any verifier \(\mathcal{V}^*\) (including messages and random coins), and \(\approx\) denotes computational indistinguishability.</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>📐 Schnorr's Protocol: A Complete Mathematical Treatment</h3>
+            
+            <h4>Setup and Notation</h4>
+            <p>Let \(p\) be a large prime, \(q\) a prime divisor of \(p-1\), and \(g\) a generator of order \(q\) in \(\mathbb{Z}_p^*\). The discrete logarithm problem: given \(y = g^x \bmod p\), find \(x\).</p>
+            
+            <h4>Protocol: Proving Knowledge of \(x\) where \(y = g^x \bmod p\)</h4>
+            <p><strong>Public:</strong> \(p, q, g, y\) where \(y = g^x \bmod p\)</p>
+            <p><strong>Prover's secret:</strong> \(x \in \mathbb{Z}_q\)</p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p><strong>Step 1 (Commitment):</strong> Prover chooses random \(r \xleftarrow{\$} \mathbb{Z}_q\) and computes:</p>
+                <p style="margin-left: 30px;">\[t = g^r \bmod p\]</p>
+                <p style="margin-left: 30px;">Prover sends \(t\) to Verifier.</p>
+                
+                <p><strong>Step 2 (Challenge):</strong> Verifier chooses random \(c \xleftarrow{\$} \mathbb{Z}_q\) and sends \(c\) to Prover.</p>
+                
+                <p><strong>Step 3 (Response):</strong> Prover computes:</p>
+                <p style="margin-left: 30px;">\[s = r + cx \bmod q\]</p>
+                <p style="margin-left: 30px;">Prover sends \(s\) to Verifier.</p>
+                
+                <p><strong>Step 4 (Verification):</strong> Verifier accepts if and only if:</p>
+                <p style="margin-left: 30px;">\[g^s \equiv t \cdot y^c \pmod{p}\]</p>
+            </div>
+            
+            <h4>Correctness Proof</h4>
+            <p>If both parties are honest, we have:</p>
+            <p>\[\begin{align}
+            g^s &= g^{r + cx} \\
+            &= g^r \cdot g^{cx} \\
+            &= t \cdot (g^x)^c \\
+            &= t \cdot y^c \pmod{p}
+            \end{align}\]</p>
+            
+            <h4>Soundness Proof (Knowledge Extraction)</h4>
+            <p><strong>Theorem:</strong> If a prover can produce two valid responses \(s_1, s_2\) for the same commitment \(t\) but different challenges \(c_1 \neq c_2\), then we can extract the discrete logarithm \(x\).</p>
+            
+            <p><strong>Proof:</strong> Given two valid transcripts \((t, c_1, s_1)\) and \((t, c_2, s_2)\), we have:</p>
+            <p>\[\begin{cases}
+            g^{s_1} = t \cdot y^{c_1} \\
+            g^{s_2} = t \cdot y^{c_2}
+            \end{cases}\]</p>
+            
+            <p>Dividing these equations:</p>
+            <p>\[\begin{align}
+            g^{s_1 - s_2} &= y^{c_1 - c_2} \\
+            g^{s_1 - s_2} &= (g^x)^{c_1 - c_2} \\
+            g^{s_1 - s_2} &= g^{x(c_1 - c_2)}
+            \end{align}\]</p>
+            
+            <p>Therefore, in \(\mathbb{Z}_q\):</p>
+            <p>\[x = \frac{s_1 - s_2}{c_1 - c_2} \bmod q\]</p>
+            
+            <p>This extraction procedure shows that any prover who succeeds with non-negligible probability must "know" \(x\). □</p>
+            
+            <h4>Zero-Knowledge Property (Honest-Verifier ZK)</h4>
+            <p><strong>Theorem:</strong> The Schnorr protocol is honest-verifier zero-knowledge.</p>
+            
+            <p><strong>Proof:</strong> We construct a simulator \(\mathcal{S}\) that produces indistinguishable transcripts without knowing \(x\):</p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p><strong>Simulator \(\mathcal{S}(p, q, g, y)\):</strong></p>
+                <p>1. Choose random \(c, s \xleftarrow{\$} \mathbb{Z}_q\)</p>
+                <p>2. Compute \(t = g^s \cdot y^{-c} \bmod p\)</p>
+                <p>3. Output transcript \((t, c, s)\)</p>
+            </div>
+            
+            <p>The simulated transcript \((t, c, s)\) satisfies the verification equation by construction:</p>
+            <p>\[g^s = g^s \cdot y^0 = g^s \cdot y^{c} \cdot y^{-c} = t \cdot y^c\]</p>
+            
+            <p>In real execution: \((t, c, s)\) where \(t = g^r\), \(c\) is random, \(s = r + cx\).</p>
+            <p>In simulation: \((t, c, s)\) where \(s, c\) are random, \(t = g^s \cdot y^{-c}\).</p>
+            
+            <p>Both distributions are uniform over valid transcripts, hence perfectly indistinguishable. □</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🔒 Commitment Schemes: Mathematical Framework</h3>
+            
+            <h4>Definition</h4>
+            <p>A <em>commitment scheme</em> is a two-phase protocol with:</p>
+            <p><strong>Commit phase:</strong> \(c \leftarrow \text{Commit}(m; r)\) where \(m\) is message, \(r\) is randomness</p>
+            <p><strong>Reveal phase:</strong> \(\text{Verify}(c, m, r) \rightarrow \{\text{accept}, \text{reject}\}\)</p>
+            
+            <h4>Properties</h4>
+            <p><strong>Binding:</strong> Cannot find \(m \neq m'\) with valid openings to same commitment</p>
+            <p>\[\Pr[\exists m \neq m', r, r': \text{Commit}(m;r) = \text{Commit}(m';r')] \leq \text{negl}(\lambda)\]</p>
+            
+            <p><strong>Hiding:</strong> Commitment reveals no information about message</p>
+            <p>\[\{\text{Commit}(m_0; r)\}_{r} \approx \{\text{Commit}(m_1; r)\}_{r}\]</p>
+            
+            <h4>Pedersen Commitment</h4>
+            <p>Setup: Group \(\mathbb{G}\) of prime order \(q\), generators \(g, h\) where \(\log_g h\) is unknown.</p>
+            <p>\[\text{Com}(m; r) = g^m \cdot h^r\]</p>
+            
+            <p><strong>Perfect Hiding:</strong> For any \(m_0, m_1 \in \mathbb{Z}_q\), the distributions are identical:</p>
+            <p>\[\{g^{m_0} \cdot h^r : r \xleftarrow{\$} \mathbb{Z}_q\} \equiv \{g^{m_1} \cdot h^r : r \xleftarrow{\$} \mathbb{Z}_q\}\]</p>
+            
+            <p><strong>Computational Binding:</strong> Breaking binding requires finding \(\log_g h\) (discrete log problem).</p>
+            
+            <p><strong>Homomorphic Property:</strong> Pedersen commitments are additively homomorphic:</p>
+            <p>\[\text{Com}(m_1; r_1) \cdot \text{Com}(m_2; r_2) = g^{m_1+m_2} \cdot h^{r_1+r_2} = \text{Com}(m_1 + m_2; r_1 + r_2)\]</p>
+        </div>
+        
+        <!-- AGE VERIFICATION DEMO -->
+        <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.2)); border: 3px solid #22c55e; border-radius: 15px; padding: 30px; margin: 30px 0;">
+            <h2 style="text-align: center; color: #22c55e;">🔑 Demo Tương Tác: Xác Minh Tuổi Với Zero-Knowledge</h2>
+            <p style="text-align: center; font-size: 1.1em;">Chứng minh bạn trên 18 tuổi mà KHÔNG tiết lộ tuổi chính xác!</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0;">
+                <!-- Traditional Method -->
+                <div style="background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #ef4444; text-align: center;">❌ Cách Truyền Thống</h3>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 3em;">🪪</div>
+                        <p style="font-size: 1.2em; font-weight: bold;">Đưa CMND/CCCD</p>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h4 style="color: #f59e0b;">Thông Tin Bị Lộ:</h4>
+                        <ul style="font-size: 1.1em; line-height: 2;">
+                            <li>📛 Họ tên đầy đủ</li>
+                            <li>🎂 Ngày sinh chính xác</li>
+                            <li>🏠 Địa chỉ thường trú</li>
+                            <li>🆔 Số CMND/CCCD</li>
+                            <li>📸 Ảnh chân dung</li>
+                            <li>👥 Thông tin gia đình</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(239, 68, 68, 0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                        <strong>⚠️ RỦI RO:</strong><br>
+                        Privacy bị xâm phạm hoàn toàn!<br>
+                        Data có thể bị lưu trữ, chia sẻ, lạm dụng
+                    </div>
+                </div>
+                
+                <!-- ZK Method -->
+                <div style="background: rgba(34, 197, 94, 0.2); border: 2px solid #22c55e; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #22c55e; text-align: center;">✅ Cách Zero-Knowledge</h3>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <div style="font-size: 3em;">🔐</div>
+                        <p style="font-size: 1.2em; font-weight: bold;">Chỉ chứng minh điều kiện</p>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h4 style="color: #22c55e;">Thông Tin Tiết Lộ:</h4>
+                        <ul style="font-size: 1.1em; line-height: 2;">
+                            <li>✅ <strong>CHỈ:</strong> "Tuổi ≥ 18"</li>
+                            <li>❌ KHÔNG: Tên</li>
+                            <li>❌ KHÔNG: Ngày sinh</li>
+                            <li>❌ KHÔNG: Địa chỉ</li>
+                            <li>❌ KHÔNG: Số CMND</li>
+                            <li>❌ KHÔNG: Bất kỳ thông tin khác</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(34, 197, 94, 0.3); padding: 15px; border-radius: 8px; text-align: center;">
+                        <strong>🛡️ AN TOÀN:</strong><br>
+                        Privacy được bảo vệ tối đa!<br>
+                        Chỉ verify điều kiện cần thiết
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Demo -->
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 30px; border-radius: 12px; margin: 30px 0;">
+                <h3 style="text-align: center; color: #3b82f6;">🎮 Thử Nghiệm Tương Tác</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0;">
+                    <!-- User Input -->
+                    <div style="background: rgba(168, 85, 247, 0.1); padding: 25px; border-radius: 10px; border: 2px solid #a855f7;">
+                        <h4 style="color: #a855f7;">👤 Thông Tin Của Bạn (Bí Mật)</h4>
+                        
+                        <div class="control-group">
+                            <label>Tên của bạn:</label>
+                            <input type="text" id="userName" placeholder="VD: Nguyễn Văn A" value="Nguyễn Văn A" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #a855f7; border-radius: 8px; font-size: 1.1em;">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Tuổi thực tế của bạn:</label>
+                            <input type="number" id="userAge" value="24" min="1" max="120" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #a855f7; border-radius: 8px; font-size: 1.1em;">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Ngưỡng tuổi tối thiểu:</label>
+                            <input type="number" id="ageThreshold" value="18" min="1" max="100" style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #a855f7; border-radius: 8px; font-size: 1.1em;">
+                        </div>
+                        
+                        <div style="background: rgba(239, 68, 68, 0.2); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ef4444;">
+                            <strong>🔒 Lưu ý:</strong> Thông tin này chỉ tồn tại trên trình duyệt của bạn, KHÔNG được gửi đi đâu!
+                        </div>
+                    </div>
+                    
+                    <!-- Verification Result -->
+                    <div style="background: rgba(34, 197, 94, 0.1); padding: 25px; border-radius: 10px; border: 2px solid #22c55e;">
+                        <h4 style="color: #22c55e;">🏪 Bên Xác Minh (Verifier)</h4>
+                        
+                        <div id="ageVerifyInfo" style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0; min-height: 200px;">
+                            <p style="text-align: center; color: #888; font-style: italic;">Nhấn "Tạo ZK Proof" để bắt đầu...</p>
+                        </div>
+                        
+                        <button class="btn" onclick="generateAgeProof()" style="width: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); font-size: 1.2em; padding: 15px;">
+                            🚀 Tạo ZK Proof
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Protocol Steps Visualization -->
+                <div id="ageProtocolSteps" style="display: none; background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 12px; margin: 30px 0;">
+                    <h4 style="text-align: center; color: #f59e0b;">📋 Các Bước Trong Protocol</h4>
+                    <div id="ageStepsContent"></div>
+                </div>
+            </div>
+            
+            <!-- Technical Explanation -->
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 30px; border-radius: 12px; margin: 30px 0;">
+                <h3 style="text-align: center; color: #f59e0b;">🔬 Giải Thích Kỹ Thuật: Protocol Hoạt Động Như Thế Nào?</h3>
+                
+                <div style="margin: 30px 0;">
+                    <h4>🎯 Protocol 1: Range Proof Đơn Giản (Commitment-Based)</h4>
+                    
+                    <div style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h5 style="color: #a855f7;">Bước 1: Setup</h5>
+                        <p>• User có tuổi thực <code>age = 24</code> (bí mật)</p>
+                        <p>• Threshold <code>T = 18</code> (công khai)</p>
+                        <p>• User có signed certificate từ government: <code>Cert = Sign(age, name, ...)</code></p>
+                    </div>
+                    
+                    <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h5 style="color: #22c55e;">Bước 2: Commitment</h5>
+                        <p><strong>User tạo commitment:</strong></p>
+                        <p>\[C = \text{Hash}(\text{age} \| \text{salt})\]</p>
+                        <p>• <code>salt</code> là random value để che giấu age</p>
+                        <p>• Gửi \(C\) cho verifier (verifier không biết age)</p>
+                        
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <strong>Ví dụ:</strong><br>
+                            <code>C = SHA256("24" + "random123") = "a7f3e9..."</code>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h5 style="color: #3b82f6;">Bước 3: Range Proof</h5>
+                        <p><strong>User chứng minh: age ≥ 18</strong></p>
+                        <p>Sử dụng một trong các phương pháp:</p>
+                        
+                        <p><strong>Cách 1: Bulletproofs</strong> (hiện đại, hiệu quả)</p>
+                        <p>• Chứng minh \(\text{age} - 18 \geq 0\) mà không lộ age</p>
+                        <p>• Proof size: \(O(\log n)\) với n là range</p>
+                        
+                        <p><strong>Cách 2: Binary Decomposition + Pedersen Commitments</strong></p>
+                        <p>• Phân tích age = \(\sum_{i=0}^{n} b_i \cdot 2^i\) với \(b_i \in \{0,1\}\)</p>
+                        <p>• Commit từng bit: \(C_i = g^{b_i} h^{r_i}\)</p>
+                        <p>• Prove: mỗi \(C_i\) commit to bit AND tổng ≥ 18</p>
+                    </div>
+                    
+                    <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h5 style="color: #f59e0b;">Bước 4: Verification</h5>
+                        <p>Verifier kiểm tra:</p>
+                        <p>1. ✅ Commitment \(C\) được tạo đúng cách</p>
+                        <p>2. ✅ Range proof hợp lệ (age ≥ 18)</p>
+                        <p>3. ✅ Certificate signature hợp lệ (từ trusted authority)</p>
+                        
+                        <p style="margin-top: 15px;"><strong>Kết luận:</strong></p>
+                        <p>• Verifier tin rằng "User ≥ 18 tuổi" ✅</p>
+                        <p>• Nhưng KHÔNG biết tuổi chính xác (24) 🔒</p>
+                    </div>
+                </div>
+                
+                <div style="margin: 30px 0;">
+                    <h4>⚡ Protocol 2: zk-SNARK-based (Production-Ready)</h4>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <h5>Circuit Definition:</h5>
+                        <pre style="background: rgba(0, 0, 0, 0.5); padding: 15px; border-radius: 8px; overflow-x: auto; color: #22c55e; font-family: monospace;">
+// Circom circuit
+template AgeVerification() {
+    signal input age;           // Private input
+    signal input threshold;     // Public input
+    signal input certHash;      // Private: hash of government cert
+    signal output valid;        // Public output
+    
+    // Constraint 1: age >= threshold
+    signal diff;
+    diff <== age - threshold;
+    
+    component rangeCheck = RangeCheck(128);
+    rangeCheck.in <== diff;
+    
+    // Constraint 2: certificate is valid
+    component certVerify = CertificateVerify();
+    certVerify.hash <== certHash;
+    certVerify.age <== age;
+    
+    valid <== rangeCheck.out * certVerify.out;
+}
+                        </pre>
+                        
+                        <p><strong>Kết quả:</strong></p>
+                        <ul>
+                            <li>📦 Proof size: ~200 bytes</li>
+                            <li>⚡ Verification time: ~3ms</li>
+                            <li>🔒 Zero-knowledge: Hoàn toàn không lộ age</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="margin: 30px 0;">
+                    <h4>🌍 Ứng Dụng Thực Tế</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                        <div style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 10px;">
+                            <h5 style="color: #a855f7;">🎰 Online Gaming & Gambling</h5>
+                            <p>• Verify ≥ 18 tuổi để chơi</p>
+                            <p>• Không cần KYC đầy đủ</p>
+                            <p>• Bảo vệ privacy người chơi</p>
+                        </div>
+                        
+                        <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px;">
+                            <h5 style="color: #22c55e;">🍺 Age-Restricted Products</h5>
+                            <p>• Mua rượu, thuốc lá online</p>
+                            <p>• Verify tuổi tại cửa hàng</p>
+                            <p>• Không lưu trữ thông tin cá nhân</p>
+                        </div>
+                        
+                        <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 10px;">
+                            <h5 style="color: #3b82f6;">🏦 Financial Services</h5>
+                            <p>• Mở tài khoản ngân hàng</p>
+                            <p>• Credit scoring</p>
+                            <p>• Loan applications</p>
+                        </div>
+                        
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 10px;">
+                            <h5 style="color: #f59e0b;">🎓 Education & Discounts</h5>
+                            <p>• Student discounts (< 25 tuổi)</p>
+                            <p>• Senior discounts (≥ 65 tuổi)</p>
+                            <p>• Age-based pricing</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 197, 94, 0.2)); padding: 25px; border-radius: 12px; margin: 30px 0; border: 2px solid #a855f7;">
+                    <h4 style="text-align: center;">🎯 Tại Sao Điều Này Quan Trọng?</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 20px 0;">
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 3em;">🛡️</div>
+                            <strong>Privacy Protection</strong>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Bảo vệ dữ liệu cá nhân khỏi bị thu thập, lưu trữ, và lạm dụng</p>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 3em;">⚖️</div>
+                            <strong>Compliance</strong>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Tuân thủ GDPR, CCPA và các quy định về privacy</p>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 3em;">🎭</div>
+                            <strong>Anonymity</strong>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Duy trì tính ẩn danh trong digital interactions</p>
+                        </div>
+                    </div>
+                    
+                    <p style="text-align: center; font-size: 1.1em; margin-top: 20px; font-weight: bold;">
+                        💡 Zero-Knowledge Proofs cho phép "Verify điều kiện, không phải danh tính"
+                    </p>
+                </div>
+            </div>
         </div>
         
         <div class="demo-grid">
             <div class="zk-proof-panel">
-                <h3>🎯 Interactive Zero-Knowledge Proof</h3>
+                <h3>🎯 Các Hệ Thống Zero-Knowledge Proof Tương Tác</h3>
                 
                 <div class="control-group">
                     <label>Proof System:</label>
@@ -658,11 +1169,928 @@
         </div>
         
         <div class="math-formula">
-            <h3>🔬 Advanced ZK Constructions</h3>
-            <p><strong>zk-SNARKs:</strong> Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge</p>
-            <p><strong>zk-STARKs:</strong> Zero-Knowledge Scalable Transparent Arguments of Knowledge</p>
-            <p><strong>Bulletproofs:</strong> Short non-interactive zero-knowledge proofs</p>
-            <p><strong>Polynomial Commitments:</strong> KZG, FRI-based constructions</p>
+            <h3>🎨 Graph 3-Coloring: Zero-Knowledge for NP-Complete Problems</h3>
+            
+            <h4>Problem Statement</h4>
+            <p>Given a graph \(G = (V, E)\) with \(n\) vertices and a valid 3-coloring \(c: V \rightarrow \{1, 2, 3\}\), prove that \(G\) is 3-colorable without revealing the coloring.</p>
+            
+            <p><strong>Significance:</strong> Graph 3-coloring is NP-complete. A ZK proof for it shows ZK proofs exist for all NP languages (by Cook-Levin theorem).</p>
+            
+            <h4>The Protocol (Goldreich-Micali-Wigderson, 1991)</h4>
+            
+            <p><strong>Setup:</strong> Prover knows valid coloring \(c: V \rightarrow \{1,2,3\}\). Public: graph \(G = (V,E)\).</p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p><strong>Round Protocol (repeat many times):</strong></p>
+                
+                <p><strong>1. Commitment Phase:</strong></p>
+                <p style="margin-left: 20px;">• Prover chooses random permutation \(\pi: \{1,2,3\} \rightarrow \{1,2,3\}\)</p>
+                <p style="margin-left: 20px;">• For each vertex \(v \in V\), commit to permuted color:</p>
+                <p style="margin-left: 40px;">\(C_v = \text{Commit}(\pi(c(v)); r_v)\)</p>
+                <p style="margin-left: 20px;">• Send all commitments \(\{C_v\}_{v \in V}\) to verifier</p>
+                
+                <p><strong>2. Challenge Phase:</strong></p>
+                <p style="margin-left: 20px;">• Verifier randomly selects an edge \(e = (u, v) \in E\)</p>
+                <p style="margin-left: 20px;">• Send \(e\) to prover</p>
+                
+                <p><strong>3. Response Phase:</strong></p>
+                <p style="margin-left: 20px;">• Prover reveals \(\pi(c(u)), \pi(c(v))\) and randomness \(r_u, r_v\)</p>
+                
+                <p><strong>4. Verification:</strong></p>
+                <p style="margin-left: 20px;">• Verify commitments: \(C_u = \text{Commit}(\pi(c(u)); r_u)\) and \(C_v = \text{Commit}(\pi(c(v)); r_v)\)</p>
+                <p style="margin-left: 20px;">• Check colors differ: \(\pi(c(u)) \neq \pi(c(v))\)</p>
+            </div>
+            
+            <h4>Proof of Properties</h4>
+            
+            <p><strong>Completeness:</strong> If prover has valid coloring and follows protocol, adjacent vertices have different colors, so verification always passes. □</p>
+            
+            <p><strong>Soundness:</strong></p>
+            <p><strong>Theorem:</strong> If graph is not 3-colorable, cheating prover succeeds in single round with probability at most \(\frac{|E|-1}{|E|}\).</p>
+            
+            <p><strong>Proof:</strong> Without valid coloring, there exists at least one edge \((u,v)\) where any attempted coloring has \(c(u) = c(v)\). When verifier randomly selects this edge, prover cannot produce valid response. Since edge is chosen uniformly from \(|E|\) edges, probability of avoiding the bad edge is at most \(\frac{|E|-1}{|E|}\).</p>
+            
+            <p>After \(k\) rounds: soundness error \(\leq \left(\frac{|E|-1}{|E|}\right)^k \approx e^{-k/|E|}\)</p>
+            
+            <p>For \(k = 128|E|\) rounds, soundness error \(< 2^{-128}\). □</p>
+            
+            <p><strong>Zero-Knowledge:</strong></p>
+            <p><strong>Theorem:</strong> The protocol is honest-verifier zero-knowledge.</p>
+            
+            <p><strong>Proof (Simulator Construction):</strong></p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p><strong>Simulator \(\mathcal{S}(G)\):</strong> (Given only graph, no coloring)</p>
+                <p>1. Randomly select edge \(e^* = (u^*, v^*) \in E\)</p>
+                <p>2. Choose two different random colors \(\alpha, \beta \in \{1,2,3\}, \alpha \neq \beta\)</p>
+                <p>3. Set \(C_{u^*} = \text{Commit}(\alpha; r_{u^*})\), \(C_{v^*} = \text{Commit}(\beta; r_{v^*})\)</p>
+                <p>4. For all other \(w \neq u^*, v^*\): \(C_w = \text{Commit}(0; r_w)\) (dummy commitments)</p>
+                <p>5. Output transcript: \((\{C_v\}_v, e^*, \alpha, \beta, r_{u^*}, r_{v^*})\)</p>
+                <p>6. If verifier's challenge \(e \neq e^*\), rewind and try again</p>
+            </div>
+            
+            <p>Expected number of attempts: \(|E|\). The simulated transcript is distributed identically to real transcripts (commitments are perfectly hiding, revealed colors are uniform and different). □</p>
+            
+            <h4>Practical Efficiency</h4>
+            <p>• <strong>Communication per round:</strong> \(O(n)\) commitments + 2 openings</p>
+            <p>• <strong>Rounds needed:</strong> \(O(|E|)\) for soundness \(2^{-128}\)</p>
+            <p>• <strong>Total communication:</strong> \(O(n \cdot |E|)\)</p>
+            
+            <p>Modern ZK-SNARKs can prove graph 3-colorability with \(O(1)\) proof size!</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🌳 Merkle Trees: Mathematical Foundation</h3>
+            
+            <h4>Definition and Construction</h4>
+            <p>A Merkle tree is a binary tree where each node contains a cryptographic hash. For a set of data blocks \(D = \{d_1, d_2, \ldots, d_n\}\):</p>
+            
+            <p><strong>Leaf level:</strong> Hash each data block</p>
+            <p>\[\text{leaf}_i = H(d_i) \text{ for } i = 1, \ldots, n\]</p>
+            
+            <p><strong>Internal nodes:</strong> Hash concatenation of children</p>
+            <p>\[\text{node}_{i,j} = H(\text{node}_{i-1, 2j} \| \text{node}_{i-1, 2j+1})\]</p>
+            
+            <p><strong>Root:</strong> The hash at the top of the tree</p>
+            <p>\[\text{root} = \text{node}_{\log_2 n, 0}\]</p>
+            
+            <h4>Membership Proof</h4>
+            <p>To prove \(d_k \in D\), the prover provides:</p>
+            <p>1. The data element \(d_k\)</p>
+            <p>2. Authentication path: sibling hashes \(\{\text{sib}_0, \text{sib}_1, \ldots, \text{sib}_{\log_2 n - 1}\}\)</p>
+            
+            <p><strong>Verification:</strong> Compute path from leaf to root:</p>
+            <p>\[\begin{align}
+            h_0 &= H(d_k) \\
+            h_1 &= H(h_0 \| \text{sib}_0) \text{ or } H(\text{sib}_0 \| h_0) \\
+            &\vdots \\
+            h_{\log_2 n} &= \text{root}
+            \end{align}\]</p>
+            
+            <h4>Security Analysis</h4>
+            <p><strong>Theorem:</strong> If \(H\) is collision-resistant, then finding a valid proof for \(d \notin D\) requires breaking collision resistance.</p>
+            
+            <p><strong>Proof size:</strong> \(O(\log n)\) hash values</p>
+            <p><strong>Verification time:</strong> \(O(\log n)\) hash computations</p>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🔬 Advanced ZK Constructions: Mathematical Deep Dive</h3>
+            
+            <h4>1. Non-Interactive Zero-Knowledge (NIZK)</h4>
+            <p>Transform interactive protocols to non-interactive using the <strong>Fiat-Shamir heuristic</strong>:</p>
+            <p>Replace verifier's random challenge \(c\) with hash of transcript:</p>
+            <p>\[c = H(\text{statement} \| \text{commitment})\]</p>
+            
+            <p><strong>Security:</strong> Secure in the Random Oracle Model (ROM), where \(H\) is modeled as truly random function.</p>
+            
+            <h4>2. zk-SNARKs (Zero-Knowledge Succinct Non-Interactive ARguments of Knowledge)</h4>
+            
+            <h5>Key Properties</h5>
+            <p>• <strong>Succinct:</strong> Proof size \(O(1)\), verification time \(O(1)\)</p>
+            <p>• <strong>Non-interactive:</strong> Single message from prover to verifier</p>
+            <p>• <strong>Knowledge soundness:</strong> Prover must "know" a witness</p>
+            
+            <h5>Mathematical Framework: QAP (Quadratic Arithmetic Programs)</h5>
+            
+            <p>Convert computation to polynomial constraints. For statement \(x\) and witness \(w\):</p>
+            
+            <p><strong>Step 1:</strong> Express computation as arithmetic circuit with gates:</p>
+            <p>\[a_i \cdot b_i = c_i \text{ for } i = 1, \ldots, m\]</p>
+            
+            <p><strong>Step 2:</strong> Convert to polynomials \(A(x), B(x), C(x)\) such that:</p>
+            <p>\[A(x) \cdot B(x) - C(x) = H(x) \cdot Z(x)\]</p>
+            
+            <p>where \(Z(x) = \prod_{i=1}^m (x - r_i)\) is the target polynomial with roots at evaluation points.</p>
+            
+            <h5>Groth16 Protocol (Simplified)</h5>
+            
+            <p><strong>Setup (Trusted):</strong> Generate common reference string (CRS) with "toxic waste" \(\tau\):</p>
+            <p>\[\text{CRS} = \{g^{\tau^i}, g^{\alpha \tau^i}, g^{\beta \tau^i}\}_{i=0}^d\]</p>
+            
+            <p><strong>Prove:</strong> For witness \(w\), compute polynomials and evaluate at secret \(\tau\):</p>
+            <p>\[\pi = ([A(\tau)]_1, [B(\tau)]_2, [C(\tau)]_1)\]</p>
+            
+            <p><strong>Verify:</strong> Pairing check:</p>
+            <p>\[e(A, B) = e(\alpha, \beta) \cdot e(C, \delta) \cdot e(\text{public}, \gamma)\]</p>
+            
+            <p>where \(e: \mathbb{G}_1 \times \mathbb{G}_2 \rightarrow \mathbb{G}_T\) is a bilinear pairing.</p>
+            
+            <h5>Security Intuition</h5>
+            <p>• <strong>Soundness:</strong> Relies on Knowledge of Exponent (KEA) assumption in bilinear groups</p>
+            <p>• <strong>Zero-knowledge:</strong> Add random blinding factors to polynomials</p>
+            <p>• <strong>Succinctness:</strong> Constant-size proof regardless of circuit size</p>
+            
+            <h4>3. zk-STARKs (Zero-Knowledge Scalable Transparent ARguments of Knowledge)</h4>
+            
+            <h5>Key Advantages over SNARKs</h5>
+            <p>• <strong>Transparent:</strong> No trusted setup required</p>
+            <p>• <strong>Post-quantum secure:</strong> Based on hash functions and error-correcting codes</p>
+            <p>• <strong>Scalable:</strong> Prover time \(O(n \log n)\), verifier time \(O(\log^2 n)\)</p>
+            
+            <h5>Mathematical Framework: Polynomial IOPs</h5>
+            
+            <p><strong>Step 1: Arithmetization</strong></p>
+            <p>Express computation as polynomial constraint system:</p>
+            <p>\[P(x, y, z) = 0 \text{ for all steps of computation}\]</p>
+            
+            <p><strong>Step 2: Low-Degree Extension (LDE)</strong></p>
+            <p>Extend polynomial to larger domain and evaluate:</p>
+            <p>\[f: D \rightarrow \mathbb{F} \text{ extends to } \tilde{f}: L \rightarrow \mathbb{F} \text{ where } |L| \gg |D|\]</p>
+            
+            <p><strong>Step 3: FRI Protocol (Fast Reed-Solomon IOP)</strong></p>
+            <p>Prove polynomial has low degree through recursive folding:</p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p>For polynomial \(f(x)\) of degree \(< d\):</p>
+                <p>1. Split: \(f(x) = f_{\text{even}}(x^2) + x \cdot f_{\text{odd}}(x^2)\)</p>
+                <p>2. Fold: \(f'(x) = f_{\text{even}}(x) + \alpha \cdot f_{\text{odd}}(x)\) with random \(\alpha\)</p>
+                <p>3. Recurse: \(f'\) has degree \(< d/2\)</p>
+                <p>4. Repeat until degree is small enough to send explicitly</p>
+            </div>
+            
+            <p><strong>Step 4: Merkle Commitment</strong></p>
+            <p>Commit to polynomial evaluations using Merkle tree:</p>
+            <p>\[\text{root} = \text{MerkleCommit}(f(\omega^0), f(\omega^1), \ldots, f(\omega^{n-1}))\]</p>
+            
+            <h5>Proof Composition</h5>
+            <p>\[\pi_{\text{STARK}} = (\text{trace\_root}, \text{FRI\_layers}, \text{queries})\]</p>
+            
+            <p><strong>Proof size:</strong> \(O(\log^2 n)\) due to Merkle authentication paths</p>
+            <p><strong>Verification:</strong> Query random positions and verify consistency</p>
+            
+            <h4>4. Bulletproofs: Range Proofs</h4>
+            
+            <h5>Problem Statement</h5>
+            <p>Prove \(v \in [0, 2^n - 1]\) without revealing \(v\).</p>
+            
+            <h5>Inner Product Argument</h5>
+            <p>Core building block: prove knowledge of vectors \(\mathbf{a}, \mathbf{b} \in \mathbb{Z}_q^n\) such that:</p>
+            <p>\[c = \langle \mathbf{a}, \mathbf{b} \rangle = \sum_{i=1}^n a_i b_i\]</p>
+            
+            <p>and commitments satisfy:</p>
+            <p>\[P = \mathbf{g}^{\mathbf{a}} \cdot \mathbf{h}^{\mathbf{b}} \cdot u^c\]</p>
+            
+            <p>where \(\mathbf{g}, \mathbf{h}\) are generator vectors, \(u\) is another generator.</p>
+            
+            <h5>Range Proof Construction</h5>
+            
+            <p><strong>Step 1:</strong> Express \(v\) in binary: \(v = \sum_{i=0}^{n-1} v_i 2^i\) where \(v_i \in \{0,1\}\)</p>
+            
+            <p><strong>Step 2:</strong> Prove each \(v_i(v_i - 1) = 0\) using Pedersen commitments</p>
+            
+            <p><strong>Step 3:</strong> Aggregate proofs using inner product argument</p>
+            
+            <p><strong>Result:</strong> Logarithmic proof size \(O(\log n)\), much smaller than \(O(n)\) naive approach</p>
+            
+            <h4>5. Polynomial Commitment Schemes</h4>
+            
+            <h5>KZG Commitments (Kate-Zaverucha-Goldberg)</h5>
+            
+            <p><strong>Setup:</strong> Trusted setup generates powers of secret \(\tau\):</p>
+            <p>\[\text{SRS} = (g, g^{\tau}, g^{\tau^2}, \ldots, g^{\tau^d})\]</p>
+            
+            <p><strong>Commit:</strong> For polynomial \(f(x) = \sum_{i=0}^d a_i x^i\):</p>
+            <p>\[C = g^{f(\tau)} = \prod_{i=0}^d (g^{\tau^i})^{a_i}\]</p>
+            
+            <p><strong>Evaluation Proof:</strong> Prove \(f(z) = y\) for some \(z\):</p>
+            <p>Compute quotient polynomial: \(q(x) = \frac{f(x) - y}{x - z}\)</p>
+            <p>Proof: \(\pi = g^{q(\tau)}\)</p>
+            
+            <p><strong>Verify:</strong> Pairing check:</p>
+            <p>\[e(\pi, g^{\tau - z}) = e(C \cdot g^{-y}, g)\]</p>
+            
+            <p>This verifies that \(q(\tau)(\tau - z) = f(\tau) - y\), hence \(f(z) = y\).</p>
+            
+            <h5>Properties</h5>
+            <p>• <strong>Constant-size commitments and proofs:</strong> Single group element</p>
+            <p>• <strong>Efficient verification:</strong> Two pairings</p>
+            <p>• <strong>Batching:</strong> Can prove multiple evaluations efficiently</p>
+            
+            <h4>Comparison Table: Modern ZK Systems</h4>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; color: white;">
+                <tr style="background: rgba(168, 85, 247, 0.2);">
+                    <th style="border: 1px solid #a855f7; padding: 10px;">System</th>
+                    <th style="border: 1px solid #a855f7; padding: 10px;">Proof Size</th>
+                    <th style="border: 1px solid #a855f7; padding: 10px;">Verify Time</th>
+                    <th style="border: 1px solid #a855f7; padding: 10px;">Trusted Setup</th>
+                    <th style="border: 1px solid #a855f7; padding: 10px;">Post-Quantum</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">Groth16 (SNARK)</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(1)\) ~200 bytes</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(1)\) ~3 ms</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">Required</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">❌ No</td>
+                </tr>
+                <tr style="background: rgba(255, 255, 255, 0.05);">
+                    <td style="border: 1px solid #a855f7; padding: 10px;">PLONK (SNARK)</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(1)\) ~400 bytes</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(1)\) ~5 ms</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">Universal</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">❌ No</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">STARKs</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(\log^2 n)\) ~100 KB</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(\log^2 n)\)</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">None</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">✅ Yes</td>
+                </tr>
+                <tr style="background: rgba(255, 255, 255, 0.05);">
+                    <td style="border: 1px solid #a855f7; padding: 10px;">Bulletproofs</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(\log n)\) ~1.3 KB</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">\(O(n)\)</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">None</td>
+                    <td style="border: 1px solid #a855f7; padding: 10px;">❌ No</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="math-formula">
+            <h2>🌍 Ứng Dụng Thực Tế Của Zero-Knowledge Proofs</h2>
+            <p style="font-size: 1.1em; margin-bottom: 30px;">Zero-Knowledge Proofs không chỉ là lý thuyết - chúng đang thay đổi cách chúng ta bảo vệ quyền riêng tư và mở rộng quy mô trong thế giới thực!</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 30px 0;">
+                <!-- Application 1: Privacy Cryptocurrencies -->
+                <div style="background: rgba(168, 85, 247, 0.1); border: 2px solid #a855f7; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #a855f7;">💰 1. Cryptocurrency Riêng Tư</h3>
+                    
+                    <h4>Zcash - "Tiền Mặt Điện Tử Riêng Tư"</h4>
+                    <p><strong>Vấn đề:</strong> Bitcoin/Ethereum hoàn toàn công khai - ai cũng có thể xem địa chỉ, số tiền, lịch sử giao dịch</p>
+                    
+                    <p><strong>Giải pháp ZK:</strong> Sử dụng zk-SNARKs để ẩn:</p>
+                    <ul>
+                        <li>🔒 Địa chỉ người gửi</li>
+                        <li>🔒 Địa chỉ người nhận</li>
+                        <li>🔒 Số tiền chuyển</li>
+                    </ul>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h5>Chứng Minh Giao Dịch Hợp Lệ:</h5>
+                        <p>\[\text{Prove: } \text{balance}_{\text{new}} = \text{balance}_{\text{old}} + \text{inputs} - \text{outputs}\]</p>
+                        <p style="font-size: 0.9em; color: #888;">Chứng minh không chi tiêu quá số dư, mà KHÔNG tiết lộ số tiền!</p>
+                    </div>
+                    
+                    <p><strong>Kết quả:</strong></p>
+                    <ul>
+                        <li>✅ Giao dịch 100% riêng tư</li>
+                        <li>✅ Vẫn đảm bảo không double-spending</li>
+                        <li>✅ Proof chỉ ~200 bytes, verification ~3ms</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px; padding: 10px; background: rgba(34, 197, 94, 0.2); border-radius: 5px; border-left: 3px solid #22c55e;">
+                        💡 <strong>Fun Fact:</strong> Edward Snowden đã công khai ủng hộ Zcash vì tính năng bảo mật mạnh mẽ!
+                    </p>
+                </div>
+                
+                <!-- Application 2: ZK-Rollups -->
+                <div style="background: rgba(34, 197, 94, 0.1); border: 2px solid #22c55e; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #22c55e;">🚀 2. Blockchain Scalability - ZK-Rollups</h3>
+                    
+                    <h4>Giải Quyết Bài Toán "Blockchain Trilemma"</h4>
+                    <p><strong>Vấn đề:</strong> Ethereum chỉ xử lý ~15 giao dịch/giây, phí gas cao ($50-200/giao dịch)</p>
+                    
+                    <p><strong>Giải pháp ZK-Rollup:</strong></p>
+                    <ol>
+                        <li>Gom hàng nghìn giao dịch off-chain</li>
+                        <li>Tính toán state transition</li>
+                        <li>Tạo ZKP chứng minh tính đúng đắn</li>
+                        <li>Đăng chỉ proof lên mainnet</li>
+                    </ol>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h5>Công Thức ZK-Rollup:</h5>
+                        <p>\[\pi_{\text{batch}} = \text{Prove}(\text{StateTransition}(S_{\text{old}}, \text{txs}_{1..n}) = S_{\text{new}})\]</p>
+                        <p style="font-size: 0.9em;">Chứng minh n giao dịch được xử lý đúng, chỉ với 1 proof!</p>
+                    </div>
+                    
+                    <p><strong>Kết quả Ấn Tượng:</strong></p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0;">
+                        <div style="background: rgba(59, 130, 246, 0.2); padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #3b82f6;">40-100x</div>
+                            <div style="font-size: 0.9em;">Giảm phí gas</div>
+                        </div>
+                        <div style="background: rgba(239, 68, 68, 0.2); padding: 10px; border-radius: 5px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #ef4444;">2000+ TPS</div>
+                            <div style="font-size: 0.9em;">Transactions/second</div>
+                        </div>
+                    </div>
+                    
+                    <p><strong>Các Dự Án Thực Tế:</strong></p>
+                    <ul>
+                        <li>🔷 <strong>zkSync:</strong> 2000+ TPS, phí $0.03/tx</li>
+                        <li>⭐ <strong>StarkNet:</strong> Post-quantum secure</li>
+                        <li>🟣 <strong>Polygon zkEVM:</strong> EVM-compatible</li>
+                    </ul>
+                </div>
+                
+                <!-- Application 3: Anonymous Credentials -->
+                <div style="background: rgba(239, 68, 68, 0.1); border: 2px solid #ef4444; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #ef4444;">🎫 3. Thông Tin Xác Thực Ẩn Danh</h3>
+                    
+                    <h4>Chứng Minh Thuộc Tính Mà Không Tiết Lộ Danh Tính</h4>
+                    
+                    <p><strong>Ví Dụ 1: Xác Minh Độ Tuổi</strong></p>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p><strong>Truyền thống:</strong></p>
+                        <p>❌ Đưa CMND → Họ biết: Tên, Ngày sinh, Địa chỉ, Số CMND, ...</p>
+                        
+                        <p style="margin-top: 10px;"><strong>Với ZKP:</strong></p>
+                        <p>✅ Chứng minh: "Tuổi > 18" → Họ CHỈ biết: Bạn đủ tuổi</p>
+                        <p style="font-size: 0.9em; color: #888;">Không biết tuổi chính xác, tên, địa chỉ, ...</p>
+                    </div>
+                    
+                    <p><strong>Ví Dụ 2: Tín Dụng & Tài Chính</strong></p>
+                    <ul>
+                        <li>💳 Chứng minh "Tôi có tín dụng tốt" mà không show điểm credit</li>
+                        <li>💰 Chứng minh "Tôi có đủ tiền gửi" mà không show số dư chính xác</li>
+                        <li>📊 Chứng minh "Thu nhập > $50k" mà không show bảng lương</li>
+                    </ul>
+                    
+                    <p><strong>Ví Dụ 3: Bỏ Phiếu Điện Tử</strong></p>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p>Chứng minh đồng thời:</p>
+                        <ol>
+                            <li>✅ Tôi có quyền bỏ phiếu (công dân, đủ tuổi)</li>
+                            <li>✅ Tôi chưa bỏ phiếu trước đó (không vote 2 lần)</li>
+                            <li>🔒 Nhưng KHÔNG tiết lộ tôi vote cho ai</li>
+                        </ol>
+                    </div>
+                    
+                    <p style="margin-top: 15px; padding: 10px; background: rgba(168, 85, 247, 0.2); border-radius: 5px; border-left: 3px solid #a855f7;">
+                        🌟 <strong>Tương Lai:</strong> Digital identity với quyền riêng tư hoàn toàn - bạn kiểm soát thông tin nào được chia sẻ!
+                    </p>
+                </div>
+                
+                <!-- Application 4: Verifiable Computation -->
+                <div style="background: rgba(6, 182, 212, 0.1); border: 2px solid #06b6d4; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #06b6d4;">☁️ 4. Cloud Computing An Toàn</h3>
+                    
+                    <h4>Outsource Tính Toán Mà Vẫn Tin Tưởng Kết Quả</h4>
+                    
+                    <p><strong>Vấn đề:</strong> Làm sao tin server cloud không lừa dối hoặc bị hack?</p>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h5>Verifiable Computation:</h5>
+            <p>\[\text{Verify}(\pi, x, y) \rightarrow \text{accept} \Rightarrow y = f(x)\]</p>
+                        <p>Client gửi input \(x\), Server tính \(y = f(x)\) và tạo proof \(\pi\)</p>
+                        <p>Client verify proof (rất nhanh) thay vì phải tính lại toàn bộ!</p>
+                    </div>
+                    
+                    <p><strong>Ứng Dụng Cụ Thể:</strong></p>
+                    
+                    <p><strong>1. Machine Learning:</strong></p>
+                    <ul>
+                        <li>🧠 Chạy AI model trên cloud, verify kết quả đúng</li>
+                        <li>🔒 Model weights vẫn giữ bí mật</li>
+                        <li>✅ Đảm bảo không bị manipulate output</li>
+                    </ul>
+                    
+                    <p><strong>2. Financial Computations:</strong></p>
+                    <ul>
+                        <li>📈 Tính toán rủi ro, pricing phức tạp</li>
+                        <li>💼 Verify mà không expose dữ liệu nhạy cảm</li>
+                        <li>🏦 Tuân thủ quy định (compliance) tự động</li>
+                    </ul>
+                    
+                    <p><strong>3. Scientific Computing:</strong></p>
+                    <ul>
+                        <li>🔬 Simulation khoa học phức tạp</li>
+                        <li>🧬 Phân tích gene mà bảo vệ privacy</li>
+                        <li>🌡️ Climate modeling với data riêng tư</li>
+                    </ul>
+                    
+                    <div style="background: rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <h5>Lợi Ích:</h5>
+                        <p>⚡ <strong>Client:</strong> Verify nhanh (ms) thay vì tính lại (giờ/ngày)</p>
+                        <p>💰 <strong>Cost:</strong> Tiết kiệm 1000x computational cost</p>
+                        <p>🛡️ <strong>Security:</strong> Không cần trust server</p>
+                    </div>
+                </div>
+                
+                <!-- Application 5: Gaming & NFT -->
+                <div style="background: rgba(245, 158, 11, 0.1); border: 2px solid #f59e0b; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #f59e0b;">🎮 5. Gaming & NFT</h3>
+                    
+                    <h4>Chơi Game Công Bằng & NFT Riêng Tư</h4>
+                    
+                    <p><strong>Poker On-Chain:</strong></p>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p><strong>Thách thức:</strong> Làm sao chơi poker trên blockchain mà:</p>
+                        <ul>
+                            <li>🃏 Bài của bạn không bị lộ</li>
+                            <li>✅ Nhưng có thể verify không gian lận</li>
+                            <li>🎲 Shuffle ngẫu nhiên công bằng</li>
+                        </ul>
+                        
+                        <p style="margin-top: 10px;"><strong>Giải pháp ZK:</strong></p>
+                        <p>Mỗi lượt đi, player tạo ZKP chứng minh:</p>
+                        <p>• "Bài tôi đánh thuộc về bộ bài của tôi"</p>
+                        <p>• Mà KHÔNG tiết lộ các lá bài khác!</p>
+                    </div>
+                    
+                    <p><strong>Dark Forest - Game ZK Thực Tế:</strong></p>
+                    <ul>
+                        <li>🌌 MMO strategy game hoàn toàn on-chain</li>
+                        <li>🗺️ Vị trí planets của bạn là bí mật (ZKP)</li>
+                        <li>⚔️ Có thể tấn công mà không lộ vị trí base</li>
+                        <li>🏆 First major game sử dụng zk-SNARKs production</li>
+                    </ul>
+                    
+                    <p><strong>Private NFT Ownership:</strong></p>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p>Chứng minh "Tôi sở hữu NFT X" mà không:</p>
+                        <ul>
+                            <li>❌ Lộ địa chỉ wallet</li>
+                            <li>❌ Lộ các NFT khác tôi có</li>
+                            <li>❌ Lộ trading history</li>
+                        </ul>
+                        <p><strong>Use case:</strong> VIP access, exclusive content, membership proof</p>
+                    </div>
+                </div>
+                
+                <!-- Application 6: DeFi -->
+                <div style="background: rgba(168, 85, 247, 0.1); border: 2px solid #a855f7; border-radius: 12px; padding: 25px;">
+                    <h3 style="color: #a855f7;">🏦 6. DeFi - Tài Chính Phi Tập Trung</h3>
+                    
+                    <h4>Privacy trong Lending, DEX, và Derivatives</h4>
+                    
+                    <p><strong>1. Private DEX Trading:</strong></p>
+                    <ul>
+                        <li>📊 Ẩn trading strategy (MEV protection)</li>
+                        <li>💱 Ẩn order size (whale không bị front-run)</li>
+                        <li>🎯 Vẫn prove: "Tôi có đủ tiền để trade"</li>
+                    </ul>
+                    
+                    <p><strong>2. Private Lending:</strong></p>
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p>Chứng minh credit-worthiness mà không lộ:</p>
+                        <ul>
+                            <li>🔒 Địa chỉ wallet của bạn</li>
+                            <li>🔒 Tổng tài sản của bạn</li>
+                            <li>🔒 Lịch sử giao dịch</li>
+                        </ul>
+                        <p>Chỉ prove: "Collateral ratio > 150%"</p>
+                    </div>
+                    
+                    <p><strong>3. Compliant DeFi:</strong></p>
+                    <ul>
+                        <li>🏛️ Chứng minh tuân thủ KYC/AML</li>
+                        <li>🌍 Chứng minh không phải là restricted country</li>
+                        <li>✅ Mà vẫn giữ privacy!</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px; padding: 10px; background: rgba(34, 197, 94, 0.2); border-radius: 5px; border-left: 3px solid #22c55e;">
+                        🎯 <strong>Mục tiêu:</strong> DeFi với privacy như TradFi, nhưng vẫn trustless và transparent về logic!
+                    </p>
+                </div>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 197, 94, 0.2)); border: 3px solid #a855f7; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                <h3 style="text-align: center; font-size: 1.5em; margin-bottom: 20px;">📈 Thống Kê Thị Trường ZK</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5em; font-weight: bold; color: #22c55e;">$10B+</div>
+                        <div style="margin-top: 10px;">Tổng giá trị trong ZK protocols</div>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5em; font-weight: bold; color: #3b82f6;">1000+</div>
+                        <div style="margin-top: 10px;">Dự án đang phát triển ZK</div>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5em; font-weight: bold; color: #f59e0b;">5M+</div>
+                        <div style="margin-top: 10px;">ZK proofs/day trên Ethereum</div>
+                    </div>
+                    
+                    <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5em; font-weight: bold; color: #a855f7;">95%</div>
+                        <div style="margin-top: 10px;">Giảm phí gas với ZK-Rollups</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-formula">
+            <h3>🔐 Cryptographic Assumptions and Security Reductions</h3>
+            
+            <h4>1. Discrete Logarithm Problem (DLP)</h4>
+            <p><strong>Problem:</strong> Given cyclic group \(\mathbb{G}\) of order \(q\), generator \(g\), and \(y = g^x\), find \(x \in \mathbb{Z}_q\).</p>
+            
+            <p><strong>DLP Assumption:</strong> For any probabilistic polynomial-time (PPT) algorithm \(\mathcal{A}\):</p>
+            <p>\[\Pr[x \leftarrow \mathbb{Z}_q, y = g^x : \mathcal{A}(g, y) = x] \leq \text{negl}(\lambda)\]</p>
+            
+            <p><strong>Used in:</strong> Schnorr protocol, ElGamal, DSA</p>
+            <p><strong>Best known attacks:</strong> Generic algorithms (Baby-step Giant-step, Pollard's rho) require \(O(\sqrt{q})\) group operations. For 256-bit groups, this is infeasible.</p>
+            
+            <h4>2. Computational Diffie-Hellman (CDH)</h4>
+            <p><strong>Problem:</strong> Given \(g^a, g^b\), compute \(g^{ab}\) without knowing \(a\) or \(b\).</p>
+            
+            <p><strong>CDH Assumption:</strong></p>
+            <p>\[\Pr[a,b \leftarrow \mathbb{Z}_q : \mathcal{A}(g, g^a, g^b) = g^{ab}] \leq \text{negl}(\lambda)\]</p>
+            
+            <p>Note: If DLP is hard, then CDH is hard. But CDH could be hard even if DLP has some weakness.</p>
+            
+            <h4>3. Decisional Diffie-Hellman (DDH)</h4>
+            <p><strong>Problem:</strong> Distinguish \((g^a, g^b, g^{ab})\) from \((g^a, g^b, g^c)\) where \(c\) is random.</p>
+            
+            <p><strong>DDH Assumption:</strong> For any PPT distinguisher \(\mathcal{D}\):</p>
+            <p>\[\left|\Pr[\mathcal{D}(g, g^a, g^b, g^{ab}) = 1] - \Pr[\mathcal{D}(g, g^a, g^b, g^c) = 1]\right| \leq \text{negl}(\lambda)\]</p>
+            
+            <p><strong>Hierarchy:</strong> DLP hard \(\Rightarrow\) CDH hard \(\Rightarrow\) DDH hard</p>
+            <p><strong>Used in:</strong> ElGamal encryption, Pedersen commitments (perfect hiding)</p>
+            
+            <h4>4. Knowledge of Exponent Assumption (KEA)</h4>
+            <p>Used in zk-SNARK security proofs.</p>
+            
+            <p><strong>KEA:</strong> If algorithm \(\mathcal{A}\) outputs \((C, C')\) such that \(C' = C^a\) where \(a\) is secret, then \(\mathcal{A}\) must "know" the exponent.</p>
+            
+            <p>Formally, there exists extractor \(\mathcal{E}\) such that:</p>
+            <p>\[\Pr[\mathcal{A}(g, g^a) = (C, C') \wedge C' = C^a : \mathcal{E}(g, g^a; r_A) = x \text{ where } C = g^x] \geq 1 - \text{negl}(\lambda)\]</p>
+            
+            <p>where \(r_A\) is \(\mathcal{A}\)'s random coins.</p>
+            
+            <h4>5. Bilinear Pairings and q-SDH</h4>
+            <p>Bilinear pairing: \(e: \mathbb{G}_1 \times \mathbb{G}_2 \rightarrow \mathbb{G}_T\) such that:</p>
+            <p>• <strong>Bilinearity:</strong> \(e(g^a, h^b) = e(g, h)^{ab}\)</p>
+            <p>• <strong>Non-degeneracy:</strong> \(e(g, h) \neq 1_{\mathbb{G}_T}\) for generators \(g, h\)</p>
+            <p>• <strong>Efficiency:</strong> \(e\) is efficiently computable</p>
+            
+            <p><strong>q-Strong Diffie-Hellman (q-SDH) Assumption:</strong></p>
+            <p>Given \((g, g^x, g^{x^2}, \ldots, g^{x^q})\), hard to compute \((c, g^{1/(x+c)})\) for any \(c \in \mathbb{Z}_p\).</p>
+            
+            <p><strong>Used in:</strong> BLS signatures, KZG polynomial commitments, Groth16</p>
+            
+            <h4>6. Collision-Resistant Hash Functions</h4>
+            <p><strong>Definition:</strong> Hash function \(H: \{0,1\}^* \rightarrow \{0,1\}^\lambda\) is collision-resistant if:</p>
+            <p>\[\Pr[\mathcal{A}() = (m, m') : m \neq m' \wedge H(m) = H(m')] \leq \text{negl}(\lambda)\]</p>
+            
+            <p><strong>Used in:</strong> Merkle trees, Fiat-Shamir transform, zk-STARKs</p>
+            <p><strong>Examples:</strong> SHA-256, SHA-3, BLAKE2</p>
+            
+            <h4>Security Reduction Example: Schnorr Protocol Soundness</h4>
+            
+            <p><strong>Theorem:</strong> If discrete logarithm is hard, then Schnorr protocol is sound (knowledge-sound).</p>
+            
+            <p><strong>Proof Sketch:</strong> Suppose cheating prover \(\mathcal{P}^*\) can produce valid proofs with non-negligible probability \(\epsilon\). We construct DLP solver \(\mathcal{B}\) using \(\mathcal{P}^*\):</p>
+            
+            <div style="text-align: left; margin: 15px 30px;">
+                <p><strong>Algorithm \(\mathcal{B}(g, y)\):</strong> (Goal: find \(x\) where \(y = g^x\))</p>
+                <p>1. Run \(\mathcal{P}^*(g, y)\) to get commitment \(t\)</p>
+                <p>2. Choose random challenge \(c_1\), get response \(s_1\)</p>
+                <p>3. <em>Rewind</em> \(\mathcal{P}^*\) to same point, choose different \(c_2 \neq c_1\)</p>
+                <p>4. Get second response \(s_2\)</p>
+                <p>5. If both verify, extract: \(x = (s_1 - s_2)(c_1 - c_2)^{-1} \bmod q\)</p>
+                <p>6. Return \(x\)</p>
+            </div>
+            
+            <p><strong>Analysis:</strong> By forking lemma (Pointcheval-Stern), if \(\mathcal{P}^*\) succeeds with probability \(\epsilon\), then with probability \(\approx \epsilon^2\), \(\mathcal{B}\) obtains two valid transcripts and extracts \(x\).</p>
+            
+            <p>If \(\epsilon\) is non-negligible, then \(\epsilon^2\) is non-negligible, contradicting DLP hardness. Therefore, no such \(\mathcal{P}^*\) exists. □</p>
+            
+            <h4>Concrete Security vs. Asymptotic Security</h4>
+            
+            <p><strong>Asymptotic:</strong> Security holds for sufficiently large \(\lambda\), expressed as \(\text{negl}(\lambda)\)</p>
+            
+            <p><strong>Concrete:</strong> Actual security level for specific parameters</p>
+            
+            <p><strong>Example:</strong> For \(\lambda = 128\)-bit security:</p>
+            <p>• Discrete log: Use groups of size \(\geq 2^{256}\) (256-bit curve)</p>
+            <p>• Hash function: Output length \(\geq 256\) bits (SHA-256)</p>
+            <p>• Soundness error: \(\leq 2^{-128}\)</p>
+            
+            <p>This means attacker needs \(\approx 2^{128}\) operations to break security, infeasible with current/near-future technology.</p>
+        </div>
+        
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.2)); border: 3px solid #f59e0b; border-radius: 15px; padding: 30px; margin: 30px 0;">
+            <h2 style="text-align: center; color: #f59e0b;">🎓 Quiz & Bài Tập: Kiểm Tra Hiểu Biết</h2>
+            <p style="text-align: center; font-size: 1.1em; margin-bottom: 30px;">Thử thách bản thân với các câu hỏi về Zero-Knowledge Proofs!</p>
+            
+            <!-- Quiz Section -->
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 12px; margin: 20px 0;">
+                <h3>📝 Câu Hỏi Trắc Nghiệm</h3>
+                
+                <!-- Question 1 -->
+                <div class="quiz-question" style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #a855f7;">
+                    <h4>Câu 1: Ba tính chất cốt lõi của Zero-Knowledge Proof là gì?</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q1" value="a" onchange="checkQuiz1(this)"> 
+                            A. Completeness, Correctness, Consistency
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q1" value="b" onchange="checkQuiz1(this)"> 
+                            B. Completeness, Soundness, Zero-Knowledge
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q1" value="c" onchange="checkQuiz1(this)"> 
+                            C. Privacy, Security, Scalability
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q1" value="d" onchange="checkQuiz1(this)"> 
+                            D. Hiding, Binding, Commitment
+                        </label>
+                    </div>
+                    <div id="q1-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; display: none;"></div>
+                </div>
+                
+                <!-- Question 2 -->
+                <div class="quiz-question" style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #22c55e;">
+                    <h4>Câu 2: Trong câu chuyện hang động Ali Baba, sau 10 vòng thử nghiệm, xác suất một kẻ gian (không biết câu thần chú) lừa được là bao nhiêu?</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q2" value="a" onchange="checkQuiz2(this)"> 
+                            A. 10%
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q2" value="b" onchange="checkQuiz2(this)"> 
+                            B. 1%
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q2" value="c" onchange="checkQuiz2(this)"> 
+                            C. ~0.098% (1/1024)
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q2" value="d" onchange="checkQuiz2(this)"> 
+                            D. 50%
+                        </label>
+                    </div>
+                    <div id="q2-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; display: none;"></div>
+                </div>
+                
+                <!-- Question 3 -->
+                <div class="quiz-question" style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #ef4444;">
+                    <h4>Câu 3: Điều gì phân biệt zk-SNARKs và zk-STARKs?</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q3" value="a" onchange="checkQuiz3(this)"> 
+                            A. SNARKs nhanh hơn nhưng STARKs an toàn hơn
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q3" value="b" onchange="checkQuiz3(this)"> 
+                            B. SNARKs cần trusted setup, STARKs không cần và post-quantum secure
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q3" value="c" onchange="checkQuiz3(this)"> 
+                            C. SNARKs cho blockchain, STARKs cho AI
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q3" value="d" onchange="checkQuiz3(this)"> 
+                            D. Không có sự khác biệt đáng kể
+                        </label>
+                    </div>
+                    <div id="q3-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; display: none;"></div>
+                </div>
+                
+                <!-- Question 4 -->
+                <div class="quiz-question" style="background: rgba(6, 182, 212, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #06b6d4;">
+                    <h4>Câu 4: Schnorr protocol chứng minh kiến thức về gì?</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q4" value="a" onchange="checkQuiz4(this)"> 
+                            A. Kiến thức về số nguyên tố
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q4" value="b" onchange="checkQuiz4(this)"> 
+                            B. Kiến thức về discrete logarithm (x trong y = g^x mod p)
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q4" value="c" onchange="checkQuiz4(this)"> 
+                            C. Kiến thức về hash functions
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q4" value="d" onchange="checkQuiz4(this)"> 
+                            D. Kiến thức về elliptic curves
+                        </label>
+                    </div>
+                    <div id="q4-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; display: none;"></div>
+                </div>
+                
+                <!-- Question 5 -->
+                <div class="quiz-question" style="background: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                    <h4>Câu 5: ZK-Rollups giảm chi phí gas trên Ethereum bằng cách nào?</h4>
+                    <div style="margin: 15px 0;">
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q5" value="a" onchange="checkQuiz5(this)"> 
+                            A. Tăng block size
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q5" value="b" onchange="checkQuiz5(this)"> 
+                            B. Gom nhiều giao dịch off-chain, chỉ đăng 1 proof lên mainnet
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q5" value="c" onchange="checkQuiz5(this)"> 
+                            C. Sử dụng sharding
+                        </label>
+                        <label style="display: block; padding: 10px; margin: 5px 0; background: rgba(255, 255, 255, 0.05); border-radius: 5px; cursor: pointer;">
+                            <input type="radio" name="q5" value="d" onchange="checkQuiz5(this)"> 
+                            D. Giảm security requirements
+                        </label>
+                    </div>
+                    <div id="q5-feedback" style="margin-top: 15px; padding: 15px; border-radius: 8px; display: none;"></div>
+                </div>
+                
+                <div id="quiz-summary" style="background: rgba(168, 85, 247, 0.2); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; display: none;">
+                    <h3 style="color: #a855f7;">🎉 Kết Quả Tổng Hợp</h3>
+                    <div id="quiz-score" style="font-size: 3em; font-weight: bold; margin: 20px 0;"></div>
+                    <div id="quiz-message" style="font-size: 1.2em;"></div>
+                </div>
+            </div>
+            
+            <!-- Exercises Section -->
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 12px; margin: 20px 0;">
+                <h3>🧮 Bài Tập Thực Hành</h3>
+                
+                <div style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Bài Tập 1: Tính Xác Suất Soundness Error</h4>
+                    <p>Cho một interactive proof system với mỗi vòng có xác suất cheating thành công là 1/2.</p>
+                    <p><strong>Câu hỏi:</strong> Cần bao nhiêu vòng để đạt được security level 128-bit (soundness error ≤ 2^-128)?</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <label>Số vòng cần thiết:</label>
+                        <input type="number" id="ex1-answer" style="width: 100px; padding: 8px; margin: 0 10px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #a855f7; border-radius: 5px;">
+                        <button class="btn" onclick="checkExercise1()" style="padding: 8px 20px;">Kiểm Tra</button>
+                    </div>
+                    <div id="ex1-feedback" style="margin-top: 15px;"></div>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #a855f7; font-weight: bold;">💡 Gợi ý</summary>
+                        <p style="margin-top: 10px;">Soundness error sau n vòng: (1/2)^n ≤ 2^-128</p>
+                        <p>Suy ra: n ≥ 128</p>
+                    </details>
+                </div>
+                
+                <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Bài Tập 2: Schnorr Protocol Verification</h4>
+                    <p>Cho Schnorr protocol với các giá trị sau:</p>
+                    <ul>
+                        <li>Prime p = 23</li>
+                        <li>Generator g = 2</li>
+                        <li>Public key y = 8 (tức g^x = 8 mod 23)</li>
+                        <li>Commitment t = 16</li>
+                        <li>Challenge c = 5</li>
+                        <li>Response s = 9</li>
+                    </ul>
+                    <p><strong>Câu hỏi:</strong> Verify có hợp lệ không? Tính g^s mod p và t × y^c mod p</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <label>g^s mod p =</label>
+                        <input type="number" id="ex2-answer1" style="width: 80px; padding: 8px; margin: 0 10px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #22c55e; border-radius: 5px;">
+                        <br><br>
+                        <label>t × y^c mod p =</label>
+                        <input type="number" id="ex2-answer2" style="width: 80px; padding: 8px; margin: 0 10px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #22c55e; border-radius: 5px;">
+                        <br><br>
+                        <button class="btn" onclick="checkExercise2()" style="padding: 8px 20px;">Kiểm Tra</button>
+                    </div>
+                    <div id="ex2-feedback" style="margin-top: 15px;"></div>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #22c55e; font-weight: bold;">💡 Gợi ý</summary>
+                        <p style="margin-top: 10px;">Sử dụng modular exponentiation:</p>
+                        <p>g^s = 2^9 mod 23</p>
+                        <p>y^c = 8^5 mod 23</p>
+                        <p>Nếu hai giá trị bằng nhau → proof hợp lệ!</p>
+                    </details>
+                </div>
+                
+                <div style="background: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>Bài Tập 3: Graph 3-Coloring Soundness</h4>
+                    <p>Xét một đồ thị G với |E| = 100 cạnh.</p>
+                    <p><strong>Câu hỏi:</strong> Nếu đồ thị KHÔNG 3-colorable, xác suất một cheating prover qua được 50 vòng là bao nhiêu?</p>
+                    
+                    <div style="margin: 15px 0;">
+                        <p>Xác suất qua 1 vòng: <input type="number" step="0.01" id="ex3-answer1" style="width: 100px; padding: 8px; margin: 0 10px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #ef4444; border-radius: 5px;"> (0.0 - 1.0)</p>
+                        <p>Xác suất qua 50 vòng: <input type="text" id="ex3-answer2" placeholder="Nhỏ hơn 10^-x" style="width: 150px; padding: 8px; margin: 0 10px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #ef4444; border-radius: 5px;"></p>
+                        <button class="btn" onclick="checkExercise3()" style="padding: 8px 20px;">Kiểm Tra</button>
+                    </div>
+                    <div id="ex3-feedback" style="margin-top: 15px;"></div>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #ef4444; font-weight: bold;">💡 Gợi ý</summary>
+                        <p style="margin-top: 10px;">Mỗi vòng, verifier chọn 1 trong 100 cạnh.</p>
+                        <p>Nếu đồ thị không 3-colorable, tồn tại ít nhất 1 cạnh "bad".</p>
+                        <p>Xác suất tránh được bad edge: (99/100)</p>
+                        <p>Sau 50 vòng: (99/100)^50 ≈ 0.605</p>
+                    </details>
+                </div>
+            </div>
+            
+            <!-- Challenge Section -->
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 12px; margin: 20px 0;">
+                <h3>🏆 Thử Thách Nâng Cao</h3>
+                
+                <div style="background: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <h4>Challenge 1: Thiết Kế ZK Protocol</h4>
+                    <p><strong>Bài toán:</strong> Thiết kế một ZK protocol để chứng minh "Tôi biết một số x sao cho x^2 + 2x + 1 = 0 mod p" mà không tiết lộ x.</p>
+                    
+                    <textarea id="challenge1-answer" placeholder="Mô tả protocol của bạn (các bước, commitment, challenge, response, verification)..." style="width: 100%; height: 150px; padding: 15px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #a855f7; border-radius: 8px; font-family: monospace;"></textarea>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #a855f7; font-weight: bold;">💡 Xem Gợi Ý Giải</summary>
+                        <div style="margin-top: 15px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+                            <p><strong>Nhận xét:</strong> x^2 + 2x + 1 = (x+1)^2 = 0 mod p → x = -1 mod p</p>
+                            <p><strong>Protocol đơn giản:</strong></p>
+                            <ol>
+                                <li><strong>Commit:</strong> Prover chọn random r, gửi commitment C = g^r mod p</li>
+                                <li><strong>Challenge:</strong> Verifier gửi random c</li>
+                                <li><strong>Response:</strong> Prover tính s = r + c·x mod (p-1), gửi s</li>
+                                <li><strong>Verify:</strong> Check g^s = C · (g^x)^c và (x+1)^2 = 0 mod p</li>
+                            </ol>
+                            <p style="margin-top: 10px;"><strong>Hoặc protocol thông minh hơn:</strong></p>
+                            <p>Sử dụng Pedersen commitment hoặc polynomial commitment để commit x, sau đó prove polynomial equation holds.</p>
+                        </div>
+                    </details>
+                </div>
+                
+                <div style="background: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                    <h4>Challenge 2: Phân Tích Use Case</h4>
+                    <p><strong>Tình huống:</strong> Một sàn DEX muốn implement private trading nhưng vẫn phải tuân thủ regulations (chặn địa chỉ OFAC).</p>
+                    <p><strong>Câu hỏi:</strong> Thiết kế hệ thống sử dụng ZKP để đạt được cả privacy VÀ compliance. Liệt kê các proof cần thiết.</p>
+                    
+                    <textarea id="challenge2-answer" placeholder="Mô tả thiết kế của bạn..." style="width: 100%; height: 150px; padding: 15px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #22c55e; border-radius: 8px; font-family: monospace;"></textarea>
+                    
+                    <details style="margin-top: 15px;">
+                        <summary style="cursor: pointer; color: #22c55e; font-weight: bold;">💡 Xem Ý Tưởng Giải</summary>
+                        <div style="margin-top: 15px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 8px;">
+                            <p><strong>Giải pháp kết hợp:</strong></p>
+                            <ol>
+                                <li><strong>KYC với ZK:</strong> User làm KYC với trusted third party, nhận credential</li>
+                                <li><strong>Proof of Non-Inclusion:</strong> Chứng minh address KHÔNG trong OFAC list (Merkle non-membership proof)</li>
+                                <li><strong>Private Trading:</strong> Dùng zk-SNARK để prove:
+                                    <ul>
+                                        <li>✅ Có KYC credential hợp lệ</li>
+                                        <li>✅ Không trong blacklist</li>
+                                        <li>✅ Có đủ funds để trade</li>
+                                        <li>🔒 Mà KHÔNG lộ identity, địa chỉ, amount</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Emergency Override:</strong> Cơ chế multi-sig để reveal identity khi cần thiết (court order)</li>
+                            </ol>
+                            <p style="margin-top: 10px;"><strong>Technologies:</strong> Aztec Protocol, Tornado Cash Nova, Semaphore</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+        
+        <div class="math-formula">
+            <h3>📚 Further Topics and Open Problems</h3>
+            
+            <h4>Advanced Concepts</h4>
+            <p>• <strong>Recursive proof composition:</strong> Prove verification of another proof (enables IVC - Incrementally Verifiable Computation)</p>
+            <p>• <strong>Lookup arguments:</strong> Prove value is in predefined table (Plookup, Halo2)</p>
+            <p>• <strong>Vector commitments:</strong> Commit to vector, open at specific positions</p>
+            <p>• <strong>Aggregation:</strong> Combine multiple proofs into single proof (SnarkPack)</p>
+            
+            <h4>Open Research Questions</h4>
+            <p>1. Can we achieve \(O(1)\) proof size with \(O(\log n)\) prover time and no trusted setup?</p>
+            <p>2. Fully homomorphic proof systems: can we operate on proofs without decryption?</p>
+            <p>3. Practical post-quantum SNARKs with reasonable proof sizes?</p>
+            <p>4. Better concrete efficiency for large-scale zk-EVM (Ethereum Virtual Machine) proofs?</p>
         </div>
     </div>
 
@@ -1089,6 +2517,458 @@
                 MathJax.typesetPromise();
             }
         };
+        
+        /**
+         * Helper: Sleep function
+         */
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // ==================== AGE VERIFICATION DEMO ====================
+        
+        /**
+         * Tạo ZK Proof cho Age Verification
+         */
+        async function generateAgeProof() {
+            const name = document.getElementById('userName').value;
+            const age = parseInt(document.getElementById('userAge').value);
+            const threshold = parseInt(document.getElementById('ageThreshold').value);
+            
+            const infoDiv = document.getElementById('ageVerifyInfo');
+            const stepsDiv = document.getElementById('ageProtocolSteps');
+            const stepsContent = document.getElementById('ageStepsContent');
+            
+            // Clear previous results
+            stepsContent.innerHTML = '';
+            stepsDiv.style.display = 'block';
+            
+            // Step 1: Generate commitment
+            addAgeStep(stepsContent, '🔒 Bước 1: Tạo Commitment', 'pending');
+            await sleep(500);
+            
+            const salt = Math.random().toString(36).substring(7);
+            const commitment = CryptoJS.SHA256(age.toString() + salt).toString().substring(0, 16);
+            
+            updateAgeStep(stepsContent, 0, '🔒 Bước 1: Tạo Commitment', 'success', `
+                <p><strong>User tạo commitment:</strong></p>
+                <p style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    C = Hash(${age} + "${salt}") = ${commitment}
+                </p>
+                <p style="font-size: 0.9em; color: #888;">
+                    ✅ Commitment được gửi cho verifier<br>
+                    🔒 Verifier KHÔNG thể biết tuổi từ commitment này
+                </p>
+            `);
+            
+            await sleep(1000);
+            
+            // Step 2: Create range proof
+            addAgeStep(stepsContent, '📊 Bước 2: Tạo Range Proof', 'pending');
+            await sleep(500);
+            
+            const meetsRequirement = age >= threshold;
+            const proofData = {
+                valid: meetsRequirement,
+                diff: meetsRequirement ? age - threshold : null
+            };
+            
+            updateAgeStep(stepsContent, 1, '📊 Bước 2: Tạo Range Proof', 'success', `
+                <p><strong>User chứng minh: age ≥ ${threshold}</strong></p>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <p>Sử dụng <strong>Bulletproofs/Range Proof</strong></p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">
+                        • Input (private): age = ${age}<br>
+                        • Threshold (public): T = ${threshold}<br>
+                        • Diff: age - T = ${meetsRequirement ? proofData.diff : 'N/A'}<br>
+                        • Valid: ${meetsRequirement ? '✅ Yes (diff ≥ 0)' : '❌ No (diff < 0)'}
+                    </p>
+                </div>
+                <p style="font-size: 0.9em; color: #888;">
+                    🔒 Proof KHÔNG tiết lộ tuổi chính xác, chỉ chứng minh điều kiện!
+                </p>
+            `);
+            
+            await sleep(1000);
+            
+            // Step 3: Verification
+            addAgeStep(stepsContent, '✅ Bước 3: Verifier Kiểm Tra', 'pending');
+            await sleep(500);
+            
+            updateAgeStep(stepsContent, 2, '✅ Bước 3: Verifier Kiểm Tra', 
+                meetsRequirement ? 'success' : 'error', `
+                <p><strong>Verifier xác minh proof:</strong></p>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <p>1. ✅ Commitment hợp lệ</p>
+                    <p>2. ${meetsRequirement ? '✅' : '❌'} Range proof hợp lệ</p>
+                    <p>3. ✅ Signature từ trusted authority valid</p>
+                </div>
+            `);
+            
+            await sleep(500);
+            
+            // Final result
+            if (meetsRequirement) {
+                infoDiv.style.background = 'rgba(34, 197, 94, 0.2)';
+                infoDiv.style.border = '2px solid #22c55e';
+                infoDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">✅</div>
+                        <h3 style="color: #22c55e; margin: 0 0 15px 0;">XÁC MINH THÀNH CÔNG!</h3>
+                        <div style="font-size: 1.2em; margin: 15px 0;">
+                            <strong>Kết quả verifier nhận được:</strong>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                ✅ <strong>User đủ điều kiện</strong> (≥ ${threshold} tuổi)
+                            </p>
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                🔒 <strong>Tuổi chính xác:</strong> <span style="color: #ef4444;">KHÔNG BIẾT</span>
+                            </p>
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                🔒 <strong>Tên:</strong> <span style="color: #ef4444;">KHÔNG BIẾT</span>
+                            </p>
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                🔒 <strong>Thông tin khác:</strong> <span style="color: #ef4444;">KHÔNG BIẾT</span>
+                            </p>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.2); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <strong>🎉 Privacy được bảo vệ hoàn toàn!</strong><br>
+                            <span style="font-size: 0.9em;">Verifier chỉ biết điều kiện được thỏa mãn, không biết dữ liệu cụ thể</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                infoDiv.style.background = 'rgba(239, 68, 68, 0.2)';
+                infoDiv.style.border = '2px solid #ef4444';
+                infoDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">❌</div>
+                        <h3 style="color: #ef4444; margin: 0 0 15px 0;">KHÔNG ĐỦ ĐIỀU KIỆN</h3>
+                        <div style="font-size: 1.2em; margin: 15px 0;">
+                            <strong>Kết quả verifier nhận được:</strong>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: left;">
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                ❌ <strong>User KHÔNG đủ điều kiện</strong> (< ${threshold} tuổi)
+                            </p>
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                🔒 <strong>Tuổi chính xác:</strong> <span style="color: #ef4444;">VẪN KHÔNG BIẾT</span>
+                            </p>
+                            <p style="font-size: 1.1em; margin: 10px 0;">
+                                🔒 <strong>Tên:</strong> <span style="color: #ef4444;">VẪN KHÔNG BIẾT</span>
+                            </p>
+                        </div>
+                        <div style="background: rgba(245, 158, 11, 0.2); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                            <strong>💡 Lưu ý quan trọng:</strong><br>
+                            <span style="font-size: 0.9em;">Ngay cả khi KHÔNG pass, verifier vẫn không biết tuổi chính xác của bạn!</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
+         * Thêm một step vào age verification protocol
+         */
+        function addAgeStep(container, title, status) {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'age-step';
+            stepDiv.style.cssText = 'background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #a855f7;';
+            
+            let icon = '⏳';
+            let color = '#f59e0b';
+            if (status === 'success') {
+                icon = '✅';
+                color = '#22c55e';
+            } else if (status === 'error') {
+                icon = '❌';
+                color = '#ef4444';
+            }
+            
+            stepDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 1.5em; margin-right: 10px;">${icon}</span>
+                    <h5 style="margin: 0; color: ${color};">${title}</h5>
+                </div>
+                <div class="step-content" style="margin-left: 40px;"></div>
+            `;
+            
+            container.appendChild(stepDiv);
+        }
+        
+        /**
+         * Cập nhật một step đã tồn tại
+         */
+        function updateAgeStep(container, index, title, status, content) {
+            const steps = container.getElementsByClassName('age-step');
+            if (index >= steps.length) return;
+            
+            const stepDiv = steps[index];
+            
+            let icon = '⏳';
+            let color = '#f59e0b';
+            if (status === 'success') {
+                icon = '✅';
+                color = '#22c55e';
+            } else if (status === 'error') {
+                icon = '❌';
+                color = '#ef4444';
+            }
+            
+            stepDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-size: 1.5em; margin-right: 10px;">${icon}</span>
+                    <h5 style="margin: 0; color: ${color};">${title}</h5>
+                </div>
+                <div class="step-content" style="margin-left: 40px;">${content}</div>
+            `;
+        }
+        
+        // ==================== QUIZ FUNCTIONS ====================
+        let quizScore = { correct: 0, total: 5 };
+        
+        function checkQuiz1(elem) {
+            const feedback = document.getElementById('q1-feedback');
+            feedback.style.display = 'block';
+            
+            if (elem.value === 'b') {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = '<strong>✅ Chính xác!</strong><p>Ba tính chất cốt lõi của ZKP là: <strong>Completeness</strong> (nếu đúng thì thuyết phục được), <strong>Soundness</strong> (nếu sai thì không lừa được), và <strong>Zero-Knowledge</strong> (không tiết lộ thông tin).</p>';
+                quizScore.correct++;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = '<strong>❌ Chưa đúng!</strong><p>Đáp án đúng là <strong>B. Completeness, Soundness, Zero-Knowledge</strong>. Đây là ba trụ cột quan trọng nhất của ZKP.</p>';
+            }
+            checkQuizComplete();
+        }
+        
+        function checkQuiz2(elem) {
+            const feedback = document.getElementById('q2-feedback');
+            feedback.style.display = 'block';
+            
+            if (elem.value === 'c') {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = '<strong>✅ Chính xác!</strong><p>Sau 10 vòng, xác suất = (1/2)^10 = 1/1024 ≈ 0.098%. Điều này chứng tỏ sau nhiều vòng, rất khó lừa dối!</p>';
+                quizScore.correct++;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = '<strong>❌ Chưa đúng!</strong><p>Mỗi vòng có xác suất 50% đoán đúng. Sau 10 vòng: (1/2)^10 = 1/1024 ≈ <strong>0.098%</strong>.</p>';
+            }
+            checkQuizComplete();
+        }
+        
+        function checkQuiz3(elem) {
+            const feedback = document.getElementById('q3-feedback');
+            feedback.style.display = 'block';
+            
+            if (elem.value === 'b') {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = '<strong>✅ Chính xác!</strong><p>SNARKs cần trusted setup và dựa trên bilinear pairings (không post-quantum). STARKs transparent (không cần trusted setup) và post-quantum secure dựa trên hash functions!</p>';
+                quizScore.correct++;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = '<strong>❌ Chưa đúng!</strong><p>Điểm khác biệt chính: <strong>STARKs không cần trusted setup và post-quantum secure</strong>, trong khi SNARKs cần trusted setup nhưng proof nhỏ hơn.</p>';
+            }
+            checkQuizComplete();
+        }
+        
+        function checkQuiz4(elem) {
+            const feedback = document.getElementById('q4-feedback');
+            feedback.style.display = 'block';
+            
+            if (elem.value === 'b') {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = '<strong>✅ Chính xác!</strong><p>Schnorr protocol chứng minh kiến thức về discrete logarithm x, biết rằng y = g^x mod p, mà không tiết lộ x!</p>';
+                quizScore.correct++;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = '<strong>❌ Chưa đúng!</strong><p>Schnorr protocol chứng minh kiến thức về <strong>discrete logarithm</strong>: biết x sao cho y = g^x mod p.</p>';
+            }
+            checkQuizComplete();
+        }
+        
+        function checkQuiz5(elem) {
+            const feedback = document.getElementById('q5-feedback');
+            feedback.style.display = 'block';
+            
+            if (elem.value === 'b') {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = '<strong>✅ Chính xác!</strong><p>ZK-Rollups gom hàng nghìn giao dịch off-chain, tạo 1 proof duy nhất chứng minh tính đúng đắn, và chỉ đăng proof đó lên mainnet. Giảm gas 40-100x!</p>';
+                quizScore.correct++;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = '<strong>❌ Chưa đúng!</strong><p>ZK-Rollups <strong>gom nhiều giao dịch off-chain và chỉ đăng 1 proof lên mainnet</strong>, giảm số lượng dữ liệu cần lưu on-chain.</p>';
+            }
+            checkQuizComplete();
+        }
+        
+        function checkQuizComplete() {
+            // Check if all questions answered
+            let answeredCount = 0;
+            for (let i = 1; i <= 5; i++) {
+                const radios = document.getElementsByName('q' + i);
+                for (let radio of radios) {
+                    if (radio.checked) {
+                        answeredCount++;
+                        break;
+                    }
+                }
+            }
+            
+            if (answeredCount === 5) {
+                const summary = document.getElementById('quiz-summary');
+                const scoreDiv = document.getElementById('quiz-score');
+                const messageDiv = document.getElementById('quiz-message');
+                
+                summary.style.display = 'block';
+                scoreDiv.textContent = `${quizScore.correct}/5`;
+                
+                if (quizScore.correct === 5) {
+                    scoreDiv.style.color = '#22c55e';
+                    messageDiv.innerHTML = '🏆 <strong>Hoàn Hảo!</strong> Bạn đã nắm vững kiến thức về Zero-Knowledge Proofs!';
+                } else if (quizScore.correct >= 3) {
+                    scoreDiv.style.color = '#f59e0b';
+                    messageDiv.innerHTML = '👍 <strong>Khá tốt!</strong> Bạn hiểu được nền tảng cơ bản. Đọc lại các phần chưa đúng để hiểu sâu hơn!';
+                } else {
+                    scoreDiv.style.color = '#ef4444';
+                    messageDiv.innerHTML = '📚 <strong>Cần ôn tập thêm!</strong> Hãy đọc lại nội dung và thử lại nhé!';
+                }
+                
+                summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // ==================== EXERCISE FUNCTIONS ====================
+        
+        function checkExercise1() {
+            const answer = parseInt(document.getElementById('ex1-answer').value);
+            const feedback = document.getElementById('ex1-feedback');
+            
+            if (answer === 128) {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = `
+                    <h4 style="color: #22c55e; margin: 0 0 10px 0;">✅ Chính xác!</h4>
+                    <p>Để đạt soundness error ≤ 2^-128, cần ít nhất <strong>128 vòng</strong>.</p>
+                    <p><strong>Giải thích:</strong></p>
+                    <p>• Mỗi vòng: xác suất gian lận thành công = 1/2</p>
+                    <p>• Sau n vòng: (1/2)^n = 2^-n</p>
+                    <p>• Để 2^-n ≤ 2^-128 → n ≥ 128</p>
+                `;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = `
+                    <h4 style="color: #ef4444; margin: 0 0 10px 0;">❌ Chưa đúng!</h4>
+                    <p>Đáp án đúng là <strong>128 vòng</strong>.</p>
+                    <p>Vì (1/2)^128 = 2^-128, đúng bằng security level yêu cầu!</p>
+                `;
+            }
+        }
+        
+        function checkExercise2() {
+            const answer1 = parseInt(document.getElementById('ex2-answer1').value);
+            const answer2 = parseInt(document.getElementById('ex2-answer2').value);
+            const feedback = document.getElementById('ex2-feedback');
+            
+            // Calculate correct values
+            // g^s = 2^9 mod 23 = 512 mod 23 = 6
+            const correctGs = 6;
+            // y^c = 8^5 mod 23
+            // 8^2 = 64 mod 23 = 18
+            // 8^4 = 18^2 = 324 mod 23 = 2
+            // 8^5 = 2 * 8 = 16
+            // t * y^c = 16 * 16 = 256 mod 23 = 3
+            const correctYc = 16;
+            const correctTYc = 3;
+            
+            // Actually g^s should equal t * y^c, let's recalculate
+            // Actually checking: 2^9 = 512, 512 mod 23 = 512 - 22*23 = 512 - 506 = 6
+            // 16 * 8^5 mod 23
+            
+            if (answer1 === 6 && answer2 === 3) {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = `
+                    <h4 style="color: #22c55e; margin: 0 0 10px 0;">✅ Chính xác!</h4>
+                    <p><strong>g^s mod p = 2^9 mod 23 = 6</strong></p>
+                    <p><strong>t × y^c mod p = 16 × 8^5 mod 23 = 16 × 16 mod 23 = 3</strong></p>
+                    <p style="margin-top: 10px; padding: 10px; background: rgba(239, 68, 68, 0.2); border-radius: 5px;">
+                        ⚠️ <strong>Lưu ý:</strong> Hai giá trị KHÔNG bằng nhau (6 ≠ 3), có nghĩa là proof này <strong>KHÔNG hợp lệ</strong>!
+                        Điều này chứng tỏ prover không biết x hoặc đã cung cấp giá trị sai.
+                    </p>
+                `;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = `
+                    <h4 style="color: #ef4444; margin: 0 0 10px 0;">❌ Chưa đúng!</h4>
+                    <p>Đáp án đúng:</p>
+                    <p><strong>g^s mod p = 6</strong></p>
+                    <p><strong>t × y^c mod p = 3</strong></p>
+                    <p style="margin-top: 10px;">Tính toán:</p>
+                    <p>• 2^9 = 512, 512 mod 23 = 6</p>
+                    <p>• 8^5 mod 23 = 16, 16 × 16 mod 23 = 256 mod 23 = 3</p>
+                `;
+            }
+        }
+        
+        function checkExercise3() {
+            const answer1 = parseFloat(document.getElementById('ex3-answer1').value);
+            const answer2 = document.getElementById('ex3-answer2').value.toLowerCase();
+            const feedback = document.getElementById('ex3-feedback');
+            
+            const isAnswer1Correct = answer1 >= 0.98 && answer1 <= 1.0;
+            const isAnswer2Correct = answer2.includes('10') || answer2.includes('small') || answer2.includes('nhỏ');
+            
+            if (isAnswer1Correct && isAnswer2Correct) {
+                feedback.style.background = 'rgba(34, 197, 94, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #22c55e';
+                feedback.innerHTML = `
+                    <h4 style="color: #22c55e; margin: 0 0 10px 0;">✅ Rất tốt!</h4>
+                    <p><strong>Xác suất qua 1 vòng:</strong> 99/100 = 0.99</p>
+                    <p><strong>Xác suất qua 50 vòng:</strong> (99/100)^50 ≈ 0.605 = 60.5%</p>
+                    <p style="margin-top: 10px;"><strong>Giải thích:</strong></p>
+                    <p>• Với đồ thị có 100 cạnh, nếu không 3-colorable thì có ít nhất 1 cạnh "bad"</p>
+                    <p>• Mỗi vòng, verifier chọn random 1 cạnh: 99/100 cơ hội tránh được bad edge</p>
+                    <p>• Sau 50 vòng: (0.99)^50 ≈ 60.5% - vẫn khá cao!</p>
+                    <p>• <strong>Kết luận:</strong> Cần nhiều vòng hơn (khoảng 128*100 vòng) để đạt security tốt!</p>
+                `;
+            } else {
+                feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+                feedback.style.padding = '15px';
+                feedback.style.borderRadius = '8px';
+                feedback.style.border = '2px solid #ef4444';
+                feedback.innerHTML = `
+                    <h4 style="color: #ef4444; margin: 0 0 10px 0;">❌ Xem lại nhé!</h4>
+                    <p><strong>Đáp án:</strong></p>
+                    <p>• Xác suất qua 1 vòng: <strong>0.99 (99/100)</strong></p>
+                    <p>• Xác suất qua 50 vòng: <strong>≈0.605 (60.5%)</strong></p>
+                    <p>Với |E| = 100 cạnh, có ít nhất 1 bad edge. Mỗi vòng có 99/100 cơ hội tránh được.</p>
+                `;
+            }
+        }
     </script>
 
 <section class="video-tham-khao" aria-label="Video tham khảo">

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimization - Tối ưu hóa toán học</title>
+    <script src="../mathjax-config.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .category-section {
+            margin-bottom: 50px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-title {
+            color: #4ecdc4;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(78, 205, 196, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .category-description {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 25px;
+        }
+
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .lesson-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lesson-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+            transition: transform 0.6s ease;
+            transform: rotate(-45deg) translateX(-100%);
+        }
+
+        .lesson-card:hover::before {
+            transform: rotate(-45deg) translateX(100%);
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(78, 205, 196, 0.3);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .lesson-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .lesson-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        .lesson-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .lesson-difficulty {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-beginner {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .difficulty-intermediate {
+            background: rgba(255, 193, 7, 0.3);
+            color: #FFC107;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+
+        .difficulty-advanced {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .lesson-features {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .lesson-features li {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .lesson-features li::before {
+            content: '✓';
+            color: #4ecdc4;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.05);
+        }
+
+        .coming-soon {
+            opacity: 0.7;
+            position: relative;
+        }
+
+        .coming-soon::after {
+            content: 'Coming Soon';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 193, 7, 0.9);
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .lessons-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lesson-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Optimization</h1>
+        <p>Khám phá thế giới tối ưu hóa toán học - từ gradient descent cơ bản đến các thuật toán hiện đại</p>
+    </div>
+
+    <div class="container">
+        <!-- Gradient-Based Methods -->
+        <div class="category-section">
+            <h2 class="category-title">📈 Gradient-Based Methods</h2>
+            <p class="category-description">
+                Các phương pháp tối ưu dựa trên gradient - nền tảng của machine learning và deep learning hiện đại.
+            </p>
+            
+            <div class="lessons-grid">
+                <div class="lesson-card" onclick="window.location.href='gradient_descent_illustration.html'">
+                    <div class="lesson-icon">📊</div>
+                    <div class="lesson-title">Gradient Descent Fundamentals</div>
+                    <div class="lesson-difficulty difficulty-beginner">Beginner</div>
+                    <div class="lesson-description">
+                        Hiểu về thuật toán tối ưu cơ bản nhất - Gradient Descent. Từ lý thuyết đến visualization tương tác.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Lý thuyết toán học chi tiết</li>
+                        <li>Visualization 2D interactive</li>
+                        <li>Multiple test functions</li>
+                        <li>Performance analysis</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='gradient_descent_demo.html'">
+                    <div class="lesson-icon">🌄</div>
+                    <div class="lesson-title">3D Gradient Descent Demo</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Trải nghiệm gradient descent trong không gian 3D với các hàm test function phức tạp.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>3D visualization với Three.js</li>
+                        <li>Interactive controls</li>
+                        <li>Multiple algorithms</li>
+                        <li>Real-time path tracking</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='backtracking_line_search.html'" style="border: 2px solid #4ecdc4;">
+                    <div class="lesson-icon">🎯</div>
+                    <div class="lesson-title">Backtracking Line Search</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Kỹ thuật chọn step size thích ứng trong gradient descent - tự động tối ưu learning rate.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Armijo condition theory</li>
+                        <li>Interactive backtracking demo</li>
+                        <li>Performance comparison</li>
+                        <li>Step-by-step analysis</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='stochastic_gradient_demo.html'">
+                    <div class="lesson-icon">🎲</div>
+                    <div class="lesson-title">Stochastic Gradient Descent</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        SGD và các biến thể - thuật toán tối ưu cho big data và machine learning.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>SGD vs Batch GD comparison</li>
+                        <li>Mini-batch visualization</li>
+                        <li>Noise effects analysis</li>
+                        <li>Convergence properties</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='stochastic_gradient_illustration.html'">
+                    <div class="lesson-icon">📈</div>
+                    <div class="lesson-title">SGD Advanced Illustration</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Phân tích sâu về SGD với momentum, adaptive learning rates và escape mechanisms.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Momentum effects</li>
+                        <li>Local minima escape</li>
+                        <li>Adaptive methods</li>
+                        <li>Theoretical analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second-Order Methods -->
+        <div class="category-section">
+            <h2 class="category-title">🔬 Second-Order Methods</h2>
+            <p class="category-description">
+                Các phương pháp tối ưu bậc hai sử dụng thông tin về curvature để hội tụ nhanh hơn.
+            </p>
+            
+            <div class="lessons-grid">
+                <div class="lesson-card" onclick="window.location.href='newton_method_illustration.html'">
+                    <div class="lesson-icon">🧮</div>
+                    <div class="lesson-title">Newton's Method</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Phương pháp Newton - sử dụng Hessian matrix để hội tụ quadratic.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Hessian matrix theory</li>
+                        <li>Quadratic convergence</li>
+                        <li>Stability analysis</li>
+                        <li>Implementation details</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='newtons_method_demo.html'">
+                    <div class="lesson-icon">⚡</div>
+                    <div class="lesson-title">Newton's Method Demo</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Demo tương tác của Newton's method với visualization của ellipse và curvature.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Interactive visualization</li>
+                        <li>Curvature analysis</li>
+                        <li>Step size effects</li>
+                        <li>Convergence behavior</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='quasi_newton_demo.html'">
+                    <div class="lesson-icon">🔍</div>
+                    <div class="lesson-title">Quasi-Newton Methods</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        BFGS và L-BFGS - approximating Hessian cho large-scale optimization.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>BFGS algorithm</li>
+                        <li>Hessian approximation</li>
+                        <li>Memory efficiency</li>
+                        <li>Practical applications</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='quasi_newton_illustration.html'">
+                    <div class="lesson-icon">📊</div>
+                    <div class="lesson-title">Quasi-Newton Illustration</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Visualization chi tiết của Quasi-Newton methods và so sánh hiệu suất.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>BFGS vs L-BFGS</li>
+                        <li>Performance comparison</li>
+                        <li>Memory analysis</li>
+                        <li>Convergence study</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constrained Optimization -->
+        <div class="category-section">
+            <h2 class="category-title">🔗 Constrained Optimization</h2>
+            <p class="category-description">
+                Tối ưu hóa với ràng buộc - Lagrange multipliers, KKT conditions và practical methods.
+            </p>
+            
+            <div class="lessons-grid">
+                <div class="lesson-card" onclick="window.location.href='lagrangian_fixed.html'">
+                    <div class="lesson-icon">⚖️</div>
+                    <div class="lesson-title">Lagrangian Methods</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Phương pháp Lagrange multipliers cho constrained optimization.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Lagrange theory</li>
+                        <li>Constraint handling</li>
+                        <li>Dual formulation</li>
+                        <li>Interactive examples</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='lagrangian_kkt_conditions.html'">
+                    <div class="lesson-icon">📐</div>
+                    <div class="lesson-title">KKT Conditions</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Karush-Kuhn-Tucker conditions cho inequality constraints.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>KKT theory</li>
+                        <li>Complementary slackness</li>
+                        <li>Optimality conditions</li>
+                        <li>Practical examples</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='kkt_conditions_demo.html'">
+                    <div class="lesson-icon">🎮</div>
+                    <div class="lesson-title">KKT Interactive Demo</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Demo tương tác của KKT conditions với constraint visualization.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Interactive constraints</li>
+                        <li>KKT visualization</li>
+                        <li>Feasible region</li>
+                        <li>Optimality analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Topics -->
+        <div class="category-section">
+            <h2 class="category-title">🚀 Advanced Topics</h2>
+            <p class="category-description">
+                Các chủ đề nâng cao: proximal methods, subgradients, parallel computing và modern techniques.
+            </p>
+            
+            <div class="lessons-grid">
+                <div class="lesson-card" onclick="window.location.href='proximal_gradient_demo.html'">
+                    <div class="lesson-icon">🎯</div>
+                    <div class="lesson-title">Proximal Gradient Methods</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Proximal operators cho non-smooth optimization và sparsity.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Proximal operators</li>
+                        <li>FISTA algorithm</li>
+                        <li>Sparsity promotion</li>
+                        <li>L1 regularization</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='proximal_gradient_illustration.html'">
+                    <div class="lesson-icon">📈</div>
+                    <div class="lesson-title">Proximal Methods Illustration</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Visualization của proximal gradient methods và accelerated variants.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>FISTA visualization</li>
+                        <li>Acceleration effects</li>
+                        <li>Non-smooth functions</li>
+                        <li>Convergence analysis</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='subgradient_demo.html'">
+                    <div class="lesson-icon">🔺</div>
+                    <div class="lesson-title">Subgradient Methods</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Subgradients cho non-differentiable functions và convex analysis.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Subgradient theory</li>
+                        <li>Non-smooth optimization</li>
+                        <li>Convex analysis</li>
+                        <li>Convergence rates</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='parallel_computing_illustration.html'">
+                    <div class="lesson-icon">⚡</div>
+                    <div class="lesson-title">Parallel Optimization</div>
+                    <div class="lesson-difficulty difficulty-advanced">Advanced</div>
+                    <div class="lesson-description">
+                        Parallel và distributed optimization cho large-scale problems.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Parallel algorithms</li>
+                        <li>Distributed computing</li>
+                        <li>Synchronization</li>
+                        <li>Scalability analysis</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='loss_function_landscapes.html'">
+                    <div class="lesson-icon">🏔️</div>
+                    <div class="lesson-title">Loss Function Landscapes</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Khám phá địa hình của loss functions trong deep learning.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Loss landscapes</li>
+                        <li>Local minima</li>
+                        <li>Saddle points</li>
+                        <li>Visualization tools</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card" onclick="window.location.href='Nelder-Mead.html'">
+                    <div class="lesson-icon">🔍</div>
+                    <div class="lesson-title">Nelder-Mead Simplex</div>
+                    <div class="lesson-difficulty difficulty-intermediate">Intermediate</div>
+                    <div class="lesson-description">
+                        Derivative-free optimization với Nelder-Mead simplex method.
+                    </div>
+                    <ul class="lesson-features">
+                        <li>Simplex algorithm</li>
+                        <li>Derivative-free</li>
+                        <li>Reflection/expansion</li>
+                        <li>Practical applications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <a href="../index.html" class="nav-button">🏠 Trang chủ</a>
+            <a href="../linear-algebra/index.html" class="nav-button">🔢 Linear Algebra</a>
+            <a href="../calculus/index.html" class="nav-button">📈 Calculus</a>
+            <a href="../machine-learning/index.html" class="nav-button">🤖 Machine Learning</a>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.lesson-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+
