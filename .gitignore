@@ -63,3 +63,7 @@ build/
 # Temporary files
 tmp/
 temp/
+
+# Python bytecode
+__pycache__/
+*.pyc
