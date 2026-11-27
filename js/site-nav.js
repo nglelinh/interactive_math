@@ -191,9 +191,10 @@
     footer.appendChild(ghLink);
 
     toggle.addEventListener("click", function () {
-      if (window.innerWidth >= 1080) {
+      if (window.innerWidth >= 1180) {
         var collapsed = document.body.classList.toggle("wired-sidebar-collapsed");
         toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 240);
       } else {
         var open = nav.classList.toggle("is-mobile-open");
         toggle.setAttribute("aria-expanded", open ? "true" : "false");

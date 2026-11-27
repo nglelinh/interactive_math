@@ -1,5 +1,5 @@
 /*
- * How It's Wired — Inspired Interactive Manual Theme & Layout
+ * How It's Wired — Inspired Interactive Manual Theme & Responsive Layout
  * Warm parchment blueprint canvas (#f6eddd), sand sidebar rail (#e9dcca),
  * deep navy headings (#18213d), teal interactive accent (#1aa3a1),
  * Barlow / Barlow Semi Condensed / JetBrains Mono typography.
@@ -26,13 +26,19 @@
   --wired-sans: "Barlow", system-ui, -apple-system, sans-serif;
   --wired-cond: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
   --wired-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --wired-sidebar-w: 276px;
+  --wired-sidebar-w: 264px;
 }
 
-/* ── Base Canvas & Blueprint Paper ────────────────────────────── */
+/* ── Base Canvas, Overflow Safety & Blueprint Paper ───────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html {
   color-scheme: light;
   background-color: var(--wired-bg) !important;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -47,10 +53,13 @@ body {
   font-family: var(--wired-sans) !important;
   -webkit-font-smoothing: antialiased;
   margin: 0;
+  max-width: 100%;
+  overflow-x: clip;
   transition: padding-left 0.22s ease;
 }
 
-@media (min-width: 1080px) {
+/* Desktop wide (>= 1180px): persistent left rail */
+@media (min-width: 1180px) {
   body.wired-has-sidebar {
     padding-left: var(--wired-sidebar-w) !important;
   }
@@ -59,9 +68,11 @@ body {
   }
 }
 
-@media (max-width: 1079px) {
+/* Tablet & Mobile (< 1180px): compact fixed top bar + drawer */
+@media (max-width: 1179px) {
   body.wired-has-sidebar {
-    padding-top: 56px !important;
+    padding-left: 0 !important;
+    padding-top: 64px !important;
   }
 }
 
@@ -82,15 +93,11 @@ body {
   transition: width 0.22s ease, transform 0.22s ease;
 }
 
-#site-nav * {
-  box-sizing: border-box;
-}
-
 #site-nav .wired-side-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 12px 12px;
+  padding: 12px;
   border-bottom: 1px solid var(--wired-line);
   flex-shrink: 0;
 }
@@ -191,10 +198,9 @@ body {
 #site-nav .wired-sub {
   display: none;
   list-style: none;
-  margin: 4px 0 8px;
+  margin: 4px 0 8px 12px;
   padding: 2px 0 2px 10px;
   border-left: 1.5px solid var(--wired-line);
-  margin-left: 12px;
 }
 
 #site-nav .wired-item.is-open > .wired-sub {
@@ -203,7 +209,7 @@ body {
 
 #site-nav .wired-lesson {
   display: block;
-  padding: 5px 9px;
+  padding: 6px 9px;
   margin: 2px 0;
   border-radius: 6px;
   font-size: 13px;
@@ -255,7 +261,7 @@ body {
 }
 
 /* Collapsed Desktop Rail (64px) */
-@media (min-width: 1080px) {
+@media (min-width: 1180px) {
   body.wired-sidebar-collapsed #site-nav {
     width: 64px;
   }
@@ -270,14 +276,14 @@ body {
   }
 }
 
-/* Mobile Top Bar + Slide-Over Drawer (< 1080px) */
-@media (max-width: 1079px) {
+/* Tablet & Mobile Top Bar + Full-Height Drawer (< 1180px) */
+@media (max-width: 1179px) {
   #site-nav {
     right: 0;
     bottom: auto;
     width: 100%;
     height: auto;
-    max-height: 100vh;
+    max-height: 100dvh;
     box-shadow: 0 2px 12px rgba(24, 33, 61, 0.08);
     border-bottom: 1.5px solid var(--wired-line);
   }
@@ -305,10 +311,22 @@ h1, h2, h3, h4,
   color: var(--wired-navy) !important;
   letter-spacing: 0.01em;
   text-shadow: none !important;
+  overflow-wrap: break-word;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  line-height: 1.28;
 }
 
 p, li, label, .theory-section p, .property-card p {
   color: var(--wired-ink);
+  overflow-wrap: break-word;
 }
 
 a {
@@ -317,6 +335,25 @@ a {
 
 code, pre, .formula, .math-display, .vector-info, .info-value {
   font-family: var(--wired-mono);
+}
+
+/* Responsive Overflow Protection for Math, Code, Tables, Media */
+pre,
+.formula,
+.math-display,
+.formula-box,
+mjx-container[display="true"] {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  max-width: 100%;
+}
+
+img, svg, canvas, video, iframe, .js-plotly-plot {
+  max-width: 100% !important;
 }
 
 /* Warm Manual Card Surfaces */
@@ -343,6 +380,7 @@ code, pre, .formula, .math-display, .vector-info, .info-value {
   border-radius: 12px !important;
   box-shadow: 0 2px 10px rgba(24, 33, 61, 0.05) !important;
   backdrop-filter: none !important;
+  max-width: 100%;
 }
 
 .theory-section,
@@ -354,6 +392,7 @@ code, pre, .formula, .math-display, .vector-info, .info-value {
   color: var(--wired-navy) !important;
   border: 1px solid var(--wired-line) !important;
   border-radius: 10px !important;
+  max-width: 100%;
 }
 
 /* Internal Lesson Tabs (.nav-container / .nav-tabs) */
@@ -364,6 +403,13 @@ code, pre, .formula, .math-display, .vector-info, .info-value {
   border-bottom: 1.5px solid var(--wired-line) !important;
   backdrop-filter: none !important;
   padding: 12px 16px !important;
+}
+
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap !important;
+  justify-content: center;
+  gap: 8px !important;
 }
 
 .nav-tab,
@@ -402,6 +448,7 @@ button.active:not(.wired-toggle):not(.wired-chapter-btn) {
 input[type="range"] {
   accent-color: var(--wired-teal) !important;
   cursor: pointer;
+  max-width: 100%;
 }
 
 input[type="text"],
@@ -413,9 +460,10 @@ textarea {
   border: 1.5px solid var(--wired-line) !important;
   border-radius: 7px !important;
   font-family: var(--wired-mono);
+  max-width: 100%;
 }
 
-/* Canvas Framing (Preserve internal canvas background for dark-mode drawings) */
+/* Canvas Framing */
 canvas {
   border: 1.5px solid var(--wired-line) !important;
   border-radius: 10px !important;
@@ -433,7 +481,7 @@ canvas {
   color: var(--wired-navy) !important;
 }
 
-/* ── Side-by-Side Stage + Right Inspector Panel (Desktop) ─────── */
+/* ── Desktop & Landscape Tablet (>= 900px): Stage + Right Inspector ─ */
 @media (min-width: 900px) {
   .interactive-container:has(> .controls),
   .interactive-container:has(> .controls-panel),
@@ -445,7 +493,7 @@ canvas {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
-    gap: 24px !important;
+    gap: 20px !important;
   }
 
   .canvas-container {
@@ -460,10 +508,95 @@ canvas {
   .main-content > .controls-panel,
   .container > .controls,
   .workspace > .controls {
-    flex: 0 0 350px !important;
-    width: 350px !important;
-    max-width: 380px !important;
+    flex: 0 0 clamp(290px, 31vw, 355px) !important;
+    width: clamp(290px, 31vw, 355px) !important;
+    max-width: 370px !important;
     position: sticky;
     top: 18px;
+  }
+}
+
+/* ── Mobile & Portrait Tablet (< 900px): Clean Single-Column Stack ─ */
+@media (max-width: 899px) {
+  .section {
+    padding: 16px 12px !important;
+    min-height: auto !important;
+  }
+
+  .container,
+  .main-container,
+  .theory-content,
+  .video-tham-khao,
+  .active-explorable,
+  .reel-video-section {
+    width: auto !important;
+    max-width: 100% !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+    padding: 16px 14px !important;
+  }
+
+  .interactive-container,
+  .main-content,
+  .demo-container,
+  .workspace,
+  .split-container,
+  .visualization-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .canvas-container {
+    width: 100% !important;
+    padding: 8px !important;
+    min-width: 0 !important;
+  }
+
+  .controls,
+  .controls-panel,
+  .control-panel,
+  .info-panel,
+  .results-panel,
+  .sidebar:not(#site-nav) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    position: static !important;
+    padding: 14px !important;
+  }
+
+  /* Collapse multi-column grids (1fr 1fr, 1fr 400px, minmax(400px,1fr)) */
+  .grid,
+  .content-grid,
+  .properties-grid,
+  .property-grid,
+  .lessons-grid,
+  .illustration-grid,
+  .illustrations-grid,
+  .cards-grid,
+  .topics-grid,
+  .controls-grid,
+  .demo-grid,
+  .two-column,
+  .three-column,
+  .comparison-grid,
+  .stats-grid,
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .nav-tab {
+    padding: 8px 14px !important;
+    font-size: 14px !important;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
