@@ -183,20 +183,41 @@
             margin: 0 0 15px 0;
         }
         
+        .interactive-container {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: flex-start;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .interactive-container {
+                flex-direction: column;
+            }
+            .controls {
+                width: 100% !important;
+                flex: 1 1 auto !important;
+            }
+        }
         .canvas-container {
+            min-width: 0;
             flex: 1;
             text-align: center;
             padding: 20px;
         }
         
         canvas {
+            max-width: 100%;
+            height: auto;
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.95);
         }
         
         .controls {
-            width: 350px;
+            flex: 0 0 360px;
+            width: 360px;
             background: rgba(0, 0, 0, 0.9);
             padding: 20px;
             border-left: 1px solid #444;
