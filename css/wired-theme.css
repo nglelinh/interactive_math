@@ -1,0 +1,469 @@
+/*
+ * How It's Wired — Inspired Interactive Manual Theme & Layout
+ * Warm parchment blueprint canvas (#f6eddd), sand sidebar rail (#e9dcca),
+ * deep navy headings (#18213d), teal interactive accent (#1aa3a1),
+ * Barlow / Barlow Semi Condensed / JetBrains Mono typography.
+ */
+
+:root {
+  --wired-bg: #f6eddd;
+  --wired-bg-deep: #efe3d1;
+  --wired-sidebar: #e9dcca;
+  --wired-card: #f9f2e5;
+  --wired-card-soft: rgba(250, 244, 233, 0.96);
+  --wired-code-bg: #f3e8d6;
+  --wired-line: #cec0ad;
+  --wired-line-soft: #e2d7c7;
+  --wired-navy: #18213d;
+  --wired-navy-2: #24304a;
+  --wired-ink: #3c4048;
+  --wired-muted: #696d74;
+  --wired-faint: #8f8476;
+  --wired-teal: #1aa3a1;
+  --wired-teal-deep: #147f7d;
+  --wired-copper: #c0652d;
+  --wired-track: #e3d8ca;
+  --wired-sans: "Barlow", system-ui, -apple-system, sans-serif;
+  --wired-cond: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --wired-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --wired-sidebar-w: 276px;
+}
+
+/* ── Base Canvas & Blueprint Paper ────────────────────────────── */
+html {
+  color-scheme: light;
+  background-color: var(--wired-bg) !important;
+}
+
+body {
+  background-color: var(--wired-bg) !important;
+  background-image:
+    radial-gradient(120% 90% at 45% 25%, rgba(255, 250, 240, 0.55), transparent 62%),
+    linear-gradient(90deg, rgba(206, 192, 173, 0.24) 1px, transparent 1px),
+    linear-gradient(rgba(206, 192, 173, 0.24) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 28px 28px, 28px 28px !important;
+  background-attachment: fixed !important;
+  color: var(--wired-ink) !important;
+  font-family: var(--wired-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  transition: padding-left 0.22s ease;
+}
+
+@media (min-width: 1080px) {
+  body.wired-has-sidebar {
+    padding-left: var(--wired-sidebar-w) !important;
+  }
+  body.wired-has-sidebar.wired-sidebar-collapsed {
+    padding-left: 64px !important;
+  }
+}
+
+@media (max-width: 1079px) {
+  body.wired-has-sidebar {
+    padding-top: 56px !important;
+  }
+}
+
+/* ── Left Sidebar Rail (#site-nav) ────────────────────────────── */
+#site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--wired-sidebar-w);
+  z-index: 2500;
+  background: linear-gradient(90deg, #e7d9c6 0%, var(--wired-sidebar) 75%, #eadecd 100%);
+  box-shadow: inset -1.5px 0 0 rgba(196, 176, 150, 0.65);
+  font-family: var(--wired-sans);
+  color: var(--wired-navy);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.22s ease, transform 0.22s ease;
+}
+
+#site-nav * {
+  box-sizing: border-box;
+}
+
+#site-nav .wired-side-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px 12px;
+  border-bottom: 1px solid var(--wired-line);
+  flex-shrink: 0;
+}
+
+#site-nav .wired-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: rgba(249, 242, 229, 0.85);
+  border: 1.5px solid var(--wired-line);
+  color: var(--wired-navy-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#site-nav .wired-toggle:hover {
+  background: var(--wired-card);
+  border-color: var(--wired-teal);
+  color: var(--wired-teal-deep);
+}
+
+#site-nav .wired-brand {
+  font-family: var(--wired-cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wired-navy);
+  text-decoration: none;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#site-nav .wired-brand:hover {
+  color: var(--wired-teal-deep);
+}
+
+#site-nav .wired-chapters {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 10px 10px 16px;
+}
+
+#site-nav .wired-item {
+  margin-bottom: 4px;
+}
+
+#site-nav .wired-chapter-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--wired-navy);
+  font-family: var(--wired-cond);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#site-nav .wired-chapter-btn:hover {
+  background: rgba(249, 242, 229, 0.72);
+  border-color: var(--wired-line-soft);
+}
+
+#site-nav .wired-item.is-current > .wired-chapter-btn,
+#site-nav .wired-item.is-open > .wired-chapter-btn {
+  background: var(--wired-card);
+  border-color: var(--wired-line);
+  color: var(--wired-navy);
+}
+
+#site-nav .wired-count {
+  font-family: var(--wired-mono);
+  font-size: 11px;
+  color: var(--wired-muted);
+  background: rgba(206, 192, 173, 0.35);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+#site-nav .wired-sub {
+  display: none;
+  list-style: none;
+  margin: 4px 0 8px;
+  padding: 2px 0 2px 10px;
+  border-left: 1.5px solid var(--wired-line);
+  margin-left: 12px;
+}
+
+#site-nav .wired-item.is-open > .wired-sub {
+  display: block;
+}
+
+#site-nav .wired-lesson {
+  display: block;
+  padding: 5px 9px;
+  margin: 2px 0;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--wired-ink);
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+#site-nav .wired-lesson:hover {
+  background: rgba(249, 242, 229, 0.85);
+  color: var(--wired-navy);
+}
+
+#site-nav .wired-lesson.is-current {
+  background: var(--wired-teal);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+#site-nav .wired-side-footer {
+  padding: 10px 12px;
+  border-top: 1px solid var(--wired-line);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+#site-nav .wired-foot-link {
+  flex: 1 1 auto;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 7px;
+  border: 1.5px solid var(--wired-line);
+  background: var(--wired-card);
+  color: var(--wired-navy);
+  font-family: var(--wired-cond);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+#site-nav .wired-foot-link:hover {
+  border-color: var(--wired-teal);
+  color: var(--wired-teal-deep);
+}
+
+/* Collapsed Desktop Rail (64px) */
+@media (min-width: 1080px) {
+  body.wired-sidebar-collapsed #site-nav {
+    width: 64px;
+  }
+  body.wired-sidebar-collapsed #site-nav .wired-brand,
+  body.wired-sidebar-collapsed #site-nav .wired-chapters,
+  body.wired-sidebar-collapsed #site-nav .wired-side-footer {
+    display: none;
+  }
+  body.wired-sidebar-collapsed #site-nav .wired-side-header {
+    justify-content: center;
+    border-bottom: none;
+  }
+}
+
+/* Mobile Top Bar + Slide-Over Drawer (< 1080px) */
+@media (max-width: 1079px) {
+  #site-nav {
+    right: 0;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    max-height: 100vh;
+    box-shadow: 0 2px 12px rgba(24, 33, 61, 0.08);
+    border-bottom: 1.5px solid var(--wired-line);
+  }
+  #site-nav .wired-chapters,
+  #site-nav .wired-side-footer {
+    display: none;
+  }
+  #site-nav.is-mobile-open {
+    bottom: 0;
+  }
+  #site-nav.is-mobile-open .wired-chapters {
+    display: block;
+  }
+  #site-nav.is-mobile-open .wired-side-footer {
+    display: flex;
+  }
+}
+
+/* ── Editorial Typography & Surfaces on All Lesson Pages ──────── */
+h1, h2, h3, h4,
+.theory-header h1,
+.section-title,
+.lesson-title {
+  font-family: var(--wired-cond) !important;
+  color: var(--wired-navy) !important;
+  letter-spacing: 0.01em;
+  text-shadow: none !important;
+}
+
+p, li, label, .theory-section p, .property-card p {
+  color: var(--wired-ink);
+}
+
+a {
+  color: var(--wired-teal-deep);
+}
+
+code, pre, .formula, .math-display, .vector-info, .info-value {
+  font-family: var(--wired-mono);
+}
+
+/* Warm Manual Card Surfaces */
+.container,
+.main-container,
+.theory-content,
+.property-card,
+.lesson-card,
+.illustration-card,
+.topic-card,
+.controls,
+.controls-panel,
+.control-panel,
+.control-group,
+.control-section,
+.info-panel,
+.results-panel,
+.video-tham-khao,
+.active-explorable,
+.reel-video-section {
+  background: var(--wired-card) !important;
+  color: var(--wired-ink) !important;
+  border: 1.5px solid var(--wired-line) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(24, 33, 61, 0.05) !important;
+  backdrop-filter: none !important;
+}
+
+.theory-section,
+.example-box,
+.formula-box,
+.highlight-box,
+.vector-info {
+  background: var(--wired-code-bg) !important;
+  color: var(--wired-navy) !important;
+  border: 1px solid var(--wired-line) !important;
+  border-radius: 10px !important;
+}
+
+/* Internal Lesson Tabs (.nav-container / .nav-tabs) */
+.nav-container {
+  position: relative !important;
+  top: auto !important;
+  background: var(--wired-bg-deep) !important;
+  border-bottom: 1.5px solid var(--wired-line) !important;
+  backdrop-filter: none !important;
+  padding: 12px 16px !important;
+}
+
+.nav-tab,
+.tab-btn,
+.tab-button,
+button:not(.wired-toggle):not(.wired-chapter-btn) {
+  font-family: var(--wired-cond) !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--wired-card) !important;
+  color: var(--wired-navy) !important;
+  border: 1.5px solid var(--wired-line) !important;
+  border-radius: 8px !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-tab:hover,
+.tab-btn:hover,
+.tab-button:hover,
+button:not(.wired-toggle):not(.wired-chapter-btn):hover {
+  background: var(--wired-bg-deep) !important;
+  border-color: var(--wired-teal) !important;
+  color: var(--wired-teal-deep) !important;
+}
+
+.nav-tab.active,
+.tab-btn.active,
+.tab-button.active,
+button.active:not(.wired-toggle):not(.wired-chapter-btn) {
+  background: var(--wired-teal) !important;
+  border-color: var(--wired-teal-deep) !important;
+  color: #ffffff !important;
+}
+
+/* Tactile Wired Range Sliders */
+input[type="range"] {
+  accent-color: var(--wired-teal) !important;
+  cursor: pointer;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  background: #ffffff !important;
+  color: var(--wired-navy) !important;
+  border: 1.5px solid var(--wired-line) !important;
+  border-radius: 7px !important;
+  font-family: var(--wired-mono);
+}
+
+/* Canvas Framing (Preserve internal canvas background for dark-mode drawings) */
+canvas {
+  border: 1.5px solid var(--wired-line) !important;
+  border-radius: 10px !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+.video-tham-khao a {
+  color: var(--wired-teal-deep) !important;
+}
+
+.video-tham-khao h2,
+.active-explorable h2,
+.reel-video-section h3 {
+  color: var(--wired-navy) !important;
+}
+
+/* ── Side-by-Side Stage + Right Inspector Panel (Desktop) ─────── */
+@media (min-width: 900px) {
+  .interactive-container:has(> .controls),
+  .interactive-container:has(> .controls-panel),
+  .interactive-container:has(> .control-panel),
+  .main-content:has(> .canvas-container):has(> .controls),
+  .main-content:has(> .canvas-container):has(> .controls-panel),
+  .container:has(> .canvas-container):has(> .controls),
+  .workspace:has(> .canvas-container):has(> .controls) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+  }
+
+  .canvas-container {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  .interactive-container > .controls,
+  .interactive-container > .controls-panel,
+  .interactive-container > .control-panel,
+  .main-content > .controls,
+  .main-content > .controls-panel,
+  .container > .controls,
+  .workspace > .controls {
+    flex: 0 0 350px !important;
+    width: 350px !important;
+    max-width: 380px !important;
+    position: sticky;
+    top: 18px;
+  }
+}
