@@ -361,6 +361,45 @@
     animate();
   </script>
 
+
+<section class="active-explorable" style="max-width:960px;margin:28px auto;padding:22px;background:#161b2e;border:1px solid #2d3748;border-radius:12px;color:#e2e8f0;">
+  <h2 style="color:#6cb6ff;margin-top:0;">🎯 Dự đoán → Thử nghiệm: Đường mức &amp; Vector Gradient \(\nabla f(x,y)\)</h2>
+  <p style="margin-bottom:12px;"><strong>Dự đoán:</strong> Với \(f(x,y) = x^2 + k y^2\), vector gradient \(\nabla f = (2x, 2ky)\) luôn tạo góc bao nhiêu độ với tiếp tuyến đường mức tại điểm \((x_0, y_0)\)?</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-family:monospace;">
+    <label>x₀: <input id="g-x" type="range" min="-2" max="2" step="0.2" value="1.2"> <span id="gv-x">1.2</span></label>
+    <label>y₀: <input id="g-y" type="range" min="-2" max="2" step="0.2" value="1.0"> <span id="gv-y">1.0</span></label>
+    <label>k: <input id="g-k" type="range" min="0.4" max="3" step="0.2" value="2.0"> <span id="gv-k">2.0</span></label>
+  </div>
+  <svg id="grad-svg-viz" viewBox="-160 -130 320 260" width="100%" style="max-height:280px;background:#0b1120;border-radius:8px;"></svg>
+  <p id="grad-svg-info" style="margin:10px 0 0;font-family:monospace;color:#f5c542;"></p>
+  <script>
+  (function(){
+    var s=42;
+    function draw(){
+      var x=+document.getElementById("g-x").value, y=+document.getElementById("g-y").value, k=+document.getElementById("g-k").value;
+      document.getElementById("gv-x").textContent=x; document.getElementById("gv-y").textContent=y; document.getElementById("gv-k").textContent=k;
+      var c = x*x + k*y*y;
+      var ellipses = "";
+      [0.4, 1.0, 2.0, c].forEach(function(lv, idx){
+        if(lv<=0.01) return;
+        var rx = Math.sqrt(lv)*s, ry = Math.sqrt(lv/k)*s;
+        ellipses += '<ellipse cx="0" cy="0" rx="'+rx+'" ry="'+ry+'" fill="none" stroke="'+(idx===3?'#6cb6ff':'#334155')+'" stroke-width="'+(idx===3?2:1)+'"/>';
+      });
+      var gx=2*x, gy=2*k*y, norm=Math.hypot(gx,gy)||1, scale=38/norm;
+      var px=x*s, py=-y*s, ex=px+gx*scale, ey=py-gy*scale;
+      document.getElementById("grad-svg-viz").innerHTML =
+        '<line x1="-150" y1="0" x2="150" y2="0" stroke="#1e293b"/><line x1="0" y1="-120" x2="0" y2="120" stroke="#1e293b"/>' +
+        ellipses +
+        '<line x1="'+px+'" y1="'+py+'" x2="'+ex+'" y2="'+ey+'" stroke="#f5c542" stroke-width="3"/>' +
+        '<circle cx="'+px+'" cy="'+py+'" r="5" fill="#6bd68a"/>';
+      document.getElementById("grad-svg-info").textContent = "∇f = ("+gx.toFixed(2)+", "+gy.toFixed(2)+") — vuông góc đường mức f = "+c.toFixed(2);
+    }
+    ["g-x","g-y","g-k"].forEach(function(id){ document.getElementById(id).addEventListener("input", draw); });
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

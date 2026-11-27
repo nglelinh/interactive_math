@@ -627,6 +627,67 @@
         }, 1000);
     </script>
 
+
+<section class="active-explorable" style="max-width:960px;margin:28px auto;padding:22px;background:#161b2e;border:1px solid #2d3748;border-radius:12px;color:#e2e8f0;">
+  <h2 style="color:#6cb6ff;margin-top:0;">🎯 Dự đoán → Thử nghiệm: Mảng Bit Bloom Filter (m = 16, k = 3)</h2>
+  <p style="margin-bottom:12px;"><strong>Thử thách:</strong> Nếu chèn 3 phần tử vào mảng 16 bit với 3 hàm băm, xác suất dương tính giả lý thuyết là \((1 - e^{-kn/m})^k \approx 8.0\%\). Hãy thử chèn từ khóa và quan sát các bit bật lên!</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+    <input id="bf-svg-input" type="text" placeholder="Nhập từ (vd: euler, gauss)" style="padding:8px 12px;border-radius:6px;border:1px solid #4a5568;background:#0f172a;color:#fff;">
+    <button id="bf-svg-add" type="button" style="padding:8px 14px;border-radius:6px;border:none;background:#2c5282;color:#fff;cursor:pointer;">Chèn vào Bloom Filter</button>
+    <button id="bf-svg-check" type="button" style="padding:8px 14px;border-radius:6px;border:none;background:#0f766e;color:#fff;cursor:pointer;">Kiểm tra tồn tại</button>
+    <button id="bf-svg-reset" type="button" style="padding:8px 14px;border-radius:6px;border:1px solid #4a5568;background:transparent;color:#cbd5e1;cursor:pointer;">Đặt lại</button>
+  </div>
+  <svg id="bf-svg-viz" viewBox="0 0 640 90" width="100%" style="max-height:110px;background:#0b1120;border-radius:8px;"></svg>
+  <p id="bf-svg-status" style="margin:10px 0 0;font-family:monospace;color:#f5c542;">Chưa chèn phần tử nào. Tỷ lệ bit = 1: 0/16 (0%).</p>
+  <script>
+  (function(){
+    var bits = new Array(16).fill(0), inserted = new Set();
+    var svg = document.getElementById("bf-svg-viz"), st = document.getElementById("bf-svg-status");
+    function hashes(s){
+      var h1=0,h2=0,h3=0;
+      for(var i=0;i<s.length;i++){ var c=s.charCodeAt(i); h1=(h1*31+c)%16; h2=(h2*131+c+7)%16; h3=(h3*17+c*3+11)%16; }
+      return [h1,h2,h3];
+    }
+    function render(hi){
+      var html="";
+      for(var i=0;i<16;i++){
+        var x=16+i*38, fill=bits[i]?"#0f766e":"#1e293b", stroke=(hi&&hi.indexOf(i)!==-1)?"#f5c542":"#475569";
+        html += '<rect x="'+x+'" y="18" width="32" height="36" rx="4" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>';
+        html += '<text x="'+(x+16)+'" y="41" text-anchor="middle" fill="#fff" font-size="14" font-family="monospace">'+bits[i]+'</text>';
+        html += '<text x="'+(x+16)+'" y="72" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="monospace">'+i+'</text>';
+      }
+      svg.innerHTML = html;
+    }
+    document.getElementById("bf-svg-add").onclick = function(){
+      var v = (document.getElementById("bf-svg-input").value || "").trim().toLowerCase();
+      if(!v) return;
+      var hs = hashes(v);
+      hs.forEach(function(i){ bits[i]=1; });
+      inserted.add(v);
+      render(hs);
+      var ones = bits.reduce(function(a,b){return a+b;},0);
+      var fp = Math.pow(ones/16, 3)*100;
+      st.textContent = 'Đã chèn "'+v+'" -> bật bit ['+hs.join(", ")+']. Số bit 1: '+ones+'/16. Xác suất dương tính giả ước tính: '+fp.toFixed(1)+'%.';
+    };
+    document.getElementById("bf-svg-check").onclick = function(){
+      var v = (document.getElementById("bf-svg-input").value || "").trim().toLowerCase();
+      if(!v) return;
+      var hs = hashes(v);
+      var allOne = hs.every(function(i){ return bits[i]===1; });
+      render(hs);
+      if(!allOne) st.textContent = '"'+v+'" -> CHẮC CHẮN KHÔNG CÓ (ít nhất 1 bit = 0 tại ['+hs.join(", ")+']).';
+      else if(inserted.has(v)) st.textContent = '"'+v+'" -> CÓ THỂ CÓ (đúng — đã được chèn, bit ['+hs.join(", ")+'] đều = 1).';
+      else st.textContent = '"'+v+'" -> DƯƠNG TÍNH GIẢ! Chưa từng chèn nhưng 3 bit ['+hs.join(", ")+'] đều đã bật!';
+    };
+    document.getElementById("bf-svg-reset").onclick = function(){
+      bits.fill(0); inserted.clear(); render([]);
+      st.textContent = "Đã đặt lại mảng bit.";
+    };
+    render([]);
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

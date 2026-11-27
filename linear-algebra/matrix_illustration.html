@@ -1303,6 +1303,44 @@
         });
     </script>
 
+
+<section class="active-explorable" style="max-width:960px;margin:28px auto;padding:22px;background:#161b2e;border:1px solid #2d3748;border-radius:12px;color:#e2e8f0;">
+  <h2 style="color:#6cb6ff;margin-top:0;">🎯 Dự đoán → Thử nghiệm: Ma trận 2×2 biến hình vuông đơn vị</h2>
+  <p style="margin-bottom:12px;"><strong>Dự đoán:</strong> Định thức \(\det(A) = ad - bc\) chính là hệ số phóng đại diện tích (và đảo chiều nếu âm). Khi nào hình bình hành biến thành đoạn thẳng có diện tích bằng 0?</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;font-family:monospace;">
+    <label>a: <input id="m-a" type="range" min="-2" max="2" step="0.2" value="1.4"> <span id="v-a">1.4</span></label>
+    <label>b: <input id="m-b" type="range" min="-2" max="2" step="0.2" value="0.6"> <span id="v-b">0.6</span></label>
+    <label>c: <input id="m-c" type="range" min="-2" max="2" step="0.2" value="0.2"> <span id="v-c">0.2</span></label>
+    <label>d: <input id="m-d" type="range" min="-2" max="2" step="0.2" value="1.2"> <span id="v-d">1.2</span></label>
+  </div>
+  <svg id="mat-svg-viz" viewBox="-160 -130 320 260" width="100%" style="max-height:280px;background:#0b1120;border-radius:8px;"></svg>
+  <p id="mat-svg-det" style="margin:10px 0 0;font-family:monospace;color:#f5c542;"></p>
+  <script>
+  (function(){
+    var s=45;
+    function draw(){
+      var a=+document.getElementById("m-a").value, b=+document.getElementById("m-b").value,
+          c=+document.getElementById("m-c").value, d=+document.getElementById("m-d").value;
+      document.getElementById("v-a").textContent=a; document.getElementById("v-b").textContent=b;
+      document.getElementById("v-c").textContent=c; document.getElementById("v-d").textContent=d;
+      var det = a*d - b*c;
+      var p1=(a*s)+","+(-c*s), p2=((a+b)*s)+","+(-(c+d)*s), p3=(b*s)+","+(-d*s);
+      var fill = det >= 0 ? "rgba(15,118,110,0.42)" : "rgba(180,83,9,0.42)";
+      var stroke = det >= 0 ? "#6bd68a" : "#ff6b6b";
+      document.getElementById("mat-svg-viz").innerHTML =
+        '<line x1="-150" y1="0" x2="150" y2="0" stroke="#334155"/><line x1="0" y1="-120" x2="0" y2="120" stroke="#334155"/>' +
+        '<rect x="0" y="'+(-s)+'" width="'+s+'" height="'+s+'" fill="none" stroke="#64748b" stroke-dasharray="4 3"/>' +
+        '<polygon points="0,0 '+p1+' '+p2+' '+p3+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>' +
+        '<line x1="0" y1="0" x2="'+(a*s)+'" y2="'+(-c*s)+'" stroke="#6cb6ff" stroke-width="2.5"/>' +
+        '<line x1="0" y1="0" x2="'+(b*s)+'" y2="'+(-d*s)+'" stroke="#f5c542" stroke-width="2.5"/>';
+      document.getElementById("mat-svg-det").textContent = "det(A) = " + det.toFixed(2) + (Math.abs(det)<0.05 ? " (Suy biến thành đoạn thẳng!)" : det<0 ? " (Đảo hướng!)" : " (Giữ hướng)");
+    }
+    ["m-a","m-b","m-c","m-d"].forEach(function(id){ document.getElementById(id).addEventListener("input", draw); });
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

@@ -1,4 +1,4 @@
-/* Shared course navigation. Lesson data is generated into js/site-nav-data.js. */
+/* Shared course navigation — Unified Course Theme (Charcoal Monochrome #202020 + Source Sans 3 / Source Serif 4). */
 (function () {
   "use strict";
 
@@ -9,16 +9,22 @@
 
   var STRINGS = {
     vi: {
+      brand: "Toán học Tương tác",
       home: "Trang chủ",
       menu: "Mục lục",
       close: "Đóng mục lục",
-      label: "Mục lục bài học"
+      label: "Mục lục bài học",
+      notes: "Ghi chú nghiên cứu",
+      github: "GitHub"
     },
     en: {
+      brand: "Interactive Mathematics",
       home: "Home",
       menu: "Menu",
       close: "Close menu",
-      label: "Lesson menu"
+      label: "Lesson menu",
+      notes: "Research Notes",
+      github: "GitHub"
     }
   };
 
@@ -44,34 +50,24 @@
     var dest = new URL(targetPath, root);
     var fromParts = window.location.pathname.split("/").slice(0, -1);
     var toParts = dest.pathname.split("/");
-    var i = 0;
-    while (i < fromParts.length && i < toParts.length && fromParts[i] === toParts[i]) {
-      i += 1;
+    var common = 0;
+    while (common < fromParts.length && common < toParts.length - 1 && fromParts[common] === toParts[common]) {
+      common += 1;
     }
-    var up = fromParts.length - i;
-    var rel = [];
-    var n;
-    for (n = 0; n < up; n += 1) {
-      rel.push("..");
+    var ups = [];
+    for (var i = common; i < fromParts.length; i += 1) {
+      ups.push("..");
     }
-    rel = rel.concat(toParts.slice(i));
-    var href = rel.join("/");
-    if (dest.search) {
-      href += dest.search;
-    }
-    if (dest.hash) {
-      href += dest.hash;
-    }
-    return href || ".";
+    return ups.concat(toParts.slice(common)).join("/") || dest.href;
   }
 
   function currentLessonPath() {
-    var rootPath = siteRoot().pathname;
-    var path = window.location.pathname;
-    if (path.indexOf(rootPath) === 0) {
-      path = path.slice(rootPath.length);
+    var root = siteRoot().pathname.replace(/\/$/, "");
+    var here = window.location.pathname;
+    if (root && here.indexOf(root) === 0) {
+      here = here.slice(root.length);
     }
-    return path.replace(/^\/+/, "");
+    return here.replace(/^\//, "");
   }
 
   function el(tag, className, attrs) {
@@ -87,12 +83,33 @@
     return node;
   }
 
-  function build() {
-    var lang = language();
-    var here = currentLessonPath();
-    if (here === "") {
-      here = "index.html";
+  function ensureFonts() {
+    if (document.querySelector("link[data-course-fonts]")) return;
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.setAttribute("data-course-fonts", "1");
+    link.href = "https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap";
+    document.head.appendChild(link);
+  }
+
+  function closeMenus(nav) {
+    nav.classList.remove("is-open");
+    var toggle = nav.querySelector(".site-nav-toggle");
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "☰ " + text("menu");
     }
+    nav.querySelectorAll(".site-nav-item.is-open").forEach(function (item) {
+      item.classList.remove("is-open");
+      var btn = item.querySelector(".site-nav-chapter");
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function build() {
+    ensureFonts();
+    var lang = language();
+    var here = currentLessonPath() || "index.html";
 
     var nav = el("nav", "tex2jax_ignore", {
       id: "site-nav",
@@ -100,18 +117,50 @@
     });
 
     var bar = el("div", "site-nav-bar");
-    var home = el("a", "site-nav-home", { href: relativeFromPage("index.html") });
-    home.textContent = text("home");
-    if (here === "index.html") {
-      home.setAttribute("aria-current", "page");
-    }
+    var leftGroup = el("div", "site-nav-left");
 
     var toggle = el("button", "site-nav-toggle", {
       type: "button",
       "aria-expanded": "false",
       "aria-controls": "site-nav-chapters"
     });
-    toggle.textContent = text("menu");
+    toggle.textContent = "☰ " + text("menu");
+    leftGroup.appendChild(toggle);
+
+    var home = el("a", "site-nav-home", { href: relativeFromPage("index.html") });
+    home.textContent = text("brand");
+    if (here === "index.html") {
+      home.setAttribute("aria-current", "page");
+    }
+    leftGroup.appendChild(home);
+    bar.appendChild(leftGroup);
+
+    var rightGroup = el("div", "site-nav-right");
+    var parts = here.split("/");
+    var notesTopics = [
+      "linear-algebra", "calculus", "real-analysis", "complex-analysis",
+      "fourier-analysis", "linear-programming", "convex-analysis", "optimization",
+      "graph-theory", "algorithms-datastructures", "cryptography", "blockchain",
+      "mechanics", "machine-learning"
+    ];
+    if (parts.length > 1 && notesTopics.indexOf(parts[0]) !== -1) {
+      var notesLink = el("a", "site-nav-action", {
+        href: "https://github.com/nglelinh/interactive_math/blob/main/notes/" + parts[0] + ".md",
+        target: "_blank",
+        rel: "noopener noreferrer"
+      });
+      notesLink.textContent = text("notes");
+      rightGroup.appendChild(notesLink);
+    }
+
+    var ghLink = el("a", "site-nav-action", {
+      href: "https://github.com/nglelinh/interactive_math",
+      target: "_blank",
+      rel: "noopener noreferrer"
+    });
+    ghLink.textContent = text("github");
+    rightGroup.appendChild(ghLink);
+    bar.appendChild(rightGroup);
 
     var chapters = el("ul", "site-nav-chapters", { id: "site-nav-chapters" });
     data.chapters.forEach(function (chapter) {
@@ -133,130 +182,90 @@
         var link = el("a", "site-nav-lesson", { href: relativeFromPage(lesson.href) });
         link.textContent = lesson.label;
         if (here === lesson.href) {
-          link.setAttribute("aria-current", "page");
           link.classList.add("is-current");
+          link.setAttribute("aria-current", "page");
           chapterActive = true;
         }
         li.appendChild(link);
         sub.appendChild(li);
       });
+
       if (chapterActive) {
-        item.classList.add("is-current-chapter");
+        item.classList.add("is-current");
       }
+
       button.addEventListener("click", function (event) {
         event.stopPropagation();
-        var open = item.classList.toggle("is-open");
-        button.setAttribute("aria-expanded", open ? "true" : "false");
-        placeSubmenu(item, sub);
+        var open = item.classList.contains("is-open");
+        nav.querySelectorAll(".site-nav-item.is-open").forEach(function (other) {
+          if (other !== item) {
+            other.classList.remove("is-open");
+            var b = other.querySelector(".site-nav-chapter");
+            if (b) b.setAttribute("aria-expanded", "false");
+          }
+        });
+        item.classList.toggle("is-open", !open);
+        button.setAttribute("aria-expanded", open ? "false" : "true");
       });
+
       item.appendChild(button);
       item.appendChild(sub);
       chapters.appendChild(item);
     });
 
-    toggle.addEventListener("click", function () {
+    toggle.addEventListener("click", function (event) {
+      event.stopPropagation();
       var open = nav.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      toggle.textContent = open ? text("close") : text("menu");
+      toggle.textContent = (open ? "✕ " + text("close") : "☰ " + text("menu"));
     });
 
     document.addEventListener("click", function (event) {
       if (!nav.contains(event.target)) {
-        closeAll(nav, toggle);
+        closeMenus(nav);
       }
     });
+
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape") {
-        closeAll(nav, toggle);
+        closeMenus(nav);
       }
     });
-    chapters.addEventListener("click", function (event) {
-      var link = event.target.closest("a");
-      if (link) {
-        closeAll(nav, toggle);
-      }
-    });
-    window.addEventListener("resize", function () {
-      reserveSpace(nav);
-    });
-    if (window.ResizeObserver) {
-      var observer = new ResizeObserver(function () {
-        reserveSpace(nav);
-      });
-      observer.observe(nav);
-    }
 
-    bar.appendChild(home);
-    bar.appendChild(toggle);
     nav.appendChild(bar);
     nav.appendChild(chapters);
     document.body.insertBefore(nav, document.body.firstChild);
-    reserveSpace(nav);
-  }
-
-  function placeSubmenu(item, sub) {
-    sub.style.left = "0";
-    sub.style.right = "auto";
-    var rect = sub.getBoundingClientRect();
-    if (rect.right > window.innerWidth - 8) {
-      sub.style.left = "auto";
-      sub.style.right = "0";
-    }
-  }
-
-  function closeAll(nav, toggle) {
-    nav.classList.remove("is-open");
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.textContent = text("menu");
-    nav.querySelectorAll(".site-nav-item.is-open").forEach(function (item) {
-      item.classList.remove("is-open");
-      var button = item.querySelector(".site-nav-chapter");
-      if (button) {
-        button.setAttribute("aria-expanded", "false");
-      }
-    });
-  }
-
-  function reserveSpace(nav) {
-    var height = nav.offsetHeight;
-    if (!document.body.dataset.siteNavBasePad) {
-      document.body.dataset.siteNavBasePad = String(parseFloat(getComputedStyle(document.body).paddingTop) || 0);
-    }
-    var base = parseFloat(document.body.dataset.siteNavBasePad) || 0;
-    document.body.style.paddingTop = base + height + "px";
   }
 
   var style = document.createElement("style");
-  style.setAttribute("data-site-nav", "css");
   style.textContent = [
-    "#site-nav{position:fixed;top:0;left:0;right:0;z-index:100000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#fff;}",
-    "#site-nav.tex2jax_ignore{line-height:1.4;}",
-    "#site-nav .site-nav-bar{display:flex;align-items:center;gap:8px;min-height:52px;padding:8px 12px;background:rgba(10,16,36,.94);border-bottom:1px solid rgba(79,195,247,.35);backdrop-filter:blur(10px);}",
-    "#site-nav .site-nav-home{color:#4fc3f7;font-weight:700;text-decoration:none;padding:8px 10px;border-radius:8px;white-space:nowrap;}",
-    "#site-nav .site-nav-home:hover,#site-nav .site-nav-home:focus{background:rgba(79,195,247,.15);}",
-    "#site-nav .site-nav-home[aria-current='page']{box-shadow:inset 0 -2px 0 #4fc3f7;}",
-    "#site-nav .site-nav-toggle{margin-left:auto;background:rgba(79,195,247,.18);color:#fff;border:1px solid rgba(79,195,247,.55);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer;}",
-    "#site-nav .site-nav-chapters{display:none;}",
-    "#site-nav .site-nav-chapter,#site-nav .site-nav-lesson{font:inherit;}",
-    "#site-nav .site-nav-chapter{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:transparent;color:#fff;border:0;border-radius:8px;padding:10px 12px;cursor:pointer;}",
-    "#site-nav .site-nav-chapter:hover,#site-nav .site-nav-chapter:focus,#site-nav .site-nav-item.is-open>.site-nav-chapter,#site-nav .site-nav-item.is-current-chapter>.site-nav-chapter{background:rgba(79,195,247,.18);}",
-    "#site-nav .site-nav-count{min-width:1.5rem;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.12);color:#9cdcfe;font-size:.75rem;text-align:center;}",
-    "#site-nav .site-nav-sub{list-style:none;margin:0;padding:4px;}",
-    "#site-nav .site-nav-lesson{display:block;color:#fff;text-decoration:none;padding:8px 10px;border-radius:8px;}",
-    "#site-nav .site-nav-lesson:hover,#site-nav .site-nav-lesson:focus{background:rgba(255,255,255,.1);}",
-    "#site-nav .site-nav-lesson.is-current{background:rgba(79,195,247,.28);color:#fff;}",
-    "@media (max-width:959px){",
-    "#site-nav.is-open .site-nav-chapters{display:block;position:absolute;top:100%;left:0;right:0;max-height:calc(100vh - 56px);overflow:auto;background:rgba(10,16,36,.98);border-bottom:1px solid rgba(79,195,247,.35);padding:8px;}",
-    "#site-nav .site-nav-sub{display:none;padding-left:8px;}",
+    "#site-nav{position:sticky;top:0;z-index:2000;font-family:'Source Sans 3',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.4;background:#202020;color:rgba(255,255,255,0.85);border-bottom:1px solid rgba(255,255,255,0.12);}",
+    "#site-nav *{box-sizing:border-box;}",
+    "#site-nav .site-nav-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;max-width:1400px;margin:0 auto;}",
+    "#site-nav .site-nav-left,#site-nav .site-nav-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}",
+    "#site-nav .site-nav-home{color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:-0.01em;padding:4px 8px;border-radius:4px;}",
+    "#site-nav .site-nav-home:hover,#site-nav .site-nav-home[aria-current='page']{background:rgba(255,255,255,0.12);}",
+    "#site-nav .site-nav-action{color:rgba(255,255,255,0.82);text-decoration:none;font-size:13px;font-weight:500;padding:5px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:4px;white-space:nowrap;}",
+    "#site-nav .site-nav-action:hover{background:rgba(255,255,255,0.1);color:#ffffff;border-color:rgba(255,255,255,0.4);}",
+    "#site-nav .site-nav-toggle{background:rgba(255,255,255,0.08);color:#ffffff;border:1px solid rgba(255,255,255,0.22);border-radius:4px;padding:5px 11px;font:inherit;font-weight:600;cursor:pointer;}",
+    "#site-nav .site-nav-toggle:hover{background:rgba(255,255,255,0.16);}",
+    "#site-nav .site-nav-chapters{display:none;list-style:none;margin:0;padding:0 18px 10px;max-width:1400px;margin:0 auto;border-top:1px solid rgba(255,255,255,0.08);}",
+    "#site-nav.is-open .site-nav-chapters{display:block;max-height:72vh;overflow:auto;background:#202020;}",
+    "#site-nav .site-nav-item{margin:2px 0;}",
+    "#site-nav .site-nav-chapter{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;background:transparent;color:rgba(255,255,255,0.78);border:none;border-radius:4px;padding:6px 10px;font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer;}",
+    "#site-nav .site-nav-chapter:hover,#site-nav .site-nav-item.is-current>.site-nav-chapter,#site-nav .site-nav-item.is-open>.site-nav-chapter{background:rgba(255,255,255,0.12);color:#ffffff;}",
+    "#site-nav .site-nav-count{font-size:11px;opacity:.7;margin-left:3px;}",
+    "#site-nav .site-nav-sub{display:none;list-style:none;margin:4px 0 0;padding:4px 0 4px 12px;}",
     "#site-nav .site-nav-item.is-open>.site-nav-sub{display:block;}",
-    "}",
+    "#site-nav .site-nav-lesson{display:block;padding:6px 12px;color:rgba(255,255,255,0.76);text-decoration:none;font-size:13px;border-radius:4px;}",
+    "#site-nav .site-nav-lesson:hover{background:rgba(255,255,255,0.09);color:#ffffff;}",
+    "#site-nav .site-nav-lesson.is-current{background:#2c5282;color:#ffffff;font-weight:600;}",
     "@media (min-width:960px){",
     "#site-nav .site-nav-toggle{display:none;}",
-    "#site-nav .site-nav-bar{flex-wrap:wrap;}",
-    "#site-nav .site-nav-chapters{display:flex;flex-wrap:wrap;gap:2px;align-items:center;list-style:none;margin:0;padding:0 8px 8px;background:rgba(10,16,36,.94);}",
+    "#site-nav .site-nav-chapters{display:flex;flex-wrap:wrap;gap:2px;align-items:center;padding:4px 14px 8px;}",
     "#site-nav .site-nav-item{position:relative;}",
-    "#site-nav .site-nav-chapter{width:auto;white-space:nowrap;padding:6px 8px;}",
-    "#site-nav .site-nav-sub{display:none;position:absolute;top:100%;left:0;z-index:2;min-width:240px;max-width:min(22rem,80vw);max-height:min(70vh,28rem);overflow:auto;background:rgba(10,16,36,.98);border:1px solid rgba(79,195,247,.4);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.35);}",
+    "#site-nav .site-nav-chapter{width:auto;white-space:nowrap;padding:5px 9px;}",
+    "#site-nav .site-nav-sub{display:none;position:absolute;top:100%;left:0;z-index:20;min-width:250px;max-width:min(22rem,80vw);max-height:min(70vh,28rem);overflow:auto;background:#202020;border:1px solid rgba(255,255,255,0.16);border-radius:6px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,0.45);}",
     "#site-nav .site-nav-item.is-open>.site-nav-sub,#site-nav .site-nav-item:focus-within>.site-nav-sub{display:block;}",
     "}"
   ].join("");
@@ -307,5 +316,4 @@
       }, { passive: true });
     });
   })();
-
 })();

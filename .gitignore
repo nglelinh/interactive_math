@@ -67,3 +67,6 @@ temp/
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Manim render cache
+manim/reels/media/

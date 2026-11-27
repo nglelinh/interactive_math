@@ -719,6 +719,50 @@
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:960px;margin:28px auto;padding:22px;background:#161b2e;border:1px solid #2d3748;border-radius:12px;color:#e2e8f0;">
+  <h2 style="color:#6cb6ff;margin-top:0;">🎯 Dự đoán → Thử nghiệm: Đường đi Khóa &amp; Lũy thừa Modulo RSA</h2>
+  <p style="margin-bottom:12px;"><strong>Dự đoán trước khi chạy:</strong> Với \(p=11, q=13\) thì \(\varphi(n)=(p-1)(q-1)=120\). Nếu chọn khóa công khai \(e=7\), khóa bí mật \(d\) thỏa \(7d \equiv 1 \pmod{120}\) là bao nhiêu? Hãy thay đổi thông điệp \(m\) để kiểm chứng \((m^e)^d \equiv m \pmod n\).</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+    <label>Thông điệp m (2–140): <input id="rsa-svg-m" type="range" min="2" max="140" value="42"></label>
+    <span id="rsa-svg-mval" style="font-family:monospace;color:#f5c542;">m = 42</span>
+  </div>
+  <svg id="rsa-svg-viz" viewBox="0 0 680 120" width="100%" style="background:#0b1120;border-radius:8px;"></svg>
+  <script>
+  (function(){
+    var p=11, q=13, n=p*q, phi=(p-1)*(q-1), e=7, d=103;
+    function modpow(base, exp, mod){
+      var res=1n, b=BigInt(base)%BigInt(mod), ex=BigInt(exp), md=BigInt(mod);
+      while(ex>0n){ if(ex%2n===1n) res=(res*b)%md; b=(b*b)%md; ex/=2n; }
+      return Number(res);
+    }
+    function update(){
+      var m = Number(document.getElementById("rsa-svg-m").value);
+      document.getElementById("rsa-svg-mval").textContent = "m = " + m;
+      var c = modpow(m, e, n);
+      var dec = modpow(c, d, n);
+      var svg = document.getElementById("rsa-svg-viz");
+      svg.innerHTML =
+        '<rect x="16" y="25" width="140" height="70" rx="8" fill="#1e293b" stroke="#6cb6ff" stroke-width="2"/>' +
+        '<text x="86" y="54" text-anchor="middle" fill="#fff" font-size="14" font-family="monospace">m = '+m+'</text>' +
+        '<text x="86" y="76" text-anchor="middle" fill="#94a3b8" font-size="11">Bản rõ (Plaintext)</text>' +
+        '<line x1="156" y1="60" x2="250" y2="60" stroke="#f5c542" stroke-width="2"/>' +
+        '<text x="203" y="48" text-anchor="middle" fill="#f5c542" font-size="11" font-family="monospace">m^7 mod 143</text>' +
+        '<rect x="250" y="25" width="160" height="70" rx="8" fill="#1e293b" stroke="#f5c542" stroke-width="2"/>' +
+        '<text x="330" y="54" text-anchor="middle" fill="#f5c542" font-size="15" font-family="monospace">c = '+c+'</text>' +
+        '<text x="330" y="76" text-anchor="middle" fill="#94a3b8" font-size="11">Bản mã (Ciphertext)</text>' +
+        '<line x1="410" y1="60" x2="504" y2="60" stroke="#6bd68a" stroke-width="2"/>' +
+        '<text x="457" y="48" text-anchor="middle" fill="#6bd68a" font-size="11" font-family="monospace">c^103 mod 143</text>' +
+        '<rect x="504" y="25" width="160" height="70" rx="8" fill="#1e293b" stroke="#6bd68a" stroke-width="2"/>' +
+        '<text x="584" y="54" text-anchor="middle" fill="#6bd68a" font-size="14" font-family="monospace">m' = '+dec+'</text>' +
+        '<text x="584" y="76" text-anchor="middle" fill="#94a3b8" font-size="11">Giải mã khớp gốc!</text>';
+    }
+    document.getElementById("rsa-svg-m").addEventListener("input", update);
+    update();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {
