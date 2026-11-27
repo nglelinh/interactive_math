@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vector Spaces - Theory and Interactive Visualization</title>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <script>
+<script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,6 +15,7 @@
             }
         };
     </script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -30,8 +30,8 @@
         }
         
         .nav-container {
-            position: fixed;
-            top: 0;
+            position: relative;
+            
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.95);
@@ -911,175 +911,6 @@
             }
         });
     </script>
-</body>
-</html>
-            ctx.stroke();
-            
-            // Draw angle arc for cosine similarity
-            if (currentOperation === 'cosine') {
-                const angleA = Math.atan2(vectorA.y, vectorA.x);
-                const angleB = Math.atan2(vectorB.y, vectorB.x);
-                const angleDiff = Math.abs(angleA - angleB);
-                
-                // Draw angle arc
-                ctx.strokeStyle = '#ff6b6b';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 50, Math.min(angleA, angleB), Math.max(angleA, angleB));
-                ctx.stroke();
-                
-                // Draw angle label
-                const midAngle = (angleA + angleB) / 2;
-                const labelX = centerX + 60 * Math.cos(midAngle);
-                const labelY = centerY - 60 * Math.sin(midAngle);
-                ctx.fillStyle = '#ff6b6b';
-                ctx.font = '12px Arial';
-                ctx.fillText(`θ = ${(angleDiff * 180 / Math.PI).toFixed(1)}°`, labelX, labelY);
-            }
-            
-            // Draw result vector
-            const result = getResultVector();
-            if (result && currentOperation !== 'dot' && currentOperation !== 'cosine') {
-                const endRX = centerX + result.x * scale;
-                const endRY = centerY - result.y * scale;
-                
-                ctx.strokeStyle = '#45b7d1';
-                ctx.lineWidth = 4;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endRX, endRY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Arrow head for result
-                const angleR = Math.atan2(-result.y, result.x);
-                ctx.beginPath();
-                ctx.moveTo(endRX, endRY);
-                ctx.lineTo(endRX - arrowLength * Math.cos(angleR - Math.PI/6), 
-                          endRY - arrowLength * Math.sin(angleR - Math.PI/6));
-                ctx.moveTo(endRX, endRY);
-                ctx.lineTo(endRX - arrowLength * Math.cos(angleR + Math.PI/6), 
-                          endRY - arrowLength * Math.sin(angleR + Math.PI/6));
-                ctx.stroke();
-            }
-            
-            // Labels
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            
-            // Always use mathematical labels
-            ctx.fillText('Vector A', endAX + 5, endAY - 5);
-            ctx.fillText('Vector B', endBX + 5, endBY - 5);
-            
-            if (currentOperation === 'cosine') {
-                // Add mathematical interpretation for cosine
-                const cosine = cosineSimilarity(vectorA, vectorB);
-                ctx.fillStyle = cosine >= 0.7 ? '#28a745' : cosine >= 0.3 ? '#ffc107' : '#dc3545';
-                ctx.font = '12px Arial';
-                ctx.fillText(`cos(θ) = ${cosine.toFixed(3)}`, centerX + 10, centerY + 30);
-            }
-            if (result && currentOperation !== 'dot' && currentOperation !== 'cosine') {
-                ctx.fillText('Result', endRX + 5, endRY - 5);
-            }
-            
-            // Origin label
-            ctx.fillText('O', startX - 15, startY + 15);
-        }
-        
-        function updateInfo() {
-            const magA = magnitude(vectorA);
-            const magB = magnitude(vectorB);
-            const result = getResultVector();
-            
-            let infoText = `Vector A: [${vectorA.x.toFixed(1)}, ${vectorA.y.toFixed(1)}] | Magnitude: ${magA.toFixed(2)}<br>`;
-            infoText += `Vector B: [${vectorB.x.toFixed(1)}, ${vectorB.y.toFixed(1)}] | Magnitude: ${magB.toFixed(2)}<br>`;
-            
-            if (currentOperation === 'dot') {
-                const dot = dotProduct(vectorA, vectorB);
-                const angle = Math.acos(Math.abs(dot) / (magA * magB)) * 180 / Math.PI;
-                infoText += `Dot Product: A·B = ${dot.toFixed(2)} | Angle: ${angle.toFixed(1)}°`;
-            } else if (currentOperation === 'cosine') {
-                const cosine = cosineSimilarity(vectorA, vectorB);
-                const angle = Math.acos(Math.abs(cosine)) * 180 / Math.PI;
-                const interpretation = cosine >= 0.866 ? '📐 Nearly Parallel (θ ≈ 30°)' : 
-                                     cosine >= 0.5 ? '📏 Acute Angle (30° < θ < 60°)' : 
-                                     cosine > 0 ? '📊 Acute Angle (60° < θ < 90°)' :
-                                     cosine === 0 ? '⊥ Orthogonal (θ = 90°)' :
-                                     cosine > -0.5 ? '📈 Obtuse Angle (90° < θ < 120°)' : 
-                                     cosine >= -0.866 ? '📉 Obtuse Angle (120° < θ < 150°)' : 
-                                     '🔄 Nearly Opposite (θ ≈ 180°)';
-                
-                infoText += `📐 <strong>Cosine Similarity: ${cosine.toFixed(3)}</strong> | Angle: ${angle.toFixed(1)}°<br>`;
-                infoText += `Mathematical Interpretation: ${interpretation}<br>`;
-                infoText += `Formula: cos(θ) = (A·B)/(|A||B|) = ${dotProduct(vectorA, vectorB).toFixed(2)}/(${magA.toFixed(2)}×${magB.toFixed(2)})`;
-            } else if (result) {
-                const magResult = magnitude(result);
-                let operationSymbol = '';
-                switch(currentOperation) {
-                    case 'add': operationSymbol = '+'; break;
-                    case 'subtract': operationSymbol = '-'; break;
-                    case 'scale': operationSymbol = `×${scaleFactor}`; break;
-                }
-                infoText += `Operation: A ${operationSymbol} B = [${result.x.toFixed(1)}, ${result.y.toFixed(1)}] | Magnitude: ${magResult.toFixed(2)}`;
-            }
-            
-            document.getElementById('vector-info').innerHTML = infoText;
-        }
-        
-        // Mathematical Examples function
-        function loadMathExample(example) {
-            switch(example) {
-                case 'unit':
-                    // Unit vectors example
-                    vectorA.x = 0.6; vectorA.y = 0.8; // Unit vector: |A| = 1
-                    vectorB.x = 0.8; vectorB.y = 0.6; // Another unit vector: |B| = 1
-                    updateSliders();
-                    setOperation('cosine');
-                    break;
-                case 'orthogonal':
-                    // Orthogonal vectors (perpendicular)
-                    vectorA.x = 3; vectorA.y = 4; // Vector A
-                    vectorB.x = 4; vectorB.y = -3; // Vector B perpendicular to A
-                    updateSliders();
-                    setOperation('dot');
-                    break;
-                case 'parallel':
-                    // Parallel vectors (same direction)
-                    vectorA.x = 2; vectorA.y = 3; // Vector A
-                    vectorB.x = 4; vectorB.y = 6; // Vector B parallel to A (scaled by 2)
-                    updateSliders();
-                    setOperation('cosine');
-                    break;
-                case 'basis':
-                    // Standard basis vectors
-                    vectorA.x = 1; vectorA.y = 0; // Standard basis vector e₁
-                    vectorB.x = 0; vectorB.y = 1; // Standard basis vector e₂
-                    updateSliders();
-                    setOperation('dot');
-                    break;
-            }
-        }
-        
-        function updateSliders() {
-            document.getElementById('vectorA-x-slider').value = vectorA.x;
-            document.getElementById('vectorA-y-slider').value = vectorA.y;
-            document.getElementById('vectorB-x-slider').value = vectorB.x;
-            document.getElementById('vectorB-y-slider').value = vectorB.y;
-            
-            document.getElementById('vectorA-x').textContent = vectorA.x.toFixed(1);
-            document.getElementById('vectorA-y').textContent = vectorA.y.toFixed(1);
-            document.getElementById('vectorB-x').textContent = vectorB.x.toFixed(1);
-            document.getElementById('vectorB-y').textContent = vectorB.y.toFixed(1);
-            
-            drawVectors();
-            updateInfo();
-        }
-        
-        // Initial draw
-        drawVectors();
-        updateInfo();
-    </script>
 
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
@@ -1108,4 +939,4 @@
 <script src="../js/site-nav-data.js" data-site-nav="data"></script>
 <script src="../js/site-nav.js" data-site-nav="boot"></script>
 </body>
-</html> 
+</html>

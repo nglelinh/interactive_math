@@ -13,56 +13,7 @@
                 processEnvironments: true
             },
             options: {
-                skipHtmlTags: ['script', 'noscript'        // Global variables
-        let currentParallelism = 'data';
-        let numWorkers = 4;
-        let datasetSize = 1000; // MB
-        let modelComplexity = 5; // 1-10 scale
-        let isSimulationRunning = false;
-        
-        // Performance constants
-        const PERFORMANCE_CONSTANTS = {
-            // Network parameters (typical values for InfiniBand)
-            LATENCY_ALPHA: 1e-6, // 1 microsecond
-            BANDWIDTH_BETA: 1e-10, // 10 GB/s bandwidth
-            
-            // Model parameters (estimated for typical deep learning models)
-            MODEL_SIZE_MB: {
-                1: 10,    // Small CNN
-                2: 25,    // ResNet-18
-                3: 50,    // ResNet-50
-                4: 100,   // ResNet-101
-                5: 200,   // Large CNN
-                6: 500,   // Small Transformer
-                7: 1000,  // BERT-Base
-                8: 2000,  // BERT-Large
-                9: 5000,  // GPT-2
-                10: 15000 // GPT-3 175B (distributed)
-            },
-            
-            // Computation parameters
-            FLOPS_PER_SAMPLE: {
-                1: 1e6,   // 1 MFLOP
-                2: 5e6,   // 5 MFLOP
-                3: 1e7,   // 10 MFLOP
-                4: 5e7,   // 50 MFLOP
-                5: 1e8,   // 100 MFLOP
-                6: 5e8,   // 500 MFLOP
-                7: 1e9,   // 1 GFLOP
-                8: 5e9,   // 5 GFLOP
-                9: 1e10,  // 10 GFLOP
-                10: 5e10  // 50 GFLOP
-            },
-            
-            // Hardware parameters
-            GPU_COMPUTE_POWER: 15e12, // 15 TFLOPS (typical for V100)
-            GPU_MEMORY_GB: 32,        // 32 GB HBM
-            CPU_CORES: 40,            // 40 core CPU
-            
-            // Parallel overhead factors
-            SYNC_OVERHEAD: 0.05,      // 5% synchronization overhead
-            COMMUNICATION_EFFICIENCY: 0.8, // 80% communication efficiency
-        };le', 'textarea', 'pre']
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
             }
         };
     </script>
