@@ -199,6 +199,14 @@ window.SITE_NAV_DATA = {
         {
           "href": "fourier-analysis/noise_cancellation_spectral_subtraction.html",
           "label": "Khử Tiếng Ồn với Spectral Subtraction"
+        },
+        {
+          "href": "fourier-analysis/fourier_series_vs_transform.html",
+          "label": "Fourier Series vs Fourier Transform"
+        },
+        {
+          "href": "fourier-analysis/index.html",
+          "label": "Giải tích Fourier - Toán học Tương tác"
         }
       ]
     },
@@ -304,6 +312,10 @@ window.SITE_NAV_DATA = {
           "label": "Gradient Descent Demo"
         },
         {
+          "href": "optimization/backtracking_line_search.html",
+          "label": "🆕 Backtracking Line Search"
+        },
+        {
           "href": "optimization/newton_method_illustration.html",
           "label": "Newton's Method"
         },
@@ -378,6 +390,10 @@ window.SITE_NAV_DATA = {
         {
           "href": "machine-learning/linear_regression_demo.html",
           "label": "Linear Regression Demo"
+        },
+        {
+          "href": "optimization/index.html",
+          "label": "Optimization - Tối ưu hóa toán học"
         },
         {
           "href": "optimization/lagrangian_kkt_clean.html",
@@ -456,6 +472,10 @@ window.SITE_NAV_DATA = {
         {
           "href": "algorithms-datastructures/drunken_bishop.html",
           "label": "Drunken Bishop Algorithm"
+        },
+        {
+          "href": "algorithms-datastructures/convex_hull_algorithms.html",
+          "label": "Convex Hull Algorithms - Interactive Visualization"
         }
       ]
     },

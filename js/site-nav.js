@@ -267,4 +267,45 @@
   } else {
     document.addEventListener("DOMContentLoaded", build);
   }
+
+  /* Touch-to-Mouse Bridge for Canvas */
+  (function initCanvasTouchBridge() {
+    if (!("ontouchstart" in window)) return;
+    var canvases = document.querySelectorAll("canvas");
+    canvases.forEach(function (canvas) {
+      if (canvas.dataset.touchBridged) return;
+      canvas.dataset.touchBridged = "1";
+      if (!canvas.style.touchAction) {
+        canvas.style.touchAction = "none";
+      }
+      function dispatchMouse(type, touch) {
+        var evt = new MouseEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          screenX: touch.screenX,
+          screenY: touch.screenY,
+          button: 0
+        });
+        canvas.dispatchEvent(evt);
+      }
+      canvas.addEventListener("touchstart", function (e) {
+        if (e.touches.length === 1) {
+          dispatchMouse("mousedown", e.touches[0]);
+        }
+      }, { passive: true });
+      canvas.addEventListener("touchmove", function (e) {
+        if (e.touches.length === 1) {
+          e.preventDefault();
+          dispatchMouse("mousemove", e.touches[0]);
+        }
+      }, { passive: false });
+      canvas.addEventListener("touchend", function (e) {
+        var t = (e.changedTouches && e.changedTouches[0]) || null;
+        if (t) dispatchMouse("mouseup", t);
+      }, { passive: true });
+    });
+  })();
+
 })();
