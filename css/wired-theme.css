@@ -1159,3 +1159,119 @@ label {
   cursor: pointer;
   font-size: 14px !important;
 }
+
+/* ── 8. Universal Legacy Class & Inline-Style Normalizer (125-page sweep) ─ */
+.header,
+.theory-header,
+.interactive-section,
+.visualization-container {
+  background: transparent !important;
+  color: var(--wired-ink) !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.inline-formula,
+.main-formula,
+.code-block,
+.parameter-display,
+.function-info {
+  background: var(--wired-code-bg) !important;
+  color: var(--wired-navy) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 7px !important;
+  font-family: var(--wired-mono) !important;
+  padding: 10px 14px !important;
+}
+
+.epsilon-delta,
+.instructions,
+.example-card,
+.function-card {
+  background: rgba(249, 242, 229, 0.82) !important;
+  color: var(--wired-ink) !important;
+  border: none !important;
+  border-left: 4px solid var(--wired-teal) !important;
+  border-radius: 8px !important;
+  padding: 16px 20px !important;
+  margin: 14px 0 !important;
+  box-shadow: none !important;
+}
+
+.comparison-table,
+table {
+  background: var(--wired-card) !important;
+  color: var(--wired-ink) !important;
+  border-collapse: collapse;
+  border: 1px solid var(--wired-line-soft) !important;
+}
+
+.comparison-table th,
+table th {
+  background: var(--wired-bg-deep) !important;
+  color: var(--wired-navy) !important;
+  border-bottom: 1.5px solid var(--wired-line) !important;
+}
+
+.comparison-table td,
+table td {
+  border-bottom: 1px solid var(--wired-line-soft) !important;
+}
+
+.back-link {
+  color: var(--wired-teal-deep) !important;
+  background: transparent !important;
+  border: 1px solid var(--wired-line) !important;
+  border-radius: 7px !important;
+  padding: 6px 12px !important;
+  text-decoration: none !important;
+  font-family: var(--wired-cond) !important;
+  font-weight: 600 !important;
+}
+
+/* Neutralize hardcoded inline gradient / dark / translucent boxes across all legacy pages */
+div[style*="linear-gradient"]:not(.progress-fill):not(.bar):not(.legend-color),
+section[style*="linear-gradient"],
+div[style*="rgba(255, 255, 255, 0.1)"],
+div[style*="rgba(255,255,255,0.1)"],
+div[style*="rgba(255, 215, 0"],
+div[style*="rgba(255,215,0"],
+div[style*="rgba(0, 0, 0, 0.3)"],
+div[style*="rgba(0,0,0,0.3)"],
+div[style*="rgba(0, 0, 0, 0.2)"],
+div[style*="rgba(0,0,0,0.2)"] {
+  background: rgba(249, 242, 229, 0.80) !important;
+  color: var(--wired-ink) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+/* Neutralize unreadable inline white / gold / neon cyan text on warm cream background */
+ul[style*="color: #fff"],
+ul[style*="color: #ffffff"],
+ul[style*="color: white"],
+p[style*="color: #fff"],
+p[style*="color: #ffffff"],
+p[style*="color: white"],
+p[style*="color: #81c784"],
+span[style*="color: #fff"],
+span[style*="color: #ffffff"],
+div[style*="color: #fff"]:not(.wired-lesson):not(.active),
+div[style*="color: #ffffff"]:not(.wired-lesson):not(.active) {
+  color: var(--wired-ink) !important;
+}
+
+h2[style*="color:"],
+h3[style*="color:"],
+h4[style*="color:"] {
+  color: var(--wired-navy) !important;
+  text-shadow: none !important;
+}
+
+@media (max-width: 899px) {
+  div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
