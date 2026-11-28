@@ -356,43 +356,101 @@ img, svg, canvas, video, iframe, .js-plotly-plot {
   max-width: 100% !important;
 }
 
-/* Warm Manual Card Surfaces */
+/* Open Frameless Page Containers (sit directly on warm blueprint paper) */
 .container,
 .main-container,
 .theory-content,
-.property-card,
-.lesson-card,
-.illustration-card,
-.topic-card,
-.controls,
-.controls-panel,
-.control-panel,
-.control-group,
-.control-section,
-.info-panel,
-.results-panel,
-.video-tham-khao,
-.active-explorable,
-.reel-video-section {
-  background: var(--wired-card) !important;
+.matrix-panel {
+  background: transparent !important;
   color: var(--wired-ink) !important;
-  border: 1.5px solid var(--wired-line) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 10px rgba(24, 33, 61, 0.05) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   backdrop-filter: none !important;
   max-width: 100%;
 }
 
+/* Open Editorial Sections (hairline top divider, no boxed frame) */
 .theory-section,
+.info-panel,
+.video-tham-khao,
+.reel-video-section {
+  background: transparent !important;
+  color: var(--wired-ink) !important;
+  border: none !important;
+  border-top: 1px solid var(--wired-line-soft) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  max-width: 100%;
+}
+
+/* Subtle Left-Accent Callouts (no 4-sided box clutter) */
 .example-box,
 .formula-box,
 .highlight-box,
-.vector-info {
-  background: var(--wired-code-bg) !important;
+.vector-info,
+.results-panel,
+.active-explorable {
+  background: rgba(249, 242, 229, 0.72) !important;
   color: var(--wired-navy) !important;
+  border: none !important;
+  border-left: 3px solid var(--wired-teal) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  max-width: 100%;
+}
+
+/* Right Inspector Control Panel (single clean surface, borderless inner groups) */
+.controls,
+.controls-panel,
+.control-panel,
+.wired-right-panel {
+  background: var(--wired-card-soft) !important;
+  color: var(--wired-ink) !important;
   border: 1px solid var(--wired-line) !important;
   border-radius: 10px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
   max-width: 100%;
+}
+
+.control-group,
+.control-section {
+  background: transparent !important;
+  color: var(--wired-ink) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--wired-line-soft) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 10px 0 !important;
+  margin: 0 !important;
+}
+
+.control-group:last-child,
+.control-section:last-child {
+  border-bottom: none !important;
+}
+
+/* Minimal Hairline Hub Cards */
+.property-card,
+.lesson-card,
+.illustration-card,
+.topic-card {
+  background: rgba(249, 242, 229, 0.78) !important;
+  color: var(--wired-ink) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  max-width: 100%;
+}
+
+.lesson-card:hover,
+.illustration-card:hover,
+.topic-card:hover {
+  border-color: var(--wired-teal) !important;
+  background: var(--wired-card) !important;
 }
 
 /* Internal Lesson Tabs (.nav-container / .nav-tabs) */
@@ -421,7 +479,7 @@ button:not(.wired-toggle):not(.wired-chapter-btn) {
   letter-spacing: 0.02em;
   background: var(--wired-card) !important;
   color: var(--wired-navy) !important;
-  border: 1.5px solid var(--wired-line) !important;
+  border: 1px solid var(--wired-line) !important;
   border-radius: 8px !important;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -457,7 +515,7 @@ select,
 textarea {
   background: #ffffff !important;
   color: var(--wired-navy) !important;
-  border: 1.5px solid var(--wired-line) !important;
+  border: 1px solid var(--wired-line) !important;
   border-radius: 7px !important;
   font-family: var(--wired-mono);
   max-width: 100%;
@@ -465,7 +523,7 @@ textarea {
 
 /* Canvas Framing */
 canvas {
-  border: 1.5px solid var(--wired-line) !important;
+  border: 1px solid var(--wired-line) !important;
   border-radius: 10px !important;
   max-width: 100% !important;
   height: auto !important;
