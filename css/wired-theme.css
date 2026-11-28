@@ -408,14 +408,18 @@ img, svg, canvas, video, iframe, .js-plotly-plot {
   margin-right: auto;
 }
 
-/* Standard Lesson Tab Bar (.lesson-nav / .nav-container / .nav-tabs) */
+/* Standard Lesson Tab Bar (ALL variants unified to fourier_transform_lesson) */
 .lesson-nav,
-.nav-container {
+.nav-container,
+.toggle-buttons,
+.tabs,
+.tab-bar {
   position: relative !important;
   top: auto !important;
-  display: flex;
+  display: flex !important;
   flex-wrap: wrap !important;
-  justify-content: center;
+  justify-content: center !important;
+  align-items: center !important;
   gap: 8px !important;
   padding: 10px 14px !important;
   margin: 0 auto 26px !important;
@@ -435,8 +439,12 @@ img, svg, canvas, video, iframe, .js-plotly-plot {
 
 .nav-button,
 .nav-tab,
+.toggle-btn,
+.toggle-button,
+.tab,
 .tab-btn,
 .tab-button,
+.btn,
 button:not(.wired-toggle):not(.wired-chapter-btn) {
   font-family: var(--wired-cond) !important;
   font-weight: 600 !important;
@@ -451,8 +459,12 @@ button:not(.wired-toggle):not(.wired-chapter-btn) {
 
 .nav-button:hover,
 .nav-tab:hover,
+.toggle-btn:hover,
+.toggle-button:hover,
+.tab:hover,
 .tab-btn:hover,
 .tab-button:hover,
+.btn:hover,
 button:not(.wired-toggle):not(.wired-chapter-btn):hover {
   background: var(--wired-bg-deep) !important;
   border-color: var(--wired-teal) !important;
@@ -462,6 +474,9 @@ button:not(.wired-toggle):not(.wired-chapter-btn):hover {
 
 .nav-button.active,
 .nav-tab.active,
+.toggle-btn.active,
+.toggle-button.active,
+.tab.active,
 .tab-btn.active,
 .tab-button.active,
 button.active:not(.wired-toggle):not(.wired-chapter-btn) {
@@ -471,6 +486,14 @@ button.active:not(.wired-toggle):not(.wired-chapter-btn) {
 }
 
 /* Open Editorial Sections */
+.section,
+.lesson-section {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 8px 0 !important;
+}
+
 .theory-section,
 .info-panel,
 .video-tham-khao,
@@ -482,57 +505,130 @@ button.active:not(.wired-toggle):not(.wired-chapter-btn) {
   border-radius: 0 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  padding: 20px 0 !important;
+  margin: 20px 0 !important;
   max-width: 100%;
 }
 
-/* Standard Left-Accent Callout Boxes (Fourier Transform Lesson Standard) */
+/* Family A: Definition / Theory / Concept Callouts (Teal Left Accent) */
 .theory-box,
-.formula-box,
-.highlight-box,
-.vector-info,
-.results-panel,
-.active-explorable {
-  background: rgba(249, 242, 229, 0.78) !important;
-  color: var(--wired-navy) !important;
+.definition,
+.definition-box,
+.concept-box,
+.info-box,
+.math-explanation,
+.complexity-info,
+.complexity-box,
+.highlight-box {
+  background: rgba(249, 242, 229, 0.80) !important;
+  color: var(--wired-ink) !important;
   border: none !important;
   border-left: 4px solid var(--wired-teal) !important;
   border-radius: 8px !important;
   box-shadow: none !important;
+  padding: 18px 20px !important;
+  margin: 16px 0 !important;
   max-width: 100%;
 }
 
+/* Family B: Theorem / Key Concept / Algorithm Callouts (Copper Left Accent) */
+.theorem,
+.theorem-box,
 .key-concept,
+.algorithm-box,
+.algorithm-steps,
 .warning {
-  background: rgba(249, 242, 229, 0.78) !important;
-  color: var(--wired-navy) !important;
+  background: rgba(249, 242, 229, 0.80) !important;
+  color: var(--wired-ink) !important;
   border: none !important;
   border-left: 4px solid var(--wired-copper) !important;
   border-radius: 8px !important;
   box-shadow: none !important;
+  padding: 18px 20px !important;
+  margin: 16px 0 !important;
+  max-width: 100%;
 }
 
-.example-box {
-  background: rgba(249, 242, 229, 0.78) !important;
+/* Family C: Formula / Equation / Math Environment Blocks (Navy Left Accent) */
+.formula-box,
+.formula-container,
+.equation-box,
+.math-formula,
+.math-environment,
+.math-display {
+  background: var(--wired-code-bg) !important;
   color: var(--wired-navy) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-left: 4px solid var(--wired-navy) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  padding: 16px 20px !important;
+  margin: 16px 0 !important;
+  max-width: 100%;
+}
+
+.formula-container .math-environment {
+  background: transparent !important;
+  border: none !important;
+  padding: 8px 0 !important;
+  margin: 4px 0 !important;
+}
+
+.formula-title {
+  font-family: var(--wired-cond) !important;
+  font-weight: 700 !important;
+  color: var(--wired-navy) !important;
+  font-size: 1.05rem !important;
+  margin-bottom: 6px !important;
+}
+
+.formula-description {
+  color: var(--wired-muted) !important;
+  font-size: 0.92rem !important;
+  margin-top: 6px !important;
+}
+
+/* Family D: Example / Result / Interactive Output Callouts (Green Left Accent) */
+.example,
+.example-box,
+.result-panel,
+.results-panel,
+.vector-info,
+.active-explorable,
+.info {
+  background: rgba(249, 242, 229, 0.80) !important;
+  color: var(--wired-ink) !important;
   border: none !important;
   border-left: 4px solid var(--wired-green) !important;
   border-radius: 8px !important;
   box-shadow: none !important;
+  padding: 16px 20px !important;
+  margin: 16px 0 !important;
+  max-width: 100%;
 }
 
-/* Step Cards, Component Items & Hub Cards */
+/* Family E: Unified Cards & Step Items */
 .step-card,
-.component-item,
+.step,
+.concept-card,
+.application-card,
+.app-card,
 .property-card,
+.stat-card,
+.metric-card,
+.metric-item,
+.comparison-card,
 .lesson-card,
 .illustration-card,
-.topic-card {
-  background: rgba(249, 242, 229, 0.82) !important;
+.topic-card,
+.component-item {
+  background: rgba(249, 242, 229, 0.84) !important;
   color: var(--wired-ink) !important;
   border: 1px solid var(--wired-line-soft) !important;
   border-radius: 10px !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
+  padding: 16px 18px !important;
   max-width: 100%;
 }
 
@@ -558,7 +654,8 @@ button.active:not(.wired-toggle):not(.wired-chapter-btn) {
 }
 
 .control-group,
-.control-section {
+.control-section,
+.parameter-control {
   background: transparent !important;
   color: var(--wired-ink) !important;
   border: none !important;
@@ -570,7 +667,8 @@ button.active:not(.wired-toggle):not(.wired-chapter-btn) {
 }
 
 .control-group:last-child,
-.control-section:last-child {
+.control-section:last-child,
+.parameter-control:last-child {
   border-bottom: none !important;
 }
 

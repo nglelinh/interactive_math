@@ -271,12 +271,12 @@
 
   /* Ensure control panels ALWAYS dock on the right without overlapping content */
   function normalizeControlPanels() {
-    var panels = document.querySelectorAll(".container > .controls, .main-container > .controls, .container > .controls-panel, .main-container > .controls-panel");
+    var panels = document.querySelectorAll(".container > .controls, .main-container > .controls, .container > .controls-panel, .main-container > .controls-panel, .container > .control-panel, .section > .controls, .section > .control-panel, .section > .controls-panel, .lesson-section > .controls, .lesson-section > .control-panel");
     panels.forEach(function (panel) {
       if (panel.closest(".wired-stage-split") || panel.closest("#site-nav")) return;
       var parent = panel.parentElement;
       if (!parent) return;
-      var stageSelectors = ".matrix-container, .matrices-container, .result-matrix, .canvas-container, .visualization, .visualization-area, .plot-container, .chart-container, .graph-container, .demo-area";
+      var stageSelectors = "canvas, .matrix-container, .matrices-container, .result-matrix, .canvas-container, .visualization, .visualization-area, .visualization-container, .visualization-panel, .plot-container, .chart-container, .graph-container, .demo-area";
       var siblings = [];
       var sib = panel.nextElementSibling;
       while (sib) {
