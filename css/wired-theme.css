@@ -26,8 +26,8 @@
   --wired-copper: #c0652d;
   --wired-green: #2f855a;
   --wired-track: #e3d8ca;
-  --wired-sans: "Barlow", system-ui, -apple-system, sans-serif;
-  --wired-cond: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --wired-sans: "Source Serif 4", "Be Vietnam Pro", Georgia, serif;
+  --wired-cond: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif;
   --wired-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --wired-sidebar-w: 264px;
 }
@@ -1106,4 +1106,19 @@ h4 {
   border-radius: 8px !important;
   padding: 16px 20px !important;
   color: var(--wired-ink) !important;
+}
+
+/* Pedagogical Font Separation: Source Serif 4 for reading prose, Be Vietnam Pro for UI/controls/headings */
+#site-nav,
+.controls,
+.controls-panel,
+.control-panel,
+.wired-right-panel,
+.lesson-nav,
+.nav-container,
+.toggle-buttons,
+button,
+select,
+label {
+  font-family: var(--wired-cond) !important;
 }

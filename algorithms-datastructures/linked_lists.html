@@ -17,6 +17,33 @@
                 }
             }
         };
+    
+        function _llLog(title, lines) {
+            const box = document.getElementById('operationLog') || document.querySelector('.info-panel') || document.querySelector('.results-panel');
+            if (box) box.innerHTML = `<strong>${title}</strong><br>${lines.join('<br>')}`;
+        }
+        function detectCycle() {
+            _llLog('Floyd Tortoise & Hare (Phát hiện chu trình O(n), bộ nhớ O(1)):', [
+                '1. Con trỏ chậm (slow) đi 1 bước, con trỏ nhanh (fast) đi 2 bước.',
+                '2. Nếu fast chạm null → Danh sách KHÔNG có chu trình.',
+                '3. Nếu slow === fast → Có chu trình! Đặt lại 1 con trỏ về head, cùng đi 1 bước để tìm điểm vào chu trình.'
+            ]);
+        }
+        function demonstrateMergeSort() {
+            _llLog('Merge Sort trên Linked List (O(n log n), không cần mảng phụ):', [
+                '1. Tách đôi danh sách bằng slow/fast pointer: [4→2→1→3] ⇒ [4→2] và [1→3].',
+                '2. Sắp xếp đệ quy từng nửa: [2→4] và [1→3].',
+                '3. Trộn tuyến tính bằng đổi con trỏ next: [1→2→3→4].'
+            ]);
+        }
+        function demonstratePalindrome() {
+            _llLog('Kiểm tra Palindrome trên Linked List (O(n) thời gian, O(1) bộ nhớ):', [
+                '1. Tìm điểm giữa bằng slow/fast pointer trên [1→2→3→2→1].',
+                '2. Đảo ngược nửa sau tại chỗ: [1→2] và [1→2].',
+                '3. So sánh từng cặp nút → Khớp hoàn toàn: ĐÂY LÀ PALINDROME!'
+            ]);
+        }
+
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script src="../math-simple.js"></script>

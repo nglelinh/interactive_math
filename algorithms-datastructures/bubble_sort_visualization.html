@@ -17,6 +17,13 @@
                 }
             }
         };
+    
+        function stepForward() {
+            if (typeof nextStep === 'function') return nextStep();
+            if (typeof bubbleSortStep === 'function') return bubbleSortStep();
+            if (typeof startSorting === 'function') return startSorting();
+        }
+
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script src="../math-simple.js"></script>

@@ -683,31 +683,34 @@
             </div>
 
             <div class="interactive-complex">
-                <h3>🎮 Tương tác với số phức</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4>Điều khiển số phức:</h4>
+                <h3>🎮 Phòng thí nghiệm Số phức &amp; Công thức Euler</h3>
+                <div class="content-layout">
+                    <div class="visualization-area">
+                        <canvas id="complexCanvas" width="640" height="320" style="width:100%;max-width:640px;height:auto;background:#141824;cursor:grab;touch-action:none;"></canvas>
+                    </div>
+                    <div class="controls-panel">
                         <div class="control-group">
-                            <label>Độ lớn (r): <span id="magnitudeValue">1.0</span></label>
-                            <input type="range" id="magnitudeSlider" min="0.1" max="2" step="0.1" value="1" oninput="updateComplexDemo()">
+                            <label>Độ lớn (A): <span class="value-display" id="complexMagValue">1.0</span></label>
+                            <input type="range" id="complexMagSlider" min="0.2" max="1.6" step="0.1" value="1.0" oninput="onComplexSliderInput()">
                         </div>
                         <div class="control-group">
-                            <label>Pha (θ): <span id="phaseValue">0°</span></label>
-                            <input type="range" id="phaseSlider" min="0" max="360" step="5" value="0" oninput="updateComplexDemo()">
+                            <label>Pha ban đầu (θ₀): <span class="value-display" id="complexPhaseValue">0°</span></label>
+                            <input type="range" id="complexPhaseSlider" min="0" max="360" step="5" value="0" oninput="onComplexSliderInput()">
                         </div>
                         <div class="control-group">
-                            <label>Tần số (f): <span id="freqValue">1 Hz</span></label>
-                            <input type="range" id="freqSlider" min="0.1" max="3" step="0.1" value="1" oninput="updateComplexDemo()">
+                            <label>Tần số quay (f): <span class="value-display" id="complexFreqValue">0.5 Hz</span></label>
+                            <input type="range" id="complexFreqSlider" min="0" max="2" step="0.1" value="0.5" oninput="onComplexSliderInput()">
+                        </div>
+                        <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button type="button" id="complexPlayBtn" onclick="toggleComplexPlay()">⏸ Tạm dừng</button>
+                            <button type="button" onclick="resetComplexDemo()">🔄 Đặt lại</button>
+                        </div>
+                        <div class="vector-info" style="margin-top:8px;">
+                            <div><strong>Số phức:</strong> <span id="complexNumber">1.00 + 0.00i</span></div>
+                            <div><strong>Dạng Euler:</strong> <span id="eulerForm">1.0·e^(i·0°)</span></div>
+                            <div style="font-size:0.85em;margin-top:4px;opacity:0.85;">Mẹo: Kéo trực tiếp đầu mũi tên trên vòng tròn đơn vị!</div>
                         </div>
                     </div>
-                    <div>
-                        <div class="complex-plane" id="complexPlane">
-                            <canvas id="complexCanvas" width="296" height="296"></canvas>
-                        </div>
-                        <div style="text-align: center; margin-top: 10px;">
-                            <div>Số phức: <span id="complexNumber">1 + 0i</span></div>
-                            <div>Dạng Euler: <span id="eulerForm">1·e^(i·0°)</span></div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -715,7 +718,7 @@
             <div class="example-box">
                 <h3>🎼 Ví dụ thực tế: Phân tích hợp âm</h3>
                 <p><strong>Tín hiệu:</strong> f(t) = cos(2πt) + 0.5·cos(4πt) + 0.25·cos(6πt)</p>
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 10px 0;">
+                <div style="background: rgba(243,232,214,0.85); border-left: 3px solid #1aa3a1; padding: 15px; border-radius: 8px; margin: 10px 0;">
                     <p><strong>Fourier Transform cho ta:</strong></p>
                     <ul>
                         <li>Tần số 1 Hz: Magnitude = 1, Phase = 0°</li>
@@ -748,7 +751,7 @@
                 <h3>🔍 Ví dụ 1: Tín hiệu Cosine đơn giản</h3>
                 <p><strong>Cho:</strong> f(t) = cos(2πf₀t) với f₀ = 5 Hz</p>
                 
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                <div style="background: rgba(243,232,214,0.85); border-left: 3px solid #1aa3a1; padding: 20px; border-radius: 10px; margin: 15px 0;">
                     <h4>Bước 1: Viết lại bằng công thức Euler</h4>
                     <p>$$\cos(2\pi f_0 t) = \frac{e^{i2\pi f_0 t} + e^{-i2\pi f_0 t}}{2}$$</p>
                     
@@ -771,7 +774,7 @@
                 <h3>🔍 Ví dụ 2: Tín hiệu Sine với pha khác 0</h3>
                 <p><strong>Cho:</strong> f(t) = sin(2πf₀t + φ) với f₀ = 3 Hz, φ = π/4</p>
                 
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                <div style="background: rgba(243,232,214,0.85); border-left: 3px solid #1aa3a1; padding: 20px; border-radius: 10px; margin: 15px 0;">
                     <h4>Bước 1: Viết lại bằng Euler</h4>
                     <p>$$\sin(2\pi f_0 t + \phi) = \frac{e^{i(2\pi f_0 t + \phi)} - e^{-i(2\pi f_0 t + \phi)}}{2i}$$</p>
                     
@@ -795,7 +798,7 @@
                 <h3>🔍 Ví dụ 3: Xung Gaussian</h3>
                 <p><strong>Cho:</strong> f(t) = e^(-t²/2σ²) (Gaussian pulse)</p>
                 
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                <div style="background: rgba(243,232,214,0.85); border-left: 3px solid #1aa3a1; padding: 20px; border-radius: 10px; margin: 15px 0;">
                     <h4>Tính chất đặc biệt:</h4>
                     <p>$$F(\omega) = \sigma\sqrt{2\pi} \cdot e^{-\sigma^2\omega^2/2}$$</p>
                     
@@ -820,7 +823,7 @@
                 <h3>🔍 Ví dụ 4: Sóng vuông - Series Fourier</h3>
                 <p><strong>Cho:</strong> Sóng vuông với chu kỳ T</p>
                 
-                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                <div style="background: rgba(243,232,214,0.85); border-left: 3px solid #1aa3a1; padding: 20px; border-radius: 10px; margin: 15px 0;">
                     <h4>Fourier Series:</h4>
                     <p>$$f(t) = \frac{4}{\pi}\sum_{n=1,3,5,...}^{\infty} \frac{\sin(2\pi nf_0 t)}{n}$$</p>
                     
@@ -2621,348 +2624,227 @@
         };
 
         // Complex Number Demonstrations
-        function updateComplexDemo() {
+        // Modern Euler Phasor + Synchronized Real/Imaginary Wave Interactive Lab
+        let complexState = {
+            amp: 1.0,
+            phaseDeg: 0,
+            freq: 0.5,
+            t: 0,
+            playing: true,
+            dragging: false,
+            lastTs: null,
+            rafId: null
+        };
+
+        function syncComplexReadouts(a, phiRad) {
+            const reVal = a * Math.cos(phiRad);
+            const imVal = a * Math.sin(phiRad);
+            const deg = ((phiRad * 180 / Math.PI) % 360 + 360) % 360;
+            const sign = imVal >= 0 ? '+' : '-';
+            const numEl = document.getElementById('complexNumber');
+            const eulEl = document.getElementById('eulerForm');
+            if (numEl) numEl.textContent = `${reVal.toFixed(2)} ${sign} ${Math.abs(imVal).toFixed(2)}i`;
+            if (eulEl) eulEl.textContent = `${a.toFixed(1)}·e^(i·${deg.toFixed(0)}°)`;
+        }
+
+        function onComplexSliderInput() {
+            const mEl = document.getElementById('complexMagSlider');
+            const pEl = document.getElementById('complexPhaseSlider');
+            const fEl = document.getElementById('complexFreqSlider');
+            if (mEl) {
+                complexState.amp = parseFloat(mEl.value);
+                const v = document.getElementById('complexMagValue');
+                if (v) v.textContent = complexState.amp.toFixed(1);
+            }
+            if (pEl) {
+                complexState.phaseDeg = parseFloat(pEl.value);
+                const v = document.getElementById('complexPhaseValue');
+                if (v) v.textContent = `${complexState.phaseDeg.toFixed(0)}°`;
+            }
+            if (fEl) {
+                complexState.freq = parseFloat(fEl.value);
+                const v = document.getElementById('complexFreqValue');
+                if (v) v.textContent = `${complexState.freq.toFixed(1)} Hz`;
+            }
+            drawComplexScene();
+        }
+
+        function toggleComplexPlay() {
+            complexState.playing = !complexState.playing;
+            complexState.lastTs = null;
+            const btn = document.getElementById('complexPlayBtn');
+            if (btn) btn.textContent = complexState.playing ? '⏸ Tạm dừng' : '▶ Tiếp tục';
+        }
+
+        function resetComplexDemo() {
+            complexState.amp = 1.0;
+            complexState.phaseDeg = 0;
+            complexState.freq = 0.5;
+            complexState.t = 0;
+            complexState.playing = true;
+            const mEl = document.getElementById('complexMagSlider');
+            const pEl = document.getElementById('complexPhaseSlider');
+            const fEl = document.getElementById('complexFreqSlider');
+            if (mEl) mEl.value = 1.0;
+            if (pEl) pEl.value = 0;
+            if (fEl) fEl.value = 0.5;
+            const btn = document.getElementById('complexPlayBtn');
+            if (btn) btn.textContent = '⏸ Tạm dừng';
+            onComplexSliderInput();
+        }
+
+        function drawComplexScene() {
             const canvas = document.getElementById('complexCanvas');
             if (!canvas) return;
-            
             const ctx = canvas.getContext('2d');
-            const width = canvas.width = 600;
-            const height = canvas.height = 400;
-            const centerX = width / 2;
-            const centerY = height / 2;
-            const scale = 80;
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
-            
-            // Get parameters
-            const amplitude = parseFloat(document.getElementById('complexAmplitude')?.value || 1);
-            const frequency = parseFloat(document.getElementById('complexFrequency')?.value || 1);
-            const phase = parseFloat(document.getElementById('complexPhase')?.value || 0);
-            const time = Date.now() / 1000; // Current time
-            
-            // Draw axes
-            ctx.strokeStyle = '#ddd';
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            const cx = 145, cy = H / 2, unitR = 72;
+            const waveX0 = 285, waveW = W - waveX0 - 20;
+            const phi = (complexState.phaseDeg * Math.PI / 180) + 2 * Math.PI * complexState.freq * complexState.t;
+            const a = complexState.amp;
+            const tipX = cx + a * unitR * Math.cos(phi);
+            const tipY = cy - a * unitR * Math.sin(phi);
+
+            // Grid & Unit circle
+            ctx.strokeStyle = 'rgba(206,192,173,0.18)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(width, centerY);
-            ctx.moveTo(centerX, 0);
-            ctx.lineTo(centerX, height);
+            ctx.moveTo(20, cy); ctx.lineTo(265, cy);
+            ctx.moveTo(cx, 20); ctx.lineTo(cx, H - 20);
+            ctx.moveTo(waveX0, cy); ctx.lineTo(W - 15, cy);
+            ctx.moveTo(waveX0, 20); ctx.lineTo(waveX0, H - 20);
             ctx.stroke();
-            
-            // Draw grid
-            ctx.strokeStyle = '#f0f0f0';
-            for (let i = -3; i <= 3; i++) {
-                if (i !== 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + i * scale, 0);
-                    ctx.lineTo(centerX + i * scale, height);
-                    ctx.moveTo(0, centerY + i * scale);
-                    ctx.lineTo(width, centerY + i * scale);
-                    ctx.stroke();
-                }
-            }
-            
-            // Calculate complex exponential
-            const angle = 2 * Math.PI * frequency * time + phase;
-            const realPart = amplitude * Math.cos(angle);
-            const imagPart = amplitude * Math.sin(angle);
-            
-            // Draw rotating vector (phasor)
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 3;
+
+            // Unit circle (r = 1)
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.setLineDash([4, 4]);
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(centerX + realPart * scale, centerY - imagPart * scale);
+            ctx.arc(cx, cy, unitR, 0, Math.PI * 2);
             ctx.stroke();
-            
-            // Draw point
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(centerX + realPart * scale, centerY - imagPart * scale, 5, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Draw projections
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            
-            // Real projection
-            ctx.beginPath();
-            ctx.moveTo(centerX + realPart * scale, centerY - imagPart * scale);
-            ctx.lineTo(centerX + realPart * scale, centerY);
-            ctx.stroke();
-            
-            // Imaginary projection
-            ctx.beginPath();
-            ctx.moveTo(centerX + realPart * scale, centerY - imagPart * scale);
-            ctx.lineTo(centerX, centerY - imagPart * scale);
-            ctx.stroke();
-            
             ctx.setLineDash([]);
-            
+
+            // Amplitude circle
+            ctx.strokeStyle = 'rgba(26,163,161,0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, a * unitR, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Projections on Re & Im
+            ctx.strokeStyle = '#1aa3a1';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tipX, cy); ctx.stroke();
+            ctx.strokeStyle = '#e07a3f';
+            ctx.beginPath(); ctx.moveTo(tipX, cy); ctx.lineTo(tipX, tipY); ctx.stroke();
+
+            // Phasor vector
+            ctx.strokeStyle = '#f5c542';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tipX, tipY); ctx.stroke();
+            ctx.fillStyle = '#f5c542';
+            ctx.beginPath(); ctx.arc(tipX, tipY, complexState.dragging ? 8 : 6, 0, Math.PI * 2); ctx.fill();
+
+            // Bridge dashed line from tip to wave start (Im = sin)
+            ctx.strokeStyle = 'rgba(224,122,63,0.5)';
+            ctx.setLineDash([3, 3]);
+            ctx.lineWidth = 1.2;
+            ctx.beginPath(); ctx.moveTo(tipX, tipY); ctx.lineTo(waveX0, tipY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Synchronized Cos (Re) & Sin (Im) waves
+            ctx.strokeStyle = '#1aa3a1';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            for (let i = 0; i <= waveW; i += 2) {
+                const ph = phi - (i / waveW) * 4 * Math.PI;
+                const y = cy - a * unitR * Math.cos(ph);
+                if (i === 0) ctx.moveTo(waveX0 + i, y); else ctx.lineTo(waveX0 + i, y);
+            }
+            ctx.stroke();
+
+            ctx.strokeStyle = '#e07a3f';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            for (let i = 0; i <= waveW; i += 2) {
+                const ph = phi - (i / waveW) * 4 * Math.PI;
+                const y = cy - a * unitR * Math.sin(ph);
+                if (i === 0) ctx.moveTo(waveX0 + i, y); else ctx.lineTo(waveX0 + i, y);
+            }
+            ctx.stroke();
+
             // Labels
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Real', width - 30, centerY - 10);
-            ctx.save();
-            ctx.translate(20, 20);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Imaginary', 0, 0);
-            ctx.restore();
-            
-            // Display values
-            const valuesElement = document.getElementById('complexValues');
-            if (valuesElement) {
-                valuesElement.innerHTML = `
-                    Real: ${realPart.toFixed(3)}<br>
-                    Imaginary: ${imagPart.toFixed(3)}<br>
-                    Magnitude: ${amplitude.toFixed(3)}<br>
-                    Phase: ${(angle % (2 * Math.PI)).toFixed(3)} rad
-                `;
-            }
-            
-            requestAnimationFrame(updateComplexDemo);
+            ctx.font = '12px JetBrains Mono, monospace';
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('Re', 248, cy - 6);
+            ctx.fillText('Im', cx + 6, 32);
+            ctx.fillStyle = '#1aa3a1';
+            ctx.fillText('Re = A·cos(ωt+θ)', waveX0 + 8, 28);
+            ctx.fillStyle = '#e07a3f';
+            ctx.fillText('Im = A·sin(ωt+θ)', waveX0 + 165, 28);
+
+            syncComplexReadouts(a, phi);
         }
-        
-        function updateGaussianDemo() {
-            const canvas = document.getElementById('gaussianCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width = 800;
-            const height = canvas.height = 400;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // Get parameters
-            const sigma = parseFloat(document.getElementById('gaussianSigma')?.value || 1);
-            const showFT = document.getElementById('showGaussianFT')?.checked || false;
-            
-            const timeScale = 40;
-            const freqScale = 200;
-            const centerY = height / 2;
-            
-            // Time domain
-            if (!showFT) {
-                ctx.strokeStyle = '#2980b9';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                
-                for (let x = 0; x < width; x++) {
-                    const t = (x - width/2) / timeScale;
-                    const amplitude = Math.exp(-t*t / (2 * sigma*sigma));
-                    const y = centerY - amplitude * centerY * 0.8;
-                    
-                    if (x === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+
+        function complexLoop(ts) {
+            if (complexState.playing && !complexState.dragging) {
+                if (complexState.lastTs !== null) {
+                    const dt = Math.min(0.05, (ts - complexState.lastTs) / 1000);
+                    complexState.t += dt;
                 }
-                ctx.stroke();
-                
-                // Axes and labels
-                ctx.strokeStyle = '#ddd';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(0, centerY);
-                ctx.lineTo(width, centerY);
-                ctx.moveTo(width/2, 0);
-                ctx.lineTo(width/2, height);
-                ctx.stroke();
-                
-                ctx.fillStyle = '#333';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Gaussian Pulse (Time Domain)', width/2, 30);
-                ctx.fillText('σ = ' + sigma, width/2, height - 20);
+                complexState.lastTs = ts;
+                drawComplexScene();
             } else {
-                // Frequency domain (Fourier Transform of Gaussian)
-                ctx.strokeStyle = '#e74c3c';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                
-                for (let x = 0; x < width; x++) {
-                    const f = (x - width/2) / freqScale;
-                    const amplitude = sigma * Math.sqrt(2 * Math.PI) * Math.exp(-2 * Math.PI*Math.PI * f*f * sigma*sigma);
-                    const y = centerY - amplitude * 20;
-                    
-                    if (x === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-                
-                // Axes and labels
-                ctx.strokeStyle = '#ddd';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(0, centerY);
-                ctx.lineTo(width, centerY);
-                ctx.moveTo(width/2, 0);
-                ctx.lineTo(width/2, height);
-                ctx.stroke();
-                
-                ctx.fillStyle = '#333';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Fourier Transform (Frequency Domain)', width/2, 30);
-                ctx.fillText('1/σ width scaling', width/2, height - 20);
+                complexState.lastTs = ts;
             }
+            complexState.rafId = requestAnimationFrame(complexLoop);
         }
-        
-        function updateSquareWaveDemo() {
-            const canvas = document.getElementById('squareWaveCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width = 800;
-            const height = canvas.height = 600;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            const harmonics = parseInt(document.getElementById('harmonicCount')?.value || 5);
-            const showComponents = document.getElementById('showComponents')?.checked || false;
-            
-            const timeScale = 200;
-            const amplitude = 100;
-            const centerY = height / 3;
-            
-            // Draw axes
-            ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(width, centerY);
-            ctx.moveTo(width/2, 0);
-            ctx.lineTo(width/2, height/2);
-            ctx.stroke();
-            
-            // Square wave synthesis
-            const points = [];
-            for (let x = 0; x < width; x++) {
-                const t = (x - width/2) / timeScale;
-                let y = 0;
-                
-                // Add harmonics
-                for (let n = 1; n <= harmonics; n += 2) {
-                    const harmonic = (4 / (n * Math.PI)) * Math.sin(2 * Math.PI * n * t);
-                    y += harmonic;
-                    
-                    // Draw individual components if requested
-                    if (showComponents && n <= 5) {
-                        ctx.strokeStyle = `hsl(${n * 60}, 70%, 50%)`;
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        
-                        for (let x2 = 0; x2 < width; x2++) {
-                            const t2 = (x2 - width/2) / timeScale;
-                            const comp = (4 / (n * Math.PI)) * Math.sin(2 * Math.PI * n * t2);
-                            const y2 = centerY - comp * amplitude;
-                            
-                            if (x2 === 0) ctx.moveTo(x2, y2);
-                            else ctx.lineTo(x2, y2);
-                        }
-                        ctx.stroke();
-                    }
-                }
-                
-                points.push({x, y: centerY - y * amplitude});
-            }
-            
-            // Draw synthesized wave
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            points.forEach((point, i) => {
-                if (i === 0) ctx.moveTo(point.x, point.y);
-                else ctx.lineTo(point.x, point.y);
-            });
-            ctx.stroke();
-            
-            // Draw ideal square wave for comparison
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            
-            for (let x = 0; x < width; x++) {
-                const t = (x - width/2) / timeScale;
-                const square = Math.sign(Math.sin(2 * Math.PI * t));
-                const y = centerY - square * amplitude;
-                
-                if (x === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Frequency spectrum
-            const spectrumY = height * 2/3;
-            const spectrumHeight = height/4;
-            
-            ctx.fillStyle = '#333';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Frequency Spectrum', width/2, spectrumY - 20);
-            
-            // Draw spectrum
-            for (let n = 1; n <= harmonics; n += 2) {
-                const magnitude = 4 / (n * Math.PI);
-                const x = width/2 + (n - harmonics/2) * 40;
-                const barHeight = magnitude * spectrumHeight * 2;
-                
-                ctx.fillStyle = '#3498db';
-                ctx.fillRect(x - 10, spectrumY + spectrumHeight - barHeight, 20, barHeight);
-                
-                ctx.fillStyle = '#333';
-                ctx.font = '10px Arial';
-                ctx.fillText(n.toString(), x, spectrumY + spectrumHeight + 15);
-            }
-            
-            // Draw spectrum axes
-            ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, spectrumY + spectrumHeight);
-            ctx.lineTo(width, spectrumY + spectrumHeight);
-            ctx.stroke();
+
+        function updateComplexDemo() {
+            onComplexSliderInput();
         }
-        
-        // Initialize complex demos when DOM is loaded
+
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                updateComplexDemo();
-                updateGaussianDemo();
-                updateSquareWaveDemo();
-                
-                // Set up event listeners for controls
-                const complexControls = ['complexAmplitude', 'complexFrequency', 'complexPhase'];
-                complexControls.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.addEventListener('input', updateComplexDemo);
+            const c = document.getElementById('complexCanvas');
+            if (c) {
+                const updateFromPtr = (e) => {
+                    const rect = c.getBoundingClientRect();
+                    const px = (e.clientX - rect.left) * (c.width / rect.width);
+                    const py = (e.clientY - rect.top) * (c.height / rect.height);
+                    const dx = px - 145, dy = (c.height / 2) - py;
+                    const dist = Math.hypot(dx, dy) / 72;
+                    complexState.amp = Math.max(0.2, Math.min(1.6, Math.round(dist * 10) / 10));
+                    const deg = ((Math.atan2(dy, dx) * 180 / Math.PI) % 360 + 360) % 360;
+                    complexState.phaseDeg = Math.round(deg / 5) * 5;
+                    complexState.t = 0;
+                    const mEl = document.getElementById('complexMagSlider');
+                    const pEl = document.getElementById('complexPhaseSlider');
+                    if (mEl) mEl.value = complexState.amp;
+                    if (pEl) pEl.value = complexState.phaseDeg;
+                    onComplexSliderInput();
+                };
+                c.addEventListener('pointerdown', (e) => {
+                    const rect = c.getBoundingClientRect();
+                    const px = (e.clientX - rect.left) * (c.width / rect.width);
+                    if (px < 275) {
+                        complexState.dragging = true;
+                        c.style.cursor = 'grabbing';
+                        if (c.setPointerCapture) c.setPointerCapture(e.pointerId);
+                        updateFromPtr(e);
                     }
                 });
-                
-                const gaussianControls = ['gaussianSigma', 'showGaussianFT'];
-                gaussianControls.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.addEventListener('input', updateGaussianDemo);
-                        element.addEventListener('change', updateGaussianDemo);
-                    }
-                });
-                
-                const squareWaveControls = ['harmonicCount', 'showComponents'];
-                squareWaveControls.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.addEventListener('input', updateSquareWaveDemo);
-                        element.addEventListener('change', updateSquareWaveDemo);
-                    }
-                });
-            }, 100);
+                c.addEventListener('pointermove', (e) => { if (complexState.dragging) updateFromPtr(e); });
+                const stopDrag = () => { complexState.dragging = false; c.style.cursor = 'grab'; };
+                c.addEventListener('pointerup', stopDrag);
+                c.addEventListener('pointercancel', stopDrag);
+            }
+            onComplexSliderInput();
+            if (!complexState.rafId) complexState.rafId = requestAnimationFrame(complexLoop);
         });
+                
 
         // MathJax configuration
         window.MathJax = {

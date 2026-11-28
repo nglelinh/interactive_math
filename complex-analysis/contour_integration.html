@@ -234,6 +234,22 @@
                 <br><br>
                 <strong>Residue at Simple Pole:</strong> \(\text{Res}(f, a) = \lim_{z \to a} (z-a)f(z)\)<br>
                 <strong>Residue at Pole of Order n:</strong> \(\text{Res}(f, a) = \frac{1}{(n-1)!} \lim_{z \to a} \frac{d^{n-1}}{dz^{n-1}}[(z-a)^n f(z)]\)
+            </div>
+            <div class="interactive-grid">
+                <div class="controls-panel">
+                    <div class="parameter-control">
+                        <label>Function f(z):</label>
+                        <select id="functionSelect">
+                            <option value="1/(z-1)">1 / (z - 1)</option>
+                            <option value="1/(z^2+1)">1 / (z² + 1)</option>
+                            <option value="1/((z-1)(z+1))">1 / ((z - 1)(z + 1))</option>
+                            <option value="e^z/z">e^z / z</option>
+                            <option value="sin(z)/z^2">sin(z) / z²</option>
+                        </select>
+                    </div>
+                    <div class="parameter-control">
+                        <label>Contour Shape:</label>
+                        <select id="contourType">
                             <option value="circle">Circle</option>
                             <option value="rectangle">Rectangle</option>
                             <option value="custom">Custom Path</option>

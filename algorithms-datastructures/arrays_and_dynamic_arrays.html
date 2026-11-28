@@ -17,6 +17,36 @@
                 }
             }
         };
+    
+        function demonstrateTwoPointers() {
+            const sample = [1, 3, 4, 6, 8, 11, 15];
+            const target = 14;
+            let l = 0, r = sample.length - 1, steps = [];
+            while (l < r) {
+                const s = sample[l] + sample[r];
+                steps.push(`L=${l}(${sample[l]}) + R=${r}(${sample[r]}) = ${s}`);
+                if (s === target) { steps.push(`✓ Tìm thấy cặp (${sample[l]}, ${sample[r]}) = ${target} trong O(n)!`); break; }
+                if (s < target) l++; else r--;
+            }
+            const out = document.getElementById('operationLog') || document.getElementById('arrayInfo') || document.querySelector('.info-panel');
+            if (out) out.innerHTML = '<strong>Two Pointers (tổng = 14 trên [1,3,4,6,8,11,15]):</strong><br>' + steps.join('<br>');
+        }
+        function demonstrateSlidingWindow() {
+            const sample = [2, 1, 5, 1, 3, 2], k = 3;
+            let wSum = 0, maxSum = -Infinity, steps = [];
+            for (let i = 0; i < sample.length; i++) {
+                wSum += sample[i];
+                if (i >= k - 1) {
+                    maxSum = Math.max(maxSum, wSum);
+                    steps.push(`Cửa sổ [${i-k+1}..${i}] = [${sample.slice(i-k+1, i+1).join(',')}] → tổng = ${wSum}`);
+                    wSum -= sample[i - (k - 1)];
+                }
+            }
+            steps.push(`✓ Tổng lớn nhất cỡ k=${k}: ${maxSum} (độ phức tạp O(n))`);
+            const out = document.getElementById('operationLog') || document.getElementById('arrayInfo') || document.querySelector('.info-panel');
+            if (out) out.innerHTML = '<strong>Sliding Window (k = 3 trên [2,1,5,1,3,2]):</strong><br>' + steps.join('<br>');
+        }
+
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <script src="../math-simple.js"></script>

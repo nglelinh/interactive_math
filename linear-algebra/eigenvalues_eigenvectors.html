@@ -642,567 +642,202 @@
     </div>
 
     <script>
-        // Global variables for the interactive visualization
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const width = canvas.width;
-        const height = canvas.height;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const scale = 100;
-        
-        // Matrix elements
-        let matrix = {
-            a11: 2, a12: 1,
-            a21: 1, a22: 2
-        };
-        
-        // Eigenvalue calculation results
-        let eigendata = {
-            eigenvalues: [],
-            eigenvectors: [],
-            isReal: true
-        };
-        
-        // Animation state
-        let animationId = null;
-        let animationTime = 0;
-        let animationSpeed = 1;
-        let isAnimating = false;
-        
-        // Visualization options
-        let showOptions = {
-            circle: true,
-            grid: false,
-            eigenvectors: true,
-            eigenlines: true
-        };
-        
-        function toCanvasX(x) {
-            return centerX + x * scale;
-        }
-        
-        function toCanvasY(y) {
-            return centerY - y * scale;
-        }
-        
-        function applyMatrix(point) {
-            return {
-                x: matrix.a11 * point.x + matrix.a12 * point.y,
-                y: matrix.a21 * point.x + matrix.a22 * point.y
-            };
-        }
-    </script>
-                    <div class="toggle-button" id="toggle-animation" onclick="toggleAnimation()">
-                        ▶ Chơi Hoạt Ảnh
-                    </div>
-                    <div class="toggle-button" onclick="resetVisualization()">
-                        🔄 Đặt Lại
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Mathematical Theory Section -->
-            <div class="control-section">
-                <h3>📐 Lý Thuyết Toán Học</h3>
-                <div style="background: rgba(255, 215, 0, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4>🔍 Đa Thức Đặc Trưng:</h4>
-                    <p><strong>det(A - λI) = 0</strong><br>
-                    <strong>Với ma trận 2×2:</strong><br>
-                    • det([a₁₁-λ, a₁₂; a₂₁, a₂₂-λ]) = 0<br>
-                    • (a₁₁-λ)(a₂₂-λ) - a₁₂a₂₁ = 0<br>
-                    • Định thức det(A) = a₁₁a₂₂ - a₁₂a₂₁</p>
-                    
-                    <h4 style="color: #2ecc71; margin: 10px 0 5px 0;">Ý Nghĩa Hình Học</h4>
-                    <ul style="margin: 5px 0; padding-left: 20px;">
-                        <li><strong>λ &gt; 1:</strong> Kéo giãn theo hướng vec-tơ riêng</li>
-                        <li><strong>0 &lt; λ &lt; 1:</strong> Co lại theo hướng vec-tơ riêng</li>
-                        <li><strong>λ &lt; 0:</strong> Phản xạ + tỷ lệ</li>
-                        <li><strong>λ = 1:</strong> Bảo toàn không đổi</li>
-                    </ul>
-                </div>
-                
-                <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4 style="color: #3498db; margin: 0 0 10px 0;">Tính Chất Quan Trọng</h4>
-                    <p><strong>Chéo hóa:</strong><br>
-                    A = PDP⁻¹ (nếu có đủ vec-tơ riêng độc lập)<br>
-                    D là ma trận chéo chứa các trị riêng</p>
-                    
-                    <p><strong>Định lý Phổ:</strong><br>
-                    Ma trận đối xứng luôn có trị riêng thực<br>
-                    Vec-tơ riêng tương ứng trị riêng khác nhau vuông góc</p>
-                    
-                    <p><strong>Vết &amp; Định thức:</strong><br>
-                    • tr(A) = λ₁ + λ₂ + ... + λₙ<br>
-                    • det(A) = λ₁ × λ₂ × ... × λₙ</p>
-                </div>
-            </div>
-            
-            <!-- Mathematical Examples Section -->
-            <div class="control-section">
-                <h3>📚 Ứng Dụng Thực Tế</h3>
-                <div style="background: rgba(155, 89, 182, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h4 style="color: #9b59b6; margin: 0 0 10px 0;">🔍 Phân Tích Thành Phần Chính (PCA)</h4>
-                    <p style="font-size: 0.9em;">Trị riêng lớn nhất → Hướng biến thiên lớn nhất của dữ liệu<br>
-                    Vec-tơ riêng → Các thành phần chính để giảm chiều dữ liệu</p>
-                    
-                    <h4 style="color: #e67e22; margin: 10px 0 5px 0;">🌐 Thuật Toán PageRank</h4>
-                    <p style="font-size: 0.9em;">Vec-tơ riêng ứng với trị riêng λ=1 của ma trận chuyển tiếp<br>
-                    Xác định mức độ quan trọng của các trang web</p>
-                    
-                    <p><strong>Ý Nghĩa Trị Riêng:</strong><br>
-                    • λ &gt; 0: Bảo toàn hướng, tỷ lệ theo hệ số λ<br>
-                    • λ &lt; 0: Đảo ngược hướng, tỷ lệ theo hệ số |λ|<br>
-                    • λ phức: Kết hợp xoay và tỷ lệ</p>
-                </div>
-            </div>
-        </div>
-    </div>
+        let eigMode = 'vectors';
+        let eigAnimating = false;
+        let eigAnimT = 1.0;
+        let eigRaf = null;
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        const width = canvas.width;
-        const height = canvas.height;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const scale = 100;
-        
-        // Matrix elements
-        let matrix = {
-            a11: 2, a12: 1,
-            a21: 1, a22: 2
-        };
-        
-        // Eigenvalue calculation results
-        let eigendata = {
-            eigenvalues: [],
-            eigenvectors: [],
-            isReal: true
-        };
-        
-        // Animation state
-        let animationId = null;
-        let animationTime = 0;
-        let animationSpeed = 1;
-        let isAnimating = false;
-        
-        // Visualization options
-        let showOptions = {
-            circle: true,
-            grid: false,
-            eigenvectors: true,
-            eigenlines: true
-        };
-        
-        function toCanvasX(x) {
-            return centerX + x * scale;
-        }
-        
-        function toCanvasY(y) {
-            return centerY - y * scale;
-        }
-        
-        function applyMatrix(point) {
-            return {
-                x: matrix.a11 * point.x + matrix.a12 * point.y,
-                y: matrix.a21 * point.x + matrix.a22 * point.y
-            };
-        }
-        
-        function calculateEigenvalues() {
-            const a = matrix.a11;
-            const b = matrix.a12;
-            const c = matrix.a21;
-            const d = matrix.a22;
-            
-            // Characteristic polynomial: λ² - trace·λ + det = 0
-            const trace = a + d;
-            const det = a * d - b * c;
-            const discriminant = trace * trace - 4 * det;
-            
-            let eigenvalues = [];
-            let eigenvectors = [];
-            let isReal = discriminant >= 0;
-            
-            if (isReal) {
-                const sqrt_disc = Math.sqrt(discriminant);
-                const lambda1 = (trace + sqrt_disc) / 2;
-                const lambda2 = (trace - sqrt_disc) / 2;
-                
-                eigenvalues = [lambda1, lambda2];
-                
-                // Calculate eigenvectors
-                for (let lambda of eigenvalues) {
-                    let v1, v2;
-                    
-                    // Try (A - λI)v = 0
-                    const m11 = a - lambda;
-                    const m12 = b;
-                    const m21 = c;
-                    const m22 = d - lambda;
-                    
-                    if (Math.abs(m12) > 1e-10) {
-                        v1 = 1;
-                        v2 = -m11 / m12;
-                    } else if (Math.abs(m21) > 1e-10) {
-                        v1 = -m22 / m21;
-                        v2 = 1;
-                    } else if (Math.abs(m11) < 1e-10 && Math.abs(m22) < 1e-10) {
-                        // Any vector is an eigenvector
-                        v1 = 1;
-                        v2 = 0;
-                    } else {
-                        v1 = 1;
-                        v2 = 0;
-                    }
-                    
-                    // Normalize
-                    const norm = Math.sqrt(v1 * v1 + v2 * v2);
-                    eigenvectors.push({ x: v1 / norm, y: v2 / norm });
-                }
-            } else {
-                const realPart = trace / 2;
-                const imagPart = Math.sqrt(-discriminant) / 2;
-                eigenvalues = [
-                    { real: realPart, imag: imagPart },
-                    { real: realPart, imag: -imagPart }
-                ];
-                
-                // For complex eigenvalues, we can still show the real eigenvectors if they exist
-                // Or show the rotation behavior
-                eigenvectors = [
-                    { x: 1, y: 0 },
-                    { x: 0, y: 1 }
-                ];
-            }
-            
-            eigendata = { eigenvalues, eigenvectors, isReal };
-            updateEigenvalueDisplay();
-        }
-        
-        function updateEigenvalueDisplay() {
-            const display = document.getElementById('eigenvalues-display');
-            let html = '';
-            
-            if (eigendata.isReal) {
-                eigendata.eigenvalues.forEach((lambda, i) => {
-                    const v = eigendata.eigenvectors[i];
-                    html += `<div class="eigenvalue real-eigenvalue">
-                        <strong>λ${i+1} = ${lambda.toFixed(3)}</strong><br/>
-                        v${i+1} = [${v.x.toFixed(3)}, ${v.y.toFixed(3)}]<br/>
-                        <small>${lambda > 1 ? 'Stretches' : lambda < -1 ? 'Stretches & flips' : lambda > 0 ? 'Shrinks' : 'Shrinks & flips'} along this direction</small>
-                    </div>`;
-                });
-            } else {
-                const lambda = eigendata.eigenvalues[0];
-                html = `<div class="eigenvalue complex-eigenvalue">
-                    <strong>λ = ${lambda.real.toFixed(3)} ± ${Math.abs(lambda.imag).toFixed(3)}i</strong><br/>
-                    <small>Complex eigenvalues → Rotation + Scaling</small><br/>
-                    <small>|λ| = ${(Math.sqrt(lambda.real*lambda.real + lambda.imag*lambda.imag)).toFixed(3)}</small><br/>
-                    <small>Angle = ${(Math.atan2(lambda.imag, lambda.real) * 180 / Math.PI).toFixed(1)}°</small>
-                </div>`;
-            }
-            
-            display.innerHTML = html;
-        }
-        
-        function drawGrid() {
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 1;
-            
-            for (let i = -10; i <= 10; i++) {
-                // Vertical lines
-                ctx.beginPath();
-                ctx.moveTo(toCanvasX(i), 0);
-                ctx.lineTo(toCanvasX(i), height);
-                ctx.stroke();
-                
-                // Horizontal lines
-                ctx.beginPath();
-                ctx.moveTo(0, toCanvasY(i));
-                ctx.lineTo(width, toCanvasY(i));
-                ctx.stroke();
-            }
-            
-            // Axes
-            ctx.strokeStyle = '#444';
-            ctx.lineWidth = 2;
-            
-            ctx.beginPath();
-            ctx.moveTo(0, centerY);
-            ctx.lineTo(width, centerY);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(centerX, 0);
-            ctx.lineTo(centerX, height);
-            ctx.stroke();
-        }
-        
-        function drawCircle() {
-            const numPoints = 100;
-            const originalPoints = [];
-            const transformedPoints = [];
-            
-            for (let i = 0; i < numPoints; i++) {
-                const angle = (i / numPoints) * 2 * Math.PI;
-                const point = { x: Math.cos(angle), y: Math.sin(angle) };
-                originalPoints.push(point);
-                transformedPoints.push(applyMatrix(point));
-            }
-            
-            // Draw original circle
-            ctx.strokeStyle = '#0ff';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            for (let i = 0; i < originalPoints.length; i++) {
-                const p = originalPoints[i];
-                if (i === 0) {
-                    ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
-                } else {
-                    ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y));
-                }
-            }
-            ctx.closePath();
-            ctx.stroke();
-            
-            // Draw transformed shape
-            ctx.strokeStyle = '#f39c12';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            for (let i = 0; i < transformedPoints.length; i++) {
-                const p = transformedPoints[i];
-                if (i === 0) {
-                    ctx.moveTo(toCanvasX(p.x), toCanvasY(p.y));
-                } else {
-                    ctx.lineTo(toCanvasX(p.x), toCanvasY(p.y));
-                }
-            }
-            ctx.closePath();
-            ctx.stroke();
-        }
-        
-        function drawVectorGrid() {
-            const gridSize = 6;
-            const spacing = 0.5;
-            
-            for (let x = -gridSize; x <= gridSize; x += spacing) {
-                for (let y = -gridSize; y <= gridSize; y += spacing) {
-                    const orig = { x, y };
-                    const trans = applyMatrix(orig);
-                    
-                    drawArrow(orig, trans, '#9b59b6', 1);
-                }
-            }
-        }
-        
-        function drawArrow(from, to, color, lineWidth = 2) {
-            const fromX = toCanvasX(from.x);
-            const fromY = toCanvasY(from.y);
-            const toX = toCanvasX(to.x);
-            const toY = toCanvasY(to.y);
-            
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            
-            // Arrow body
-            ctx.beginPath();
-            ctx.moveTo(fromX, fromY);
-            ctx.lineTo(toX, toY);
-            ctx.stroke();
-            
-            // Arrow head
-            const angle = Math.atan2(toY - fromY, toX - fromX);
-            const headLength = 8;
-            
-            ctx.beginPath();
-            ctx.moveTo(toX, toY);
-            ctx.lineTo(
-                toX - headLength * Math.cos(angle - Math.PI / 6),
-                toY - headLength * Math.sin(angle - Math.PI / 6)
-            );
-            ctx.moveTo(toX, toY);
-            ctx.lineTo(
-                toX - headLength * Math.cos(angle + Math.PI / 6),
-                toY - headLength * Math.sin(angle + Math.PI / 6)
-            );
-            ctx.stroke();
-        }
-        
-        function drawEigenvectors() {
-            if (!eigendata.isReal) return;
-            
-            const colors = ['#e74c3c', '#2ecc71'];
-            
-            eigendata.eigenvectors.forEach((v, i) => {
-                const lambda = eigendata.eigenvalues[i];
-                const length = Math.min(3, Math.max(0.5, Math.abs(lambda)));
-                
-                // Draw eigenvector line
-                const end = { x: v.x * length, y: v.y * length };
-                const start = { x: -v.x * length, y: -v.y * length };
-                
-                if (showOptions.eigenlines) {
-                    ctx.strokeStyle = colors[i];
-                    ctx.setLineDash([5, 5]);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(toCanvasX(start.x), toCanvasY(start.y));
-                    ctx.lineTo(toCanvasX(end.x), toCanvasY(end.y));
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                }
-                
-                if (showOptions.eigenvectors) {
-                    // Draw eigenvector arrow
-                    drawArrow({ x: 0, y: 0 }, end, colors[i], 3);
-                    
-                    // Draw eigenvalue effect
-                    const transformed = { x: v.x * lambda, y: v.y * lambda };
-                    drawArrow({ x: 0, y: 0 }, transformed, colors[i], 2);
-                    
-                    // Label
-                    ctx.fillStyle = colors[i];
-                    ctx.font = '12px Arial';
-                    ctx.fillText(`λ${i+1}=${lambda.toFixed(2)}`, 
-                        toCanvasX(end.x) + 10, 
-                        toCanvasY(end.y) - 10
-                    );
-                }
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            const sec = document.getElementById(sectionId);
+            if (sec) sec.classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                if ((t.getAttribute('onclick') || '').includes("'" + sectionId + "'")) t.classList.add('active');
             });
+            if (sectionId === 'interactive') drawEigen();
         }
-        
-        function draw() {
-            ctx.clearRect(0, 0, width, height);
-            
-            drawGrid();
-            
-            if (showOptions.circle) {
-                drawCircle();
-            }
-            
-            if (showOptions.grid) {
-                drawVectorGrid();
-            }
-            
-            if (showOptions.eigenvectors || showOptions.eigenlines) {
-                drawEigenvectors();
-            }
-        }
-        
-        function updateMatrix() {
-            matrix.a11 = parseFloat(document.getElementById('a11').value) || 0;
-            matrix.a12 = parseFloat(document.getElementById('a12').value) || 0;
-            matrix.a21 = parseFloat(document.getElementById('a21').value) || 0;
-            matrix.a22 = parseFloat(document.getElementById('a22').value) || 0;
-            
-            // Update display
-            document.getElementById('display_a11').textContent = matrix.a11.toFixed(1);
-            document.getElementById('display_a12').textContent = matrix.a12.toFixed(1);
-            document.getElementById('display_a21').textContent = matrix.a21.toFixed(1);
-            document.getElementById('display_a22').textContent = matrix.a22.toFixed(1);
-            
-            const det = matrix.a11 * matrix.a22 - matrix.a12 * matrix.a21;
-            const trace = matrix.a11 + matrix.a22;
-            
-            document.getElementById('determinant').textContent = det.toFixed(3);
-            document.getElementById('trace').textContent = trace.toFixed(3);
-            
-            calculateEigenvalues();
-            draw();
-        }
-        
-        function loadPreset(type) {
+
+        function loadExample(type) {
             const presets = {
                 identity: [1, 0, 0, 1],
-                diagonal: [3, 0, 0, 1],
-                symmetric: [2, 1, 1, 2],
-                rotation: [Math.cos(Math.PI/4), -Math.sin(Math.PI/4), Math.sin(Math.PI/4), Math.cos(Math.PI/4)],
-                shear: [1, 1, 0, 1],
-                reflection: [1, 0, 0, -1]
+                diagonal: [2, 0, 0, -1],
+                rotation: [0, -1, 1, 0],
+                shear: [1, 1.5, 0, 1],
+                symmetric: [2, 1, 1, 2]
             };
-            
-            const values = presets[type];
-            document.getElementById('a11').value = values[0];
-            document.getElementById('a12').value = values[1];
-            document.getElementById('a21').value = values[2];
-            document.getElementById('a22').value = values[3];
-            
-            updateMatrix();
+            const [a, b, c, d] = presets[type] || [2, 1, 1, 2];
+            [['a', a], ['b', b], ['c', c], ['d', d]].forEach(([id, v]) => {
+                const el = document.getElementById(id);
+                if (el) el.value = v;
+            });
+            eigAnimT = 1.0;
+            drawEigen();
         }
-        
-        function toggleVisualization(option) {
-            showOptions[option] = !showOptions[option];
-            const button = document.getElementById(`toggle-${option}`);
-            button.classList.toggle('active', showOptions[option]);
-            draw();
+
+        function toggleMode(mode) {
+            eigMode = mode;
+            drawEigen();
         }
-        
+
         function toggleAnimation() {
-            isAnimating = !isAnimating;
-            const button = document.getElementById('toggle-animation');
-            
-            if (isAnimating) {
-                button.textContent = '⏸ Pause';
-                animate();
+            eigAnimating = !eigAnimating;
+            if (eigAnimating) {
+                eigAnimT = 0;
+                const step = () => {
+                    if (!eigAnimating) return;
+                    eigAnimT += 0.015;
+                    if (eigAnimT > 1.0) eigAnimT = 0;
+                    drawEigen();
+                    eigRaf = requestAnimationFrame(step);
+                };
+                eigRaf = requestAnimationFrame(step);
+            } else if (eigRaf) {
+                cancelAnimationFrame(eigRaf);
+            }
+        }
+
+        function resetVisualization() {
+            eigAnimating = false;
+            if (eigRaf) cancelAnimationFrame(eigRaf);
+            eigAnimT = 1.0;
+            loadExample('symmetric');
+        }
+
+        function computeEigen(a, b, c, d) {
+            const tr = a + d, det = a * d - b * c;
+            const disc = tr * tr - 4 * det;
+            if (disc < -1e-9) {
+                const re = tr / 2, im = Math.sqrt(-disc) / 2;
+                return { real: false, l1: `${re.toFixed(2)} + ${im.toFixed(2)}i`, l2: `${re.toFixed(2)} - ${im.toFixed(2)}i`, v1: null, v2: null };
+            }
+            const s = Math.sqrt(Math.max(0, disc));
+            const l1 = (tr + s) / 2, l2 = (tr - s) / 2;
+            const eigVec = (lam) => {
+                let vx, vy;
+                if (Math.abs(b) > 1e-6) { vx = b; vy = lam - a; }
+                else if (Math.abs(c) > 1e-6) { vx = lam - d; vy = c; }
+                else { vx = Math.abs(a - lam) < 1e-6 ? 1 : 0; vy = vx === 1 ? 0 : 1; }
+                const n = Math.hypot(vx, vy) || 1;
+                return [vx / n, vy / n];
+            };
+            return { real: true, l1, l2, v1: eigVec(l1), v2: eigVec(l2) };
+        }
+
+        function drawEigen() {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const a = parseFloat(document.getElementById('a')?.value || 2);
+            const b = parseFloat(document.getElementById('b')?.value || 1);
+            const c = parseFloat(document.getElementById('c')?.value || 1);
+            const d = parseFloat(document.getElementById('d')?.value || 2);
+
+            [['aValue', a], ['bValue', b], ['cValue', c], ['dValue', d],
+             ['matrix11', a], ['matrix12', b], ['matrix21', c], ['matrix22', d]].forEach(([id, v]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = v.toFixed(1);
+            });
+
+            const eig = computeEigen(a, b, c, d);
+            const e1 = document.getElementById('eigenvalue1'), e2 = document.getElementById('eigenvalue2');
+            if (eig.real) {
+                if (e1) e1.textContent = eig.l1.toFixed(2);
+                if (e2) e2.textContent = eig.l2.toFixed(2);
+                [['eigenvector1x', eig.v1[0]], ['eigenvector1y', eig.v1[1]],
+                 ['eigenvector2x', eig.v2[0]], ['eigenvector2y', eig.v2[1]]].forEach(([id, v]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = v.toFixed(2);
+                });
             } else {
-                button.textContent = '▶ Play Animation';
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
+                if (e1) e1.textContent = eig.l1;
+                if (e2) e2.textContent = eig.l2;
+                ['eigenvector1x','eigenvector1y','eigenvector2x','eigenvector2y'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = 'phức';
+                });
+            }
+
+            const W = canvas.width, H = canvas.height, cx = W / 2, cy = H / 2, sc = 70;
+            const t = eigAnimT;
+            const ma = 1 + (a - 1) * t, mb = b * t, mc = c * t, md = 1 + (d - 1) * t;
+            const xf = (x, y) => [cx + (ma * x + mb * y) * sc, cy - (mc * x + md * y) * sc];
+
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            // Base grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = -5; i <= 5; i++) {
+                ctx.beginPath(); ctx.moveTo(cx + i * sc, 0); ctx.lineTo(cx + i * sc, H); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, cy + i * sc); ctx.lineTo(W, cy + i * sc); ctx.stroke();
+            }
+
+            // Transformed grid
+            if (eigMode === 'grid') {
+                ctx.strokeStyle = 'rgba(26,163,161,0.45)';
+                ctx.lineWidth = 1.5;
+                for (let i = -4; i <= 4; i++) {
+                    const [x1, y1] = xf(i, -4), [x2, y2] = xf(i, 4);
+                    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                    const [x3, y3] = xf(-4, i), [x4, y4] = xf(4, i);
+                    ctx.beginPath(); ctx.moveTo(x3, y3); ctx.lineTo(x4, y4); ctx.stroke();
                 }
             }
-        }
-        
-        function animate() {
-            if (!isAnimating) return;
-            
-            animationTime += 0.02 * animationSpeed;
-            
-            // Animate by interpolating between identity and the matrix
-            const t = (Math.sin(animationTime) + 1) / 2; // 0 to 1
-            
-            const originalMatrix = { ...matrix };
-            matrix.a11 = 1 + t * (originalMatrix.a11 - 1);
-            matrix.a12 = t * originalMatrix.a12;
-            matrix.a21 = t * originalMatrix.a21;
-            matrix.a22 = 1 + t * (originalMatrix.a22 - 1);
-            
-            calculateEigenvalues();
-            draw();
-            
-            matrix = originalMatrix; // Restore original matrix
-            
-            animationId = requestAnimationFrame(animate);
-        }
-        
-        function resetVisualization() {
-            isAnimating = false;
-            animationTime = 0;
-            document.getElementById('toggle-animation').textContent = '▶ Play Animation';
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            updateMatrix();
-        }
-        
-        // Event listeners
-        document.getElementById('a11').addEventListener('input', updateMatrix);
-        document.getElementById('a12').addEventListener('input', updateMatrix);
-        document.getElementById('a21').addEventListener('input', updateMatrix);
-        document.getElementById('a22').addEventListener('input', updateMatrix);
-        
-        document.getElementById('animSpeed').addEventListener('input', function() {
-            animationSpeed = parseFloat(this.value);
-            document.getElementById('animSpeedValue').textContent = animationSpeed.toFixed(1);
-        });
-        
-        // Initialize
-        updateMatrix();
-    </script>
 
+            // Transformed unit circle
+            if (eigMode === 'circle') {
+                ctx.strokeStyle = '#f5c542';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                for (let k = 0; k <= 80; k++) {
+                    const ang = (k / 80) * Math.PI * 2;
+                    const [px, py] = xf(Math.cos(ang), Math.sin(ang));
+                    if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+            const arrow = (x1, y1, x2, y2, color, lbl) => {
+                ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                const ang = Math.atan2(y2 - y1, x2 - x1);
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - 10 * Math.cos(ang - 0.45), y2 - 10 * Math.sin(ang - 0.45));
+                ctx.lineTo(x2 - 10 * Math.cos(ang + 0.45), y2 - 10 * Math.sin(ang + 0.45));
+                ctx.closePath(); ctx.fill();
+                if (lbl) { ctx.font = '13px JetBrains Mono, monospace'; ctx.fillText(lbl, x2 + 6, y2 - 6); }
+            };
+
+            // Basis vectors e1, e2 transformed
+            const [e1x, e1y] = xf(1, 0), [e2x, e2y] = xf(0, 1);
+            arrow(cx, cy, e1x, e1y, '#6cb6ff', 'Ae₁');
+            arrow(cx, cy, e2x, e2y, '#a78bfa', 'Ae₂');
+
+            // Real eigenvectors
+            if (eig.real) {
+                [[eig.v1, eig.l1, '#1aa3a1', 'v₁'], [eig.v2, eig.l2, '#f5c542', 'v₂']].forEach(([v, lam, col, name]) => {
+                    const [tx, ty] = xf(v[0], v[1]);
+                    arrow(cx, cy, tx, ty, col, `${name} (λ=${lam.toFixed(1)})`);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ['a', 'b', 'c', 'd'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', drawEigen);
+            });
+            drawEigen();
+        });
+    </script>
 <section class="reel-video-section" style="max-width:720px;margin:28px auto;padding:20px;background:#161b2e;border:1px solid #2d3748;border-radius:12px;color:#e2e8f0;text-align:center;">
   <h3 style="color:#f5c542;margin-top:0;">Video ngắn: Giá trị riêng & Vector riêng</h3>
   <div class="reel-video" style="margin:1rem 0;">

@@ -84,7 +84,7 @@
       var fonts = document.createElement("link");
       fonts.rel = "stylesheet";
       fonts.setAttribute("data-wired-fonts", "1");
-      fonts.href = "https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap";
+      fonts.href = "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap";
       document.head.appendChild(fonts);
     }
     if (!document.querySelector("link[data-wired-theme]")) {
