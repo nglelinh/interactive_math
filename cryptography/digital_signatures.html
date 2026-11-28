@@ -824,6 +824,58 @@ This contract is digitally signed for authenticity.
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Chữ ký Số: Ký bằng Khóa Bí mật &amp; Kiểm chứng bằng Khóa Công khai</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Sau khi Alice ký hợp đồng, hãy thử sửa dù chỉ <strong>1 ký tự</strong> trong nội dung tin nhắn nhận được để xem cơ chế xác thực phát hiện giả mạo tức thì như thế nào!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="ds-lab-svg" viewBox="0 0 660 170" width="100%" style="background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Tin nhắn gốc Alice ký:</label>
+        <input type="text" id="ds-orig" value="Chuyen 100 VND cho Bob" style="width:100%;padding:8px;">
+      </div>
+      <div class="control-group">
+        <label>Tin nhắn Bob nhận được (thử giả mạo!):</label>
+        <input type="text" id="ds-recv" value="Chuyen 100 VND cho Bob" style="width:100%;padding:8px;">
+      </div>
+      <div class="vector-info" id="ds-status"></div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    function miniHash(s){ var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%139; return h+2; }
+    function modpow(b,e,m){ var r=1n, B=BigInt(b)%BigInt(m), E=BigInt(e), M=BigInt(m); while(E>0n){ if(E&1n) r=(r*B)%M; B=(B*B)%M; E>>=1n; } return Number(r); }
+    function draw(){
+      var n=143, e=7, d=103;
+      var m1=document.getElementById("ds-orig").value||"", m2=document.getElementById("ds-recv").value||"";
+      var h1=miniHash(m1), sig=modpow(h1,d,n), h2=miniHash(m2), ver=modpow(sig,e,n), ok=(ver===h2);
+      var col = ok ? "#6bd68a" : "#ff6b6b";
+      document.getElementById("ds-lab-svg").innerHTML =
+        '<rect x="16" y="28" width="180" height="114" rx="8" fill="#1e293b" stroke="#1aa3a1" stroke-width="2"/>' +
+        '<text x="106" y="56" text-anchor="middle" fill="#1aa3a1" font-size="13" font-weight="700">ALICE KÝ (d = 103)</text>' +
+        '<text x="106" y="86" text-anchor="middle" fill="#cbd5e1" font-size="12">H(m) = '+h1+'</text>' +
+        '<text x="106" y="114" text-anchor="middle" fill="#f5c542" font-size="13">sig = H^d mod 143 = '+sig+'</text>' +
+        '<line x1="196" y1="85" x2="256" y2="85" stroke="#f5c542" stroke-width="2"/>' +
+        '<rect x="256" y="28" width="180" height="114" rx="8" fill="#1e293b" stroke="#f5c542" stroke-width="2"/>' +
+        '<text x="346" y="56" text-anchor="middle" fill="#f5c542" font-size="13" font-weight="700">BOB KIỂM CHỨNG (e = 7)</text>' +
+        '<text x="346" y="86" text-anchor="middle" fill="#cbd5e1" font-size="12">sig^e mod 143 = '+ver+'</text>' +
+        '<text x="346" y="114" text-anchor="middle" fill="#cbd5e1" font-size="12">H(m_nhận) = '+h2+'</text>' +
+        '<line x1="436" y1="85" x2="486" y2="85" stroke="'+col+'" stroke-width="2"/>' +
+        '<rect x="486" y="42" width="158" height="86" rx="8" fill="#0f172a" stroke="'+col+'" stroke-width="2"/>' +
+        '<text x="565" y="92" text-anchor="middle" fill="'+col+'" font-size="15" font-weight="700">'+(ok?'✓ HỢP LỆ':'✗ GIẢ MẠO!')+'</text>';
+      document.getElementById("ds-status").textContent = ok
+        ? "Chữ ký khớp hoàn toàn: sig^e mod n ("+ver+") === H(m_nhận) ("+h2+")."
+        : "Cảnh báo! Nội dung đã bị thay đổi nên H(m_nhận)="+h2+" khác chữ ký giải mã ("+ver+").";
+    }
+    ["ds-orig","ds-recv"].forEach(function(id){ document.getElementById(id).addEventListener("input", draw); });
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

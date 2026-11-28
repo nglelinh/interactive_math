@@ -867,6 +867,52 @@
         loadExample();
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Simplex 2D: Nhảy đỉnh trên Đa giác Miền Khả thi</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Với bài toán $\max Z = 3x + 2y$ thỏa $x+y \le 4,\; 2x+y \le 6,\; x,y \ge 0$, bấm từng bước để xem Simplex nhảy dọc các đỉnh $(0,0) 	o (3,0) 	o (2,2)$ đạt tối ưu $Z^* = 10$!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <canvas id="spx-lab-canvas" width="540" height="340" style="width:100%;max-width:540px;background:#141824;"></canvas>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="spx-next">⏭️ Bước đỉnh tiếp theo</button>
+        <button type="button" id="spx-rst">🔄 Đặt lại</button>
+      </div>
+      <div class="vector-info" id="spx-status"></div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var path = [[0,0],[3,0],[2,2]];
+    var poly = [[0,0],[3,0],[2,2],[0,4]];
+    var idx = 0;
+    function draw(){
+      var c = document.getElementById("spx-lab-canvas"), ctx = c.getContext("2d");
+      var W=c.width, H=c.height, mx=function(x){return 55+x*95;}, my=function(y){return H-45-y*62;};
+      ctx.fillStyle="#141824"; ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle="rgba(255,255,255,0.22)"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(55,20); ctx.lineTo(55,H-45); ctx.lineTo(W-20,H-45); ctx.stroke();
+      ctx.fillStyle="rgba(26,163,161,0.24)"; ctx.strokeStyle="#1aa3a1"; ctx.lineWidth=2;
+      ctx.beginPath();
+      poly.forEach(function(p,i){ if(i===0) ctx.moveTo(mx(p[0]),my(p[1])); else ctx.lineTo(mx(p[0]),my(p[1])); });
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle="#f5c542"; ctx.lineWidth=3;
+      ctx.beginPath();
+      for(var i=0;i<=idx;i++){ var p=path[i]; if(i===0) ctx.moveTo(mx(p[0]),my(p[1])); else ctx.lineTo(mx(p[0]),my(p[1])); }
+      ctx.stroke();
+      var cur = path[idx], Z = 3*cur[0] + 2*cur[1];
+      ctx.fillStyle="#f5c542"; ctx.beginPath(); ctx.arc(mx(cur[0]),my(cur[1]),7,0,Math.PI*2); ctx.fill();
+      document.getElementById("spx-status").textContent = "Đỉnh bước "+idx+": (x, y) = ("+cur[0]+", "+cur[1]+") → Z = 3x + 2y = "+Z + (idx===2?" ✓ TỐI ƯU TOÀN CỤC!":"");
+    }
+    document.getElementById("spx-next").onclick = function(){ if(idx<path.length-1) idx++; draw(); };
+    document.getElementById("spx-rst").onclick = function(){ idx=0; draw(); };
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

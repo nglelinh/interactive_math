@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Động lực học Phi tuyến, Hỗn loạn (Chaos) &amp; Điểm hút Lorenz</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Động lực học Phi tuyến, Hỗn loạn &amp; Điểm hút Lorenz</h1>
+
+        <div class="lesson-nav">
+            <button type="button" class="nav-button active" onclick="switchTab('lorenz', this)">1. Điểm hút Lorenz &amp; Hiệu ứng Cánh bướm</button>
+            <button type="button" class="nav-button" onclick="switchTab('logistic', this)">2. Sơ đồ Phân nhánh (Logistic Map)</button>
+            <button type="button" class="nav-button" onclick="switchTab('theory', this)">3. Lý thuyết Hỗn loạn</button>
+        </div>
+
+        <div id="tab-lorenz" class="lesson-section active">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Hai quỹ đạo cách nhau chỉ $10^{-3}$ tách rời nhau thế nào?</h3>
+                <p>Hệ phương trình Lorenz $\dot{x}=\sigma(y-x),\; \dot{y}=x(\rho-z)-y,\; \dot{z}=xy-\beta z$ hoàn toàn tất định (không có nhiễu ngẫu nhiên). Thế nhưng khi $\rho = 28$, hai quỹ đạo xuất phát gần như trùng nhau (màu xanh teal và màu cam) ban đầu đi song hành rồi <strong>tách rời theo hàm mũ</strong> sang hai cánh bướm khác nhau!</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="lorenzCanvas" width="680" height="380" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Tham số ρ (Rayleigh): <span class="value-display" id="lorRhoVal">28.0</span></label>
+                        <input type="range" id="lorRho" min="10" max="40" step="0.5" value="28">
+                    </div>
+                    <div class="control-group">
+                        <label>Sai lệch ban đầu Δx₀: <span class="value-display" id="lorEpsVal">0.010</span></label>
+                        <input type="range" id="lorEps" min="0.001" max="0.2" step="0.001" value="0.01">
+                    </div>
+                    <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button type="button" id="lorPlayBtn">⏸ Tạm dừng</button>
+                        <button type="button" id="lorResetBtn">🔄 Khởi chạy lại</button>
+                    </div>
+                    <div class="vector-info" id="lorStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-logistic" class="lesson-section" style="display:none;">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Con đường Nhân đôi Chu kỳ tới Hỗn loạn</h3>
+                <p>Chỉ với phương trình rời rạc cực đơn giản $x_{n+1} = r x_n (1 - x_n)$, khi tăng $r$ qua $3.0$, điểm cân bằng tách thành chu kỳ 2; qua $3.45$ tách thành chu kỳ 4; và từ $r \approx 3.57$ bùng phát thành <strong>hỗn loạn (chaos)</strong>!</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="logCanvas" width="680" height="360" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Tốc độ sinh trưởng r: <span class="value-display" id="logRVal">3.70</span></label>
+                        <input type="range" id="logR" min="2.5" max="4.0" step="0.01" value="3.70">
+                    </div>
+                    <div class="vector-info" id="logStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-theory" class="lesson-section" style="display:none;">
+            <div class="definition">
+                <h3>Hệ hỗn loạn tất định (Deterministic Chaos)</h3>
+                <p>Một hệ động lực là hỗn loạn nếu thỏa 3 tính chất: (1) nhạy cảm theo hàm mũ với điều kiện đầu (số mũ Lyapunov $\lambda > 0$), (2) quỹ đạo bị chặn trong một tập hút (strange attractor), và (3) có vô số quỹ đạo tuần hoàn trù mật.</p>
+            </div>
+            <div class="formula-box">
+                <div class="formula-title">Hằng số Feigenbaum phổ quát</div>
+                $$\delta = \lim_{k\to\infty} \frac{r_k - r_{k-1}}{r_{k+1} - r_k} \approx 4.6692016\dots$$
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(name, btn) {
+            document.querySelectorAll('.lesson-section').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            const sec = document.getElementById('tab-' + name);
+            if (sec) { sec.style.display = 'block'; sec.classList.add('active'); }
+            if (btn) btn.classList.add('active');
+            if (name === 'logistic') drawLogistic();
+        }
+
+        // Lorenz system (2 nearby trajectories)
+        const sigma = 10, beta = 8 / 3;
+        let lor = { rho: 28, eps: 0.01, playing: true, p1: [1, 1, 1], p2: [1.01, 1, 1], t1: [], t2: [], steps: 0 };
+
+        function resetLorenz() {
+            lor.rho = parseFloat(document.getElementById('lorRho').value);
+            lor.eps = parseFloat(document.getElementById('lorEps').value);
+            document.getElementById('lorRhoVal').textContent = lor.rho.toFixed(1);
+            document.getElementById('lorEpsVal').textContent = lor.eps.toFixed(3);
+            lor.p1 = [1, 1, 1];
+            lor.p2 = [1 + lor.eps, 1, 1];
+            lor.t1 = [[1, 1, 1]];
+            lor.t2 = [[1 + lor.eps, 1, 1]];
+            lor.steps = 0;
+        }
+
+        function stepLorenzPt(p, dt) {
+            const [x, y, z] = p;
+            const dx = sigma * (y - x), dy = x * (lor.rho - z) - y, dz = x * y - beta * z;
+            return [x + dx * dt, y + dy * dt, z + dz * dt];
+        }
+
+        function drawLorenz() {
+            const c = document.getElementById('lorenzCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            const proj = ([x, y, z]) => [W / 2 + x * 11.5, H - 28 - z * 6.5];
+
+            [[lor.t1, '#1aa3a1'], [lor.t2, '#e07a3f']].forEach(([tr, col]) => {
+                ctx.strokeStyle = col; ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                tr.forEach((pt, i) => {
+                    const [px, py] = proj(pt);
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                });
+                ctx.stroke();
+            });
+
+            const [x1, y1] = proj(lor.p1), [x2, y2] = proj(lor.p2);
+            ctx.fillStyle = '#1aa3a1'; ctx.beginPath(); ctx.arc(x1, y1, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#f5c542'; ctx.beginPath(); ctx.arc(x2, y2, 5, 0, Math.PI * 2); ctx.fill();
+
+            const dist = Math.hypot(lor.p1[0] - lor.p2[0], lor.p1[1] - lor.p2[1], lor.p1[2] - lor.p2[2]);
+            document.getElementById('lorStats').innerHTML =
+                `Bước <code>${lor.steps}</code> · Khoảng cách hiện tại <code>‖p₁ - p₂‖ = ${dist.toFixed(3)}</code><br>` +
+                (dist > 8 ? '<strong>⚡ Hiệu ứng Cánh bướm:</strong> Hai quỹ đạo đã tách sang hai nhánh hoàn toàn khác nhau!' : 'Hai quỹ đạo vẫn đang bám sát nhau...');
+        }
+
+        function drawLogistic() {
+            const c = document.getElementById('logCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            const rCur = parseFloat(document.getElementById('logR').value);
+            document.getElementById('logRVal').textContent = rCur.toFixed(2);
+
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            // Bifurcation diagram r in [2.5, 4.0]
+            ctx.fillStyle = 'rgba(26,163,161,0.55)';
+            for (let px = 44; px < W - 20; px++) {
+                const r = 2.5 + ((px - 44) / (W - 64)) * 1.5;
+                let x = 0.5;
+                for (let i = 0; i < 160; i++) x = r * x * (1 - x);
+                for (let i = 0; i < 60; i++) {
+                    x = r * x * (1 - x);
+                    const py = H - 30 - x * (H - 56);
+                    ctx.fillRect(px, py, 1.2, 1.2);
+                }
+            }
+
+            // Current r vertical line
+            const rx = 44 + ((rCur - 2.5) / 1.5) * (W - 64);
+            ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(rx, 20); ctx.lineTo(rx, H - 30); ctx.stroke();
+
+            const regime = rCur < 3.0 ? 'Hội tụ về 1 điểm cân bằng ổn định' :
+                           rCur < 3.45 ? 'Dao động chu kỳ 2' :
+                           rCur < 3.57 ? 'Nhân đôi chu kỳ (4 → 8 → 16...)' : 'Vùng Hỗn loạn (Chaos)!';
+            document.getElementById('logStats').innerHTML = `Tại <code>r = ${rCur.toFixed(2)}</code>: <strong>${regime}</strong>`;
+        }
+
+        function loop() {
+            if (lor.playing) {
+                for (let k = 0; k < 3; k++) {
+                    lor.p1 = stepLorenzPt(lor.p1, 0.007);
+                    lor.p2 = stepLorenzPt(lor.p2, 0.007);
+                    lor.t1.push(lor.p1); lor.t2.push(lor.p2);
+                    if (lor.t1.length > 900) { lor.t1.shift(); lor.t2.shift(); }
+                    lor.steps++;
+                }
+                drawLorenz();
+            }
+            requestAnimationFrame(loop);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ['lorRho', 'lorEps'].forEach(id => document.getElementById(id).addEventListener('input', resetLorenz));
+            document.getElementById('lorPlayBtn').onclick = () => {
+                lor.playing = !lor.playing;
+                document.getElementById('lorPlayBtn').textContent = lor.playing ? '⏸ Tạm dừng' : '▶ Tiếp tục';
+            };
+            document.getElementById('lorResetBtn').onclick = resetLorenz;
+            document.getElementById('logR').addEventListener('input', drawLogistic);
+            resetLorenz();
+            drawLogistic();
+            requestAnimationFrame(loop);
+        });
+    </script>
+    <script src="../js/site-nav-data.js" data-site-nav="data"></script>
+    <script src="../js/site-nav.js" data-site-nav="boot"></script>
+<script src="../js/site-nav-data.js" data-site-nav="data"></script>
+<script src="../js/site-nav.js" data-site-nav="boot"></script>
+</body>
+</html>

@@ -581,6 +581,10 @@ window.SITE_NAV_DATA = {
           "label": "Kinematics & Dynamics"
         },
         {
+          "href": "mechanics/lagrangian_mechanics.html",
+          "label": "Lagrangian Mechanics"
+        },
+        {
           "href": "mechanics/hamiltonian_mechanics.html",
           "label": "Hamiltonian Mechanics"
         },
@@ -595,6 +599,10 @@ window.SITE_NAV_DATA = {
         {
           "href": "mechanics/continuum_mechanics.html",
           "label": "Continuum Mechanics"
+        },
+        {
+          "href": "mechanics/nonlinear_dynamics.html",
+          "label": "Nonlinear Dynamics"
         }
       ]
     },

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cơ học Lagrange &amp; Nguyên lý Tác dụng Cực tiểu</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Cơ học Lagrange &amp; Nguyên lý Tác dụng Cực tiểu</h1>
+
+        <div class="lesson-nav">
+            <button type="button" class="nav-button active" onclick="switchTab('pendulum', this)">1. Con lắc &amp; Không gian pha</button>
+            <button type="button" class="nav-button" onclick="switchTab('action', this)">2. Nguyên lý Tác dụng Cực tiểu</button>
+            <button type="button" class="nav-button" onclick="switchTab('theory', this)">3. Phương trình Euler–Lagrange</button>
+        </div>
+
+        <div id="tab-pendulum" class="lesson-section active">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Chuyển hóa Động năng $T$ &amp; Thế năng $V$</h3>
+                <p>Thay vì phân tích vector lực căng dây phức tạp như Newton, Cơ học Lagrange chỉ cần một đại lượng vô hướng duy nhất $L(\theta, \dot{\theta}) = T - V = \frac{1}{2} m \ell^2 \dot{\theta}^2 - m g \ell (1 - \cos\theta)$. Hãy tăng góc ban đầu $\theta_0$ lên gần $180^\circ$ và quan sát quỹ đạo không gian pha $(\theta, \dot{\theta})$ biến dạng từ hình elip sang đường cong phi tuyến!</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="lagPendCanvas" width="680" height="360" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Góc ban đầu θ₀: <span class="value-display" id="lpThetaVal">90°</span></label>
+                        <input type="range" id="lpTheta" min="10" max="175" step="5" value="90">
+                    </div>
+                    <div class="control-group">
+                        <label>Chiều dài dây ℓ (m): <span class="value-display" id="lpLenVal">1.5</span></label>
+                        <input type="range" id="lpLen" min="0.5" max="3.0" step="0.1" value="1.5">
+                    </div>
+                    <div class="control-group">
+                        <label>Ma sát (damping): <span class="value-display" id="lpDampVal">0.00</span></label>
+                        <input type="range" id="lpDamp" min="0" max="0.25" step="0.01" value="0">
+                    </div>
+                    <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button type="button" id="lpPlayBtn">⏸ Tạm dừng</button>
+                        <button type="button" id="lpResetBtn">🔄 Đặt lại</button>
+                    </div>
+                    <div class="vector-info" id="lpStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-action" class="lesson-section" style="display:none;">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Quỹ đạo thật cực tiểu hóa Tác dụng $S[y] = \int_0^T L\,dt$</h3>
+                <p>Một vật ném thẳng đứng lên với vận tốc đầu $v_0$ rơi xuống tại $T = 2\,\text{s}$ đi theo parabol thật $y^*(t) = \frac{1}{2} g t (T - t)$. Hãy thử làm méo quỹ đạo bằng nhiễu $\alpha \sin(\pi t / T)$ và quan sát tích phân tác dụng $S[\alpha]$ <strong>luôn tăng lên</strong> mỗi khi $\alpha \neq 0$!</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="actionCanvas" width="680" height="340" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Độ méo quỹ đạo α: <span class="value-display" id="actAlphaVal">0.00</span></label>
+                        <input type="range" id="actAlpha" min="-3.0" max="3.0" step="0.1" value="0.0">
+                    </div>
+                    <div class="vector-info" id="actStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-theory" class="lesson-section" style="display:none;">
+            <div class="definition">
+                <h3>Hàm Lagrange &amp; Phiếm hàm Tác dụng</h3>
+                <p>Với tọa độ suy rộng $q(t)$, hàm Lagrange là hiệu động năng và thế năng: $L(q, \dot{q}, t) = T - V$. Tác dụng dọc theo một quỹ đạo là $S[q] = \int_{t_1}^{t_2} L(q, \dot{q}, t)\,dt$.</p>
+            </div>
+            <div class="formula-box">
+                <div class="formula-title">Phương trình Euler–Lagrange</div>
+                $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot{q}_i}\right) - \frac{\partial L}{\partial q_i} = 0$$
+            </div>
+            <div class="theorem">
+                <h3>Định lý Noether (Đối xứng → Bảo toàn)</h3>
+                <p>Mỗi đối xứng liên tục của hàm Lagrange sinh ra một đại lượng bảo toàn: tịnh tiến thời gian → bảo toàn năng lượng; tịnh tiến không gian → bảo toàn động lượng; phép quay → bảo toàn mô-men động lượng.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(name, btn) {
+            document.querySelectorAll('.lesson-section').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            const sec = document.getElementById('tab-' + name);
+            if (sec) { sec.style.display = 'block'; sec.classList.add('active'); }
+            if (btn) btn.classList.add('active');
+            if (name === 'action') drawAction();
+        }
+
+        // Pendulum RK4 simulation
+        const g = 9.81;
+        let pend = { th: Math.PI / 2, w: 0, len: 1.5, damp: 0, playing: true, trail: [] };
+        function resetPend() {
+            const deg = parseFloat(document.getElementById('lpTheta').value);
+            pend.len = parseFloat(document.getElementById('lpLen').value);
+            pend.damp = parseFloat(document.getElementById('lpDamp').value);
+            pend.th = deg * Math.PI / 180;
+            pend.w = 0;
+            pend.trail = [];
+            document.getElementById('lpThetaVal').textContent = deg + '°';
+            document.getElementById('lpLenVal').textContent = pend.len.toFixed(1);
+            document.getElementById('lpDampVal').textContent = pend.damp.toFixed(2);
+        }
+
+        function stepPend(dt) {
+            const acc = (th, w) => -(g / pend.len) * Math.sin(th) - pend.damp * w;
+            const k1t = pend.w, k1w = acc(pend.th, pend.w);
+            const k2t = pend.w + 0.5 * dt * k1w, k2w = acc(pend.th + 0.5 * dt * k1t, pend.w + 0.5 * dt * k1w);
+            const k3t = pend.w + 0.5 * dt * k2w, k3w = acc(pend.th + 0.5 * dt * k2t, pend.w + 0.5 * dt * k2w);
+            const k4t = pend.w + dt * k3w, k4w = acc(pend.th + dt * k3t, pend.w + dt * k3w);
+            pend.th += (dt / 6) * (k1t + 2 * k2t + 2 * k3t + k4t);
+            pend.w += (dt / 6) * (k1w + 2 * k2w + 2 * k3w + k4w);
+            pend.trail.push([pend.th, pend.w]);
+            if (pend.trail.length > 260) pend.trail.shift();
+        }
+
+        function drawPend() {
+            const c = document.getElementById('lagPendCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            // Left: Physical Pendulum
+            const ox = 165, oy = 115, rPx = 42 * pend.len;
+            const bx = ox + rPx * Math.sin(pend.th), by = oy + rPx * Math.cos(pend.th);
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy + rPx + 15); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(bx, by); ctx.stroke();
+            ctx.fillStyle = '#f5c542';
+            ctx.beginPath(); ctx.arc(bx, by, 13, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#1aa3a1';
+            ctx.beginPath(); ctx.arc(ox, oy, 5, 0, Math.PI * 2); ctx.fill();
+
+            // Right: Phase Space (theta, omega)
+            const px0 = 500, py0 = 185, sx = 46, sy = 26;
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(345, py0); ctx.lineTo(W - 20, py0);
+            ctx.moveTo(px0, 30); ctx.lineTo(px0, H - 30);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#1aa3a1'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            pend.trail.forEach(([th, w], i) => {
+                const x = px0 + th * sx, y = py0 - w * sy;
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            ctx.fillStyle = '#f5c542';
+            ctx.beginPath(); ctx.arc(px0 + pend.th * sx, py0 - pend.w * sy, 5, 0, Math.PI * 2); ctx.fill();
+
+            ctx.fillStyle = '#cbd5e1'; ctx.font = '12px JetBrains Mono, monospace';
+            ctx.fillText('Con lắc thực', 120, 28);
+            ctx.fillText('Không gian pha (θ, θ̇)', 430, 28);
+
+            const T = 0.5 * pend.len * pend.len * pend.w * pend.w;
+            const V = g * pend.len * (1 - Math.cos(pend.th));
+            const L = T - V, E = T + V;
+            document.getElementById('lpStats').innerHTML =
+                `Động năng <code>T = ${T.toFixed(2)} J</code> · Thế năng <code>V = ${V.toFixed(2)} J</code><br>` +
+                `Hàm Lagrange <code>L = T - V = ${L.toFixed(2)} J</code> · Cơ năng <code>E = ${E.toFixed(2)} J</code>`;
+        }
+
+        function drawAction() {
+            const c = document.getElementById('actionCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            const alpha = parseFloat(document.getElementById('actAlpha').value);
+            document.getElementById('actAlphaVal').textContent = alpha.toFixed(2);
+            const Ttot = 2.0, steps = 200, dt = Ttot / steps;
+            const yTrue = (t) => 0.5 * g * t * (Ttot - t);
+            const yPert = (t) => yTrue(t) + alpha * Math.sin(Math.PI * t / Ttot);
+
+            let Strue = 0, Spert = 0;
+            for (let i = 0; i < steps; i++) {
+                const t = (i + 0.5) * dt;
+                const vT = (yTrue(t + 1e-4) - yTrue(t - 1e-4)) / 2e-4;
+                const vP = (yPert(t + 1e-4) - yPert(t - 1e-4)) / 2e-4;
+                Strue += (0.5 * vT * vT - g * yTrue(t)) * dt;
+                Spert += (0.5 * vP * vP - g * yPert(t)) * dt;
+            }
+
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+            const mx = (t) => 56 + (t / Ttot) * (W - 96);
+            const my = (y) => H - 46 - (y / 9.5) * (H - 86);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(56, 28); ctx.lineTo(56, H - 46); ctx.lineTo(W - 30, H - 46); ctx.stroke();
+
+            // True trajectory
+            ctx.strokeStyle = '#1aa3a1'; ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const t = (i / 100) * Ttot;
+                if (i === 0) ctx.moveTo(mx(t), my(yTrue(t))); else ctx.lineTo(mx(t), my(yTrue(t)));
+            }
+            ctx.stroke();
+
+            // Perturbed trajectory
+            ctx.strokeStyle = '#e07a3f'; ctx.lineWidth = 2.5; ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            for (let i = 0; i <= 100; i++) {
+                const t = (i / 100) * Ttot;
+                if (i === 0) ctx.moveTo(mx(t), my(yPert(t))); else ctx.lineTo(mx(t), my(yPert(t)));
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '12px JetBrains Mono, monospace';
+            ctx.fillStyle = '#1aa3a1'; ctx.fillText('Quỹ đạo thật y*(t) (S cực tiểu)', 72, 34);
+            ctx.fillStyle = '#e07a3f'; ctx.fillText('Quỹ đạo thử y(t) = y*(t) + α·sin(πt/T)', 72, 54);
+
+            document.getElementById('actStats').innerHTML =
+                `Tác dụng cực tiểu <code>S* = ${Strue.toFixed(2)}</code><br>` +
+                `Tác dụng quỹ đạo thử <code>S(α) = ${Spert.toFixed(2)}</code> (chênh lệch <code>ΔS = +${(Spert - Strue).toFixed(2)}</code>)`;
+        }
+
+        function loop() {
+            if (pend.playing) stepPend(0.016);
+            drawPend();
+            requestAnimationFrame(loop);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ['lpTheta', 'lpLen', 'lpDamp'].forEach(id => document.getElementById(id).addEventListener('input', resetPend));
+            document.getElementById('lpPlayBtn').onclick = () => {
+                pend.playing = !pend.playing;
+                document.getElementById('lpPlayBtn').textContent = pend.playing ? '⏸ Tạm dừng' : '▶ Tiếp tục';
+            };
+            document.getElementById('lpResetBtn').onclick = resetPend;
+            document.getElementById('actAlpha').addEventListener('input', drawAction);
+            resetPend();
+            drawAction();
+            requestAnimationFrame(loop);
+        });
+    </script>
+    <script src="../js/site-nav-data.js" data-site-nav="data"></script>
+    <script src="../js/site-nav.js" data-site-nav="boot"></script>
+<script src="../js/site-nav-data.js" data-site-nav="data"></script>
+<script src="../js/site-nav.js" data-site-nav="boot"></script>
+</body>
+</html>

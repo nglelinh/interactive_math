@@ -893,6 +893,68 @@
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Chuỗi Khối Bất Biến (Tamper Cascade)</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Mỗi khối chứa <code>prevHash</code> của khối trước. Hãy thử sửa dữ liệu trong <strong>Block #1</strong> và quan sát hiệu ứng domino làm hỏng chữ ký của cả chuỗi phía sau!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="bc-lab-svg" viewBox="0 0 660 190" width="100%" style="background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Dữ liệu Block #1 (thử sửa!):</label>
+        <input type="text" id="bc-d1" value="Alice -> Bob: 10 BTC" style="width:100%;padding:8px;">
+      </div>
+      <div class="control-group">
+        <button type="button" id="bc-remine">⛏️ Đào lại (Re-mine) toàn chuỗi</button>
+      </div>
+      <div class="vector-info" id="bc-status"></div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    function h4(s){ var h=0x811c9dc5>>>0; for(var i=0;i<s.length;i++) h=Math.imul(h^s.charCodeAt(i),0x01000193)>>>0; return h.toString(16).padStart(8,"0").slice(0,6); }
+    var sealed = ["000000", h4("000000|Alice -> Bob: 10 BTC"), ""];
+    sealed[2] = h4(sealed[1] + "|Bob -> Carol: 5 BTC");
+    function draw(){
+      var d1 = document.getElementById("bc-d1").value || "";
+      var h1 = h4("000000|" + d1);
+      var ok1 = (h1 === sealed[1]);
+      var h2 = h4(h1 + "|Bob -> Carol: 5 BTC");
+      var ok2 = ok1 && (h2 === sealed[2]);
+      var blocks = [
+        {t:"Block #0 (Genesis)", prev:"000000", cur:"000000", ok:true},
+        {t:"Block #1", prev:"000000", cur:h1, ok:ok1},
+        {t:"Block #2", prev:h1, cur:h2, ok:ok2}
+      ];
+      var out = "";
+      blocks.forEach(function(b, i){
+        var x = 18 + i*216, col = b.ok ? "#1aa3a1" : "#ff6b6b";
+        out += '<rect x="'+x+'" y="24" width="192" height="140" rx="8" fill="#1e293b" stroke="'+col+'" stroke-width="2"/>';
+        out += '<text x="'+(x+96)+'" y="50" text-anchor="middle" fill="'+col+'" font-size="13" font-weight="700">'+b.t+'</text>';
+        out += '<text x="'+(x+96)+'" y="84" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="monospace">prev: '+b.prev+'</text>';
+        out += '<text x="'+(x+96)+'" y="110" text-anchor="middle" fill="#f5c542" font-size="12" font-family="monospace">hash: '+b.cur+'</text>';
+        out += '<text x="'+(x+96)+'" y="144" text-anchor="middle" fill="'+col+'" font-size="12" font-weight="700">'+(b.ok?'✓ HỢP LỆ':'✗ BỊ ĐỨT CHUỖI')+'</text>';
+        if(i<2) out += '<line x1="'+(x+192)+'" y1="94" x2="'+(x+216)+'" y2="94" stroke="'+col+'" stroke-width="2"/>';
+      });
+      document.getElementById("bc-lab-svg").innerHTML = out;
+      document.getElementById("bc-status").textContent = ok2
+        ? "Toàn bộ chuỗi khối nguyên vẹn (3/3 khối hợp lệ)."
+        : "Sửa Block #1 làm đổi hash thành "+h1+", kéo theo Block #2 mất liên kết!";
+    }
+    document.getElementById("bc-d1").addEventListener("input", draw);
+    document.getElementById("bc-remine").onclick = function(){
+      var d1 = document.getElementById("bc-d1").value || "";
+      sealed[1] = h4("000000|" + d1);
+      sealed[2] = h4(sealed[1] + "|Bob -> Carol: 5 BTC");
+      draw();
+    };
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {
