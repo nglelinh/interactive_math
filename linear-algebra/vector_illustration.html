@@ -638,12 +638,57 @@
         let vectorB = { x: 1, y: 2 };
         let currentOperation = 'add';
         let scaleFactor = 2;
+        let listenersInitialized = false;
+        let draggingVector = null;
+        let hoveredVector = null;
         
         function initializeCanvas() {
             canvas = document.getElementById('canvas');
             if (!canvas) return;
             ctx = canvas.getContext('2d');
-            setupEventListeners();
+            if (!listenersInitialized) {
+                setupEventListeners();
+                listenersInitialized = true;
+            }
+        }
+        
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                px: (e.clientX - rect.left) * scaleX,
+                py: (e.clientY - rect.top) * scaleY
+            };
+        }
+        
+        function hitTestVector(px, py) {
+            const scale = 20;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const ax = cx + vectorA.x * scale, ay = cy - vectorA.y * scale;
+            const bx = cx + vectorB.x * scale, by = cy - vectorB.y * scale;
+            const distA = Math.hypot(px - ax, py - ay);
+            const distB = Math.hypot(px - bx, py - by);
+            const hitRadius = 22;
+            if (distA <= hitRadius && distA <= distB) return 'A';
+            if (distB <= hitRadius) return 'B';
+            return null;
+        }
+        
+        function syncSlidersFromVectors() {
+            const pairs = [
+                ['vectorA-x-slider', 'vectorA-x', vectorA.x],
+                ['vectorA-y-slider', 'vectorA-y', vectorA.y],
+                ['vectorB-x-slider', 'vectorB-x', vectorB.x],
+                ['vectorB-y-slider', 'vectorB-y', vectorB.y]
+            ];
+            pairs.forEach(([sId, spId, val]) => {
+                const s = document.getElementById(sId);
+                const sp = document.getElementById(spId);
+                if (s) s.value = val;
+                if (sp) sp.textContent = val.toFixed(1);
+            });
         }
         
         function setupEventListeners() {
@@ -664,6 +709,67 @@
                     });
                 }
             });
+            
+            // Pointer drag listeners on canvas (mouse + touch)
+            if (canvas) {
+                canvas.style.touchAction = 'none';
+                canvas.style.cursor = 'grab';
+                
+                canvas.addEventListener('pointerdown', (e) => {
+                    const { px, py } = getCanvasCoords(e);
+                    const hit = hitTestVector(px, py);
+                    if (hit) {
+                        draggingVector = hit;
+                        canvas.style.cursor = 'grabbing';
+                        if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+                        e.preventDefault();
+                    }
+                });
+                
+                canvas.addEventListener('pointermove', (e) => {
+                    const { px, py } = getCanvasCoords(e);
+                    if (draggingVector) {
+                        const scale = 20;
+                        const cx = canvas.width / 2;
+                        const cy = canvas.height / 2;
+                        const rawX = (px - cx) / scale;
+                        const rawY = (cy - py) / scale;
+                        const clampedX = Math.round(Math.max(-10, Math.min(10, rawX)) * 10) / 10;
+                        const clampedY = Math.round(Math.max(-10, Math.min(10, rawY)) * 10) / 10;
+                        if (draggingVector === 'A') {
+                            vectorA.x = clampedX;
+                            vectorA.y = clampedY;
+                        } else if (draggingVector === 'B') {
+                            vectorB.x = clampedX;
+                            vectorB.y = clampedY;
+                        }
+                        syncSlidersFromVectors();
+                        drawVectors();
+                        updateInfo();
+                        e.preventDefault();
+                    } else {
+                        const hit = hitTestVector(px, py);
+                        if (hit !== hoveredVector) {
+                            hoveredVector = hit;
+                            canvas.style.cursor = hit ? 'grab' : 'default';
+                            drawVectors();
+                        }
+                    }
+                });
+                
+                const endDrag = (e) => {
+                    if (draggingVector) {
+                        draggingVector = null;
+                        canvas.style.cursor = hoveredVector ? 'grab' : 'default';
+                        if (canvas.releasePointerCapture && e.pointerId !== undefined) {
+                            try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+                        }
+                        drawVectors();
+                    }
+                };
+                canvas.addEventListener('pointerup', endDrag);
+                canvas.addEventListener('pointercancel', endDrag);
+            }
         }
         
         function updateVectors() {
@@ -821,9 +927,21 @@
             ctx.fillText('Y', centerX + 10, 15);
             ctx.fillText('(0,0)', centerX + 5, centerY + 15);
             
-            // Draw original vectors
+            // Draw original vectors with draggable tip handles
             drawVector({x: 0, y: 0}, vectorA, '#667eea', 'A');
             drawVector({x: 0, y: 0}, vectorB, '#764ba2', 'B');
+            [['A', vectorA, '#667eea'], ['B', vectorB, '#764ba2']].forEach(([name, vec, col]) => {
+                const tx = centerX + vec.x * scale;
+                const ty = centerY - vec.y * scale;
+                const active = draggingVector === name || hoveredVector === name;
+                ctx.beginPath();
+                ctx.arc(tx, ty, active ? 9 : 6, 0, Math.PI * 2);
+                ctx.fillStyle = active ? '#1aa3a1' : '#ffffff';
+                ctx.fill();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = col;
+                ctx.stroke();
+            });
             
             // Draw result based on operation
             if (currentOperation === 'add' || currentOperation === 'subtract' || currentOperation === 'scale') {
@@ -859,7 +977,7 @@
                     resultText = `A · B = ${dot.toFixed(2)} (scalar)`;
                     break;
                 case 'cosine':
-                    resultText = `cos(θ) = ${cosine.toFixed(3)} | θ = ${(Math.acos(cosine) * 180 / Math.PI).toFixed(1)}°`;
+                    resultText = `cos(θ) = ${cosine.toFixed(3)} | θ = ${(Math.acos(Math.max(-1, Math.min(1, cosine))) * 180 / Math.PI).toFixed(1)}°`;
                     break;
                 case 'scale':
                     const scaled = getResultVector();
