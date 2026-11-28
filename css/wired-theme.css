@@ -971,3 +971,139 @@ canvas {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ── 7. Course-Wide Design System Standard (8px Grid, 16px Base, 24px Indent, Frameless Sections) ─ */
+body {
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+p {
+  font-size: 1rem !important;
+  line-height: 1.65 !important;
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+}
+
+ul, ol {
+  padding-left: 24px !important;
+  margin-top: 0 !important;
+  margin-bottom: 16px !important;
+}
+
+li {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 6px !important;
+}
+
+b, strong {
+  font-size: inherit !important;
+  color: var(--wired-navy) !important;
+  font-weight: 600 !important;
+}
+
+i, em {
+  font-size: inherit !important;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 3.1vw, 2.45rem) !important;
+  margin: 0 0 20px !important;
+}
+
+h2 {
+  font-size: clamp(1.35rem, 2.1vw, 1.65rem) !important;
+  border-bottom: 1px solid var(--wired-line-soft) !important;
+  padding-bottom: 8px !important;
+  margin: 28px 0 14px !important;
+}
+
+h3 {
+  font-size: 1.125rem !important;
+  margin: 20px 0 8px !important;
+}
+
+h4 {
+  font-size: 1rem !important;
+  margin: 16px 0 6px !important;
+}
+
+.section,
+.lesson-section,
+.theory {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 8px 0 !important;
+  max-width: 1360px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.container,
+.main-container,
+.theory-content,
+.lesson-nav,
+.nav-container,
+.toggle-buttons {
+  max-width: 1360px !important;
+}
+
+.nav-button,
+.nav-tab,
+.toggle-btn,
+.toggle-button,
+.tab,
+.tab-btn,
+.tab-button {
+  font-size: 14px !important;
+  padding: 8px 16px !important;
+  margin: 0 !important;
+  text-transform: none !important;
+}
+
+.value-display {
+  font-size: 0.92rem !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  color: var(--wired-teal-deep) !important;
+}
+
+.math-inline {
+  background: var(--wired-code-bg) !important;
+  color: var(--wired-navy) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 5px !important;
+  padding: 2px 6px !important;
+  font-family: var(--wired-mono) !important;
+  font-size: 0.9em !important;
+}
+
+.control-group label,
+.controls label,
+.controls-panel label,
+.control-panel label {
+  font-size: 0.94rem !important;
+  margin-bottom: 6px !important;
+}
+
+/* Neutralize legacy inline rainbow/dark boxes inside lesson sections */
+.section div[style*="rgba(0, 123, 255"],
+.section div[style*="rgba(40, 167, 69"],
+.section div[style*="rgba(220, 53, 69"],
+.section div[style*="rgba(255, 255, 0"],
+.section div[style*="rgba(76, 175, 80"],
+.container div[style*="rgba(0, 123, 255"],
+.container div[style*="rgba(40, 167, 69"],
+.container div[style*="rgba(220, 53, 69"] {
+  background: rgba(249, 242, 229, 0.80) !important;
+  border: none !important;
+  border-left: 4px solid var(--wired-teal) !important;
+  border-radius: 8px !important;
+  padding: 16px 20px !important;
+  color: var(--wired-ink) !important;
+}

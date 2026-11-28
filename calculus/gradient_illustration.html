@@ -346,6 +346,124 @@
             <b>3. Himmelblau Function:</b> \( f(x, y) = (x^2+y-11)^2 + (x+y^2-7)^2 \)<br>
             <b>4. Ackley Function:</b> Phức tạp với nhiều local minima
         </div>
+
+            <div class="theory-box">
+                <h3>🧠 Gradient trong Deep Learning:</h3>
+                
+                <h4>🔴 Gradient Descent Algorithm:</h4>
+                <div class="formula-container">
+                  <div class="formula-title">Parameter Update Rule</div>
+                  <div class="math-environment">$$\theta = \theta - \alpha \nabla f(\theta)$$</div>
+                  <div class="formula-description">$\alpha$ = learning rate (step size)</div>
+                </div>
+                <p>Neural networks update billions parameters using this simple rule!</p>
+                
+                <h4>🟢 Backpropagation = Chain Rule:</h4>
+                <div class="formula-container">
+                  <div class="formula-title">Chain Rule for Backpropagation</div>
+                  <div class="math-environment">$$\frac{\partial \text{Loss}}{\partial w_1} = \frac{\partial \text{Loss}}{\partial \text{output}} \times \frac{\partial \text{output}}{\partial w_1}$$</div>
+                  <div class="formula-description">Gradient flows backward through network layers</div>
+                </div>
+                <p>Gradient flows backward through network layers via chain rule</p>
+                
+                <h4>🔵 Gradient Problems & Solutions:</h4>
+                <ul>
+                    <li><strong>Vanishing Gradients:</strong> $|\nabla f| \to 0$, training slows down (ReLU activation solves this)</li>
+                    <li><strong>Exploding Gradients:</strong> $|\nabla f| \to \infty$, training unstable (Gradient clipping solves this)</li>
+                    <li><strong>Saddle Points:</strong> Gradient = 0 nhưng không phải minimum (Momentum helps escape)</li>
+                </ul>
+            </div>
+            
+            <div class="example-box">
+                <h3>🎯 Real-world ML Applications:</h3>
+                <h4>📈 Loss Function Optimization:</h4>
+                <ul>
+                    <li><strong>Linear Regression:</strong> MSE loss = $\frac{1}{2}\sum(y - \hat{y})^2$, gradient = $-X^T(y - X\theta)$</li>
+                    <li><strong>Logistic Regression:</strong> Cross-entropy loss, gradient qua sigmoid activation</li>
+                    <li><strong>Neural Networks:</strong> Complex loss landscapes với millions local minima</li>
+                </ul>
+                
+                <h4>🚀 Advanced Optimizers:</h4>
+                <ul>
+                    <li><strong>SGD + Momentum:</strong> Accelerated gradients, escape local minima</li>
+                    <li><strong>Adam:</strong> Adaptive learning rates, industry standard cho deep learning</li>
+                    <li><strong>RMSprop:</strong> Root Mean Square Propagation, good cho RNNs</li>
+                </ul>
+            </div>
+            
+            <div class="theory-box">
+                <h3>💼 Industry Success Stories:</h3>
+                <ul>
+                    <li><strong>🎬 Netflix:</strong> Recommendation system trained với gradient descent → $15B revenue</li>
+                    <li><strong>🚗 Tesla:</strong> Autopilot neural networks = gradient-based computer vision</li>
+                    <li><strong>📱 Siri/Alexa:</strong> Speech recognition models trained qua gradient methods</li>
+                    <li><strong>🏥 Medical AI:</strong> Cancer detection models achieve 94% accuracy qua optimization</li>
+                </ul>
+            </div>
+            
+            <div class="theory-box">
+                <h3>🎯 Gradient & Level Curves - The Heart of Optimization!</h3>
+                <h4>🔥 Critical Insight: Gradient ALWAYS perpendicular to Level Curves!</h4>
+                <p><strong>Tại sao?</strong> Level curve = f(x,y) = constant. Moving along level curve → function value không đổi → df = 0</p>
+                <p><strong>Mathematically:</strong> df = (∂f/∂x)dx + (∂f/∂y)dy = ∇f · [dx, dy] = 0</p>
+                <p><strong>Result:</strong> Gradient ⊥ tangent vector của level curve!</p>
+                
+                <h4>🧠 ML Interpretation - Why This Matters:</h4>
+                <ul>
+                    <li><strong>🎯 Gradient Descent:</strong> Gradient points away from level curves → fastest escape route!</li>
+                    <li><strong>⚡ Newton's Method:</strong> Uses curvature to predict where level curves bend</li>
+                    <li><strong>🔍 Constrained Optimization:</strong> Lagrange multipliers = gradients must align with constraint curves</li>
+                    <li><strong>🎪 Neural Networks:</strong> Loss function level curves = contours of same error</li>
+                </ul>
+            </div>
+
+            <div class="theory-box">
+                <h3>🔬 Mathematical Foundation:</h3>
+                <ul>
+                    <li><strong>Gradient $\nabla f$:</strong> Vector của partial derivatives $[\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}, \ldots]$</li>
+                    <li><strong>Directional Derivative:</strong> $D_u f = \nabla f \cdot \vb{u}$ (rate of change theo direction $\vb{u}$)</li>
+                    <li><strong>Steepest Ascent:</strong> Direction của maximum increase = $\frac{\nabla f}{|\nabla f|}$</li>
+                    <li><strong>Level Sets:</strong> $f(x,y) = c$, gradient perpendicular to level curves</li>
+                    <li><strong>Critical Points:</strong> $\nabla f = \vb{0}$, potential minima/maxima/saddle points</li>
+                    <li><strong>⊥ Perpendicularity:</strong> $\nabla f \cdot \text{tangent vector} = 0$ (fundamental optimization principle)</li>
+                </ul>
+            </div>
+            
+            <div class="theory-box">
+                <h3>🔥 Gradient-Level Curve Applications in ML & Engineering:</h3>
+                <h4>🎯 Gradient Descent Navigation:</h4>
+                <ul>
+                    <li><strong>🧭 Why it works:</strong> Gradient ⊥ level curves → steepest path away from current loss level</li>
+                    <li><strong>🎪 Neural Networks:</strong> Each weight update moves perpendicular to current error contour</li>
+                    <li><strong>🏔️ Mountain Climbing Analogy:</strong> Always walk perpendicular to elevation lines for steepest ascent</li>
+                </ul>
+                
+                <h4>🚗 Real-world Examples:</h4>
+                <ul style="font-size: 16px;">
+                    <li><strong>GPS Navigation:</strong> Gradient of travel time function ⊥ isochrone lines (constant travel time)</li>
+                    <li><strong>Heat Transfer:</strong> Heat flow ⊥ isotherms (temperature level curves)</li>
+                    <li><strong>Economics:</strong> Price gradient ⊥ indifference curves (constant utility)</li>
+                    <li><strong>Computer Graphics:</strong> Normal mapping uses gradient ⊥ surface level curves</li>
+                </ul>
+                
+                <h4>⚡ Mathematical Proof:</h4>
+                <div class="formula-container">
+                  <div class="formula-title">Proof of Perpendicularity</div>
+                  <div class="math-environment">
+                    $$\text{Level curve: } f(x,y) = c$$
+                    $$\text{Implicit differentiation: } \frac{\partial f}{\partial x} + \frac{\partial f}{\partial y}\frac{dy}{dx} = 0$$
+                    $$\text{Slope of level curve: } \frac{dy}{dx} = -\frac{\partial f/\partial x}{\partial f/\partial y}$$
+                    $$\text{Gradient slope: } \frac{\partial f/\partial y}{\partial f/\partial x}$$
+                  </div>
+                  <div class="formula-description">Product = -1 → Perpendicular! ✓</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===========================================
+             INTERACTIVE ILLUSTRATION SECTION  
+             =========================================== -->
+        <div style="background: linear-gradient(145deg, rgba(15, 40, 15, 0.9), rgba(25, 60, 25, 0.7)); padding: 30px; border-radius: 15px; margin: 30px auto; border: 2px solid rgba(76, 175, 80, 0.4);">
     </div>
 
     <div id="illustrationSection" class="section" style="display:none;">
@@ -407,199 +525,6 @@
                 <li>Observe how gradient vectors point toward steepest ascent</li>
                 <li>Notice that gradient is perpendicular to contour lines</li>
             </ul>
-        </div>
-    </div>
-
-            <div style="background: rgba(0, 123, 255, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(0, 123, 255, 0.3);">
-                <h3>🧠 Gradient trong Deep Learning:</h3>
-                
-                <h4>🔴 Gradient Descent Algorithm:</h4>
-                <div class="formula-container">
-                  <div class="formula-title">Parameter Update Rule</div>
-                  <div class="math-environment">$$\theta = \theta - \alpha \nabla f(\theta)$$</div>
-                  <div class="formula-description">$\alpha$ = learning rate (step size)</div>
-                </div>
-                <p>Neural networks update billions parameters using this simple rule!</p>
-                
-                <h4>🟢 Backpropagation = Chain Rule:</h4>
-                <div class="formula-container">
-                  <div class="formula-title">Chain Rule for Backpropagation</div>
-                  <div class="math-environment">$$\frac{\partial \text{Loss}}{\partial w_1} = \frac{\partial \text{Loss}}{\partial \text{output}} \times \frac{\partial \text{output}}{\partial w_1}$$</div>
-                  <div class="formula-description">Gradient flows backward through network layers</div>
-                </div>
-                <p>Gradient flows backward through network layers via chain rule</p>
-                
-                <h4>🔵 Gradient Problems & Solutions:</h4>
-                <ul>
-                    <li><strong>Vanishing Gradients:</strong> $|\nabla f| \to 0$, training slows down (ReLU activation solves this)</li>
-                    <li><strong>Exploding Gradients:</strong> $|\nabla f| \to \infty$, training unstable (Gradient clipping solves this)</li>
-                    <li><strong>Saddle Points:</strong> Gradient = 0 nhưng không phải minimum (Momentum helps escape)</li>
-                </ul>
-            </div>
-            
-            <div style="background: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(40, 167, 69, 0.3);">
-                <h3>🎯 Real-world ML Applications:</h3>
-                <h4>📈 Loss Function Optimization:</h4>
-                <ul>
-                    <li><strong>Linear Regression:</strong> MSE loss = $\frac{1}{2}\sum(y - \hat{y})^2$, gradient = $-X^T(y - X\theta)$</li>
-                    <li><strong>Logistic Regression:</strong> Cross-entropy loss, gradient qua sigmoid activation</li>
-                    <li><strong>Neural Networks:</strong> Complex loss landscapes với millions local minima</li>
-                </ul>
-                
-                <h4>🚀 Advanced Optimizers:</h4>
-                <ul>
-                    <li><strong>SGD + Momentum:</strong> Accelerated gradients, escape local minima</li>
-                    <li><strong>Adam:</strong> Adaptive learning rates, industry standard cho deep learning</li>
-                    <li><strong>RMSprop:</strong> Root Mean Square Propagation, good cho RNNs</li>
-                </ul>
-            </div>
-            
-            <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(255, 193, 7, 0.3);">
-                <h3>💼 Industry Success Stories:</h3>
-                <ul>
-                    <li><strong>🎬 Netflix:</strong> Recommendation system trained với gradient descent → $15B revenue</li>
-                    <li><strong>🚗 Tesla:</strong> Autopilot neural networks = gradient-based computer vision</li>
-                    <li><strong>📱 Siri/Alexa:</strong> Speech recognition models trained qua gradient methods</li>
-                    <li><strong>🏥 Medical AI:</strong> Cancer detection models achieve 94% accuracy qua optimization</li>
-                </ul>
-            </div>
-            
-            <div style="background: rgba(255, 20, 147, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(255, 20, 147, 0.3);">
-                <h3>🎯 Gradient & Level Curves - The Heart of Optimization!</h3>
-                <h4>🔥 Critical Insight: Gradient ALWAYS perpendicular to Level Curves!</h4>
-                <p><strong>Tại sao?</strong> Level curve = f(x,y) = constant. Moving along level curve → function value không đổi → df = 0</p>
-                <p><strong>Mathematically:</strong> df = (∂f/∂x)dx + (∂f/∂y)dy = ∇f · [dx, dy] = 0</p>
-                <p><strong>Result:</strong> Gradient ⊥ tangent vector của level curve!</p>
-                
-                <h4>🧠 ML Interpretation - Why This Matters:</h4>
-                <ul>
-                    <li><strong>🎯 Gradient Descent:</strong> Gradient points away from level curves → fastest escape route!</li>
-                    <li><strong>⚡ Newton's Method:</strong> Uses curvature to predict where level curves bend</li>
-                    <li><strong>🔍 Constrained Optimization:</strong> Lagrange multipliers = gradients must align with constraint curves</li>
-                    <li><strong>🎪 Neural Networks:</strong> Loss function level curves = contours of same error</li>
-                </ul>
-            </div>
-
-            <div style="background: rgba(108, 117, 125, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(108, 117, 125, 0.3);">
-                <h3>🔬 Mathematical Foundation:</h3>
-                <ul>
-                    <li><strong>Gradient $\nabla f$:</strong> Vector của partial derivatives $[\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}, \ldots]$</li>
-                    <li><strong>Directional Derivative:</strong> $D_u f = \nabla f \cdot \vb{u}$ (rate of change theo direction $\vb{u}$)</li>
-                    <li><strong>Steepest Ascent:</strong> Direction của maximum increase = $\frac{\nabla f}{|\nabla f|}$</li>
-                    <li><strong>Level Sets:</strong> $f(x,y) = c$, gradient perpendicular to level curves</li>
-                    <li><strong>Critical Points:</strong> $\nabla f = \vb{0}$, potential minima/maxima/saddle points</li>
-                    <li><strong>⊥ Perpendicularity:</strong> $\nabla f \cdot \text{tangent vector} = 0$ (fundamental optimization principle)</li>
-                </ul>
-            </div>
-            
-            <div style="background: rgba(255, 140, 0, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid rgba(255, 140, 0, 0.3);">
-                <h3>🔥 Gradient-Level Curve Applications in ML & Engineering:</h3>
-                <h4>🎯 Gradient Descent Navigation:</h4>
-                <ul>
-                    <li><strong>🧭 Why it works:</strong> Gradient ⊥ level curves → steepest path away from current loss level</li>
-                    <li><strong>🎪 Neural Networks:</strong> Each weight update moves perpendicular to current error contour</li>
-                    <li><strong>🏔️ Mountain Climbing Analogy:</strong> Always walk perpendicular to elevation lines for steepest ascent</li>
-                </ul>
-                
-                <h4>🚗 Real-world Examples:</h4>
-                <ul style="font-size: 16px;">
-                    <li><strong>GPS Navigation:</strong> Gradient of travel time function ⊥ isochrone lines (constant travel time)</li>
-                    <li><strong>Heat Transfer:</strong> Heat flow ⊥ isotherms (temperature level curves)</li>
-                    <li><strong>Economics:</strong> Price gradient ⊥ indifference curves (constant utility)</li>
-                    <li><strong>Computer Graphics:</strong> Normal mapping uses gradient ⊥ surface level curves</li>
-                </ul>
-                
-                <h4>⚡ Mathematical Proof:</h4>
-                <div class="formula-container">
-                  <div class="formula-title">Proof of Perpendicularity</div>
-                  <div class="math-environment">
-                    $$\text{Level curve: } f(x,y) = c$$
-                    $$\text{Implicit differentiation: } \frac{\partial f}{\partial x} + \frac{\partial f}{\partial y}\frac{dy}{dx} = 0$$
-                    $$\text{Slope of level curve: } \frac{dy}{dx} = -\frac{\partial f/\partial x}{\partial f/\partial y}$$
-                    $$\text{Gradient slope: } \frac{\partial f/\partial y}{\partial f/\partial x}$$
-                  </div>
-                  <div class="formula-description">Product = -1 → Perpendicular! ✓</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===========================================
-             INTERACTIVE ILLUSTRATION SECTION  
-             =========================================== -->
-        <div style="background: linear-gradient(145deg, rgba(15, 40, 15, 0.9), rgba(25, 60, 25, 0.7)); padding: 30px; border-radius: 15px; margin: 30px auto; border: 2px solid rgba(76, 175, 80, 0.4);">
-            <h2 style="color: #4caf50; font-size: 2.5em; margin-bottom: 20px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">🎮 MINH HỌA TƯƠNG TÁC</h2>
-            
-            <div style="text-align: center; margin-bottom: 20px; background: rgba(76, 175, 80, 0.1); padding: 15px; border-radius: 10px;">
-                <p style="font-size: 18px; color: #81c784; margin: 0;">Khám phá trực quan gradient và level curves - quan sát cách gradient luôn luôn vuông góc với level curves</p>
-            </div>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <h3>Chọn hàm số</h3>
-                    <div class="function-selector">
-                        <button onclick="setFunction('quadratic')">f(x,y) = x² + y²</button>
-                        <button onclick="setFunction('linear')">f(x,y) = x + y</button>
-                        <button onclick="setFunction('product')">f(x,y) = xy</button>
-                        <button onclick="setFunction('rosenbrock')">Rosenbrock</button>
-                        <button onclick="setFunction('custom')">f(x,y) = ax² + by² + c</button>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <h3>Tham số hàm số</h3>
-                    <label>a: <span id="param-a">1</span></label>
-                    <input type="range" id="param-a-slider" min="0.1" max="3" value="1" step="0.1">
-                    <label>b: <span id="param-b">1</span></label>
-                    <input type="range" id="param-b-slider" min="0.1" max="3" value="1" step="0.1">
-                    <label>c: <span id="param-c">0</span></label>
-                    <input type="range" id="param-c-slider" min="-5" max="5" value="0" step="0.1">
-                </div>
-                
-                <div class="control-group">
-                    <h3>Điểm quan sát</h3>
-                    <label>X: <span id="point-x">2</span></label>
-                    <input type="range" id="point-x-slider" min="-5" max="5" value="2" step="0.1">
-                    <label>Y: <span id="point-y">1</span></label>
-                    <input type="range" id="point-y-slider" min="-5" max="5" value="1" step="0.1">
-                </div>
-                
-                <div class="control-group">
-                    <h3>Hiển thị</h3>
-                    <label><input type="checkbox" id="show-level-curves" checked> Level Curves</label>
-                    <label><input type="checkbox" id="show-gradient" checked> Gradient Vectors</label>
-                    <label><input type="checkbox" id="show-point" checked> Điểm quan sát</label>
-                    <label><input type="checkbox" id="show-perpendicular" checked> ⊥ Perpendicular Lines</label>
-                </div>
-            </div>
-            
-            <div class="canvas-container">
-                <canvas id="gradientCanvas" width="600" height="400"></canvas>
-            </div>
-            
-            <div class="info">
-                <h3>📊 Thông tin Gradient</h3>
-                <div class="gradient-info" id="gradient-info">
-                    Gradient tại điểm (2, 1): ∇f = [4, 2]<br>
-                    Độ lớn gradient: |∇f| = 4.47<br>
-                    Hướng tăng nhanh nhất: [0.89, 0.45]
-                </div>
-                
-                <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h3>⚡ Interactive Experiments - Test the Theory:</h3>
-                    <ol>
-                        <li><strong>🔵 Quadratic Bowl:</strong> Perfect convex function, gradient always points to minimum. Notice green tangent lines!</li>
-                        <li><strong>⚪ Move observation point:</strong> Watch how gradient rotates but ALWAYS stays ⊥ to level curves</li>
-                        <li><strong>🎛️ Try different functions:</strong> Linear, product, custom - perpendicularity holds universally!</li>
-                        <li><strong>🔍 Zoom in close:</strong> Even at tiny scales, 90° relationship is mathematically exact</li>
-                        <li><strong>🎯 Challenge:</strong> Find ANY point where gradient isn't perpendicular (spoiler: impossible!)</li>
-                    </ol>
-                    
-                    <div style="background: rgba(255, 255, 0, 0.1); padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        <strong>💡 Pro Tip:</strong> Toggle "⊥ Perpendicular Lines" to see the tangent direction to level curves. 
-                        Green dashed line = direction you can move without changing function value!
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
