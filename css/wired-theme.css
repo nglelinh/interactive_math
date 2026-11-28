@@ -1,8 +1,10 @@
 /*
- * How It's Wired — Inspired Interactive Manual Theme & Responsive Layout
- * Warm parchment blueprint canvas (#f6eddd), sand sidebar rail (#e9dcca),
- * deep navy headings (#18213d), teal interactive accent (#1aa3a1),
- * Barlow / Barlow Semi Condensed / JetBrains Mono typography.
+ * Unified Interactive Math Standard Theme & Layout
+ * Standard reference: fourier-analysis/fourier_transform_lesson.html
+ * Palette & 3-zone shell inspired by how-its-wired.vercel.app:
+ *   Warm parchment blueprint canvas (#f6eddd), sand sidebar rail (#e9dcca),
+ *   deep navy ink (#18213d), teal interactive accent (#1aa3a1),
+ *   Barlow / Barlow Semi Condensed / JetBrains Mono typography.
  */
 
 :root {
@@ -17,11 +19,12 @@
   --wired-navy: #18213d;
   --wired-navy-2: #24304a;
   --wired-ink: #3c4048;
-  --wired-muted: #696d74;
+  --wired-muted: #5e636b;
   --wired-faint: #8f8476;
   --wired-teal: #1aa3a1;
   --wired-teal-deep: #147f7d;
   --wired-copper: #c0652d;
+  --wired-green: #2f855a;
   --wired-track: #e3d8ca;
   --wired-sans: "Barlow", system-ui, -apple-system, sans-serif;
   --wired-cond: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
@@ -29,7 +32,7 @@
   --wired-sidebar-w: 264px;
 }
 
-/* ── Base Canvas, Overflow Safety & Blueprint Paper ───────────── */
+/* ── 1. Base Canvas, Overflow Safety & Blueprint Paper ────────── */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -51,35 +54,36 @@ body {
   background-attachment: fixed !important;
   color: var(--wired-ink) !important;
   font-family: var(--wired-sans) !important;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   margin: 0;
+  padding: 20px 24px 48px !important;
   max-width: 100%;
+  min-height: 100vh;
+  height: auto !important;
   overflow-x: clip !important;
   overflow-y: auto !important;
-  height: auto !important;
-  min-height: 100vh;
   transition: padding-left 0.22s ease;
 }
 
-/* Desktop wide (>= 1180px): persistent left rail */
 @media (min-width: 1180px) {
   body.wired-has-sidebar {
-    padding-left: var(--wired-sidebar-w) !important;
+    padding-left: calc(var(--wired-sidebar-w) + 24px) !important;
   }
   body.wired-has-sidebar.wired-sidebar-collapsed {
-    padding-left: 64px !important;
+    padding-left: 88px !important;
   }
 }
 
-/* Tablet & Mobile (< 1180px): compact fixed top bar + drawer */
 @media (max-width: 1179px) {
   body.wired-has-sidebar {
-    padding-left: 0 !important;
-    padding-top: 64px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    padding-top: 72px !important;
   }
 }
 
-/* ── Left Sidebar Rail (#site-nav) ────────────────────────────── */
+/* ── 2. Left Collapsible Sidebar Rail (#site-nav) ─────────────── */
 #site-nav {
   position: fixed;
   top: 0;
@@ -88,7 +92,7 @@ body {
   width: var(--wired-sidebar-w);
   z-index: 2500;
   background: linear-gradient(90deg, #e7d9c6 0%, var(--wired-sidebar) 75%, #eadecd 100%);
-  box-shadow: inset -1.5px 0 0 rgba(196, 176, 150, 0.65);
+  box-shadow: inset -1px 0 0 rgba(196, 176, 150, 0.75);
   font-family: var(--wired-sans);
   color: var(--wired-navy);
   display: flex;
@@ -110,7 +114,7 @@ body {
   height: 40px;
   border-radius: 9px;
   background: rgba(249, 242, 229, 0.85);
-  border: 1.5px solid var(--wired-line);
+  border: 1px solid var(--wired-line);
   color: var(--wired-navy-2);
   display: grid;
   place-items: center;
@@ -118,7 +122,6 @@ body {
   flex-shrink: 0;
   font-size: 18px;
   line-height: 1;
-  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 #site-nav .wired-toggle:hover {
@@ -174,7 +177,6 @@ body {
   letter-spacing: 0.02em;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 #site-nav .wired-chapter-btn:hover {
@@ -219,7 +221,6 @@ body {
   line-height: 1.35;
   color: var(--wired-ink);
   text-decoration: none;
-  transition: background 0.12s ease, color 0.12s ease;
 }
 
 #site-nav .wired-lesson:hover {
@@ -247,7 +248,7 @@ body {
   text-align: center;
   padding: 6px 8px;
   border-radius: 7px;
-  border: 1.5px solid var(--wired-line);
+  border: 1px solid var(--wired-line);
   background: var(--wired-card);
   color: var(--wired-navy);
   font-family: var(--wired-cond);
@@ -263,7 +264,6 @@ body {
   color: var(--wired-teal-deep);
 }
 
-/* Collapsed Desktop Rail (64px) */
 @media (min-width: 1180px) {
   body.wired-sidebar-collapsed #site-nav {
     width: 64px;
@@ -279,7 +279,6 @@ body {
   }
 }
 
-/* Tablet & Mobile Top Bar + Full-Height Drawer (< 1180px) */
 @media (max-width: 1179px) {
   #site-nav {
     right: 0;
@@ -288,7 +287,7 @@ body {
     height: auto;
     max-height: 100dvh;
     box-shadow: 0 2px 12px rgba(24, 33, 61, 0.08);
-    border-bottom: 1.5px solid var(--wired-line);
+    border-bottom: 1px solid var(--wired-line);
   }
   #site-nav .wired-chapters,
   #site-nav .wired-side-footer {
@@ -305,31 +304,64 @@ body {
   }
 }
 
-/* ── Editorial Typography & Surfaces on All Lesson Pages ──────── */
+/* ── 3. Unified Typography (Fourier Standard + Wired Palette) ─── */
 h1, h2, h3, h4,
 .theory-header h1,
 .section-title,
-.lesson-title {
+.lesson-title,
+.demo-title {
   font-family: var(--wired-cond) !important;
   color: var(--wired-navy) !important;
+  -webkit-text-fill-color: var(--wired-navy) !important;
+  background: none !important;
   letter-spacing: 0.01em;
   text-shadow: none !important;
   overflow-wrap: break-word;
 }
 
 h1 {
-  font-size: clamp(1.6rem, 3.2vw, 2.5rem);
-  line-height: 1.2;
+  font-size: clamp(1.75rem, 3.2vw, 2.55rem) !important;
+  line-height: 1.18 !important;
+  font-weight: 700 !important;
+  text-align: center;
+  margin: 0 0 22px !important;
 }
 
 h2 {
-  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-  line-height: 1.28;
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem) !important;
+  line-height: 1.28 !important;
+  font-weight: 700 !important;
 }
 
-p, li, label, .theory-section p, .property-card p {
-  color: var(--wired-ink);
+h3, .demo-title {
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+}
+
+p, li, label, td, th,
+.theory-section p,
+.theory-box p,
+.property-card p,
+.step-card p,
+.control-group label,
+.controls label,
+.controls-panel label {
+  color: var(--wired-ink) !important;
   overflow-wrap: break-word;
+}
+
+.control-group label,
+.controls label,
+.controls-panel label {
+  font-weight: 600;
+  color: var(--wired-navy) !important;
+}
+
+.value-display,
+.metric-value {
+  font-family: var(--wired-mono) !important;
+  color: var(--wired-teal-deep) !important;
+  font-weight: 600 !important;
 }
 
 a {
@@ -340,7 +372,6 @@ code, pre, .formula, .math-display, .vector-info, .info-value {
   font-family: var(--wired-mono);
 }
 
-/* Responsive Overflow Protection for Math, Code, Tables, Media */
 pre,
 .formula,
 .math-display,
@@ -351,29 +382,95 @@ mjx-container[display="true"] {
   -webkit-overflow-scrolling: touch;
 }
 
-table {
-  max-width: 100%;
-}
-
 img, svg, canvas, video, iframe, .js-plotly-plot {
   max-width: 100% !important;
 }
 
-/* Open Frameless Page Containers (sit directly on warm blueprint paper) */
+/* ── 4. Frameless Open Containers & Standard Callouts ─────────── */
 .container,
 .main-container,
 .theory-content,
-.matrix-panel {
+.matrix-panel,
+.interactive-demo,
+#container,
+.app-container,
+.tab-content {
   background: transparent !important;
   color: var(--wired-ink) !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
-  max-width: 100%;
+  max-width: 1400px !important;
+  width: 100% !important;
+  height: auto !important;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Open Editorial Sections (hairline top divider, no boxed frame) */
+/* Standard Lesson Tab Bar (.lesson-nav / .nav-container / .nav-tabs) */
+.lesson-nav,
+.nav-container {
+  position: relative !important;
+  top: auto !important;
+  display: flex;
+  flex-wrap: wrap !important;
+  justify-content: center;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  margin: 0 auto 26px !important;
+  background: rgba(233, 220, 202, 0.52) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 10px !important;
+  backdrop-filter: none !important;
+  max-width: 1400px;
+}
+
+.nav-tabs {
+  display: flex;
+  flex-wrap: wrap !important;
+  justify-content: center;
+  gap: 8px !important;
+}
+
+.nav-button,
+.nav-tab,
+.tab-btn,
+.tab-button,
+button:not(.wired-toggle):not(.wired-chapter-btn) {
+  font-family: var(--wired-cond) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  background: var(--wired-card) !important;
+  color: var(--wired-navy) !important;
+  border: 1px solid var(--wired-line) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-button:hover,
+.nav-tab:hover,
+.tab-btn:hover,
+.tab-button:hover,
+button:not(.wired-toggle):not(.wired-chapter-btn):hover {
+  background: var(--wired-bg-deep) !important;
+  border-color: var(--wired-teal) !important;
+  color: var(--wired-teal-deep) !important;
+  transform: none !important;
+}
+
+.nav-button.active,
+.nav-tab.active,
+.tab-btn.active,
+.tab-button.active,
+button.active:not(.wired-toggle):not(.wired-chapter-btn) {
+  background: var(--wired-teal) !important;
+  border-color: var(--wired-teal-deep) !important;
+  color: #ffffff !important;
+}
+
+/* Open Editorial Sections */
 .theory-section,
 .info-panel,
 .video-tham-khao,
@@ -388,23 +485,65 @@ img, svg, canvas, video, iframe, .js-plotly-plot {
   max-width: 100%;
 }
 
-/* Subtle Left-Accent Callouts (no 4-sided box clutter) */
-.example-box,
+/* Standard Left-Accent Callout Boxes (Fourier Transform Lesson Standard) */
+.theory-box,
 .formula-box,
 .highlight-box,
 .vector-info,
 .results-panel,
 .active-explorable {
-  background: rgba(249, 242, 229, 0.72) !important;
+  background: rgba(249, 242, 229, 0.78) !important;
   color: var(--wired-navy) !important;
   border: none !important;
-  border-left: 3px solid var(--wired-teal) !important;
-  border-radius: 6px !important;
+  border-left: 4px solid var(--wired-teal) !important;
+  border-radius: 8px !important;
   box-shadow: none !important;
   max-width: 100%;
 }
 
-/* Right Inspector Control Panel (single clean surface, borderless inner groups) */
+.key-concept,
+.warning {
+  background: rgba(249, 242, 229, 0.78) !important;
+  color: var(--wired-navy) !important;
+  border: none !important;
+  border-left: 4px solid var(--wired-copper) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.example-box {
+  background: rgba(249, 242, 229, 0.78) !important;
+  color: var(--wired-navy) !important;
+  border: none !important;
+  border-left: 4px solid var(--wired-green) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+/* Step Cards, Component Items & Hub Cards */
+.step-card,
+.component-item,
+.property-card,
+.lesson-card,
+.illustration-card,
+.topic-card {
+  background: rgba(249, 242, 229, 0.82) !important;
+  color: var(--wired-ink) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  max-width: 100%;
+}
+
+.lesson-card:hover,
+.illustration-card:hover,
+.topic-card:hover {
+  border-color: var(--wired-teal) !important;
+  background: var(--wired-card) !important;
+}
+
+/* Right Inspector Control Panel */
 .controls,
 .controls-panel,
 .control-panel,
@@ -435,77 +574,7 @@ img, svg, canvas, video, iframe, .js-plotly-plot {
   border-bottom: none !important;
 }
 
-/* Minimal Hairline Hub Cards */
-.property-card,
-.lesson-card,
-.illustration-card,
-.topic-card {
-  background: rgba(249, 242, 229, 0.78) !important;
-  color: var(--wired-ink) !important;
-  border: 1px solid var(--wired-line-soft) !important;
-  border-radius: 10px !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  max-width: 100%;
-}
-
-.lesson-card:hover,
-.illustration-card:hover,
-.topic-card:hover {
-  border-color: var(--wired-teal) !important;
-  background: var(--wired-card) !important;
-}
-
-/* Internal Lesson Tabs (.nav-container / .nav-tabs) */
-.nav-container {
-  position: relative !important;
-  top: auto !important;
-  background: var(--wired-bg-deep) !important;
-  border-bottom: 1.5px solid var(--wired-line) !important;
-  backdrop-filter: none !important;
-  padding: 12px 16px !important;
-}
-
-.nav-tabs {
-  display: flex;
-  flex-wrap: wrap !important;
-  justify-content: center;
-  gap: 8px !important;
-}
-
-.nav-tab,
-.tab-btn,
-.tab-button,
-button:not(.wired-toggle):not(.wired-chapter-btn) {
-  font-family: var(--wired-cond) !important;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  background: var(--wired-card) !important;
-  color: var(--wired-navy) !important;
-  border: 1px solid var(--wired-line) !important;
-  border-radius: 8px !important;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.nav-tab:hover,
-.tab-btn:hover,
-.tab-button:hover,
-button:not(.wired-toggle):not(.wired-chapter-btn):hover {
-  background: var(--wired-bg-deep) !important;
-  border-color: var(--wired-teal) !important;
-  color: var(--wired-teal-deep) !important;
-}
-
-.nav-tab.active,
-.tab-btn.active,
-.tab-button.active,
-button.active:not(.wired-toggle):not(.wired-chapter-btn) {
-  background: var(--wired-teal) !important;
-  border-color: var(--wired-teal-deep) !important;
-  color: #ffffff !important;
-}
-
-/* Tactile Wired Range Sliders */
+/* Sliders, Inputs & Canvas Framing */
 input[type="range"] {
   accent-color: var(--wired-teal) !important;
   cursor: pointer;
@@ -524,7 +593,13 @@ textarea {
   max-width: 100%;
 }
 
-/* Canvas Framing */
+.visualization-area {
+  background: rgba(249, 242, 229, 0.65) !important;
+  border: 1px solid var(--wired-line-soft) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+}
+
 canvas {
   border: 1px solid var(--wired-line) !important;
   border-radius: 10px !important;
@@ -536,33 +611,25 @@ canvas {
   color: var(--wired-teal-deep) !important;
 }
 
-.video-tham-khao h2,
-.active-explorable h2,
-.reel-video-section h3 {
-  color: var(--wired-navy) !important;
-}
-
-/* ── Desktop & Landscape Tablet (>= 900px): Controls ALWAYS on Right ─ */
+/* ── 5. Unified 2-Column Standard Layout (Stage Left + Controls Right) ─ */
 .wired-stage-main {
   min-width: 0;
 }
 
-/* Unified 3D WebGL Shell (Left 3D Viewport + Right Inspector Panel) */
 .wired-3d-shell {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 350px) !important;
-  gap: 20px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 360px) !important;
+  gap: 22px !important;
   align-items: start !important;
-  padding: 18px 20px !important;
   width: 100% !important;
-  max-width: 1520px;
-  margin: 0 auto !important;
+  max-width: 1400px;
+  margin: 0 auto 24px !important;
 }
 
 .wired-3d-viewport {
   position: relative !important;
   width: 100% !important;
-  height: clamp(460px, 74vh, 700px) !important;
+  height: clamp(460px, 72vh, 680px) !important;
   background: #141824 !important;
   border: 1px solid var(--wired-line) !important;
   border-radius: 10px !important;
@@ -606,43 +673,27 @@ canvas {
   border-top: 1px solid var(--wired-line-soft) !important;
   padding-top: 12px !important;
   font-size: 0.92rem;
-  line-height: 1.5;
 }
 
-.wired-3d-shell #info strong,
-.wired-3d-shell #controls h3,
-.wired-3d-shell #controls label {
-  color: var(--wired-navy) !important;
-}
-
-/* Sub-pattern B2: #container with #canvas-container + #info */
 #container:has(> #canvas-container):has(> #info) {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 360px) !important;
-  gap: 20px !important;
+  gap: 22px !important;
   align-items: start !important;
-  height: auto !important;
-  min-height: 75vh !important;
-  padding: 18px 20px !important;
-  width: 100% !important;
-  background: transparent !important;
-  border: none !important;
+  min-height: 70vh !important;
+  margin: 0 auto 24px !important;
 }
 
 #container > #canvas-container {
   order: 1 !important;
   width: 100% !important;
   min-width: 0 !important;
-  height: auto !important;
-  overflow: visible !important;
 }
 
 #container > #info {
   order: 2 !important;
   position: sticky !important;
   top: 18px !important;
-  width: 100% !important;
-  max-width: 100% !important;
   max-height: calc(100vh - 36px);
   overflow-y: auto;
   background: var(--wired-card-soft) !important;
@@ -652,46 +703,29 @@ canvas {
   padding: 16px !important;
 }
 
-/* Prevent floating absolute .info-panel overlays from colliding with sidebar or canvas */
-.canvas-container > .info-panel {
+.info-panel,
+.info-panel-3d,
+.gradient-info,
+.camera-controls {
   position: static !important;
+  inset: auto !important;
+  width: auto !important;
   max-width: 100% !important;
-  margin-top: 12px !important;
-  background: rgba(249, 242, 229, 0.82) !important;
-  color: var(--wired-navy) !important;
-  border: none !important;
-  border-left: 3px solid var(--wired-teal) !important;
-  border-radius: 6px !important;
-  padding: 12px 14px !important;
-}
-
-@media (max-width: 899px) {
-  .wired-3d-shell,
-  #container:has(> #canvas-container):has(> #info) {
-    grid-template-columns: 1fr !important;
-    padding: 12px !important;
-  }
-  .wired-3d-viewport {
-    height: 52vh !important;
-    min-height: 320px !important;
-  }
-  .wired-3d-shell > .wired-right-panel,
-  #container > #info {
-    position: static !important;
-    max-height: none !important;
-  }
+  margin: 10px 0 !important;
 }
 
 @media (min-width: 900px) {
+  .content-layout,
   .wired-stage-split {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) clamp(280px, 28vw, 340px) !important;
+    grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 360px) !important;
     align-items: start !important;
     gap: 22px !important;
     width: 100% !important;
     margin: 18px 0 !important;
   }
 
+  .content-layout > .visualization-area,
   .wired-stage-split > .wired-stage-main,
   .wired-stage-split > .canvas-container {
     order: 1 !important;
@@ -699,6 +733,7 @@ canvas {
     width: 100% !important;
   }
 
+  .content-layout > .controls-panel,
   .wired-stage-split > .wired-right-panel {
     order: 2 !important;
     width: 100% !important;
@@ -710,7 +745,8 @@ canvas {
     overflow-y: auto;
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 10px !important;
+    padding: 16px !important;
   }
 
   .interactive-container:has(> .controls),
@@ -722,7 +758,7 @@ canvas {
     display: flex !important;
     flex-wrap: nowrap !important;
     align-items: flex-start !important;
-    gap: 20px !important;
+    gap: 22px !important;
   }
 
   .interactive-container > .canvas-container,
@@ -740,37 +776,28 @@ canvas {
   .main-content:has(> .canvas-container) > .controls-panel,
   .workspace:has(> .canvas-container) > .controls {
     order: 2 !important;
-    flex: 0 0 clamp(280px, 28vw, 345px) !important;
-    width: clamp(280px, 28vw, 345px) !important;
+    flex: 0 0 clamp(290px, 28vw, 360px) !important;
+    width: clamp(290px, 28vw, 360px) !important;
     max-width: 360px !important;
     position: sticky !important;
     top: 18px !important;
     max-height: calc(100vh - 36px);
     overflow-y: auto;
+    padding: 16px !important;
   }
 }
 
-/* ── Mobile & Portrait Tablet (< 900px): Clean Single-Column Stack ─ */
+/* ── 6. Mobile & Portrait Tablet (< 900px): Clean 1-Column Stack ─ */
 @media (max-width: 899px) {
   .section {
-    padding: 16px 12px !important;
+    padding: 12px 0 !important;
     min-height: auto !important;
   }
 
-  .container,
-  .main-container,
-  .theory-content,
-  .video-tham-khao,
-  .active-explorable,
-  .reel-video-section {
-    width: auto !important;
-    max-width: 100% !important;
-    margin-left: 10px !important;
-    margin-right: 10px !important;
-    padding: 16px 14px !important;
-  }
-
+  .content-layout,
   .wired-stage-split,
+  .wired-3d-shell,
+  #container:has(> #canvas-container):has(> #info),
   .interactive-container,
   .main-content,
   .demo-container,
@@ -783,10 +810,16 @@ canvas {
     width: 100% !important;
   }
 
+  .wired-3d-viewport {
+    height: 52vh !important;
+    min-height: 320px !important;
+  }
+
   .canvas-container,
-  .wired-stage-main {
+  .wired-stage-main,
+  .visualization-area {
     width: 100% !important;
-    padding: 8px !important;
+    padding: 10px !important;
     min-width: 0 !important;
   }
 
@@ -794,6 +827,7 @@ canvas {
   .controls,
   .controls-panel,
   .control-panel,
+  #container > #info,
   .info-panel,
   .results-panel,
   .sidebar:not(#site-nav) {
@@ -806,6 +840,7 @@ canvas {
     padding: 14px !important;
   }
 
+  .step-container,
   .grid,
   .content-grid,
   .properties-grid,
@@ -826,9 +861,10 @@ canvas {
     gap: 14px !important;
   }
 
-  .nav-tab {
-    padding: 8px 14px !important;
-    font-size: 14px !important;
+  .nav-tab,
+  .nav-button {
+    padding: 8px 12px !important;
+    font-size: 13.5px !important;
   }
 
   table {
@@ -836,25 +872,4 @@ canvas {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-}
-
-/* ── Eliminate 100vw/100vh traps & floating HUD overlays across all 122 pages ─ */
-#container,
-.app-container,
-.tab-content {
-  width: 100% !important;
-  height: auto !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.info-panel,
-.info-panel-3d,
-.gradient-info,
-.camera-controls {
-  position: static !important;
-  inset: auto !important;
-  width: auto !important;
-  max-width: 100% !important;
-  margin: 10px 0 !important;
 }
