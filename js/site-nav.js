@@ -337,4 +337,38 @@
       }, { passive: true });
     });
   })();
+
+  /* Modern Non-Blocking Toast replacing legacy window.alert() dialogs */
+  (function initWiredToast() {
+    var stack = null;
+    function ensureStack() {
+      if (!stack) {
+        stack = document.createElement("div");
+        stack.id = "wired-toast-stack";
+        stack.setAttribute("aria-live", "polite");
+        document.body.appendChild(stack);
+      }
+      return stack;
+    }
+    window.wiredNotify = function (msg) {
+      var host = ensureStack();
+      var item = document.createElement("div");
+      item.className = "wired-toast";
+      var body = document.createElement("div");
+      body.className = "wired-toast-body";
+      body.textContent = String(msg);
+      var close = document.createElement("button");
+      close.type = "button";
+      close.className = "wired-toast-close";
+      close.setAttribute("aria-label", "Đóng");
+      close.textContent = "✕";
+      close.onclick = function () { item.remove(); };
+      item.appendChild(body);
+      item.appendChild(close);
+      host.appendChild(item);
+      setTimeout(function () { if (item.parentNode) item.remove(); }, 7000);
+    };
+    window.alert = window.wiredNotify;
+  })();
+
 })();

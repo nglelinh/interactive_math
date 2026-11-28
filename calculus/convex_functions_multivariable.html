@@ -597,13 +597,13 @@
             </div>
         </div>
 
-        <div id="illustrationSection" class="section" style="display:none;">
+        <div id="illustrationSection_dup2" class="section" style="display:none;">
             <h2>Interactive Convex/Non-Convex Function Visualization</h2>
             
             <div class="control-panel">
                 <div class="control-group">
                     <label>Function Type:</label>
-                    <select id="functionType" onchange="updateVisualization()">
+                    <select id="functionType_dup2" onchange="updateVisualization()">
                         <option value="quadratic_convex">Convex Quadratic (x² + y²)</option>
                         <option value="norm_l1">L1 Norm (|x| + |y|)</option>
                         <option value="norm_l2">L2 Norm (√(x² + y²))</option>
@@ -645,7 +645,7 @@
                 <div class="control-group">
                     <label>Visualization Options:</label>
                     <div class="checkbox-group">
-                        <label><input type="checkbox" id="showContours" checked onchange="updateVisualization()"> Contour Lines</label>
+                        <label><input type="checkbox" id="showContours_dup2" checked onchange="updateVisualization()"> Contour Lines</label>
                         <label><input type="checkbox" id="showLineSegment" checked onchange="updateVisualization()"> Line Segment AB</label>
                         <label><input type="checkbox" id="showConvexTest" checked onchange="updateVisualization()"> Convexity Test</label>
                         <label><input type="checkbox" id="showHessian" onchange="updateVisualization()"> Hessian Info</label>
@@ -664,7 +664,7 @@
             
             <div id="convexInfo" class="example">
                 <h4>📊 Function Analysis:</h4>
-                <div id="functionDetails"></div>
+                <div id="functionDetails_dup2"></div>
                 <div id="convexityTest"></div>
                 <div id="hessianInfo" style="display:none;"></div>
             </div>

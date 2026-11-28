@@ -1102,6 +1102,65 @@
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Ma trận Trạng thái AES 4×4 (SubBytes → ShiftRows → AddRoundKey)</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Bấm từng bước trong một vòng AES để quan sát ma trận 16 byte biến đổi và khuếch tán (diffusion) sang hàng/cột khác như thế nào.</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="aes-lab-svg" viewBox="0 0 420 260" width="100%" style="max-width:420px;background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="aes-sub">1. SubBytes</button>
+        <button type="button" id="aes-shift">2. ShiftRows</button>
+        <button type="button" id="aes-xor">3. AddRoundKey</button>
+        <button type="button" id="aes-rst">🔄 Đặt lại</button>
+      </div>
+      <div class="vector-info" id="aes-log">Trạng thái ban đầu: 16 byte đầu vào xếp theo cột 4×4.</div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var init = [0x32,0x88,0x31,0xe0, 0x43,0x5a,0x31,0x37, 0xf6,0x30,0x98,0x07, 0xa8,0x8d,0xa2,0x34];
+    var state = init.slice();
+    function render(hiCol){
+      var html = "";
+      for(var r=0;r<4;r++){
+        for(var c=0;c<4;c++){
+          var v = state[r*4+c], x=26+c*94, y=22+r*56;
+          html += '<rect x="'+x+'" y="'+y+'" width="82" height="44" rx="6" fill="'+(hiCol||'#1e293b')+'" stroke="#1aa3a1" stroke-width="1.5"/>';
+          html += '<text x="'+(x+41)+'" y="'+(y+28)+'" text-anchor="middle" fill="#fff" font-size="16" font-family="monospace">0x'+v.toString(16).toUpperCase().padStart(2,'0')+'</text>';
+        }
+      }
+      document.getElementById("aes-lab-svg").innerHTML = html;
+    }
+    document.getElementById("aes-sub").onclick = function(){
+      state = state.map(function(b){ return ((b * 73 + 99) ^ 0x63) & 0xff; });
+      render("#134e4a");
+      document.getElementById("aes-log").textContent = "SubBytes: Thay thế phi tuyến từng byte qua S-Box (tạo tính hỗn loạn - Confusion).";
+    };
+    document.getElementById("aes-shift").onclick = function(){
+      var next = state.slice();
+      for(var r=0;r<4;r++) for(var c=0;c<4;c++) next[r*4+c] = state[r*4 + ((c+r)%4)];
+      state = next;
+      render("#3b2f1e");
+      document.getElementById("aes-log").textContent = "ShiftRows: Dịch vòng trái hàng r đi r vị trí (tạo tính khuếch tán - Diffusion).";
+    };
+    document.getElementById("aes-xor").onclick = function(){
+      state = state.map(function(b,i){ return (b ^ (0x2b + i*11)) & 0xff; });
+      render("#1e293b");
+      document.getElementById("aes-log").textContent = "AddRoundKey: XOR ma trận trạng thái với khóa vòng 128-bit.";
+    };
+    document.getElementById("aes-rst").onclick = function(){
+      state = init.slice(); render("#1e293b");
+      document.getElementById("aes-log").textContent = "Đã khôi phục ma trận trạng thái ban đầu.";
+    };
+    render("#1e293b");
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

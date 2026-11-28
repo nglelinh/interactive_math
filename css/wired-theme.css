@@ -1122,3 +1122,40 @@ select,
 label {
   font-family: var(--wired-cond) !important;
 }
+
+/* Non-blocking Toast Notifications (replaces legacy alert()) */
+#wired-toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(420px, calc(100vw - 36px));
+}
+.wired-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--wired-card);
+  color: var(--wired-navy);
+  border: 1px solid var(--wired-line);
+  border-left: 4px solid var(--wired-teal);
+  border-radius: 9px;
+  box-shadow: 0 8px 24px rgba(24, 33, 61, 0.14);
+  font-family: var(--wired-cond);
+  font-size: 0.94rem;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+.wired-toast-body { flex: 1; }
+.wired-toast-close {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 4px !important;
+  color: var(--wired-muted) !important;
+  cursor: pointer;
+  font-size: 14px !important;
+}

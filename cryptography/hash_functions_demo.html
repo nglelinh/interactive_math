@@ -690,6 +690,62 @@
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Hiệu ứng Tuyết lở (Avalanche Effect — 64-bit Bit-Diff)</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Nếu chỉ sửa <strong>1 ký tự duy nhất</strong> trong chuỗi đầu vào, khoảng bao nhiêu phần trăm bit băm sẽ đảo chiều? (Lý thuyết hàm băm mật mã: xấp xỉ <strong>50%</strong>!)</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="hash-lab-svg" viewBox="0 0 640 160" width="100%" style="background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Chuỗi gốc (Input 1):</label>
+        <input type="text" id="hl-in1" value="Interactive Math 2026" style="width:100%;padding:8px;">
+      </div>
+      <div class="control-group">
+        <label>Chuỗi sửa 1 ký tự (Input 2):</label>
+        <input type="text" id="hl-in2" value="Interactive Math 2027" style="width:100%;padding:8px;">
+      </div>
+      <div class="vector-info" id="hl-stats"></div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    function hash64Bits(str){
+      var h1=0x811c9dc5>>>0, h2=0x9e3779b9>>>0;
+      for(var i=0;i<str.length;i++){
+        var c=str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+        h2 = Math.imul(h2 ^ (c + i*17), 0x85ebca6b) >>> 0;
+        h1 = ((h1 << 13) | (h1 >>> 19)) >>> 0;
+        h2 = ((h2 << 15) | (h2 >>> 17)) >>> 0;
+      }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 0x85ebca6b) >>> 0;
+      h2 = Math.imul(h2 ^ (h2 >>> 13), 0xc2b2ae35) >>> 0;
+      return (h1.toString(2).padStart(32,"0") + h2.toString(2).padStart(32,"0"));
+    }
+    function draw(){
+      var b1 = hash64Bits(document.getElementById("hl-in1").value || "");
+      var b2 = hash64Bits(document.getElementById("hl-in2").value || "");
+      var diff = 0, out = '<text x="16" y="24" fill="#cbd5e1" font-size="12" font-family="monospace">64-bit Hash Diff (Cam = bit bị đảo chiều):</text>';
+      for(var i=0;i<64;i++){
+        var col = i % 16, row = Math.floor(i / 16);
+        var changed = b1[i] !== b2[i];
+        if(changed) diff++;
+        var x = 16 + col * 38, y = 36 + row * 28;
+        out += '<rect x="'+x+'" y="'+y+'" width="32" height="22" rx="4" fill="'+(changed?'#c0652d':'#1aa3a1')+'"/>';
+        out += '<text x="'+(x+16)+'" y="'+(y+15)+'" text-anchor="middle" fill="#fff" font-size="11" font-family="monospace">'+b1[i]+'→'+b2[i]+'</text>';
+      }
+      document.getElementById("hash-lab-svg").innerHTML = out;
+      document.getElementById("hl-stats").textContent = "Khoảng cách Hamming: " + diff + "/64 bit đảo chiều (" + (diff/64*100).toFixed(1) + "%).";
+    }
+    ["hl-in1","hl-in2"].forEach(function(id){ document.getElementById(id).addEventListener("input", draw); });
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

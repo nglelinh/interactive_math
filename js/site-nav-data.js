@@ -97,6 +97,10 @@ window.SITE_NAV_DATA = {
         {
           "href": "real-analysis/continuity_differentiability.html",
           "label": "Continuity & Differentiability"
+        },
+        {
+          "href": "real-analysis/cauchy_sequences_bolzano.html",
+          "label": "Dãy Cauchy, Hội tụ & Định lý Giá trị Trung gian (Bolzano)"
         }
       ]
     },

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dãy Cauchy, Hội tụ &amp; Định lý Giá trị Trung gian (Bolzano)</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Dãy Cauchy, Hội tụ &amp; Định lý Giá trị Trung gian (Bolzano)</h1>
+
+        <div class="lesson-nav">
+            <button type="button" class="nav-button active" onclick="switchTab('cauchy', this)">1. Dãy Cauchy &amp; Ống ε</button>
+            <button type="button" class="nav-button" onclick="switchTab('bolzano', this)">2. Định lý Bolzano &amp; Chia đôi</button>
+            <button type="button" class="nav-button" onclick="switchTab('theory', this)">3. Lý thuyết &amp; Phản ví dụ</button>
+        </div>
+
+        <div id="tab-cauchy" class="lesson-section active">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Khi nào một dãy số thực là dãy Cauchy?</h3>
+                <p>Một dãy $(x_n)$ là <strong>dãy Cauchy</strong> nếu với mọi $\varepsilon > 0$, tồn tại chỉ số $N$ sao cho mọi cặp $m, n \ge N$ đều thỏa $|x_m - x_n| < \varepsilon$. Trong $\mathbb{R}$ (không gian đầy đủ), mọi dãy Cauchy đều hội tụ! Hãy thử giảm $\varepsilon$ trên dãy hội tụ và so sánh với <strong>phản ví dụ dãy điều hòa $H_n = \sum_{k=1}^n \frac{1}{k}$</strong> (dù bước nhảy $\frac{1}{n} \to 0$ nhưng tổng vẫn phân kỳ!).</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="cauchyCanvas" width="680" height="360" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Chọn dãy số $(x_n)$:</label>
+                        <select id="seqType">
+                            <option value="alt">Hội tụ: xₙ = (-1)ⁿ / n → 0</option>
+                            <option value="geom">Hội tụ nhanh: xₙ = 1 - (0.7)ⁿ → 1</option>
+                            <option value="harmonic">Phản ví dụ: Tổng điều hòa Hₙ = Σ 1/k (Phân kỳ!)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Bán kính ống ε: <span class="value-display" id="epsVal">0.20</span></label>
+                        <input type="range" id="epsSlider" min="0.05" max="0.6" step="0.01" value="0.20">
+                    </div>
+                    <div class="control-group">
+                        <label>Ngưỡng chỉ số N: <span class="value-display" id="nThreshVal">10</span></label>
+                        <input type="range" id="nThreshSlider" min="2" max="35" step="1" value="10">
+                    </div>
+                    <div class="vector-info" id="cauchyStatus"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-bolzano" class="lesson-section" style="display:none;">
+            <div class="theory-box">
+                <h3>🎯 Dự đoán → Thử nghiệm: Định lý Bolzano (Giá trị Trung gian)</h3>
+                <p>Nếu $f$ liên tục trên $[a, b]$ và $f(a)\cdot f(b) < 0$, chắc chắn tồn tại ít nhất một nghiệm $c \in (a, b)$ sao cho $f(c) = 0$. Mỗi bước chia đôi (Bisection) thu hẹp sai số đi đúng một nửa: $|c - m_k| \le \frac{b-a}{2^k}$.</p>
+            </div>
+
+            <div class="content-layout">
+                <div class="visualization-area">
+                    <canvas id="bolzanoCanvas" width="680" height="360" style="width:100%;max-width:680px;background:#141824;"></canvas>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Chọn hàm liên tục $f(x)$:</label>
+                        <select id="bolzFunc">
+                            <option value="cubic">f(x) = x³ - x - 2 (nghiệm ≈ 1.5214)</option>
+                            <option value="cos">f(x) = cos(x) - x (nghiệm ≈ 0.7391)</option>
+                            <option value="sqrt">f(x) = x² - 2 (nghiệm √2 ≈ 1.4142)</option>
+                        </select>
+                    </div>
+                    <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button type="button" id="bolzStepBtn">⏭️ Chia đôi 1 bước</button>
+                        <button type="button" id="bolzResetBtn">🔄 Đặt lại [a, b]</button>
+                    </div>
+                    <div class="vector-info" id="bolzStatus"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-theory" class="lesson-section" style="display:none;">
+            <div class="definition">
+                <h3>Định nghĩa dãy Cauchy</h3>
+                <p>Dãy $(x_n)$ trong $\mathbb{R}$ là dãy Cauchy nếu $\forall \varepsilon > 0, \exists N \in \mathbb{N}$ sao cho $\forall m, n \ge N: |x_m - x_n| < \varepsilon$.</p>
+            </div>
+            <div class="theorem">
+                <h3>Tính đầy đủ của $\mathbb{R}$ &amp; Tiêu chuẩn Cauchy</h3>
+                <p>Một dãy số thực hội tụ <strong>khi và chỉ khi</strong> nó là dãy Cauchy. Ngược lại, trong $\mathbb{Q}$, dãy xấp xỉ $\sqrt{2}$ là dãy Cauchy nhưng không hội tụ trong $\mathbb{Q}$.</p>
+            </div>
+            <div class="key-concept">
+                <h3>Cạm bẫy kinh điển: $|x_{n+1} - x_n| \to 0$ KHÔNG đủ để là Cauchy!</h3>
+                <p>Với dãy điều hòa $H_n = \sum_{k=1}^n \frac{1}{k}$, ta có $H_{n+1} - H_n = \frac{1}{n+1} \to 0$, nhưng với mọi $n$: $H_{2n} - H_n = \frac{1}{n+1} + \dots + \frac{1}{2n} \ge n \cdot \frac{1}{2n} = \frac{1}{2}$, nên dãy không bao giờ nằm gọn trong ống $\varepsilon < 0.5$!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(name, btn) {
+            document.querySelectorAll('.lesson-section').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+            document.querySelectorAll('.nav-button').forEach(b => b.classList.remove('active'));
+            const sec = document.getElementById('tab-' + name);
+            if (sec) { sec.style.display = 'block'; sec.classList.add('active'); }
+            if (btn) btn.classList.add('active');
+            if (name === 'cauchy') drawCauchy();
+            if (name === 'bolzano') drawBolzano();
+        }
+
+        function getSeq(type, maxN) {
+            const arr = [];
+            let sum = 0;
+            for (let n = 1; n <= maxN; n++) {
+                if (type === 'alt') arr.push(Math.pow(-1, n) / n);
+                else if (type === 'geom') arr.push(1 - Math.pow(0.7, n));
+                else { sum += 1 / n; arr.push(sum); }
+            }
+            return arr;
+        }
+
+        function drawCauchy() {
+            const c = document.getElementById('cauchyCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            const type = document.getElementById('seqType').value;
+            const eps = parseFloat(document.getElementById('epsSlider').value);
+            const N = parseInt(document.getElementById('nThreshSlider').value, 10);
+            document.getElementById('epsVal').textContent = eps.toFixed(2);
+            document.getElementById('nThreshVal').textContent = N;
+
+            const maxN = 45;
+            const vals = getSeq(type, maxN);
+            const yMin = type === 'harmonic' ? 0 : -1.2;
+            const yMax = type === 'harmonic' ? 4.8 : 1.4;
+            const mapX = (n) => 48 + ((n - 1) / (maxN - 1)) * (W - 72);
+            const mapY = (y) => H - 36 - ((y - yMin) / (yMax - yMin)) * (H - 64);
+
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(48, 24); ctx.lineTo(48, H - 36); ctx.lineTo(W - 20, H - 36);
+            ctx.stroke();
+
+            // Band around x_N with radius eps/2 (all pairs within eps if inside band of diameter eps)
+            const ref = vals[N - 1];
+            const tail = vals.slice(N - 1);
+            const maxDiff = Math.max(...tail) - Math.min(...tail);
+            const ok = maxDiff < eps;
+
+            const nx = mapX(N);
+            const yTop = mapY(ref + eps / 2), yBot = mapY(ref - eps / 2);
+            ctx.fillStyle = ok ? 'rgba(26,163,161,0.22)' : 'rgba(224,122,63,0.22)';
+            ctx.fillRect(nx, yTop, W - 24 - nx, yBot - yTop);
+            ctx.strokeStyle = ok ? '#1aa3a1' : '#e07a3f';
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(nx, 24); ctx.lineTo(nx, H - 36);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Points
+            vals.forEach((v, idx) => {
+                const n = idx + 1;
+                const px = mapX(n), py = mapY(v);
+                ctx.fillStyle = n >= N ? (ok ? '#6bd68a' : '#f5c542') : '#94a3b8';
+                ctx.beginPath(); ctx.arc(px, py, n === N ? 6 : 4, 0, Math.PI * 2); ctx.fill();
+            });
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '12px JetBrains Mono, monospace';
+            ctx.fillText(`N = ${N}`, nx + 6, 38);
+            ctx.fillText(`max|xₘ - xₙ| (m,n ≥ ${N}) = ${maxDiff.toFixed(3)}`, 60, 38);
+
+            const st = document.getElementById('cauchyStatus');
+            st.innerHTML = ok
+                ? `<strong>✓ Thỏa điều kiện Cauchy!</strong> Với N = ${N}, mọi cặp phần tử phía sau chỉ lệch tối đa <code>${maxDiff.toFixed(3)} &lt; ε = ${eps.toFixed(2)}</code>.`
+                : `<strong>✗ Chưa lọt vào ống ε = ${eps.toFixed(2)}!</strong> Độ lệch cực đại từ n ≥ ${N} là <code>${maxDiff.toFixed(3)}</code>.` +
+                  (type === 'harmonic' ? ' (Với tổng điều hòa, dù tăng N lớn cỡ nào cũng không thể lọt vào ống ε &lt; 0.5!)' : ' Hãy thử tăng N lớn hơn.');
+        }
+
+        // Bolzano Bisection
+        let bolz = { a: 0, b: 2, step: 0 };
+        function evalBolz(kind, x) {
+            if (kind === 'cubic') return x * x * x - x - 2;
+            if (kind === 'cos') return Math.cos(x) - x;
+            return x * x - 2;
+        }
+        function resetBolzano() {
+            bolz = { a: 0, b: 2, step: 0 };
+            drawBolzano();
+        }
+        function stepBolzano() {
+            const kind = document.getElementById('bolzFunc').value;
+            const m = (bolz.a + bolz.b) / 2;
+            if (evalBolz(kind, bolz.a) * evalBolz(kind, m) <= 0) bolz.b = m;
+            else bolz.a = m;
+            bolz.step++;
+            drawBolzano();
+        }
+        function drawBolzano() {
+            const c = document.getElementById('bolzanoCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            const W = c.width, H = c.height;
+            const kind = document.getElementById('bolzFunc').value;
+            const mapX = (x) => 48 + (x / 2.2) * (W - 80);
+            const mapY = (y) => H / 2 - y * 42;
+
+            ctx.fillStyle = '#141824';
+            ctx.fillRect(0, 0, W, H);
+
+            // Bracket highlight
+            const ax = mapX(bolz.a), bx = mapX(bolz.b), mx = mapX((bolz.a + bolz.b) / 2);
+            ctx.fillStyle = 'rgba(26,163,161,0.20)';
+            ctx.fillRect(ax, 20, bx - ax, H - 40);
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(30, mapY(0)); ctx.lineTo(W - 20, mapY(0));
+            ctx.moveTo(mapX(0), 20); ctx.lineTo(mapX(0), H - 20);
+            ctx.stroke();
+
+            // Curve
+            ctx.strokeStyle = '#6cb6ff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let i = 0; i <= 200; i++) {
+                const x = (i / 200) * 2.15;
+                const px = mapX(x), py = mapY(evalBolz(kind, x));
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Midpoint marker
+            const mid = (bolz.a + bolz.b) / 2;
+            ctx.strokeStyle = '#f5c542';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(mx, 20); ctx.lineTo(mx, H - 20); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#f5c542';
+            ctx.beginPath(); ctx.arc(mx, mapY(evalBolz(kind, mid)), 6, 0, Math.PI * 2); ctx.fill();
+
+            document.getElementById('bolzStatus').innerHTML =
+                `<strong>Bước ${bolz.step}:</strong> Đoạn chứa nghiệm <code>[${bolz.a.toFixed(4)}, ${bolz.b.toFixed(4)}]</code><br>` +
+                `Trung điểm <code>m = ${mid.toFixed(4)}</code> · <code>f(m) = ${evalBolz(kind, mid).toFixed(4)}</code> · Sai số ≤ <code>${((bolz.b - bolz.a) / 2).toFixed(4)}</code>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            ['seqType', 'epsSlider', 'nThreshSlider'].forEach(id => document.getElementById(id).addEventListener('input', drawCauchy));
+            document.getElementById('bolzFunc').addEventListener('change', resetBolzano);
+            document.getElementById('bolzStepBtn').addEventListener('click', stepBolzano);
+            document.getElementById('bolzResetBtn').addEventListener('click', resetBolzano);
+            drawCauchy();
+            drawBolzano();
+        });
+    </script>
+    <script src="../js/site-nav-data.js" data-site-nav="data"></script>
+    <script src="../js/site-nav.js" data-site-nav="boot"></script>
+<script src="../js/site-nav-data.js" data-site-nav="data"></script>
+<script src="../js/site-nav.js" data-site-nav="boot"></script>
+</body>
+</html>

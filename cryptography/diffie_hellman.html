@@ -1292,6 +1292,61 @@
         };
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Diffie-Hellman: Trao đổi khóa trên kênh công khai</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Kẻ nghe lén Eve biết công khai <code>p, g, A = gᵃ mod p, B = gᵇ mod p</code>. Hãy thay đổi khóa bí mật <code>a</code> của Alice và <code>b</code> của Bob để kiểm chứng cả hai đều tính ra đúng cùng một khóa chung <code>K = Bᵃ mod p = Aᵇ mod p</code>!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="dh-lab-svg" viewBox="0 0 660 220" width="100%" style="background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group">
+        <label>Số nguyên tố p = 23, sinh g = 5 (công khai)</label>
+      </div>
+      <div class="control-group">
+        <label>Bí mật Alice (a): <span class="value-display" id="dh-a-val">6</span></label>
+        <input type="range" id="dh-a" min="2" max="20" value="6">
+      </div>
+      <div class="control-group">
+        <label>Bí mật Bob (b): <span class="value-display" id="dh-b-val">15</span></label>
+        <input type="range" id="dh-b" min="2" max="20" value="15">
+      </div>
+      <div class="vector-info" id="dh-summary"></div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    function modpow(b, e, m){ var r=1; b%=m; while(e>0){ if(e&1) r=(r*b)%m; b=(b*b)%m; e>>=1; } return r; }
+    function draw(){
+      var p=23, g=5, a=+document.getElementById("dh-a").value, b=+document.getElementById("dh-b").value;
+      document.getElementById("dh-a-val").textContent = a;
+      document.getElementById("dh-b-val").textContent = b;
+      var A=modpow(g,a,p), B=modpow(g,b,p), Ka=modpow(B,a,p), Kb=modpow(A,b,p);
+      document.getElementById("dh-lab-svg").innerHTML =
+        '<rect x="18" y="24" width="170" height="172" rx="10" fill="#1e293b" stroke="#1aa3a1" stroke-width="2"/>' +
+        '<text x="103" y="52" text-anchor="middle" fill="#1aa3a1" font-size="15" font-weight="700">ALICE</text>' +
+        '<text x="103" y="82" text-anchor="middle" fill="#cbd5e1" font-size="13">Bí mật a = '+a+'</text>' +
+        '<text x="103" y="112" text-anchor="middle" fill="#f5c542" font-size="13">Gửi A = 5^'+a+' mod 23 = '+A+'</text>' +
+        '<text x="103" y="160" text-anchor="middle" fill="#6bd68a" font-size="14" font-weight="700">K = '+B+'^'+a+' mod 23 = '+Ka+'</text>' +
+        '<rect x="472" y="24" width="170" height="172" rx="10" fill="#1e293b" stroke="#c0652d" stroke-width="2"/>' +
+        '<text x="557" y="52" text-anchor="middle" fill="#e07a3f" font-size="15" font-weight="700">BOB</text>' +
+        '<text x="557" y="82" text-anchor="middle" fill="#cbd5e1" font-size="13">Bí mật b = '+b+'</text>' +
+        '<text x="557" y="112" text-anchor="middle" fill="#f5c542" font-size="13">Gửi B = 5^'+b+' mod 23 = '+B+'</text>' +
+        '<text x="557" y="160" text-anchor="middle" fill="#6bd68a" font-size="14" font-weight="700">K = '+A+'^'+b+' mod 23 = '+Kb+'</text>' +
+        '<rect x="242" y="52" width="176" height="114" rx="10" fill="#0f172a" stroke="#64748b" stroke-dasharray="4 3"/>' +
+        '<text x="330" y="78" text-anchor="middle" fill="#ff6b6b" font-size="13" font-weight="700">KÊNH CÔNG KHAI (EVE)</text>' +
+        '<text x="330" y="106" text-anchor="middle" fill="#f5c542" font-size="13">A = '+A+'  →</text>' +
+        '<text x="330" y="130" text-anchor="middle" fill="#f5c542" font-size="13">←  B = '+B+'</text>' +
+        '<text x="330" y="152" text-anchor="middle" fill="#94a3b8" font-size="11">Khó tìm a, b (Log rời rạc)</text>';
+      document.getElementById("dh-summary").textContent = "Khóa bí mật chung khớp 100%: K = " + Ka + " (Eve chỉ thấy p=23, g=5, A=" + A + ", B=" + B + ").";
+    }
+    ["dh-a","dh-b"].forEach(function(id){ document.getElementById(id).addEventListener("input", draw); });
+    draw();
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

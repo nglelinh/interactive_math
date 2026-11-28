@@ -2970,6 +2970,60 @@ template AgeVerification() {
         }
     </script>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm ZKP: Chứng minh Tô 3 Màu Đồ Thị Không Tiết Lộ Lời Giải</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Mỗi vòng, người chứng minh (Prover) hoán vị ngẫu nhiên 3 màu rồi che kín các đỉnh; người kiểm chứng (Verifier) chỉ được mở <strong>1 cạnh bất kỳ</strong>. Sau <code>k</code> vòng đều hợp lệ, xác suất gian lận giảm theo hàm mũ <code>(1 - 1/|E|)ᵏ</code> mà Verifier vẫn không hề biết cách tô màu gốc!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <svg id="zkp-lab-svg" viewBox="0 0 500 260" width="100%" style="max-width:500px;background:#141824;border-radius:10px;"></svg>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="zkp-step">🎲 Chạy 1 vòng kiểm chứng</button>
+        <button type="button" id="zkp-rst">🔄 Đặt lại</button>
+      </div>
+      <div class="vector-info" id="zkp-stats">Số vòng đã qua: 0 | Độ tin cậy: 0.0%</div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var nodes = [[100,130],[220,55],[220,205],[360,75],[360,185]];
+    var edges = [[0,1],[0,2],[1,2],[1,3],[2,4],[3,4],[1,4]];
+    var baseColor = [0,1,2,2,0];
+    var palette = ["#1aa3a1","#f5c542","#e07a3f"];
+    var rounds = 0;
+    function draw(openEdge, perm){
+      var html = "";
+      edges.forEach(function(e, idx){
+        var p1=nodes[e[0]], p2=nodes[e[1]], isOpen = idx === openEdge;
+        html += '<line x1="'+p1[0]+'" y1="'+p1[1]+'" x2="'+p2[0]+'" y2="'+p2[1]+'" stroke="'+(isOpen?'#6bd68a':'#475569')+'" stroke-width="'+(isOpen?4:2)+'"/>';
+      });
+      nodes.forEach(function(pt, i){
+        var rev = openEdge !== null && (edges[openEdge][0]===i || edges[openEdge][1]===i);
+        var fill = rev ? palette[perm[baseColor[i]]] : "#334155";
+        html += '<circle cx="'+pt[0]+'" cy="'+pt[1]+'" r="22" fill="'+fill+'" stroke="#cbd5e1" stroke-width="2"/>';
+        html += '<text x="'+pt[0]+'" y="'+(pt[1]+5)+'" text-anchor="middle" fill="#fff" font-size="13" font-family="monospace">'+(rev?'V'+i:'?')+'</text>';
+      });
+      document.getElementById("zkp-lab-svg").innerHTML = html;
+    }
+    document.getElementById("zkp-step").onclick = function(){
+      rounds++;
+      var perm = [0,1,2].sort(function(){ return Math.random()-0.5; });
+      var eIdx = Math.floor(Math.random()*edges.length);
+      draw(eIdx, perm);
+      var conf = (1 - Math.pow(1 - 1/edges.length, rounds)) * 100;
+      document.getElementById("zkp-stats").textContent = "Vòng "+rounds+": Mở cạnh ("+edges[eIdx][0]+"-"+edges[eIdx][1]+") → 2 đỉnh khác màu ✓ | Độ tin cậy: "+conf.toFixed(1)+"%";
+    };
+    document.getElementById("zkp-rst").onclick = function(){
+      rounds = 0; draw(null, [0,1,2]);
+      document.getElementById("zkp-stats").textContent = "Số vòng đã qua: 0 | Độ tin cậy: 0.0%";
+    };
+    draw(null, [0,1,2]);
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {

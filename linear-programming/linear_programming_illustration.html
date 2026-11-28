@@ -854,16 +854,16 @@
                 <h3>📊 Hàm mục tiêu</h3>
                 <div class="control-row">
                     <label>Lợi nhuận bàn:</label>
-                    <input type="range" id="profitTable" min="10" max="100" value="40" step="5">
-                    <input type="number" id="profitTableValue" value="40" min="10" max="100">
+                    <input type="range" id="profitTable_dup2" min="10" max="100" value="40" step="5">
+                    <input type="number" id="profitTableValue_dup2" value="40" min="10" max="100">
                 </div>
                 <div class="control-row">
                     <label>Lợi nhuận ghế:</label>
-                    <input type="range" id="profitChair" min="10" max="100" value="30" step="5">
-                    <input type="number" id="profitChairValue" value="30" min="10" max="100">
+                    <input type="range" id="profitChair_dup2" min="10" max="100" value="30" step="5">
+                    <input type="number" id="profitChairValue_dup2" value="30" min="10" max="100">
                 </div>
                 <div class="formula">
-                    <strong>Z = <span id="objectiveFormula">40x + 30y</span></strong>
+                    <strong>Z = <span id="objectiveFormula_dup2">40x + 30y</span></strong>
                 </div>
             </div>
             
@@ -871,21 +871,21 @@
                 <h3>🔧 Ràng buộc lao động</h3>
                 <div class="control-row">
                     <label>Giờ/bàn:</label>
-                    <input type="range" id="laborTable" min="1" max="5" value="2" step="0.5">
-                    <input type="number" id="laborTableValue" value="2" min="1" max="5" step="0.5">
+                    <input type="range" id="laborTable_dup2" min="1" max="5" value="2" step="0.5">
+                    <input type="number" id="laborTableValue_dup2" value="2" min="1" max="5" step="0.5">
                 </div>
                 <div class="control-row">
                     <label>Giờ/ghế:</label>
-                    <input type="range" id="laborChair" min="0.5" max="3" value="1" step="0.5">
-                    <input type="number" id="laborChairValue" value="1" min="0.5" max="3" step="0.5">
+                    <input type="range" id="laborChair_dup2" min="0.5" max="3" value="1" step="0.5">
+                    <input type="number" id="laborChairValue_dup2" value="1" min="0.5" max="3" step="0.5">
                 </div>
                 <div class="control-row">
                     <label>Tổng giờ:</label>
-                    <input type="range" id="totalLabor" min="50" max="200" value="100" step="10">
-                    <input type="number" id="totalLaborValue" value="100" min="50" max="200">
+                    <input type="range" id="totalLabor_dup2" min="50" max="200" value="100" step="10">
+                    <input type="number" id="totalLaborValue_dup2" value="100" min="50" max="200">
                 </div>
                 <div class="formula">
-                    <strong><span id="laborFormula">2x + y ≤ 100</span></strong>
+                    <strong><span id="laborFormula_dup2">2x + y ≤ 100</span></strong>
                 </div>
             </div>
             
@@ -893,37 +893,37 @@
                 <h3>🌳 Ràng buộc gỗ</h3>
                 <div class="control-row">
                     <label>Đơn vị/bàn:</label>
-                    <input type="range" id="woodTable" min="1" max="5" value="3" step="0.5">
-                    <input type="number" id="woodTableValue" value="3" min="1" max="5" step="0.5">
+                    <input type="range" id="woodTable_dup2" min="1" max="5" value="3" step="0.5">
+                    <input type="number" id="woodTableValue_dup2" value="3" min="1" max="5" step="0.5">
                 </div>
                 <div class="control-row">
                     <label>Đơn vị/ghế:</label>
-                    <input type="range" id="woodChair" min="1" max="5" value="2" step="0.5">
-                    <input type="number" id="woodChairValue" value="2" min="1" max="5" step="0.5">
+                    <input type="range" id="woodChair_dup2" min="1" max="5" value="2" step="0.5">
+                    <input type="number" id="woodChairValue_dup2" value="2" min="1" max="5" step="0.5">
                 </div>
                 <div class="control-row">
                     <label>Tổng gỗ:</label>
-                    <input type="range" id="totalWood" min="50" max="300" value="120" step="10">
-                    <input type="number" id="totalWoodValue" value="120" min="50" max="300">
+                    <input type="range" id="totalWood_dup2" min="50" max="300" value="120" step="10">
+                    <input type="number" id="totalWoodValue_dup2" value="120" min="50" max="300">
                 </div>
                 <div class="formula">
-                    <strong><span id="woodFormula">3x + 2y ≤ 120</span></strong>
+                    <strong><span id="woodFormula_dup2">3x + 2y ≤ 120</span></strong>
                 </div>
             </div>
         </div>
         
         <div class="canvas-container">
-            <canvas id="lpCanvas" width="800" height="600"></canvas>
+            <canvas id="lpCanvas_dup2" width="800" height="600"></canvas>
         </div>
         
         <div class="info-panel">
             <h3>📈 Kết quả phân tích</h3>
             <div class="optimal-solution">
-                <strong>Nghiệm tối ưu:</strong> <span id="optimalSolution">x = 20, y = 60, Z = 2600</span>
+                <strong>Nghiệm tối ưu:</strong> <span id="optimalSolution_dup2">x = 20, y = 60, Z = 2600</span>
             </div>
             
             <h4>🎯 Các điểm góc (Corner Points):</h4>
-            <div class="corner-points" id="cornerPoints">
+            <div class="corner-points" id="cornerPoints_dup2">
                 <!-- Corner points will be populated here -->
             </div>
             

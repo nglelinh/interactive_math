@@ -1730,6 +1730,69 @@
     </div>
   </div>
 
+
+<section class="active-explorable" style="max-width:1360px;margin:24px auto;">
+  <h3>🎯 Phòng thí nghiệm Nelder-Mead Simplex (Tối ưu không cần đạo hàm)</h3>
+  <p><strong>Dự đoán → Thử nghiệm:</strong> Quan sát tam giác đơn hình (simplex) tự <strong>phản xạ, mở rộng và co cụm</strong> quanh cực tiểu toàn cục <code>(0, 0)</code> của hàm <code>f(x,y) = x² + 2y²</code> mà không hề tính gradient!</p>
+  <div class="content-layout">
+    <div class="visualization-area">
+      <canvas id="nm-lab-canvas" width="560" height="340" style="width:100%;max-width:560px;background:#141824;"></canvas>
+    </div>
+    <div class="controls-panel">
+      <div class="control-group" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="nm-step">⏭️ 1 bước Simplex</button>
+        <button type="button" id="nm-run">▶ Chạy 12 bước</button>
+        <button type="button" id="nm-rst">🔄 Đặt lại</button>
+      </div>
+      <div class="vector-info" id="nm-status">Bước 0 — bấm để xem tam giác simplex phản xạ về (0, 0).</div>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var f = function(p){ return p[0]*p[0] + 2*p[1]*p[1]; };
+    var init = [[-2.4, 1.8], [-1.2, 2.2], [-2.1, 0.5]];
+    var simp = init.map(function(p){ return p.slice(); }), step = 0;
+    function draw(lastOp){
+      var c = document.getElementById("nm-lab-canvas"), ctx = c.getContext("2d");
+      var W=c.width, H=c.height, cx=W/2, cy=H/2, sc=65;
+      ctx.fillStyle="#141824"; ctx.fillRect(0,0,W,H);
+      [0.3,1,2.5,5,9].forEach(function(lv){
+        ctx.strokeStyle="rgba(26,163,161,0.3)"; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.ellipse(cx, cy, Math.sqrt(lv)*sc, Math.sqrt(lv/2)*sc, 0, 0, Math.PI*2); ctx.stroke();
+      });
+      ctx.fillStyle="#6bd68a"; ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle="#f5c542"; ctx.fillStyle="rgba(245,197,66,0.2)"; ctx.lineWidth=2.5;
+      ctx.beginPath();
+      simp.forEach(function(p,i){ var x=cx+p[0]*sc, y=cy-p[1]*sc; if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      simp.sort(function(a,b){ return f(a)-f(b); });
+      document.getElementById("nm-status").textContent = "Bước "+step+" ("+(lastOp||"Khởi tạo")+"): Đỉnh tốt nhất = ("+simp[0][0].toFixed(2)+", "+simp[0][1].toFixed(2)+"), f = "+f(simp[0]).toFixed(4);
+    }
+    function iterate(){
+      simp.sort(function(a,b){ return f(a)-f(b); });
+      var b=simp[0], g=simp[1], w=simp[2];
+      var m=[(b[0]+g[0])/2, (b[1]+g[1])/2];
+      var xr=[m[0]+(m[0]-w[0]), m[1]+(m[1]-w[1])], op="Phản xạ (Reflection)";
+      if(f(xr)<f(b)){
+        var xe=[m[0]+2*(xr[0]-m[0]), m[1]+2*(xr[1]-m[1])];
+        if(f(xe)<f(xr)){ simp[2]=xe; op="Mở rộng (Expansion)"; } else { simp[2]=xr; }
+      } else if(f(xr)<f(g)){
+        simp[2]=xr;
+      } else {
+        var xc=[m[0]+0.5*(w[0]-m[0]), m[1]+0.5*(w[1]-m[1])];
+        if(f(xc)<f(w)){ simp[2]=xc; op="Co cụm (Contraction)"; }
+        else { simp[1]=[(b[0]+g[0])/2,(b[1]+g[1])/2]; simp[2]=[(b[0]+w[0])/2,(b[1]+w[1])/2]; op="Thu nhỏ (Shrink)"; }
+      }
+      step++; draw(op);
+    }
+    document.getElementById("nm-step").onclick = iterate;
+    document.getElementById("nm-run").onclick = function(){ for(var i=0;i<12;i++) iterate(); };
+    document.getElementById("nm-rst").onclick = function(){ simp = init.map(function(p){ return p.slice(); }); step=0; draw("Đặt lại"); };
+    draw("Khởi tạo");
+  })();
+  </script>
+</section>
+
 <section class="video-tham-khao" aria-label="Video tham khảo">
   <style>
     .video-tham-khao {
