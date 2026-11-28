@@ -214,6 +214,7 @@
     nav.appendChild(chapters);
     nav.appendChild(footer);
     document.body.insertBefore(nav, document.body.firstChild);
+    normalize3DStages();
     normalizeControlPanels();
   }
 
@@ -223,6 +224,50 @@
     document.addEventListener("DOMContentLoaded", build);
   }
 
+
+
+  /* Unify full-viewport Three.js HUD demos (#info + #controls + body>canvas) into 3-zone layout */
+  function normalize3DStages() {
+    var info = document.body.querySelector(":scope > #info");
+    var ctrl = document.body.querySelector(":scope > #controls");
+    if (!info && !ctrl) return;
+    if (document.querySelector(".wired-3d-shell")) return;
+
+    var shell = document.createElement("div");
+    shell.className = "wired-3d-shell";
+    var viewport = document.createElement("div");
+    viewport.className = "wired-3d-viewport";
+    var panel = document.createElement("div");
+    panel.className = "wired-right-panel";
+
+    var navNode = document.getElementById("site-nav");
+    if (navNode && navNode.nextSibling) {
+      document.body.insertBefore(shell, navNode.nextSibling);
+    } else {
+      document.body.appendChild(shell);
+    }
+
+    if (ctrl) panel.appendChild(ctrl);
+    if (info) panel.appendChild(info);
+    shell.appendChild(viewport);
+    shell.appendChild(panel);
+
+    function adoptCanvas(node) {
+      if (node && node.tagName === "CANVAS" && node.parentElement === document.body) {
+        viewport.appendChild(node);
+        setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 100);
+      }
+    }
+
+    Array.prototype.slice.call(document.body.children).forEach(adoptCanvas);
+
+    var obs = new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        m.addedNodes.forEach(adoptCanvas);
+      });
+    });
+    obs.observe(document.body, { childList: true });
+  }
 
   /* Ensure control panels ALWAYS dock on the right without overlapping content */
   function normalizeControlPanels() {

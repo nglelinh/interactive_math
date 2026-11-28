@@ -54,7 +54,10 @@ body {
   -webkit-font-smoothing: antialiased;
   margin: 0;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: clip !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  min-height: 100vh;
   transition: padding-left 0.22s ease;
 }
 
@@ -544,13 +547,139 @@ canvas {
   min-width: 0;
 }
 
-#controls {
-  left: auto !important;
-  right: 16px !important;
-  top: 16px !important;
-  max-width: min(320px, calc(100vw - 32px)) !important;
-  max-height: calc(100vh - 32px);
+/* Unified 3D WebGL Shell (Left 3D Viewport + Right Inspector Panel) */
+.wired-3d-shell {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 350px) !important;
+  gap: 20px !important;
+  align-items: start !important;
+  padding: 18px 20px !important;
+  width: 100% !important;
+  max-width: 1520px;
+  margin: 0 auto !important;
+}
+
+.wired-3d-viewport {
+  position: relative !important;
+  width: 100% !important;
+  height: clamp(460px, 74vh, 700px) !important;
+  background: #141824 !important;
+  border: 1px solid var(--wired-line) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+.wired-3d-viewport > canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.wired-3d-shell > .wired-right-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  position: sticky !important;
+  top: 18px !important;
+  max-height: calc(100vh - 36px);
   overflow-y: auto;
+  padding: 16px !important;
+}
+
+.wired-3d-shell #controls,
+.wired-3d-shell #info {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  background: transparent !important;
+  color: var(--wired-ink) !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.wired-3d-shell #info {
+  border-top: 1px solid var(--wired-line-soft) !important;
+  padding-top: 12px !important;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.wired-3d-shell #info strong,
+.wired-3d-shell #controls h3,
+.wired-3d-shell #controls label {
+  color: var(--wired-navy) !important;
+}
+
+/* Sub-pattern B2: #container with #canvas-container + #info */
+#container:has(> #canvas-container):has(> #info) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(290px, 28vw, 360px) !important;
+  gap: 20px !important;
+  align-items: start !important;
+  height: auto !important;
+  min-height: 75vh !important;
+  padding: 18px 20px !important;
+  width: 100% !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#container > #canvas-container {
+  order: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+#container > #info {
+  order: 2 !important;
+  position: sticky !important;
+  top: 18px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  background: var(--wired-card-soft) !important;
+  color: var(--wired-ink) !important;
+  border: 1px solid var(--wired-line) !important;
+  border-radius: 10px !important;
+  padding: 16px !important;
+}
+
+/* Prevent floating absolute .info-panel overlays from colliding with sidebar or canvas */
+.canvas-container > .info-panel {
+  position: static !important;
+  max-width: 100% !important;
+  margin-top: 12px !important;
+  background: rgba(249, 242, 229, 0.82) !important;
+  color: var(--wired-navy) !important;
+  border: none !important;
+  border-left: 3px solid var(--wired-teal) !important;
+  border-radius: 6px !important;
+  padding: 12px 14px !important;
+}
+
+@media (max-width: 899px) {
+  .wired-3d-shell,
+  #container:has(> #canvas-container):has(> #info) {
+    grid-template-columns: 1fr !important;
+    padding: 12px !important;
+  }
+  .wired-3d-viewport {
+    height: 52vh !important;
+    min-height: 320px !important;
+  }
+  .wired-3d-shell > .wired-right-panel,
+  #container > #info {
+    position: static !important;
+    max-height: none !important;
+  }
 }
 
 @media (min-width: 900px) {
@@ -707,4 +836,25 @@ canvas {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+/* ── Eliminate 100vw/100vh traps & floating HUD overlays across all 122 pages ─ */
+#container,
+.app-container,
+.tab-content {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.info-panel,
+.info-panel-3d,
+.gradient-info,
+.camera-controls {
+  position: static !important;
+  inset: auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin: 10px 0 !important;
 }
