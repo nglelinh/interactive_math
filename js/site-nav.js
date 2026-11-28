@@ -214,12 +214,45 @@
     nav.appendChild(chapters);
     nav.appendChild(footer);
     document.body.insertBefore(nav, document.body.firstChild);
+    normalizeControlPanels();
   }
 
   if (document.body) {
     build();
   } else {
     document.addEventListener("DOMContentLoaded", build);
+  }
+
+
+  /* Ensure control panels ALWAYS dock on the right without overlapping content */
+  function normalizeControlPanels() {
+    var panels = document.querySelectorAll(".container > .controls, .main-container > .controls, .container > .controls-panel, .main-container > .controls-panel");
+    panels.forEach(function (panel) {
+      if (panel.closest(".wired-stage-split") || panel.closest("#site-nav")) return;
+      var parent = panel.parentElement;
+      if (!parent) return;
+      var stageSelectors = ".matrix-container, .matrices-container, .result-matrix, .canvas-container, .visualization, .visualization-area, .plot-container, .chart-container, .graph-container, .demo-area";
+      var siblings = [];
+      var sib = panel.nextElementSibling;
+      while (sib) {
+        if (sib.matches(stageSelectors) || sib.querySelector("canvas, svg, .js-plotly-plot, .matrix-grid")) {
+          siblings.push(sib);
+          sib = sib.nextElementSibling;
+        } else {
+          break;
+        }
+      }
+      if (siblings.length === 0) return;
+      var split = document.createElement("div");
+      split.className = "wired-stage-split";
+      var main = document.createElement("div");
+      main.className = "wired-stage-main";
+      parent.insertBefore(split, panel);
+      siblings.forEach(function (node) { main.appendChild(node); });
+      panel.classList.add("wired-right-panel");
+      split.appendChild(main);
+      split.appendChild(panel);
+    });
   }
 
   /* Touch-to-Mouse Bridge for Canvas */
